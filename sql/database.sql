@@ -212,7 +212,7 @@ CREATE UNIQUE INDEX uk_seed_growth_stage_index
 -- ==========================================
 -- 7. 用户种子背包表
 -- ==========================================
-CREATE TABLE farm.user_seed_inventory
+CREATE TABLE farm.user_seeds
 (
     id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -230,9 +230,9 @@ CREATE TABLE farm.user_seed_inventory
     is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
     opt_lock_version            INT             NOT NULL DEFAULT 0
 );
-COMMENT ON TABLE farm.user_seed_inventory IS '用户种子背包表';
-CREATE UNIQUE INDEX uk_user_seed_inventory_active
-    ON farm.user_seed_inventory(user_id, seed_type_id)
+COMMENT ON TABLE farm.user_seeds IS '用户种子背包表';
+CREATE UNIQUE INDEX uk_user_seeds_active
+    ON farm.user_seeds(user_id, seed_type_id)
     WHERE is_deleted = false;
 
 -- ==========================================
@@ -297,7 +297,7 @@ CREATE UNIQUE INDEX uk_plot_active_crop
 -- ==========================================
 -- 10. 用户果实仓库表
 -- ==========================================
-CREATE TABLE farm.user_fruit_inventory
+CREATE TABLE farm.user_fruits
 (
     id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -315,7 +315,7 @@ CREATE TABLE farm.user_fruit_inventory
     is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
     opt_lock_version            INT             NOT NULL DEFAULT 0
 );
-COMMENT ON TABLE farm.user_fruit_inventory IS '用户果实仓库表';
-CREATE UNIQUE INDEX uk_user_fruit_inventory_active
-    ON farm.user_fruit_inventory(user_id, seed_type_id)
+COMMENT ON TABLE farm.user_fruits IS '用户果实仓库表';
+CREATE UNIQUE INDEX uk_user_fruits_active
+    ON farm.user_fruits(user_id, seed_type_id)
     WHERE is_deleted = false;
