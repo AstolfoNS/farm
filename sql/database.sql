@@ -6,6 +6,8 @@ CREATE SCHEMA IF NOT EXISTS farm;
 
 CREATE EXTENSION IF NOT EXISTS citext;
 
+
+
 -- ==========================================
 -- 1. 用户信息表
 -- ==========================================
