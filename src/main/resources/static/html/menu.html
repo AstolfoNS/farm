@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <script src="/js/easyui/jquery.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -10,21 +11,41 @@
             height: 60px;
             overflow: hidden;
         }
-        .nav-container { position: absolute; right: 20px; top: 8px; display: flex; gap: 15px; }
-        .nav-icon { width: 45px; height: 45px; cursor: pointer; transition: 0.2s; }
-        .nav-icon:hover { transform: scale(1.1); }
+
+        .nav-container {
+            position: absolute;
+            right: 10px;
+            top: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-icon {
+            width: 46px;
+            height: 46px;
+            cursor: pointer;
+            border: 2px solid #5a2d00;
+            border-radius: 6px;
+            background: #efe8d6;
+            box-shadow: 0 0 0 1px #caa35a inset;
+            transition: transform 0.2s;
+        }
+
+        .nav-icon:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
 <div class="nav-container">
-    <img src="/images/userManager.png" class="nav-icon" onclick="toPage('user_list.html')" title="玩家管理">
-    <img src="/images/seedManager.png" class="nav-icon" onclick="toPage('seed_list.html')" title="种子管理">
+    <img id="seedShopIcon" src="/images/seedManager.png" class="nav-icon" title="种子管理">
 </div>
 <script>
-    function toPage(url) {
-        // 通过 parent.frames 找到中间的 workspace 窗口进行跳转
-        parent.frames['workspace'].location.href = url;
-    }
+    $(function () {
+        $('#seedShopIcon').on('click', function () {
+            parent.frames['workspace'].location.href = 'seed_list.html';
+        });
+    });
 </script>
 </body>
 </html>

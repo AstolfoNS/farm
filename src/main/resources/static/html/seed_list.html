@@ -5,161 +5,751 @@
     <title>种子清单</title>
     <link rel="stylesheet" type="text/css" href="/js/easyui/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css" href="/js/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/color.css">
     <link rel="stylesheet" type="text/css" href="/css/farm-theme.css">
     <script src="/js/easyui/jquery.min.js"></script>
     <script src="/js/easyui/jquery.easyui.min.js"></script>
     <script src="/js/easyui/plugins/jquery.edatagrid.js"></script>
     <script src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .seed-page {
+            background: url('/images/topbar.png') repeat-x top, url('/images/bottom.png') repeat-x bottom, #014d01;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #seedToolbar {
+            background: transparent;
+            border: 0;
+            padding: 8px 0 6px;
+            margin: 0;
+        }
+
+        .toolbar-title {
+            color: #ffffff;
+            font-size: 34px;
+            font-weight: 700;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .toolbar-group {
+            display: inline-block;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .seed-grid-wrap {
+            height: calc(100% - 54px);
+        }
+
+        .seed-list-title {
+            height: 28px;
+            line-height: 28px;
+            padding: 0 8px;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            background: #00be00;
+            border: 1px solid #00ff00;
+            border-bottom: 0;
+        }
+
+        .seed-grid-panel {
+            height: calc(100% - 29px);
+            border: 1px solid #00ff00;
+            border-top: 0;
+        }
+
+        .seed-page .datagrid-header td {
+            background: #017000 !important;
+            border-color: #007a00 !important;
+        }
+
+        .seed-page .datagrid-header .datagrid-cell span,
+        .seed-page .datagrid-header .datagrid-cell {
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+
+        .seed-page .datagrid-row {
+            background-color: #00b000;
+            color: #ffffff;
+        }
+
+        .seed-page .datagrid-row-alt {
+            background-color: #005500 !important;
+            color: #ffffff;
+        }
+
+        .seed-page .datagrid-row-selected {
+            background: #d90000 !important;
+            color: #ffffff !important;
+        }
+
+        .seed-page .datagrid-row-over {
+            background: #0f8f0f;
+            color: #ffffff;
+        }
+
+        .seed-page .datagrid-body td,
+        .seed-page .datagrid-footer td {
+            border-color: #007a00 !important;
+        }
+
+        .seed-page .datagrid-pager {
+            background: #009300 !important;
+            color: #ffffff;
+            border-top: 1px solid #00ff00 !important;
+        }
+
+        .btn-growth-stage {
+            display: inline-block;
+            padding: 2px 10px;
+            border: 1px solid #e8e8e8;
+            border-radius: 7px;
+            background: #e8f6e8;
+            color: #235523;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .btn-growth-stage:hover {
+            background: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .seed-dialog-form td {
+            color: #ffffff;
+            padding: 4px 8px;
+            white-space: nowrap;
+        }
+
+        .seed-dialog-form .textbox,
+        .seed-dialog-form .combo {
+            width: 200px !important;
+        }
+
+        .stage-window-toolbar {
+            padding: 8px 6px;
+        }
+
+        .positioner-display {
+            position: relative;
+            width: 200px;
+            height: 330px;
+            margin: 0 auto;
+            border: 1px solid #00bb00;
+            background-color: #f0f0f0;
+            background-image: linear-gradient(45deg, #ddd 25%, transparent 25%), linear-gradient(-45deg, #ddd 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ddd 75%), linear-gradient(-45deg, transparent 75%, #ddd 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+            overflow: hidden;
+        }
+
+        #positionImage {
+            position: absolute;
+            top: 80px;
+            left: 50px;
+            width: 100px;
+            height: 140px;
+            border: 2px solid #ff2f2f;
+            cursor: move;
+        }
+    </style>
 </head>
-<body class="easyui-layout">
-
+<body class="easyui-layout seed-page">
 <div data-options="region:'center',border:false">
-    <!-- 数据表格 -->
-    <table id="grid"></table>
+    <div id="seedToolbar">
+        <span class="toolbar-title">种子名称:</span>
+        <span class="toolbar-group"><input id="nameSearch" class="easyui-textbox" style="width:180px"></span>
+        <a id="btnSearch" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
+        <a id="btnAdd" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">添加</a>
+        <a id="btnEdit" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑</a>
+        <a id="btnCancel" href="javascript:void(0)" class="easyui-linkbutton c3" data-options="iconCls:'icon-undo'">取消</a>
+        <a id="btnDelete" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除</a>
+    </div>
+
+    <div class="seed-grid-wrap">
+        <div class="seed-list-title">种子清单</div>
+        <div class="seed-grid-panel">
+            <table id="grid"></table>
+        </div>
+    </div>
 </div>
 
-<!-- 工具栏 -->
-<div id="seedTb" style="padding:10px;">
-    <span style="color: white">种子名称:</span>
-    <input id="nameSearch" class="easyui-textbox" style="width:140px">
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'" onclick="doSearch()">查询</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick="grid.edatagrid('addRow')">新增</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit'" onclick="editRow()">弹窗编辑</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-undo'" onclick="grid.edatagrid('cancelRow')">取消</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="grid.edatagrid('destroyRow')">删除</a>
-</div>
-
-<!-- 弹窗编辑表单 -->
-<div id="formContainer" class="easyui-dialog" title="编辑种子信息" style="width:800px; padding:20px;" closed="true" buttons="#formSeedButtons">
-    <form id="formEditor" method="POST">
+<div id="formContainer" class="easyui-dialog" title="编辑数据" style="width:900px;height:360px;padding:10px" closed="true" modal="true" buttons="#formSeedButtons">
+    <form id="formEditor" method="post">
         <input type="hidden" name="id" value="0">
-        <table class="tbledit" style="width:100%; border-spacing:10px;">
+        <table class="seed-dialog-form" style="width:100%;">
             <tr>
-                <td style="width:15%">ID：</td>
-                <td style="width:35%"><input name="id" class="easyui-textbox" style="width:160px" readonly></td>
-                <td style="width:15%">种子ID：</td>
-                <td style="width:35%"><input name="seedId" class="easyui-numberbox" required="true" style="width:160px"></td>
+                <td>ID：</td>
+                <td><input name="id" class="easyui-textbox" readonly></td>
+                <td>种子ID：</td>
+                <td><input name="seedId" class="easyui-numberbox" required="true"></td>
             </tr>
             <tr>
                 <td>种子名称：</td>
-                <td><input name="name" class="easyui-textbox" required="true" style="width:160px"></td>
+                <td><input name="name" class="easyui-textbox" required="true"></td>
                 <td>X季作物：</td>
-                <td><input name="season" class="easyui-numberbox" style="width:160px"></td>
+                <td><input name="season" class="easyui-numberbox" data-options="min:1,precision:0"></td>
             </tr>
             <tr>
                 <td>种子等级：</td>
-                <td><input name="level" class="easyui-numberspinner" data-options="min:1" style="width:160px"></td>
+                <td><input name="level" class="easyui-numberspinner" data-options="min:1,precision:0"></td>
                 <td>种子类型：</td>
-                <td>
-                    <select name="type" class="easyui-combobox" data-options="panelHeight:'auto',editable:false" style="width:160px">
-                        <option value="普通">普通</option>
-                        <option value="稀有">稀有</option>
-                    </select>
-                </td>
+                <td><input id="seedQualityId" name="seedQualityId" class="easyui-combobox" data-options="valueField:'id',textField:'text',editable:false,panelHeight:'auto'"></td>
             </tr>
             <tr>
                 <td>可获经验：</td>
-                <td><input name="exp" class="easyui-numberbox" style="width:160px"></td>
+                <td><input name="exp" class="easyui-numberbox" data-options="precision:0"></td>
                 <td>每季成熟所需时间：</td>
-                <td><input name="timeNeeded" class="easyui-numberbox" data-options="suffix:'秒'" style="width:160px"></td>
+                <td><input name="timeNeeded" class="easyui-numberbox" data-options="suffix:'秒',precision:0"></td>
             </tr>
             <tr>
-                <td>每季成熟可获收成：</td>
-                <td><input name="harvestCount" class="easyui-numberbox" data-options="suffix:'个果实'" style="width:160px"></td>
+                <td>每季成熟可获果实：</td>
+                <td><input name="harvestCount" class="easyui-numberbox" data-options="suffix:'个果实',precision:0"></td>
                 <td>种子采购价：</td>
-                <td><input name="buyPrice" class="easyui-numberbox" data-options="suffix:'个金币'" style="width:160px"></td>
+                <td><input name="buyPrice" class="easyui-numberbox" data-options="suffix:'金币',precision:0"></td>
             </tr>
             <tr>
                 <td>每个收获的果实单价：</td>
-                <td><input name="fruitPrice" class="easyui-numberbox" data-options="suffix:'个金币'" style="width:160px"></td>
+                <td><input name="fruitPrice" class="easyui-numberbox" data-options="suffix:'金币',precision:0"></td>
                 <td>土地需求：</td>
-                <td>
-                    <select name="soil" class="easyui-combobox" data-options="panelHeight:'auto',editable:false" style="width:160px">
-                        <option value="黄土地">黄土地</option>
-                        <option value="红土地">红土地</option>
-                        <option value="黑土地">黑土地</option>
-                    </select>
-                </td>
+                <td><input id="soilTypeId" name="soilTypeId" class="easyui-combobox" data-options="valueField:'id',textField:'text',editable:false,panelHeight:'auto'"></td>
             </tr>
             <tr>
                 <td>每季成熟可获积分：</td>
-                <td><input name="score" class="easyui-numberbox" style="width:160px"></td>
+                <td><input name="score" class="easyui-numberbox" data-options="precision:0"></td>
                 <td>提示信息：</td>
-                <td><input name="tips" class="easyui-textbox" style="width:160px"></td>
+                <td><input name="tips" class="easyui-textbox"></td>
             </tr>
         </table>
     </form>
 </div>
-
 <div id="formSeedButtons">
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveForm()">保存</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="$('#formContainer').dialog('close')">关闭</a>
+    <a id="btnSaveSeed" href="javascript:void(0)" class="easyui-linkbutton c2" iconCls="icon-ok">保存</a>
+    <a id="btnCloseSeedForm" href="javascript:void(0)" class="easyui-linkbutton c5" iconCls="icon-cancel">取消</a>
+</div>
+
+<div id="growthStageWin" class="easyui-window" title="编辑成长阶段" style="width:1020px;height:620px;padding:8px" closed="true" modal="true" minimizable="false" maximizable="false">
+    <div id="stageToolbar" class="stage-window-toolbar">
+        <a id="btnStageAdd" href="javascript:void(0)" class="easyui-linkbutton c2" iconCls="icon-add">添加</a>
+        <a id="btnStageEdit" href="javascript:void(0)" class="easyui-linkbutton c4" iconCls="icon-edit">编辑</a>
+        <a id="btnStageCancel" href="javascript:void(0)" class="easyui-linkbutton c3" iconCls="icon-undo">取消</a>
+        <a id="btnStageDelete" href="javascript:void(0)" class="easyui-linkbutton c5" iconCls="icon-cancel">删除</a>
+    </div>
+    <table id="stageGrid"></table>
+</div>
+
+<div id="stageFormContainer" class="easyui-dialog" title="编辑数据" style="width:830px;height:360px;padding:8px" closed="true" modal="true" buttons="#stageFormButtons">
+    <form id="stageFormEditor" method="post">
+        <input type="hidden" name="id" value="0">
+        <input type="hidden" name="seedTypeId" value="0">
+        <table class="seed-dialog-form" style="width:100%">
+            <tr>
+                <td>ID：</td>
+                <td><input name="id" class="easyui-textbox" readonly></td>
+                <td>种子ID：</td>
+                <td><input name="seedId" class="easyui-textbox" readonly></td>
+            </tr>
+            <tr>
+                <td>生长阶段：</td>
+                <td><input name="growthStage" class="easyui-numberbox" data-options="precision:0,min:0" required="true"></td>
+                <td>生长阶段标题：</td>
+                <td><input id="growthStageId" name="growthStageId" class="easyui-combobox" data-options="valueField:'id',textField:'text',editable:false,panelHeight:'auto'" required="true"></td>
+            </tr>
+            <tr>
+                <td>阶段生长时间：</td>
+                <td><input name="durationSeconds" class="easyui-numberbox" data-options="suffix:'秒',precision:0" required="true"></td>
+                <td>生虫概率：</td>
+                <td><input name="pestProbability" class="easyui-numberbox" data-options="precision:4,min:0,max:1"></td>
+            </tr>
+            <tr>
+                <td>图片宽度：</td>
+                <td><input name="width" class="easyui-numberbox" data-options="suffix:'px',precision:0"></td>
+                <td>图片高度：</td>
+                <td><input name="height" class="easyui-numberbox" data-options="suffix:'px',precision:0"></td>
+            </tr>
+            <tr>
+                <td>图片offsetX：</td>
+                <td><input name="offsetX" class="easyui-numberbox" data-options="suffix:'px',precision:0"></td>
+                <td>图片offsetY：</td>
+                <td><input name="offsetY" class="easyui-numberbox" data-options="suffix:'px',precision:0"></td>
+            </tr>
+            <tr>
+                <td>作物状态：</td>
+                <td><input name="cropStatus" class="easyui-textbox" readonly></td>
+                <td>图片资源URL：</td>
+                <td><input name="assetUrl" class="easyui-textbox"></td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:right">
+                    <a id="btnEditPosition" href="javascript:void(0)" class="easyui-linkbutton c1">编辑图片位置</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="stageFormButtons">
+    <a id="btnSaveStage" href="javascript:void(0)" class="easyui-linkbutton c2" iconCls="icon-ok">保存</a>
+    <a id="btnCloseStageForm" href="javascript:void(0)" class="easyui-linkbutton c5" iconCls="icon-cancel">取消</a>
+</div>
+
+<div id="positionDialog" class="easyui-dialog" title="定位编辑器" style="width:260px;height:470px;padding:8px" closed="true" modal="true" buttons="#positionDialogButtons">
+    <div class="positioner-display">
+        <img id="positionImage" src="/images/crops/basic/0.png" alt="">
+    </div>
+</div>
+<div id="positionDialogButtons">
+    <a id="btnGainPosition" href="javascript:void(0)" class="easyui-linkbutton c2" iconCls="icon-ok">确定</a>
+    <a id="btnClosePosition" href="javascript:void(0)" class="easyui-linkbutton c5" iconCls="icon-cancel">取消</a>
 </div>
 
 <script>
-    let grid;
+    var grid = null;
+    var stageGrid = null;
+    var currentSeedRow = null;
+    var soilOptionList = [];
+
     $(function () {
+        initGrid();
+        initStageGrid();
+        bindEvents();
+        loadDictionaryData();
+        autoOpenFromUrl();
+    });
+
+    function getUrlParameters() {
+        var urlParams = {};
+        var match;
+        var regex = /([^&=]+)=([^&]*)/g;
+        var searchString = window.location.search.substring(1);
+        while ((match = regex.exec(searchString))) {
+            var key = decodeURIComponent(match[1]);
+            urlParams[key] = decodeURIComponent(match[2]);
+        }
+        return urlParams;
+    }
+
+    function autoOpenFromUrl() {
+        var params = getUrlParameters();
+        if (params.seedTypeId) {
+            $('#nameSearch').textbox('setValue', params.seedName || '');
+            grid.datagrid('load', {name: params.seedName || ''});
+        }
+    }
+
+    function initGrid() {
         grid = $('#grid').edatagrid({
+            method: 'post',
             url: '/seed/gridDataFilterSortPage',
             saveUrl: '/seed/addOrUpdate',
             updateUrl: '/seed/addOrUpdate',
             destroyUrl: '/seed/delete',
-            toolbar: '#seedTb',
             fit: true,
-            pagination: true,
+            fitColumns: true,
             striped: true,
+            rownumbers: true,
+            pagination: true,
+            singleSelect: true,
+            pageSize: 5,
+            pageList: [5, 10, 20, 50],
             idField: 'id',
+            toolbar: '#seedToolbar',
             columns: [[
-                {field: 'id', title: 'ID', width: 50},
-                {field: 'seedId', title: '种子ID', width: 50},
-                {field: 'seedName', title: '种子名称', width: 100},
+                {field: 'id', title: 'ID', width: 50, sortable: true},
+                {field: 'seedId', title: '种子ID', width: 65},
+                {field: 'seedName', title: '种子名称', width: 90, sortable: true},
                 {field: 'cropType', title: 'X季作物', width: 80},
-                {field: 'seedLevel', title: '种子等级', width: 80},
+                {field: 'seedLevel', title: '种子等级', width: 75},
+                {field: 'seedQualityName', title: '种子类型', width: 75},
                 {field: 'exp', title: '可获经验', width: 80},
                 {field: 'growTime', title: '每季成熟所需时', width: 100},
-                {field: 'harvestCount', title: '每季成熟可收获', width: 100},
+                {field: 'harvestCount', title: '每季成熟可获收', width: 100},
                 {field: 'buyPrice', title: '种子采购价', width: 80},
                 {field: 'fruitPrice', title: '每个收获的果实', width: 100},
-                {field: 'landRequirement', title: '土地需求', width: 80},
-                {field: 'points', title: '每季成熟可获积分', width: 100},
-                {field: 'tips', title: '提示信息', width: 150},
-                {field: 'action', title: '操作', width: 100, align: 'center',
+                {field: 'landRequirement', title: '土地需', width: 60},
+                {field: 'points', title: '每季成熟可获积', width: 100},
+                {field: 'tips', title: '提示信息', width: 180},
+                {
+                    field: 'action',
+                    title: '操作',
+                    width: 90,
+                    align: 'center',
                     formatter: function (value, row) {
-                        return '<a href="javascript:void(0)" class="btn-action" onclick="showGrowthStage(' + row.id + ')">成长阶</a>';
+                        return '<a href="javascript:void(0)" class="btn-growth-stage js-growth-stage" data-id="' + row.id + '">成长阶段</a>';
                     }
                 }
-            ]]
-        });
-    });
-
-    function doSearch() {
-        grid.datagrid("load", { name: $("#nameSearch").val() });
-    }
-
-    function editRow() {
-        var row = grid.datagrid('getSelected');
-        if (row) {
-            $('#formContainer').dialog('open');
-            $('#formEditor').form('load', row);
-        }
-    }
-
-    function saveForm() {
-        $('#formEditor').form('submit', {
-            url: '/seed/addOrUpdate',
-            success: function (result) {
-                var res = JSON.parse(result); // 使用标准 JSON 解析
-                if (res.code === 0) {
-                    $('#formContainer').dialog('close');
-                    grid.datagrid('reload');
-                }
-                $.messager.show({ title: "提示", msg: res.msg });
+            ]],
+            onLoadSuccess: function () {
+                $('.js-growth-stage').off('click').on('click', function () {
+                    var id = $(this).attr('data-id');
+                    openGrowthStageById(id);
+                });
             }
         });
     }
 
-    function showGrowthStage(id) {
-        $.messager.alert("提示", "正在查看 ID 为 " + id + " 的成长详情");
+    function initStageGrid() {
+        stageGrid = $('#stageGrid').edatagrid({
+            method: 'post',
+            url: '/seed/stage/gridDataFilterSortPage',
+            saveUrl: '/seed/stage/addOrUpdate',
+            updateUrl: '/seed/stage/addOrUpdate',
+            destroyUrl: '/seed/stage/delete',
+            fit: true,
+            fitColumns: true,
+            striped: true,
+            rownumbers: true,
+            singleSelect: true,
+            toolbar: '#stageToolbar',
+            idField: 'id',
+            queryParams: {seedTypeId: 0},
+            columns: [[
+                {field: 'id', title: 'ID', width: 50},
+                {field: 'seedId', title: '种子ID', width: 60},
+                {field: 'growthStage', title: '生长阶段', width: 80},
+                {field: 'growthStageTitle', title: '生长阶段标题', width: 100},
+                {field: 'durationSeconds', title: '阶段生长时间', width: 100},
+                {field: 'pestProbability', title: '生虫概率', width: 80},
+                {field: 'width', title: '宽度', width: 65},
+                {field: 'height', title: '高度', width: 65},
+                {field: 'offsetX', title: 'offsetX', width: 75},
+                {field: 'offsetY', title: 'offsetY', width: 75},
+                {field: 'cropStatus', title: '作物状态', width: 90}
+            ]],
+            onBeforeLoad: function (param) {
+                if (!currentSeedRow || !currentSeedRow.id) {
+                    return false;
+                }
+                param.seedTypeId = currentSeedRow.id;
+                return true;
+            }
+        });
+    }
+
+    function bindEvents() {
+        $('#btnSearch').on('click', function () {
+            doSearch();
+        });
+        $('#btnAdd').on('click', function () {
+            newRecord();
+        });
+        $('#btnEdit').on('click', function () {
+            editRecord();
+        });
+        $('#btnCancel').on('click', function () {
+            grid.edatagrid('cancelRow');
+        });
+        $('#btnDelete').on('click', function () {
+            deleteRecord();
+        });
+        $('#btnSaveSeed').on('click', function () {
+            saveRecord();
+        });
+        $('#btnCloseSeedForm').on('click', function () {
+            $('#formContainer').dialog('close');
+        });
+
+        $('#btnStageAdd').on('click', function () {
+            newStageRecord();
+        });
+        $('#btnStageEdit').on('click', function () {
+            editStageRecord();
+        });
+        $('#btnStageCancel').on('click', function () {
+            stageGrid.edatagrid('cancelRow');
+        });
+        $('#btnStageDelete').on('click', function () {
+            deleteStageRecord();
+        });
+        $('#btnSaveStage').on('click', function () {
+            saveStageRecord();
+        });
+        $('#btnCloseStageForm').on('click', function () {
+            $('#stageFormContainer').dialog('close');
+        });
+        $('#btnEditPosition').on('click', function () {
+            openPositionEditor();
+        });
+        $('#btnGainPosition').on('click', function () {
+            gainPosition();
+        });
+        $('#btnClosePosition').on('click', function () {
+            $('#positionDialog').dialog('close');
+        });
+    }
+
+    function loadDictionaryData() {
+        $.ajax({
+            url: '/seed/qualityOptions',
+            type: 'get',
+            dataType: 'json',
+            success: function (result) {
+                $('#seedQualityId').combobox('loadData', result || []);
+            }
+        });
+
+        $.ajax({
+            url: '/seed/soilOptions',
+            type: 'get',
+            dataType: 'json',
+            success: function (result) {
+                soilOptionList = result || [];
+                $('#soilTypeId').combobox('loadData', soilOptionList);
+            }
+        });
+
+        $.ajax({
+            url: '/seed/growthStageOptions',
+            type: 'get',
+            dataType: 'json',
+            success: function (result) {
+                $('#growthStageId').combobox('loadData', result || []);
+            }
+        });
+    }
+
+    function doSearch() {
+        grid.datagrid('load', {name: $('#nameSearch').textbox('getValue')});
+    }
+
+    function newRecord() {
+        $('#formContainer').dialog('open').dialog('center').dialog('setTitle', '添加数据');
+        $('#formEditor').form('clear');
+        $('#formEditor').find("input[name='id']").val(0);
+    }
+
+    function editRecord() {
+        var row = grid.datagrid('getSelected');
+        if (!row) {
+            $.messager.show({
+                title: '消息',
+                msg: '请先选择一行数据，然后再尝试点击操作按钮！'
+            });
+            return;
+        }
+
+        $('#formContainer').dialog('open').dialog('center').dialog('setTitle', '编辑数据');
+        $('#formEditor').form('load', {
+            id: row.id,
+            seedId: row.seedId,
+            name: row.seedName,
+            season: row.seedLevel,
+            level: row.seedLevel,
+            seedQualityId: row.seedQualityId,
+            exp: row.exp,
+            timeNeeded: row.growTime,
+            harvestCount: row.harvestCount,
+            buyPrice: row.buyPrice,
+            fruitPrice: row.fruitPrice,
+            score: row.points,
+            tips: row.tips
+        });
+        setSoilTypeByBits(row.soilTypeBits);
+    }
+
+    function setSoilTypeByBits(soilTypeBits) {
+        if (!soilTypeBits) {
+            return;
+        }
+        var matchId = '';
+        $.each(soilOptionList, function (index, item) {
+            if (item && item.bitCode && Number(item.bitCode) === Number(soilTypeBits)) {
+                matchId = item.id;
+                return false;
+            }
+        });
+        if (matchId) {
+            $('#soilTypeId').combobox('setValue', matchId);
+        }
+    }
+
+    function saveRecord() {
+        $('#formEditor').form('submit', {
+            url: '/seed/addOrUpdate',
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var res = typeof result === 'string' ? JSON.parse(result) : result;
+                if (res.code === 0) {
+                    $('#formContainer').dialog('close');
+                    grid.datagrid('reload');
+                }
+                $.messager.show({
+                    title: '消息',
+                    msg: res.msg
+                });
+            }
+        });
+    }
+
+    function deleteRecord() {
+        var row = grid.datagrid('getSelected');
+        if (!row) {
+            $.messager.show({
+                title: '消息',
+                msg: '请先选择一行数据，然后再尝试点击操作按钮！'
+            });
+            return;
+        }
+        $.messager.confirm('确认', '是否删除选中数据？', function (r) {
+            if (!r) {
+                return;
+            }
+            $.ajax({
+                url: '/seed/delete',
+                type: 'post',
+                dataType: 'json',
+                data: {id: row.id},
+                success: function (res) {
+                    if (res.code === 0) {
+                        grid.datagrid('reload');
+                    }
+                    $.messager.show({title: '消息', msg: res.msg});
+                }
+            });
+        });
+    }
+
+    function openGrowthStageById(id) {
+        var rows = grid.datagrid('getRows') || [];
+        var selected = null;
+        $.each(rows, function (index, row) {
+            if (String(row.id) === String(id)) {
+                selected = row;
+                return false;
+            }
+        });
+        if (!selected) {
+            $.messager.show({title: '消息', msg: '未找到当前种子数据'});
+            return;
+        }
+        currentSeedRow = selected;
+        $('#growthStageWin').window('setTitle', '编辑成长阶段');
+        $('#growthStageWin').window('open');
+        stageGrid.datagrid('load', {seedTypeId: selected.id});
+    }
+
+    function newStageRecord() {
+        if (!currentSeedRow) {
+            $.messager.show({title: '消息', msg: '请先从种子清单进入成长阶段'});
+            return;
+        }
+        $('#stageFormContainer').dialog('open').dialog('center').dialog('setTitle', '编辑数据');
+        $('#stageFormEditor').form('clear');
+        $('#stageFormEditor').find("input[name='id']").val(0);
+        $('#stageFormEditor').find("input[name='seedTypeId']").val(currentSeedRow.id);
+        $('#stageFormEditor').find("input[name='seedId']").textbox('setValue', currentSeedRow.seedId);
+        $('#stageFormEditor').find("input[name='pestProbability']").numberbox('setValue', 0);
+        $('#stageFormEditor').find("input[name='width']").numberbox('setValue', 100);
+        $('#stageFormEditor').find("input[name='height']").numberbox('setValue', 100);
+    }
+
+    function editStageRecord() {
+        var row = stageGrid.datagrid('getSelected');
+        if (!row) {
+            $.messager.show({
+                title: '消息',
+                msg: '请先选择一行成长阶段数据，然后再尝试点击操作按钮！'
+            });
+            return;
+        }
+        $('#stageFormContainer').dialog('open').dialog('center').dialog('setTitle', '编辑数据');
+        $('#stageFormEditor').form('load', row);
+        $('#stageFormEditor').find("input[name='seedTypeId']").val(currentSeedRow.id);
+    }
+
+    function saveStageRecord() {
+        $('#stageFormEditor').form('submit', {
+            url: '/seed/stage/addOrUpdate',
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var res = typeof result === 'string' ? JSON.parse(result) : result;
+                if (res.code === 0) {
+                    $('#stageFormContainer').dialog('close');
+                    stageGrid.datagrid('reload');
+                    grid.datagrid('reload');
+                }
+                $.messager.show({
+                    title: '消息',
+                    msg: res.msg
+                });
+            }
+        });
+    }
+
+    function deleteStageRecord() {
+        var row = stageGrid.datagrid('getSelected');
+        if (!row) {
+            $.messager.show({
+                title: '消息',
+                msg: '请先选择一行成长阶段数据，然后再尝试点击操作按钮！'
+            });
+            return;
+        }
+        $.messager.confirm('确认', '是否删除选中的成长阶段记录？', function (r) {
+            if (!r) {
+                return;
+            }
+            $.ajax({
+                url: '/seed/stage/delete',
+                type: 'post',
+                dataType: 'json',
+                data: {id: row.id},
+                success: function (res) {
+                    if (res.code === 0) {
+                        stageGrid.datagrid('reload');
+                    }
+                    $.messager.show({title: '消息', msg: res.msg});
+                }
+            });
+        });
+    }
+
+    function openPositionEditor() {
+        var imageUrl = $('#stageFormEditor').find("input[name='assetUrl']").textbox('getValue');
+        if (!imageUrl) {
+            imageUrl = '/images/crops/basic/0.png';
+        }
+        $('#positionImage').attr('src', imageUrl);
+        $('#positionDialog').dialog('open').dialog('center');
+        $('#positionImage').css({
+            left: Number($('#stageFormEditor').find("input[name='offsetX']").numberbox('getValue') || 50) + 'px',
+            top: Number($('#stageFormEditor').find("input[name='offsetY']").numberbox('getValue') || 80) + 'px',
+            width: Number($('#stageFormEditor').find("input[name='width']").numberbox('getValue') || 100) + 'px',
+            height: Number($('#stageFormEditor').find("input[name='height']").numberbox('getValue') || 140) + 'px'
+        });
+
+        $('#positionImage').draggable({
+            containment: '.positioner-display'
+        });
+        $('#positionImage').resizable({
+            handles: 'n,e,s,w,ne,se,sw,nw'
+        });
+    }
+
+    function gainPosition() {
+        var left = parseInt($('#positionImage').css('left'), 10) || 0;
+        var top = parseInt($('#positionImage').css('top'), 10) || 0;
+        var width = $('#positionImage').outerWidth() || 0;
+        var height = $('#positionImage').outerHeight() || 0;
+
+        $('#stageFormEditor').find("input[name='width']").numberbox('setValue', width);
+        $('#stageFormEditor').find("input[name='height']").numberbox('setValue', height);
+        $('#stageFormEditor').find("input[name='offsetX']").numberbox('setValue', left);
+        $('#stageFormEditor').find("input[name='offsetY']").numberbox('setValue', top);
+        $('#positionDialog').dialog('close');
     }
 </script>
 </body>
