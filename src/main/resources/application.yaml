@@ -28,5 +28,3 @@ springdoc:
 
 server:
   port: 8080
-  servlet:
-    context-path: /api/${VERSION:v1}

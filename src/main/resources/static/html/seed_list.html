@@ -32,19 +32,60 @@
 <!-- 弹窗编辑表单 -->
 <div id="formContainer" class="easyui-dialog" title="编辑种子信息" style="width:800px; padding:20px;" closed="true" buttons="#formSeedButtons">
     <form id="formEditor" method="POST">
-        <input type="hidden" name="id">
-        <table class="tbledit" style="width:100%">
+        <input type="hidden" name="id" value="0">
+        <table class="tbledit" style="width:100%; border-spacing:10px;">
             <tr>
-                <td>种子名称：</td>
-                <td><input name="name" class="easyui-textbox" required="true" style="width:100%"></td>
-                <td>采购价格：</td>
-                <td><input name="price" class="easyui-numberbox" data-options="min:0" style="width:100%"></td>
+                <td style="width:15%">ID：</td>
+                <td style="width:35%"><input name="id" class="easyui-textbox" style="width:160px" readonly></td>
+                <td style="width:15%">种子ID：</td>
+                <td style="width:35%"><input name="seedId" class="easyui-numberbox" required="true" style="width:160px"></td>
             </tr>
             <tr>
-                <td>收获经验：</td>
-                <td><input name="harvestExperience" class="easyui-numberbox" style="width:100%"></td>
-                <td>收获积分：</td>
-                <td><input name="harvestScore" class="easyui-numberbox" style="width:100%"></td>
+                <td>种子名称：</td>
+                <td><input name="name" class="easyui-textbox" required="true" style="width:160px"></td>
+                <td>X季作物：</td>
+                <td><input name="season" class="easyui-numberbox" style="width:160px"></td>
+            </tr>
+            <tr>
+                <td>种子等级：</td>
+                <td><input name="level" class="easyui-numberspinner" data-options="min:1" style="width:160px"></td>
+                <td>种子类型：</td>
+                <td>
+                    <select name="type" class="easyui-combobox" data-options="panelHeight:'auto',editable:false" style="width:160px">
+                        <option value="普通">普通</option>
+                        <option value="稀有">稀有</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>可获经验：</td>
+                <td><input name="exp" class="easyui-numberbox" style="width:160px"></td>
+                <td>每季成熟所需时间：</td>
+                <td><input name="timeNeeded" class="easyui-numberbox" data-options="suffix:'秒'" style="width:160px"></td>
+            </tr>
+            <tr>
+                <td>每季成熟可获收成：</td>
+                <td><input name="harvestCount" class="easyui-numberbox" data-options="suffix:'个果实'" style="width:160px"></td>
+                <td>种子采购价：</td>
+                <td><input name="buyPrice" class="easyui-numberbox" data-options="suffix:'个金币'" style="width:160px"></td>
+            </tr>
+            <tr>
+                <td>每个收获的果实单价：</td>
+                <td><input name="fruitPrice" class="easyui-numberbox" data-options="suffix:'个金币'" style="width:160px"></td>
+                <td>土地需求：</td>
+                <td>
+                    <select name="soil" class="easyui-combobox" data-options="panelHeight:'auto',editable:false" style="width:160px">
+                        <option value="黄土地">黄土地</option>
+                        <option value="红土地">红土地</option>
+                        <option value="黑土地">黑土地</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>每季成熟可获积分：</td>
+                <td><input name="score" class="easyui-numberbox" style="width:160px"></td>
+                <td>提示信息：</td>
+                <td><input name="tips" class="easyui-textbox" style="width:160px"></td>
             </tr>
         </table>
     </form>
@@ -70,10 +111,18 @@
             idField: 'id',
             columns: [[
                 {field: 'id', title: 'ID', width: 50},
-                {field: 'name', title: '种子名称', width: 100, editor: 'textbox'},
-                {field: 'price', title: '采购价', width: 80, editor: 'numberbox'},
-                {field: 'harvestExperience', title: '收获经验', width: 80, editor: 'numberbox'},
-                {field: 'harvestScore', title: '收获积分', width: 80, editor: 'numberbox'},
+                {field: 'seedId', title: '种子ID', width: 50},
+                {field: 'seedName', title: '种子名称', width: 100},
+                {field: 'cropType', title: 'X季作物', width: 80},
+                {field: 'seedLevel', title: '种子等级', width: 80},
+                {field: 'exp', title: '可获经验', width: 80},
+                {field: 'growTime', title: '每季成熟所需时', width: 100},
+                {field: 'harvestCount', title: '每季成熟可收获', width: 100},
+                {field: 'buyPrice', title: '种子采购价', width: 80},
+                {field: 'fruitPrice', title: '每个收获的果实', width: 100},
+                {field: 'landRequirement', title: '土地需求', width: 80},
+                {field: 'points', title: '每季成熟可获积分', width: 100},
+                {field: 'tips', title: '提示信息', width: 150},
                 {field: 'action', title: '操作', width: 100, align: 'center',
                     formatter: function (value, row) {
                         return '<a href="javascript:void(0)" class="btn-action" onclick="showGrowthStage(' + row.id + ')">成长阶</a>';
