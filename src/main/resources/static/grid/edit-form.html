@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/js/easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/js/easyui/plugins/jquery.edatagrid.js"></script>
+    <script type="text/javascript" src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/color.css">
+</head>
+<body>
+<div id="controlBox">
+    <span>性别:</span>
+    <input id="genderSearch" class="easyui-combobox" panelHeight="auto"
+           data-options="editable:false, valueField:'code',textField:'caption',url:'/code/gender/data'">
+    <a href="#" class="easyui-linkbutton c1" iconCls="icon-search" onclick="doSearch()">查询</a>
+    <a href="#" class="easyui-linkbutton c2" iconCls="icon-add" onclick="grid.edatagrid('addRow')">添加</a>
+    <a href="#" class="easyui-linkbutton c4" iconCls="icon-save" onclick="grid.edatagrid('saveRow')">保存</a>
+    <a href="#" class="easyui-linkbutton c3" iconCls="icon-remove" onclick="grid.edatagrid('cancelRow')">取消</a>
+    <a href="#" class="easyui-linkbutton c5" iconCls="icon-cancel" onclick="grid.edatagrid('destroyRow')">删除</a>
+</div>
+<table id="grid"></table>
+<div id="formStudentContainer" class="easyui-dialog" style="width:280px;height:300px;padding:10px 10px" closed="true" buttons="#formStudentButtons">
+    <form id="formStudent" method="POST" novalidate>
+        <table class='tbledit'>
+            <tr>
+                <td>ID：</td>
+                <td><input name="id" required="true" class="w200" value="0"></td>
+            </tr>
+            <tr>
+                <td>照片：</td>
+                <td><input name="photo" required="true" class="easyui-validatebox w1024"></td>
+            </tr>
+            <tr>
+                <td>姓名：</td>
+                <td><input name="name" required="true" class="easyui-validatebox w50"></td>
+            </tr>
+            <tr>
+                <td>性别：</td>
+                <td><input name="gender" required="true" class="easyui-combobox" panelHeight="auto"
+                           data-options="editable:false,valueField:'code',textField:'caption',url:'/code/gender/data'"></td>
+            </tr>
+            <tr>
+                <td>生日：</td>
+                <td><input name="birth" required="true" class="easyui-datebox"></td>
+            </tr>
+            <tr>
+                <td>身高：</td>
+                <td><input name="height" required="true" class="easyui-numberbox " data-options="precision: 1">米</td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="formStudentButtons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveForm()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="$('#formStudentContainer').dialog('close')">取消</a>
+</div>
+<script>
+    let grid;
+    $(document).ready(function () {
+        grid = $('#grid').edatagrid({
+            title: '学生花名册',
+            width: 600,
+            height: 250,
+            method: 'post',
+            url: '/student/gridDataFilterSortPage',
+            saveUrl: '/student/addOrUpdate',
+            updateUrl: '/student/addOrUpdate',
+            destroyUrl: '/student/delete',
+            toolbar: [{
+                iconCls: 'icon-edit',
+                handler: function () {
+                    loadForm();
+                }
+            }, '-', {
+                iconCls: 'icon-help',
+                handler: function () {
+                    alert('可以把需要的帮助信息放在本function中调用显示');
+                }
+            }],
+            border: false,
+            rownumbers: true,
+            remoteSort: true,
+            nowrap: false,
+            singleSelect: true,
+            fitColumns: true,
+            pagination: true,
+            pageSize: 2,
+            pageList: [1, 2, 5, 10, 15, 20],
+            striped: true,
+            idField: "id",
+            columns: [
+                [{
+                    field: 'id',
+                    title: 'ID',
+                    width: 50,
+                    sortable: true
+                }, {
+                    field: 'photo',
+                    title: '照片',
+                    width: 100,
+                    align: 'right',
+                    formatter: function (value, row) {
+                        if (value == null)
+                            value = "none.png";
+                        return `<img src="/image/photo/${value}" height="50px" alt="">`;
+                    },
+                    editor: {
+                        type: 'validatebox',
+                        options: {
+                            validType: 'length[0,1024]',
+                            invalidMessage: '有效长度0-1024',
+                            required: true
+                        }
+                    }
+                }, {
+                    field: 'name',
+                    title: '姓名',
+                    width: 100,
+                    align: 'right',
+                    sortable: true,
+                    editor: {
+                        type: 'validatebox',
+                        options: {
+                            validType: 'length[1,5]',
+                            invalidMessage: '有效长度1-5',
+                            required: true
+                        }
+                    }
+                }, {
+                    field: 'gender',
+                    title: '性别',
+                    width: 100,
+                    align: 'right',
+                    sortable: true,
+                    editor: {
+                        type: 'combobox',
+                        options: {
+                            valueField: 'key',
+                            textField: 'value',
+                            data: [{
+                                key: '0',
+                                value: '女'
+                            }, {
+                                key: '1',
+                                value: '男'
+                            }],
+                            panelHeight: 'auto',
+                            required: true
+                        }
+                    },
+                    formatter: function (value, row) {
+                        if (value === 1) {
+                            return '男';
+                        } else {
+                            return '女';
+                        }
+                    }
+                }, {
+                    field: 'birth',
+                    title: '生日',
+                    width: 200,
+                    sortable: true,
+                    editor: {
+                        type: 'datebox',
+                        options: {
+                            required: true
+                        }
+                    }
+                }, {
+                    field: 'height',
+                    title: '身高',
+                    width: 100,
+                    align: 'center',
+                    formatter: function (value, row) {
+                        return Number(value).toFixed(2) + '米';
+                    },
+                    editor: {
+                        type: 'numberbox',
+                        options: {
+                            precision: 1,
+                            required: true
+                        },
+                    }
+                }]
+            ],
+            destroyMsg: {
+                norecord: {
+                    title: '警告',
+                    msg: '首先需要选中记录，然后在点击删除按钮'
+                },
+                confirm: {
+                    title: '确认',
+                    msg: '是否删除选中记录?'
+                }
+            },
+            onSuccess: function (index, row) {
+                console.log(row);
+            },
+            onDestroy: function (index, row) {
+                console.log(row);
+            }
+        });
+    });
+
+    function doSearch() {
+        grid.datagrid("load", {
+            gender: $("#genderSearch").val()
+        });
+    }
+
+    function loadForm() {
+        var row = grid.datagrid('getSelected');
+        if (row) {
+            $('#formStudentContainer').dialog('open').dialog('setTitle', '编辑数据');
+            $('#formStudent').form('load', row);
+        } else {
+            alert("请先选择一行数据，然后再尝试点击操作按钮！");
+        }
+    }
+
+    function saveForm() {
+        $('#formStudent').form('submit', {
+            url: '/student/addOrUpdate',
+            onSubmit: function (param) {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var result = eval('(' + result + ')');
+                if (result.code === 0) {
+                    $('#formStudentContainer').dialog('close');
+                    grid.datagrid('reload');
+                }
+                $.messager.show({
+                    title: "消息",
+                    msg: result.msg
+                });
+            }
+        });
+    }
+</script>
+</body>
+</html>

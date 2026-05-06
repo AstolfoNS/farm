@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/client/easyui/themes/green/easyui.css">
+    <script type="text/javascript" src="/client/easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="/client/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/client/easyui/plugins/jquery.edatagrid.js"></script>
+</head>
+<body style="background:#004d00; padding:20px;">
+<table id="userGrid"></table>
+
+<form id="formUploadFile" method="post" action="/file/saveHeadImg" enctype="multipart/form-data" style="display:none">
+    <input id="filePathName" name="filePathName" type="file" onchange="ajaxUpload()">
+</form>
+
+<script>
+    var grid;
+    $(function() {
+        grid = $('#userGrid').edatagrid({
+            url: '/user/list',
+            fit: true,
+            columns: [[
+                {field:'id', title:'ID', width:50},
+                {field:'head', title:'头像', width:60, formatter:function(v){
+                        return '<img src="'+v+'" style="width:30px;height:30px">';
+                    }},
+                {field:'username', title:'用户名', width:100},
+                {field:'action', title:'操作', width:150, formatter:function(v,r,i){
+                        return '<a onclick="triggerUpload('+i+')">上传头像</a> <a onclick="saveData('+i+')">保存数据</a>';
+                    }}
+            ]]
+        });
+    });
+
+    function triggerUpload(index) {
+        grid.datagrid('selectRow', index);
+        $('#filePathName').click();
+    }
+
+    // 使用你提供的编辑器定位代码
+    function ajaxUpload() {
+        // 模拟上传成功回调
+        let newValue = "images/headImages/new_head.png";
+        let curRow = grid.edatagrid('getSelected');
+        let curRowIndex = grid.edatagrid('getRowIndex', curRow);
+
+        grid.datagrid('beginEdit', curRowIndex);
+        let yyy = grid.datagrid('getEditor', { index: curRowIndex, field: 'head' });
+        if(yyy) yyy.target.val(newValue);
+        grid.edatagrid("endEdit", curRowIndex);
+    }
+</script>
+</body>
+</html>

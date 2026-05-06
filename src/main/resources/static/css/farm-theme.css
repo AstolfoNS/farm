@@ -1,0 +1,105 @@
+/* --- 1. 全局背景与布局调整 --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
+    background-color: #004d00;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* --- 2. 弹窗（Dialog）深度还原 --- */
+/* 还原图片中的深绿色背景 */
+.window-body {
+    background-color: #008000 !important; /* 纯正绿背景 */
+    color: #ffffff !important;
+}
+
+/* 弹窗最外层亮绿色细边框 */
+.window, .window-shadow {
+    border: 1px solid #00FF00 !important;
+    box-shadow: none !important;
+}
+
+/* 标题栏背景与边框 */
+.panel-header {
+    background: #00a000 !important;
+    border-color: #00FF00 !important;
+}
+.panel-title {
+    color: #ffffff !important;
+}
+/* 底部按钮栏背景（如图所示是更深的绿色） */
+.dialog-button {
+    background-color: #006400 !important;
+    border-top: 1px solid #00FF00 !important;
+    text-align: right;
+    padding: 5px 10px;
+}
+
+/* --- 3. 表单内部文字与标签定制 --- */
+.tbledit td {
+    color: #ffffff !important; /* 确保所有标签文字为白色 */
+    font-size: 14px;
+}
+
+/* 修改 EasyUI 输入框样式 */
+.textbox, .textbox-text {
+    border-radius: 4px !important;
+}
+
+/* 针对 readonly 的 ID 输入框进行区分 */
+.textbox-readonly {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* --- 4. DataGrid 表格细节优化 --- */
+/* 表头背景与文字 */
+.datagrid-header td {
+    background: #008000 !important;
+    border-color: #00FF00 !important;
+}
+
+.datagrid-header span {
+    color: #ffffff !important;
+}
+
+/* 单元格边框：改为浅绿色线，增加层次感 */
+.datagrid-body td, .datagrid-footer td {
+    border-color: rgba(0, 255, 0, 0.3) !important;
+}
+
+/* 斑马线：单行亮绿，双行深绿 */
+.datagrid-row {
+    background-color: #00a000;
+}
+.datagrid-row-alt {
+    background-color: #006400 !important;
+}
+
+/* 选中行效果 */
+.datagrid-row-selected {
+    background: #ffd700 !important;
+    color: #000000 !important;
+}
+
+/* --- 5. 操作列按钮 (成长阶) 定制 --- */
+.btn-action {
+    background: #ffffff; /* 如图3所示，操作按钮是浅色背景 */
+    border: 1px solid #999999;
+    border-radius: 6px;
+    padding: 3px 10px;
+    color: #333333;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.btn-action:hover {
+    background: #f0f0f0;
+    border-color: #00FF00;
+}

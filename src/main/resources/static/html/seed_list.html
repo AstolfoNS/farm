@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>种子清单</title>
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/css/farm-theme.css">
+    <script src="/js/easyui/jquery.min.js"></script>
+    <script src="/js/easyui/jquery.easyui.min.js"></script>
+    <script src="/js/easyui/plugins/jquery.edatagrid.js"></script>
+    <script src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body class="easyui-layout">
+
+<div data-options="region:'center',border:false">
+    <!-- 数据表格 -->
+    <table id="grid"></table>
+</div>
+
+<!-- 工具栏 -->
+<div id="seedTb" style="padding:10px;">
+    <span style="color: white">种子名称:</span>
+    <input id="nameSearch" class="easyui-textbox" style="width:140px">
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'" onclick="doSearch()">查询</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick="grid.edatagrid('addRow')">新增</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit'" onclick="editRow()">弹窗编辑</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-undo'" onclick="grid.edatagrid('cancelRow')">取消</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="grid.edatagrid('destroyRow')">删除</a>
+</div>
+
+<!-- 弹窗编辑表单 -->
+<div id="formContainer" class="easyui-dialog" title="编辑种子信息" style="width:800px; padding:20px;" closed="true" buttons="#formSeedButtons">
+    <form id="formEditor" method="POST">
+        <input type="hidden" name="id">
+        <table class="tbledit" style="width:100%">
+            <tr>
+                <td>种子名称：</td>
+                <td><input name="name" class="easyui-textbox" required="true" style="width:100%"></td>
+                <td>采购价格：</td>
+                <td><input name="price" class="easyui-numberbox" data-options="min:0" style="width:100%"></td>
+            </tr>
+            <tr>
+                <td>收获经验：</td>
+                <td><input name="harvestExperience" class="easyui-numberbox" style="width:100%"></td>
+                <td>收获积分：</td>
+                <td><input name="harvestScore" class="easyui-numberbox" style="width:100%"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<div id="formSeedButtons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveForm()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="$('#formContainer').dialog('close')">关闭</a>
+</div>
+
+<script>
+    let grid;
+    $(function () {
+        grid = $('#grid').edatagrid({
+            url: '/seed/gridDataFilterSortPage',
+            saveUrl: '/seed/addOrUpdate',
+            updateUrl: '/seed/addOrUpdate',
+            destroyUrl: '/seed/delete',
+            toolbar: '#seedTb',
+            fit: true,
+            pagination: true,
+            striped: true,
+            idField: 'id',
+            columns: [[
+                {field: 'id', title: 'ID', width: 50},
+                {field: 'name', title: '种子名称', width: 100, editor: 'textbox'},
+                {field: 'price', title: '采购价', width: 80, editor: 'numberbox'},
+                {field: 'harvestExperience', title: '收获经验', width: 80, editor: 'numberbox'},
+                {field: 'harvestScore', title: '收获积分', width: 80, editor: 'numberbox'},
+                {field: 'action', title: '操作', width: 100, align: 'center',
+                    formatter: function (value, row) {
+                        return '<a href="javascript:void(0)" class="btn-action" onclick="showGrowthStage(' + row.id + ')">成长阶</a>';
+                    }
+                }
+            ]]
+        });
+    });
+
+    function doSearch() {
+        grid.datagrid("load", { name: $("#nameSearch").val() });
+    }
+
+    function editRow() {
+        var row = grid.datagrid('getSelected');
+        if (row) {
+            $('#formContainer').dialog('open');
+            $('#formEditor').form('load', row);
+        }
+    }
+
+    function saveForm() {
+        $('#formEditor').form('submit', {
+            url: '/seed/addOrUpdate',
+            success: function (result) {
+                var res = JSON.parse(result); // 使用标准 JSON 解析
+                if (res.code === 0) {
+                    $('#formContainer').dialog('close');
+                    grid.datagrid('reload');
+                }
+                $.messager.show({ title: "提示", msg: res.msg });
+            }
+        });
+    }
+
+    function showGrowthStage(id) {
+        $.messager.alert("提示", "正在查看 ID 为 " + id + " 的成长详情");
+    }
+</script>
+</body>
+</html>

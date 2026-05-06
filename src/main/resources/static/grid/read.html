@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/js/easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/js/easyui/plugins/jquery.edatagrid.js"></script>
+    <script type="text/javascript" src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/color.css">
+</head>
+<body>
+<table id="grid"></table>
+<script>
+    let grid;
+    $(document).ready(function () {
+        grid = $('#grid').edatagrid({
+            title: '学生花名册',
+            width: 600,
+            height: 250,
+            method: 'post',
+            url: '/student/gridData',
+            border: false,
+            rownumbers: true,
+            remoteSort: false,
+            nowrap: false,
+            singleSelect: true,
+            fitColumns: true,
+            pagination: false,
+            striped: true,
+            idField: "id",
+            columns: [
+                [{
+                    field: 'id',
+                    title: 'ID',
+                    width: 50,
+                    sortable: true
+                }, {
+                    field: 'name',
+                    title: '姓名',
+                    width: 100,
+                    align: 'right',
+                    sortable: true
+                }, {
+                    field: 'gender',
+                    title: '性别',
+                    width: 100,
+                    align: 'right',
+                    sortable: true
+                }, {
+                    field: 'birth',
+                    title: '生日',
+                    width: 200,
+                    sortable: true
+                }, {
+                    field: 'height',
+                    title: '身高',
+                    width: 100
+                }]
+            ]
+        });
+    });
+</script>
+</body>
+</html>

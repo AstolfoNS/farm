@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            background: url('/images/topbar.png') repeat-x;
+            background-size: auto 60px;
+            height: 60px;
+            overflow: hidden;
+        }
+        .nav-container { position: absolute; right: 20px; top: 8px; display: flex; gap: 15px; }
+        .nav-icon { width: 45px; height: 45px; cursor: pointer; transition: 0.2s; }
+        .nav-icon:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+<div class="nav-container">
+    <img src="/images/userManager.png" class="nav-icon" onclick="toPage('user_list.html')" title="玩家管理">
+    <img src="/images/seedManager.png" class="nav-icon" onclick="toPage('seed_list.html')" title="种子管理">
+</div>
+<script>
+    function toPage(url) {
+        // 通过 parent.frames 找到中间的 workspace 窗口进行跳转
+        parent.frames['workspace'].location.href = url;
+    }
+</script>
+</body>
+</html>

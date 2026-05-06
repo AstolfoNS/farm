@@ -16,7 +16,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         naming:
-          physical-strategy: cn.jxufe.fram.database.PostgreSQLServerNamingStrategy
+          physical-strategy: cn.jxufe.farm.database.PostgreSQLServerNamingStrategy
 
 springdoc:
   api-docs:
