@@ -55,8 +55,10 @@ public class SeedImp implements SeedService {
     public EasyUIData gridDataFilterSortPage(String name, EasyUIDataPageRequest pageRequest) {
         EasyUIData data = new EasyUIData();
 
+        int pageNumber = Math.max(pageRequest.getPage() - 1, 0);
+        int pageSize = pageRequest.getRows() <= 0 ? 10 : pageRequest.getRows();
         Sort.Direction direction = "desc".equalsIgnoreCase(pageRequest.getOrder()) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(Math.max(pageRequest.getPage() - 1, 0), pageRequest.getRows(), Sort.by(direction, safeSortField(pageRequest.getSort())));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(direction, safeSortField(pageRequest.getSort())));
         Page<SeedType> seedPage = seedTypeDao.findByIsDeletedFalseAndNameContainingIgnoreCase(name, pageable);
 
         Map<Long, SeedQuality> qualityMap = new HashMap<>();
@@ -434,15 +436,22 @@ public class SeedImp implements SeedService {
     private Long resolveSoilBits(Map<String, String> params) {
         String soilTypeIdStr = params.get("soilTypeId");
         if (soilTypeIdStr != null && !soilTypeIdStr.isBlank()) {
-            Long soilTypeId = parseLong(soilTypeIdStr, 0L);
-            if (soilTypeId != null && soilTypeId > 0) {
-                List<SoilType> soilTypes = soilTypeDao.findByIsDeletedFalseOrderByIdAsc();
+            List<SoilType> soilTypes = soilTypeDao.findByIsDeletedFalseOrderByIdAsc();
+            String[] idArray = soilTypeIdStr.split(",");
+            long mergedBits = 0L;
+            for (String idText : idArray) {
+                Long soilTypeId = parseLong(idText, 0L);
+                if (soilTypeId == null || soilTypeId <= 0) {
+                    continue;
+                }
                 for (SoilType soilType : soilTypes) {
-                    if (soilTypeId.equals(soilType.getId())) {
-                        return soilType.getBitCode() == null ? 0L : soilType.getBitCode().longValue();
+                    if (soilTypeId.equals(soilType.getId()) && soilType.getBitCode() != null) {
+                        mergedBits |= soilType.getBitCode().longValue();
+                        break;
                     }
                 }
             }
+            return mergedBits;
         }
         return parseLong(params.get("soilTypeBits"), 0L);
     }
@@ -451,13 +460,17 @@ public class SeedImp implements SeedService {
         if (soilBits == null || soilBits <= 0) {
             return "";
         }
+        List<String> names = new ArrayList<>();
         for (Map.Entry<Integer, String> entry : soilNameByBitCode.entrySet()) {
             Long bit = entry.getKey().longValue();
             if ((soilBits & bit) == bit) {
-                return entry.getValue();
+                names.add(entry.getValue());
             }
         }
-        return "";
+        if (names.isEmpty()) {
+            return "";
+        }
+        return String.join("/", names);
     }
 
     private Integer getTotalGrowSeconds(Long seedTypeId) {

@@ -18,6 +18,7 @@
             top: 6px;
             display: flex;
             align-items: center;
+            gap: 8px;
         }
 
         .nav-icon {
@@ -34,17 +35,48 @@
         .nav-icon:hover {
             transform: scale(1.05);
         }
+
+        .nav-icon.active {
+            border-color: #8cff66;
+            box-shadow: 0 0 0 2px #2f7200 inset;
+        }
     </style>
 </head>
 <body>
 <div class="nav-container">
+    <img id="userManagerIcon" src="/images/userManager.png" class="nav-icon" title="玩家管理">
     <img id="seedShopIcon" src="/images/seedManager.png" class="nav-icon" title="种子管理">
 </div>
 <script>
     $(function () {
+        function setActiveByWorkspace() {
+            var href = '';
+            try {
+                href = parent.frames['workspace'].location.href || '';
+            } catch (e) {
+                href = '';
+            }
+            $('#seedShopIcon').removeClass('active');
+            $('#userManagerIcon').removeClass('active');
+            if (href.indexOf('seed_list.html') >= 0) {
+                $('#seedShopIcon').addClass('active');
+            } else if (href.indexOf('user_list.html') >= 0) {
+                $('#userManagerIcon').addClass('active');
+            }
+        }
+
+        $('#userManagerIcon').on('click', function () {
+            parent.frames['workspace'].location.href = 'user_list.html';
+            setActiveByWorkspace();
+        });
+
         $('#seedShopIcon').on('click', function () {
             parent.frames['workspace'].location.href = 'seed_list.html';
+            setActiveByWorkspace();
         });
+
+        setActiveByWorkspace();
+        setInterval(setActiveByWorkspace, 800);
     });
 </script>
 </body>

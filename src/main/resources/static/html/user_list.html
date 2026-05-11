@@ -1,54 +1,522 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="/client/easyui/themes/green/easyui.css">
-    <script type="text/javascript" src="/client/easyui/jquery.min.js"></script>
-    <script type="text/javascript" src="/client/easyui/jquery.easyui.min.js"></script>
-    <script type="text/javascript" src="/client/easyui/plugins/jquery.edatagrid.js"></script>
-</head>
-<body style="background:#004d00; padding:20px;">
-<table id="userGrid"></table>
+    <title>玩家管理</title>
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/color.css">
+    <script src="/js/easyui/jquery.min.js"></script>
+    <script src="/js/easyui/jquery.easyui.min.js"></script>
+    <script src="/js/easyui/plugins/jquery.edatagrid.js"></script>
+    <script src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
 
-<form id="formUploadFile" method="post" action="/file/saveHeadImg" enctype="multipart/form-data" style="display:none">
-    <input id="filePathName" name="filePathName" type="file" onchange="ajaxUpload()">
-</form>
+        body {
+            background: #158115;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .user-page {
+            height: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 92, 0, 0.86);
+            border: 2px solid #00cf00;
+        }
+
+        #toolbar {
+            background: #018f01;
+            border-bottom: 1px solid #00d500;
+            padding: 10px 8px;
+        }
+
+        #toolbar label {
+            color: #fff;
+            font-weight: 700;
+            margin-right: 6px;
+        }
+
+        .user-grid-wrap {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: 8px;
+        }
+
+        .user-grid-title {
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 36px;
+            padding: 0 8px;
+            border: 1px solid #00d500;
+            border-bottom: 0;
+            background: #00ac00;
+        }
+
+        .user-grid-panel {
+            flex: 1;
+            min-height: 0;
+            border: 1px solid #00d500;
+            background: #026b02;
+        }
+
+        .user-page .datagrid-header td {
+            background: #056105 !important;
+            border-color: #056105 !important;
+        }
+
+        .user-page .datagrid-header .datagrid-cell,
+        .user-page .datagrid-header .datagrid-cell span {
+            color: #fff !important;
+            font-weight: 700;
+        }
+
+        .user-page .datagrid-row {
+            background: #028002;
+            color: #fff;
+        }
+
+        .user-page .datagrid-row-alt {
+            background: #016701 !important;
+            color: #fff;
+        }
+
+        .user-page .datagrid-row-selected {
+            background: #0d860d !important;
+            color: #fff !important;
+        }
+
+        .user-page .datagrid-pager {
+            background: #037003 !important;
+            color: #fff;
+            border-top: 1px solid #00d500 !important;
+        }
+
+        .avatar-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #60db60;
+        }
+
+        .money-cell-icon {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+
+        .op-link {
+            display: inline-block;
+            border: 1px solid #d8d8d8;
+            border-radius: 8px;
+            background: #ecffec;
+            color: #114b11;
+            padding: 2px 8px;
+            text-decoration: none;
+            margin-right: 6px;
+        }
+
+        .op-link:hover {
+            background: #fff;
+        }
+
+        .footer-box {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 10px;
+        }
+
+        .upload-dialog-theme {
+            background: #009900;
+        }
+
+        .upload-dialog-theme .panel-header {
+            background: #00a500;
+            color: #fff;
+            border-color: #00d500;
+        }
+
+        .upload-dialog-theme .panel-title {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .upload-body {
+            color: #fff;
+            padding: 10px 6px;
+            font-size: 16px;
+        }
+
+        .upload-actions {
+            padding: 8px 6px 2px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<div class="user-page">
+    <div id="toolbar">
+        <label for="usernameSearch">用户名:</label>
+        <input id="usernameSearch" class="easyui-textbox" style="width:180px">
+        <a id="btnSearch" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
+        <a id="btnAdd" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">添加</a>
+        <a id="btnCancel" href="javascript:void(0)" class="easyui-linkbutton c3" data-options="iconCls:'icon-undo'">取消</a>
+        <a id="btnDelete" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除</a>
+    </div>
+
+    <div class="user-grid-wrap">
+        <div class="user-grid-title">用户清单</div>
+        <div class="user-grid-panel">
+            <table id="userGrid"></table>
+        </div>
+    </div>
+
+    <div class="footer-box">
+        <a id="btnCloseWindow" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">关闭窗口</a>
+    </div>
+</div>
+
+<div id="uploadDialog" class="easyui-dialog upload-dialog-theme" title="头像上传" style="width:420px;height:170px;padding:0 8px"
+     closed="true" modal="true" resizable="false">
+    <div class="upload-body">
+        <form id="formUploadFile" method="post" action="/file/saveHeadImg" enctype="multipart/form-data">
+            <label for="filePathName">头像文件:</label>
+            <input id="filePathName" name="filePathName" type="file" accept="image/*" style="width:260px">
+        </form>
+        <div class="upload-actions">
+            <a id="btnStartUpload" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">开始上传</a>
+            <a id="btnCloseUpload" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">关闭窗口</a>
+        </div>
+    </div>
+</div>
 
 <script>
-    var grid;
-    $(function() {
-        grid = $('#userGrid').edatagrid({
-            url: '/user/list',
-            fit: true,
-            columns: [[
-                {field:'id', title:'ID', width:50},
-                {field:'head', title:'头像', width:60, formatter:function(v){
-                        return '<img src="'+v+'" style="width:30px;height:30px">';
-                    }},
-                {field:'username', title:'用户名', width:100},
-                {field:'action', title:'操作', width:150, formatter:function(v,r,i){
-                        return '<a onclick="triggerUpload('+i+')">上传头像</a> <a onclick="saveData('+i+')">保存数据</a>';
-                    }}
-            ]]
-        });
+    var grid = null;
+    var currentEditIndex = -1;
+    var uploadRowIndex = -1;
+
+    $(function () {
+        initGrid();
+        bindEvents();
     });
 
-    function triggerUpload(index) {
-        grid.datagrid('selectRow', index);
-        $('#filePathName').click();
+    function initGrid() {
+        grid = $('#userGrid').edatagrid({
+            method: 'post',
+            url: '/user/gridDataFilterSortPage',
+            fit: true,
+            fitColumns: true,
+            striped: true,
+            rownumbers: true,
+            singleSelect: true,
+            pagination: true,
+            pageSize: 5,
+            pageList: [5, 10, 20],
+            idField: 'id',
+            columns: [[
+                {field: 'id', title: 'ID', width: 45, sortable: true},
+                {
+                    field: 'head',
+                    title: '头像',
+                    width: 70,
+                    formatter: function (value) {
+                        var src = value || '/images/unknownUser.png';
+                        return '<img class="avatar-img" src="' + src + '" alt="头像">';
+                    }
+                },
+                {
+                    field: 'username',
+                    title: '用户名',
+                    width: 105,
+                    editor: {type: 'textbox', options: {required: true}}
+                },
+                {
+                    field: 'nickname',
+                    title: '昵称',
+                    width: 90,
+                    editor: {type: 'textbox', options: {required: true}}
+                },
+                {
+                    field: 'experience',
+                    title: '经验值',
+                    width: 95,
+                    editor: {type: 'numberbox', options: {min: 0, precision: 0}},
+                    formatter: function (value) {
+                        return '<img class="money-cell-icon" src="/images/exp.png" alt="">'+ Number(value || 0);
+                    }
+                },
+                {
+                    field: 'score',
+                    title: '积分',
+                    width: 85,
+                    editor: {type: 'numberbox', options: {min: 0, precision: 0}},
+                    formatter: function (value) {
+                        return '<img class="money-cell-icon" src="/images/score.png" alt="">'+ Number(value || 0);
+                    }
+                },
+                {
+                    field: 'coin',
+                    title: '金币',
+                    width: 85,
+                    editor: {type: 'numberbox', options: {min: 0, precision: 0}},
+                    formatter: function (value) {
+                        return '<img class="money-cell-icon" src="/images/gold.png" alt="">'+ Number(value || 0);
+                    }
+                },
+                {
+                    field: 'action',
+                    title: '操作',
+                    width: 120,
+                    formatter: function (value, row, index) {
+                        return '<a href="javascript:void(0)" class="op-link" onclick="openUploadDialog(' + index + ')">上传头像</a>' +
+                            '<a href="javascript:void(0)" class="op-link" onclick="saveData(' + index + ')">保存数据</a>';
+                    }
+                },
+                {
+                    field: 'avatarPath',
+                    title: '头像路径',
+                    width: 10,
+                    hidden: true,
+                    editor: {type: 'text'}
+                }
+            ]],
+            onClickRow: function (index) {
+                beginRowEdit(index);
+            },
+            onLoadSuccess: function () {
+                currentEditIndex = -1;
+            }
+        });
     }
 
-    // 使用你提供的编辑器定位代码
-    function ajaxUpload() {
-        // 模拟上传成功回调
-        let newValue = "images/headImages/new_head.png";
-        let curRow = grid.edatagrid('getSelected');
-        let curRowIndex = grid.edatagrid('getRowIndex', curRow);
+    function bindEvents() {
+        $('#btnSearch').on('click', doSearch);
+        $('#btnAdd').on('click', addUser);
+        $('#btnCancel').on('click', cancelEdit);
+        $('#btnDelete').on('click', deleteUser);
+        $('#btnCloseWindow').on('click', function () {
+            window.location.href = 'welcome.html';
+        });
+        $('#btnStartUpload').on('click', ajaxUpload);
+        $('#btnCloseUpload').on('click', function () {
+            $('#uploadDialog').dialog('close');
+        });
+    }
 
-        grid.datagrid('beginEdit', curRowIndex);
-        let yyy = grid.datagrid('getEditor', { index: curRowIndex, field: 'head' });
-        if(yyy) yyy.target.val(newValue);
-        grid.edatagrid("endEdit", curRowIndex);
+    function doSearch() {
+        endCurrentEdit();
+        grid.datagrid('load', {name: $('#usernameSearch').textbox('getValue')});
+    }
+
+    function addUser() {
+        if (!endCurrentEdit()) {
+            return;
+        }
+        var rows = grid.datagrid('getRows');
+        var index = rows.length;
+        grid.datagrid('appendRow', {
+            id: 0,
+            username: '',
+            nickname: '',
+            experience: 0,
+            score: 0,
+            coin: 0,
+            avatarPath: 'images/headImages/none.png',
+            head: '/images/headImages/none.png',
+            _isNew: true
+        });
+        grid.datagrid('selectRow', index);
+        beginRowEdit(index);
+    }
+
+    function cancelEdit() {
+        if (currentEditIndex < 0) {
+            return;
+        }
+        var row = grid.datagrid('getRows')[currentEditIndex];
+        grid.datagrid('cancelEdit', currentEditIndex);
+        if (row && row._isNew) {
+            grid.datagrid('deleteRow', currentEditIndex);
+        }
+        currentEditIndex = -1;
+    }
+
+    function deleteUser() {
+        var row = grid.edatagrid('getSelected');
+        if (!row) {
+            $.messager.alert('提示', '请先选择一条记录');
+            return;
+        }
+        var rowIndex = grid.datagrid('getRowIndex', row);
+        if (row.id && Number(row.id) > 0) {
+            $.messager.confirm('确认', '确认删除当前用户吗？', function (ok) {
+                if (!ok) {
+                    return;
+                }
+                $.post('/user/delete', {id: row.id}, function (res) {
+                    showMessage(res);
+                    if (res && res.code === 0) {
+                        grid.datagrid('reload');
+                    }
+                }, 'json').fail(function () {
+                    $.messager.alert('错误', '删除失败，请稍后重试');
+                });
+            });
+        } else if (rowIndex >= 0) {
+            grid.datagrid('deleteRow', rowIndex);
+            currentEditIndex = -1;
+        }
+    }
+
+    function openUploadDialog(index) {
+        grid.datagrid('selectRow', index);
+        beginRowEdit(index);
+        uploadRowIndex = index;
+        $('#filePathName').val('');
+        $('#uploadDialog').dialog('open').dialog('center');
+    }
+
+    function ajaxUpload() {
+        if (uploadRowIndex < 0) {
+            $.messager.alert('提示', '请先选择要上传头像的用户');
+            return;
+        }
+        var fileValue = $('#filePathName').val();
+        if (!fileValue) {
+            $.messager.alert('提示', '请选择需要上传的头像文件');
+            return;
+        }
+        var formData = new FormData($('#formUploadFile')[0]);
+        $.ajax({
+            url: '/file/saveHeadImg',
+            type: 'post',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res && res.code === 0 && res.data) {
+                    var relativePath = res.data.relativePath || res.data.path || '';
+                    var accessUrl = res.data.accessUrl || '';
+                    updateAvatarEditor(uploadRowIndex, relativePath, accessUrl);
+                    $('#uploadDialog').dialog('close');
+                }
+                showMessage(res);
+            },
+            error: function () {
+                $.messager.alert('错误', '上传失败，请稍后重试');
+            },
+            complete: function () {
+                $('#filePathName').val('');
+            }
+        });
+    }
+
+    function updateAvatarEditor(index, avatarPath, headUrl) {
+        if (index < 0) {
+            return;
+        }
+        grid.datagrid('beginEdit', index);
+        var avatarEditor = grid.datagrid('getEditor', {index: index, field: 'avatarPath'});
+        if (avatarEditor && avatarEditor.target) {
+            avatarEditor.target.val(avatarPath);
+        }
+
+        var rows = grid.datagrid('getRows');
+        if (!rows[index]) {
+            return;
+        }
+        rows[index].avatarPath = avatarPath;
+        rows[index].head = headUrl;
+        grid.datagrid('refreshRow', index);
+    }
+
+    function beginRowEdit(index) {
+        if (index === currentEditIndex) {
+            return true;
+        }
+        if (!endCurrentEdit()) {
+            grid.datagrid('selectRow', currentEditIndex);
+            return false;
+        }
+        grid.datagrid('beginEdit', index);
+        currentEditIndex = index;
+        return true;
+    }
+
+    function endCurrentEdit() {
+        if (currentEditIndex < 0) {
+            return true;
+        }
+        if (!grid.datagrid('validateRow', currentEditIndex)) {
+            return false;
+        }
+        grid.datagrid('endEdit', currentEditIndex);
+        currentEditIndex = -1;
+        return true;
+    }
+
+    function saveData(index) {
+        if (!beginRowEdit(index)) {
+            return;
+        }
+        if (!endCurrentEdit()) {
+            $.messager.alert('提示', '请先完善当前行数据');
+            return;
+        }
+        var row = grid.datagrid('getRows')[index];
+        if (!row) {
+            $.messager.alert('提示', '未获取到当前行数据');
+            return;
+        }
+        var payload = {
+            id: row.id || 0,
+            username: row.username || '',
+            nickname: row.nickname || '',
+            experience: row.experience || 0,
+            score: row.score || 0,
+            coin: row.coin || 0,
+            avatarPath: row.avatarPath || ''
+        };
+        $.ajax({
+            url: '/user/addOrUpdate',
+            type: 'post',
+            dataType: 'json',
+            data: payload,
+            success: function (res) {
+                showMessage(res);
+                if (res && res.code === 0) {
+                    grid.datagrid('reload');
+                }
+            },
+            error: function () {
+                $.messager.alert('错误', '保存失败，请稍后重试');
+            }
+        });
+    }
+
+    function showMessage(res) {
+        if (!res) {
+            $.messager.alert('错误', '操作失败');
+            return;
+        }
+        var messageText = res.msg || (res.code === 0 ? '操作成功' : '操作失败');
+        if (res.code === 0) {
+            $.messager.show({title: '消息', msg: messageText});
+            return;
+        }
+        $.messager.alert('提示', messageText);
     }
 </script>
 </body>

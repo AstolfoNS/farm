@@ -28,3 +28,8 @@ springdoc:
 
 server:
   port: 8080
+
+farm:
+  file:
+    storage-root: ${FILE_STORAGE_ROOT:./static/oss}
+    public-prefix: ${FILE_PUBLIC_PREFIX:/oss}

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
@@ -23,6 +24,13 @@ public class SeedController {
 
     public SeedController(SeedService seedService) {
         this.seedService = seedService;
+    }
+
+    @RequestMapping(value = "/gridDataFilterSortPage", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public EasyUIData gridDataFilterSortPageGet(@RequestParam(required = false, defaultValue = "") String name,
+                                                EasyUIDataPageRequest pageRequest) {
+        return seedService.gridDataFilterSortPage(name, pageRequest);
     }
 
     @PostMapping(value = "/gridDataFilterSortPage", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -50,9 +58,21 @@ public class SeedController {
         return seedService.qualityOptions();
     }
 
+    @GetMapping(value = "/seedQualityOptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<Map<String, Object>> seedQualityOptions() {
+        return seedService.qualityOptions();
+    }
+
     @GetMapping(value = "/soilOptions", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<Map<String, Object>> soilOptions() {
+        return seedService.soilOptions();
+    }
+
+    @GetMapping(value = "/soilTypeOptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<Map<String, Object>> soilTypeOptions() {
         return seedService.soilOptions();
     }
 
@@ -60,6 +80,18 @@ public class SeedController {
     @ResponseBody
     public List<Map<String, Object>> growthStageOptions() {
         return seedService.growthStageOptions();
+    }
+
+    @GetMapping(value = "/stageOptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<Map<String, Object>> stageOptions() {
+        return seedService.growthStageOptions();
+    }
+
+    @RequestMapping(value = "/stage/gridDataFilterSortPage", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public EasyUIData stageGridDataFilterSortPageGet(@RequestParam("seedTypeId") Long seedTypeId) {
+        return seedService.stageGridDataFilterSortPage(seedTypeId);
     }
 
     @PostMapping(value = "/stage/gridDataFilterSortPage", produces = MediaType.APPLICATION_JSON_VALUE)
