@@ -1,15 +1,214 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <title>欢迎</title>
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/icon.css">
+    <script src="/js/easyui/jquery.min.js"></script>
+    <script src="/js/easyui/jquery.easyui.min.js"></script>
+    <script src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
     <style>
-        body {
+        html, body {
             margin: 0;
-            background: url('../images/welcome.png') no-repeat;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: url('/images/welcome.png') no-repeat;
             background-size: 100% 100%;
-            height: 100vh;
+            position: relative;
+        }
+
+        #loginPanel {
+            width: 340px;
+            padding: 8px 8px 10px;
+            position: absolute;
+            left: 50%;
+            top: 46%;
+            transform: translate(-50%, -50%);
+            background: #008900;
+            border: 2px solid #0c610c;
+            box-shadow: 0 0 0 2px #00d000 inset;
+            display: none;
+        }
+
+        .login-title {
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-label {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .login-tip {
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-top: 10px;
+            border-top: 1px solid #66ce66;
+            padding-top: 8px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .tip-text {
+            flex: 1;
+        }
+
+        .user-option {
+            display: flex;
+            align-items: center;
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.2;
+            padding: 2px 4px;
+            background: #008500;
+            border-bottom: 1px dashed #3d9c3d;
+        }
+
+        .user-option img {
+            width: 34px;
+            height: 34px;
+            border-radius: 4px;
+            margin-right: 8px;
+            border: 1px solid #5ec95e;
+            object-fit: cover;
+            background: #fff;
+        }
+
+        .combo-panel {
+            border-color: #0c610c !important;
         }
     </style>
 </head>
-<body></body>
+<body>
+<div id="loginPanel">
+    <div class="login-title">👤 用户选择</div>
+    <div class="login-label">当前用户:</div>
+    <input id="curUserSelect" style="width:100%">
+    <div class="login-tip">
+        <div class="tip-text">请在下拉框中选择用户昵称，并点击“确认”按钮设定当前用户信息。</div>
+        <a id="btnConfirmLogin" href="javascript:void(0)" class="easyui-linkbutton c1">确认</a>
+    </div>
+</div>
+
+<script>
+    var loginLoaded = false;
+
+    $(function () {
+        initUserCombobox();
+        var params = getUrlParameters();
+        if (params.showLogin === '1') {
+            openUserLoginPanel();
+        }
+    });
+
+    function initUserCombobox() {
+        $('#curUserSelect').combobox({
+            valueField: 'id',
+            textField: 'nickname',
+            panelHeight: 180,
+            editable: false,
+            method: 'get',
+            url: '/user/loginOptions',
+            formatter: function (row) {
+                var head = row.head || '/images/unknownUser.png';
+                var exp = Number(row.experience || 0);
+                var coin = Number(row.coin || 0);
+                var score = Number(row.score || 0);
+                return '<div class="user-option">' +
+                    '<img src="' + head + '" alt="">' +
+                    '<span>' + (row.nickname || '') + ' | 经验：' + exp + ' | 金币：' + coin + ' | 积分：' + score + '</span>' +
+                    '</div>';
+            },
+            onLoadSuccess: function (data) {
+                loginLoaded = true;
+                if (data && data.length > 0 && !$('#curUserSelect').combobox('getValue')) {
+                    $('#curUserSelect').combobox('setValue', data[0].id);
+                }
+            }
+        });
+
+        $('#btnConfirmLogin').on('click', function () {
+            confirmCurUser();
+        });
+    }
+
+    function openUserLoginPanel() {
+        $('#loginPanel').show();
+        if (loginLoaded) {
+            $('#curUserSelect').combobox('reload');
+        }
+    }
+
+    function confirmCurUser() {
+        var userId = Number($('#curUserSelect').combobox('getValue') || 0);
+        if (!userId) {
+            $.messager.alert('提示', '请先选择一个用户');
+            return;
+        }
+        $.ajax({
+            url: '/user/setCurUser',
+            type: 'post',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({id: userId}),
+            success: function (res) {
+                if (res && res.code === 0) {
+                    if (parent && parent.frames && parent.frames['topbar'] && typeof parent.frames['topbar'].refreshCurrentUserInfo === 'function') {
+                        parent.frames['topbar'].refreshCurrentUserInfo();
+                    }
+                }
+                showBottomRightMessage(res);
+            },
+            error: function () {
+                showBottomRightMessage({code: 1, msg: '设置当前用户失败，请稍后重试'});
+            }
+        });
+    }
+
+    function showBottomRightMessage(res) {
+        var text = (res && res.msg) ? res.msg : '操作失败';
+        if (res && res.code === 0) {
+            $.messager.show({
+                title: '消息',
+                msg: text,
+                showType: 'slide',
+                timeout: 2600,
+                style: {right: '', bottom: ''}
+            });
+            return;
+        }
+        $.messager.alert('提示', text);
+    }
+
+    function getUrlParameters() {
+        var result = {};
+        var search = window.location.search.substring(1);
+        if (!search) {
+            return result;
+        }
+        var pairs = search.split('&');
+        for (var i = 0; i < pairs.length; i++) {
+            var item = pairs[i].split('=');
+            var key = decodeURIComponent(item[0] || '');
+            var value = decodeURIComponent(item[1] || '');
+            result[key] = value;
+        }
+        return result;
+    }
+
+    window.openUserLoginPanel = openUserLoginPanel;
+</script>
+</body>
 </html>
