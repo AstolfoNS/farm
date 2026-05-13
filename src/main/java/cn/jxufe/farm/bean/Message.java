@@ -1,4 +1,4 @@
-package cn.jxufe.farm.model.bean;
+package cn.jxufe.farm.bean;
 
 import lombok.Getter;
 import lombok.Setter;

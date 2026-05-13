@@ -140,6 +140,7 @@ CREATE TABLE farm.seed_types
 
     name                        VARCHAR(500)    NOT NULL,
     code                        VARCHAR(64)     NOT NULL,
+    image                       VARCHAR(1024)   NOT NULL,
     seed_quality_id             BIGINT          NOT NULL,
     enable_soil_type_bits       BIGINT          NOT NULL,
     level                       SMALLINT        NOT NULL,
@@ -274,7 +275,6 @@ CREATE TABLE farm.user_crops
     plot_id                     BIGINT          NOT NULL,
     seed_type_id                BIGINT          NOT NULL,
 
-    -- 【优化】剥离了宽高等静态坐标，只留动态数据
     planted_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_harvest_at             TIMESTAMPTZ         NULL,
     harvest_count               SMALLINT        NOT NULL DEFAULT 0,

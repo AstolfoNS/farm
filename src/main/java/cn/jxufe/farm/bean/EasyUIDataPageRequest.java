@@ -1,4 +1,4 @@
-package cn.jxufe.farm.model.bean;
+package cn.jxufe.farm.bean;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
