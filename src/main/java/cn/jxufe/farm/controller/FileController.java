@@ -2,7 +2,7 @@ package cn.jxufe.farm.controller;
 
 import cn.jxufe.farm.model.bean.FileUploadResult;
 import cn.jxufe.farm.model.bean.Message;
-import cn.jxufe.farm.service.FileService;
+import cn.jxufe.farm.oss.FileService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

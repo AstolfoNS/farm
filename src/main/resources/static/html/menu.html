@@ -12,6 +12,59 @@
             overflow: hidden;
         }
 
+        .top-user {
+            position: absolute;
+            left: 8px;
+            top: 3px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px 0 0;
+            background: rgba(25, 140, 175, 0.62);
+            border-radius: 4px;
+        }
+
+        .top-user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #103f63;
+            object-fit: cover;
+            background: #fff;
+        }
+
+        .top-user-info {
+            margin-left: 8px;
+            line-height: 1.1;
+            color: #ffd600;
+            text-shadow: 1px 1px 1px #6f4f00;
+        }
+
+        .top-user-name {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-top: -1px;
+        }
+
+        .top-user-stats {
+            margin-top: 2px;
+            font-size: 14px;
+            color: #b8f5ff;
+        }
+
+        .stats-number {
+            color: #fff;
+        }
+
+        .stats-coin {
+            color: #ffd24a;
+        }
+
+        .stats-score {
+            color: #ff88c8;
+        }
+
         .nav-container {
             position: absolute;
             right: 10px;
@@ -43,12 +96,43 @@
     </style>
 </head>
 <body>
+<div class="top-user">
+    <img id="curUserHead" class="top-user-avatar" src="/images/unknownUser.png" alt="头像">
+    <div class="top-user-info">
+        <div id="curUserName" class="top-user-name">未知用户</div>
+        <div class="top-user-stats">
+            经验：<span id="curUserExp" class="stats-number">0</span>
+            金币：<span id="curUserCoin" class="stats-coin">0</span>
+            积分：<span id="curUserScore" class="stats-score">0</span>
+        </div>
+    </div>
+</div>
+
 <div class="nav-container">
+    <img id="loginUserIcon" src="/images/userSelect.png" class="nav-icon" title="用户登录">
     <img id="userManagerIcon" src="/images/userManager.png" class="nav-icon" title="玩家管理">
     <img id="seedShopIcon" src="/images/seedManager.png" class="nav-icon" title="种子管理">
 </div>
+
 <script>
     $(function () {
+        function renderTopUser(user) {
+            var data = user || {};
+            $('#curUserHead').attr('src', data.head || '/images/unknownUser.png');
+            $('#curUserName').text(data.nickname || '未知用户');
+            $('#curUserExp').text(Number(data.experience || 0));
+            $('#curUserCoin').text(Number(data.coin || 0));
+            $('#curUserScore').text(Number(data.score || 0));
+        }
+
+        function refreshCurrentUserInfo() {
+            $.getJSON('/user/getCurUser', function (res) {
+                if (res && res.code === 0 && res.data) {
+                    renderTopUser(res.data);
+                }
+            });
+        }
+
         function setActiveByWorkspace() {
             var href = '';
             try {
@@ -65,6 +149,19 @@
             }
         }
 
+        function openUserLoginPanel() {
+            var workspace = parent.frames['workspace'];
+            if (workspace && typeof workspace.openUserLoginPanel === 'function') {
+                workspace.openUserLoginPanel();
+                return;
+            }
+            parent.frames['workspace'].location.href = 'welcome.html?showLogin=1';
+        }
+
+        $('#loginUserIcon').on('click', function () {
+            openUserLoginPanel();
+        });
+
         $('#userManagerIcon').on('click', function () {
             parent.frames['workspace'].location.href = 'user_list.html';
             setActiveByWorkspace();
@@ -75,8 +172,11 @@
             setActiveByWorkspace();
         });
 
+        window.refreshCurrentUserInfo = refreshCurrentUserInfo;
+        refreshCurrentUserInfo();
         setActiveByWorkspace();
         setInterval(setActiveByWorkspace, 800);
+        setInterval(refreshCurrentUserInfo, 5000);
     });
 </script>
 </body>

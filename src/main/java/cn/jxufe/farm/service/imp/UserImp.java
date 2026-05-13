@@ -1,14 +1,15 @@
-package cn.jxufe.farm.imp;
+package cn.jxufe.farm.service.imp;
 
-import cn.jxufe.farm.config.LocalFileStorageProperties;
+import cn.jxufe.farm.config.properties.LocalFileStorageProperties;
 import cn.jxufe.farm.model.bean.EasyUIData;
 import cn.jxufe.farm.model.bean.EasyUIDataPageRequest;
 import cn.jxufe.farm.model.bean.Message;
 import cn.jxufe.farm.model.dao.UserDao;
 import cn.jxufe.farm.model.entity.User;
-import cn.jxufe.farm.service.FileService;
+import cn.jxufe.farm.oss.FileService;
 import cn.jxufe.farm.service.UserService;
-import cn.jxufe.farm.util.FilePathUtils;
+import cn.jxufe.farm.common.util.FilePathUtils;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import java.util.Optional;
 
 @Service
 public class UserImp implements UserService {
+    private static final String CUR_USER_SESSION_KEY = "curUser";
 
     private final UserDao userDao;
     private final FileService fileService;
@@ -212,6 +214,63 @@ public class UserImp implements UserService {
         return message;
     }
 
+    @Override
+    public List<Map<String, Object>> loginUserOptions() {
+        List<User> users = userDao.findByIsDeletedFalseOrderByIdAsc();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (User user : users) {
+            result.add(buildLoginOption(user));
+        }
+        return result;
+    }
+
+    @Override
+    public Message setCurUser(HttpSession session, User user) {
+        Message message = new Message();
+        if (user == null || user.getId() == null || user.getId() <= 0) {
+            message.setCode(1);
+            message.setMsg("请选择有效用户");
+            return message;
+        }
+        Optional<User> optional = userDao.findByIdAndIsDeletedFalse(user.getId());
+        if (optional.isEmpty()) {
+            message.setCode(1);
+            message.setMsg("用户不存在");
+            return message;
+        }
+        User curUser = optional.get();
+        session.setAttribute(CUR_USER_SESSION_KEY, curUser);
+        message.setCode(0);
+        message.setMsg("当前用户已经设定为：" + safeString(curUser.getNickname()) + "[" + safeString(curUser.getUsername()) + "]");
+        message.setData(buildCurUserData(curUser));
+        return message;
+    }
+
+    @Override
+    public Message getCurUser(HttpSession session) {
+        Message message = new Message();
+        Object sessionUser = session.getAttribute(CUR_USER_SESSION_KEY);
+        if (!(sessionUser instanceof User)) {
+            message.setCode(0);
+            message.setMsg("未登录用户");
+            message.setData(buildGuestData());
+            return message;
+        }
+        User user = (User) sessionUser;
+        Optional<User> optional = userDao.findByIdAndIsDeletedFalse(user.getId());
+        if (optional.isEmpty()) {
+            session.removeAttribute(CUR_USER_SESSION_KEY);
+            message.setCode(0);
+            message.setMsg("未登录用户");
+            message.setData(buildGuestData());
+            return message;
+        }
+        message.setCode(0);
+        message.setMsg("获取成功");
+        message.setData(buildCurUserData(optional.get()));
+        return message;
+    }
+
     private String safeSortField(String sort) {
         String value = safeString(sort).trim();
         if ("id".equalsIgnoreCase(value)) {
@@ -246,6 +305,42 @@ public class UserImp implements UserService {
         row.put("avatarPath", safeString(user.getAvatarUrl()));
         row.put("head", resolveAvatarAccessUrl(user.getAvatarUrl()));
         return row;
+    }
+
+    private Map<String, Object> buildLoginOption(User user) {
+        Map<String, Object> option = new HashMap<>();
+        option.put("id", user.getId());
+        option.put("username", safeString(user.getUsername()));
+        option.put("nickname", safeString(user.getNickname()));
+        option.put("experience", user.getExperience() == null ? 0L : user.getExperience());
+        option.put("score", user.getScore() == null ? 0L : user.getScore());
+        option.put("coin", user.getCoin() == null ? 0L : user.getCoin());
+        option.put("head", resolveAvatarAccessUrl(user.getAvatarUrl()));
+        return option;
+    }
+
+    private Map<String, Object> buildCurUserData(User user) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", user.getId());
+        data.put("username", safeString(user.getUsername()));
+        data.put("nickname", safeString(user.getNickname()));
+        data.put("experience", user.getExperience() == null ? 0L : user.getExperience());
+        data.put("score", user.getScore() == null ? 0L : user.getScore());
+        data.put("coin", user.getCoin() == null ? 0L : user.getCoin());
+        data.put("head", resolveAvatarAccessUrl(user.getAvatarUrl()));
+        return data;
+    }
+
+    private Map<String, Object> buildGuestData() {
+        Map<String, Object> guest = new HashMap<>();
+        guest.put("id", 0);
+        guest.put("username", "");
+        guest.put("nickname", "未知用户");
+        guest.put("experience", 0L);
+        guest.put("score", 0L);
+        guest.put("coin", 0L);
+        guest.put("head", "/images/unknownUser.png");
+        return guest;
     }
 
     private String resolveAvatarAccessUrl(String avatarPath) {

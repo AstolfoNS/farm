@@ -1,4 +1,4 @@
-package cn.jxufe.farm.service;
+package cn.jxufe.farm.oss;
 
 import cn.jxufe.farm.model.bean.FileUploadResult;
 import org.springframework.web.multipart.MultipartFile;

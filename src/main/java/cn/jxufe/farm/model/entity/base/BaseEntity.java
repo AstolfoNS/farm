@@ -1,4 +1,4 @@
-package cn.jxufe.farm.model.entity;
+package cn.jxufe.farm.model.entity.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;

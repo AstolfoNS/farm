@@ -1,4 +1,4 @@
-package cn.jxufe.farm.imp;
+package cn.jxufe.farm.service.imp;
 
 import cn.jxufe.farm.model.bean.EasyUIData;
 import cn.jxufe.farm.model.bean.EasyUIDataPageRequest;

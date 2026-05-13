@@ -1,9 +1,9 @@
-package cn.jxufe.farm.imp;
+package cn.jxufe.farm.oss.imp;
 
-import cn.jxufe.farm.config.LocalFileStorageProperties;
+import cn.jxufe.farm.config.properties.LocalFileStorageProperties;
 import cn.jxufe.farm.model.bean.FileUploadResult;
-import cn.jxufe.farm.service.FileService;
-import cn.jxufe.farm.util.FilePathUtils;
+import cn.jxufe.farm.oss.FileService;
+import cn.jxufe.farm.common.util.FilePathUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

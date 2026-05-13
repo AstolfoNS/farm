@@ -1,4 +1,4 @@
-package cn.jxufe.farm.util;
+package cn.jxufe.farm.common.util;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

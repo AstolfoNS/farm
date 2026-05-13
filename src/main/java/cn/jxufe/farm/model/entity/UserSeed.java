@@ -1,5 +1,6 @@
 package cn.jxufe.farm.model.entity;
 
+import cn.jxufe.farm.model.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
