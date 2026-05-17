@@ -1,0 +1,66 @@
+package cn.jxufe.farm.common.constants;
+
+public enum BizErrorCode {
+
+    SERVICE_ERROR("SERVICE_ERROR", "服务执行失败"),
+    SYSTEM_ERROR("SYSTEM_ERROR", "系统异常"),
+    PARAM_INVALID("PARAM_INVALID", "请求参数不合法"),
+
+    USER_NOT_FOUND("USER_NOT_FOUND", "用户不存在"),
+    DUPLICATE_USERNAME("DUPLICATE_USERNAME", "用户名已存在"),
+    USERNAME_REQUIRED("USERNAME_REQUIRED", "用户名不能为空"),
+
+    PLOT_NOT_FOUND("PLOT_NOT_FOUND", "地块不存在"),
+    PLOT_LOCKED("PLOT_LOCKED", "地块已锁定"),
+    PLOT_ALREADY_UNLOCKED("PLOT_ALREADY_UNLOCKED", "地块已解锁"),
+    PLOT_UNLOCK_ORDER_INVALID("PLOT_UNLOCK_ORDER_INVALID", "必须按顺序解锁地块"),
+    PLOT_BIZ_TYPE_UNSUPPORTED("PLOT_BIZ_TYPE_UNSUPPORTED", "不支持的地块经营类型"),
+
+    SEED_TYPE_NOT_FOUND("SEED_TYPE_NOT_FOUND", "种子类型不存在"),
+    SEED_QUALITY_NOT_FOUND("SEED_QUALITY_NOT_FOUND", "种子品质不存在"),
+    SEED_STAGE_NOT_FOUND("SEED_STAGE_NOT_FOUND", "种子阶段配置不存在"),
+    SEED_INVENTORY_NOT_FOUND("SEED_INVENTORY_NOT_FOUND", "种子库存不存在"),
+    SEED_NOT_ENOUGH("SEED_NOT_ENOUGH", "种子库存不足"),
+    SEED_NAME_REQUIRED("SEED_NAME_REQUIRED", "种子名称不能为空"),
+    SEED_GROWTH_STAGE_NOT_CONFIGURED("SEED_GROWTH_STAGE_NOT_CONFIGURED", "种子生长阶段未配置"),
+    SOIL_TYPE_REQUIRED("SOIL_TYPE_REQUIRED", "至少需要选择一种土壤类型"),
+
+    SOIL_TYPE_NOT_FOUND("SOIL_TYPE_NOT_FOUND", "土壤类型不存在"),
+    SOIL_NOT_COMPATIBLE("SOIL_NOT_COMPATIBLE", "种子与土壤不兼容"),
+
+    GROWTH_STAGE_NOT_FOUND("GROWTH_STAGE_NOT_FOUND", "生长阶段不存在"),
+
+    CROP_NOT_FOUND("CROP_NOT_FOUND", "作物不存在"),
+    CROP_WITHERED("CROP_WITHERED", "作物已枯萎"),
+    CROP_NOT_RIPE("CROP_NOT_RIPE", "作物未成熟"),
+    PLOT_ALREADY_HAS_CROP("PLOT_ALREADY_HAS_CROP", "地块已有作物"),
+
+    COIN_NOT_ENOUGH("COIN_NOT_ENOUGH", "金币不足"),
+    AMOUNT_INVALID("AMOUNT_INVALID", "数量必须大于0"),
+    AMOUNT_OVERFLOW("AMOUNT_OVERFLOW", "数量计算溢出"),
+    FRUIT_INVENTORY_NOT_FOUND("FRUIT_INVENTORY_NOT_FOUND", "果实库存不存在"),
+    FRUIT_NOT_ENOUGH("FRUIT_NOT_ENOUGH", "果实库存不足"),
+    TRADE_TYPE_UNSUPPORTED("TRADE_TYPE_UNSUPPORTED", "不支持的交易类型"),
+
+    CROP_ACTION_TYPE_UNSUPPORTED("CROP_ACTION_TYPE_UNSUPPORTED", "不支持的作物操作类型"),
+
+    REQUEST_ID_REQUIRED("REQUEST_ID_REQUIRED", "请求ID不能为空"),
+    REQUEST_IN_PROGRESS("REQUEST_IN_PROGRESS", "请求正在处理中"),
+    IDEMPOTENT_RESPONSE_INVALID("IDEMPOTENT_RESPONSE_INVALID", "幂等返回数据异常");
+
+    private final String code;
+    private final String defaultMessage;
+
+    BizErrorCode(String code, String defaultMessage) {
+        this.code = code;
+        this.defaultMessage = defaultMessage;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getDefaultMessage() {
+        return defaultMessage;
+    }
+}

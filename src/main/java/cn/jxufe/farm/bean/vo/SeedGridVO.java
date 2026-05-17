@@ -1,0 +1,28 @@
+package cn.jxufe.farm.bean.vo;
+
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+public class SeedGridVO implements Serializable {
+
+    private Long id;
+    private String name;
+    private String coverImageUrl;
+    private Long seedQualityId;
+    private String seedQualityName;
+    private Long enableSoilTypeBits;
+    private String enableSoilTypeNames;
+    private Short level;
+    private String description;
+    private Short maxBugLimit;
+    private Short maxHarvestCount;
+    private Short regrowStageIndex;
+    private Long price;
+    private Long harvestExperience;
+    private Integer harvestFruitNumber;
+    private Long fruitPrice;
+    private Long harvestScore;
+    private Integer totalGrowSeconds;
+}

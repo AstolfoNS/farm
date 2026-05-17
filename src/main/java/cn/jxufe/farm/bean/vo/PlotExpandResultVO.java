@@ -1,0 +1,21 @@
+package cn.jxufe.farm.bean.vo;
+
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+public class PlotExpandResultVO implements Serializable {
+
+    private Long userId;
+    private Long plotId;
+    private Short plotIndex;
+    private Long soilTypeId;
+    private String soilName;
+    private Long expandCostCoin;
+    private Long beforeCoin;
+    private Long afterCoin;
+    private Integer totalPlots;
+    private Integer unlockedPlots;
+    private Integer lockedPlots;
+}
