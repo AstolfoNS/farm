@@ -1,13 +1,13 @@
 package cn.jxufe.farm.common.utils;
 
-import cn.jxufe.farm.common.constants.BizErrorCode;
+import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.exception.ServiceException;
 
 import java.util.Optional;
 
-public final class ServiceGuard {
+public final class ServiceGuardUtils {
 
-    private ServiceGuard() {
+    private ServiceGuardUtils() {
     }
 
     public static void requireNotNull(Object value, String message) {

@@ -30,6 +30,6 @@ public class UserPlot extends BaseEntity {
     @Column(name = "unlocked_at")
     private OffsetDateTime unlockedAt;
 
-    @Column(name = "lock_reason", length = 255)
+    @Column(name = "lock_reason")
     private String lockReason;
 }

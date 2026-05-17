@@ -1,45 +1,16 @@
 package cn.jxufe.farm.service.imp;
 
-import cn.jxufe.farm.bean.dto.CareCropDTO;
-import cn.jxufe.farm.bean.dto.HarvestCropDTO;
-import cn.jxufe.farm.bean.dto.MyFarmOverviewDTO;
-import cn.jxufe.farm.bean.dto.MyPlantingPanelDTO;
-import cn.jxufe.farm.bean.dto.PlantCropDTO;
-import cn.jxufe.farm.bean.dto.SeedPlantablePlotsDTO;
-import cn.jxufe.farm.bean.vo.CareResultVO;
-import cn.jxufe.farm.bean.vo.CropOverviewVO;
-import cn.jxufe.farm.bean.vo.HarvestResultVO;
-import cn.jxufe.farm.bean.vo.MyFarmOverviewVO;
-import cn.jxufe.farm.bean.vo.MyPlantingPanelVO;
-import cn.jxufe.farm.bean.vo.PlantResultVO;
-import cn.jxufe.farm.bean.vo.PlantablePlotVO;
-import cn.jxufe.farm.bean.vo.PlotOverviewVO;
-import cn.jxufe.farm.bean.vo.SeedBackpackItemVO;
-import cn.jxufe.farm.bean.vo.SeedPlantablePlotsVO;
-import cn.jxufe.farm.common.constants.BizErrorCode;
+import cn.jxufe.farm.bean.dto.*;
+import cn.jxufe.farm.bean.vo.*;
+import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.exception.ServiceException;
-import cn.jxufe.farm.common.utils.ServiceGuard;
+import cn.jxufe.farm.common.utils.ServiceGuardUtils;
 import cn.jxufe.farm.config.properties.GameplayPolicyProperties;
-import cn.jxufe.farm.dao.SeedGrowthStageDao;
-import cn.jxufe.farm.dao.SeedTypeDao;
-import cn.jxufe.farm.dao.SoilTypeDao;
-import cn.jxufe.farm.dao.UserCropActionLogDao;
-import cn.jxufe.farm.dao.UserCropDao;
-import cn.jxufe.farm.dao.UserDao;
-import cn.jxufe.farm.dao.UserFruitDao;
-import cn.jxufe.farm.dao.UserInventoryFlowDao;
-import cn.jxufe.farm.dao.UserPlotDao;
-import cn.jxufe.farm.dao.UserSeedDao;
-import cn.jxufe.farm.entity.SeedGrowthStage;
-import cn.jxufe.farm.entity.SeedType;
-import cn.jxufe.farm.entity.SoilType;
-import cn.jxufe.farm.entity.User;
-import cn.jxufe.farm.entity.UserCrop;
-import cn.jxufe.farm.entity.UserFruit;
-import cn.jxufe.farm.entity.UserPlot;
-import cn.jxufe.farm.entity.UserSeed;
+import cn.jxufe.farm.dao.*;
+import cn.jxufe.farm.entity.*;
 import cn.jxufe.farm.service.CropLifecycleService;
 import cn.jxufe.farm.service.GameplayCoreService;
+import cn.jxufe.farm.service.PlotGameplayService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -48,42 +19,61 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class CropLifecycleServiceImp implements CropLifecycleService {
 
     private static final short GROW_STATUS_GROWING = 1;
+
     private static final short GROW_STATUS_RIPE = 2;
+
     private static final short GROW_STATUS_WITHERED = 3;
 
     private final UserDao userDao;
+
     private final UserPlotDao userPlotDao;
+
     private final UserCropDao userCropDao;
+
     private final UserSeedDao userSeedDao;
+
     private final UserFruitDao userFruitDao;
+
     private final SeedTypeDao seedTypeDao;
+
     private final SoilTypeDao soilTypeDao;
+
     private final SeedGrowthStageDao seedGrowthStageDao;
+
     private final UserInventoryFlowDao userInventoryFlowDao;
+
     private final UserCropActionLogDao userCropActionLogDao;
+
     private final GameplayCoreService gameplayCoreService;
+
+    private final PlotGameplayService plotGameplayService;
+
     private final GameplayPolicyProperties gameplayPolicyProperties;
 
-    public CropLifecycleServiceImp(UserDao userDao,
-                                   UserPlotDao userPlotDao,
-                                   UserCropDao userCropDao,
-                                   UserSeedDao userSeedDao,
-                                   UserFruitDao userFruitDao,
-                                   SeedTypeDao seedTypeDao,
-                                   SoilTypeDao soilTypeDao,
-                                   SeedGrowthStageDao seedGrowthStageDao,
-                                   UserInventoryFlowDao userInventoryFlowDao,
-                                   UserCropActionLogDao userCropActionLogDao,
-                                   GameplayCoreService gameplayCoreService,
-                                   GameplayPolicyProperties gameplayPolicyProperties) {
+    public CropLifecycleServiceImp(
+            UserDao userDao,
+            UserPlotDao userPlotDao,
+            UserCropDao userCropDao,
+            UserSeedDao userSeedDao,
+            UserFruitDao userFruitDao,
+            SeedTypeDao seedTypeDao,
+            SoilTypeDao soilTypeDao,
+            SeedGrowthStageDao seedGrowthStageDao,
+            UserInventoryFlowDao userInventoryFlowDao,
+            UserCropActionLogDao userCropActionLogDao,
+            GameplayCoreService gameplayCoreService,
+            PlotGameplayService plotGameplayService,
+            GameplayPolicyProperties gameplayPolicyProperties
+    ) {
         this.userDao = userDao;
         this.userPlotDao = userPlotDao;
         this.userCropDao = userCropDao;
@@ -95,50 +85,89 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
         this.userInventoryFlowDao = userInventoryFlowDao;
         this.userCropActionLogDao = userCropActionLogDao;
         this.gameplayCoreService = gameplayCoreService;
+        this.plotGameplayService = plotGameplayService;
         this.gameplayPolicyProperties = gameplayPolicyProperties;
     }
+
+    /* =========================================================
+     *  Context Helpers (消除重复的核心)
+     * ========================================================= */
+
+    private void requireNotNull(Object params) {
+        ServiceGuardUtils.requireNotNull(params, BizErrorCode.PARAM_INVALID, "请求参数不能为空");
+    }
+
+    /**
+     * 地块操作上下文：统一处理单地块操作的参数校验、用户校验、地块校验与作物提取
+     */
+    private class CropActionContext {
+        final Long userId;
+        final Long plotId;
+        final UserPlot plot;
+        final UserCrop crop;
+
+        CropActionContext(Long rawUserId, Long rawPlotId, boolean requireCropExists) {
+            this.userId = ServiceGuardUtils.requirePositive(rawUserId, BizErrorCode.PARAM_INVALID, "用户ID无效");
+            this.plotId = ServiceGuardUtils.requirePositive(rawPlotId, BizErrorCode.PARAM_INVALID, "地块ID无效");
+            validateUser(this.userId);
+            this.plot = getAndValidateUnlockedPlot(this.userId, this.plotId);
+
+            if (requireCropExists) {
+                this.crop = getAndValidateCrop(this.userId, this.plotId);
+            } else {
+                if (userCropDao.findByUserIdAndPlotIdAndIsDeletedFalse(this.userId, this.plotId).isPresent()) {
+                    throw new ServiceException(BizErrorCode.PLOT_ALREADY_HAS_CROP, "地块已有作物");
+                }
+                this.crop = null;
+            }
+        }
+    }
+
+    /**
+     * 农场视图上下文：统一处理列表展示类接口的数据预加载（用户校验、批量查询与映射）
+     */
+    private class FarmViewContext {
+        final Long userId;
+        final OffsetDateTime now;
+        final List<UserPlot> plots;
+        final Map<Long, UserCrop> cropByPlotId;
+
+        FarmViewContext(Long rawUserId) {
+            this.userId = ServiceGuardUtils.requirePositive(rawUserId, BizErrorCode.PARAM_INVALID, "用户ID无效");
+            validateUser(this.userId);
+            this.now = OffsetDateTime.now();
+            this.plots = userPlotDao.findByUserIdAndIsDeletedFalseOrderByPlotIndexAsc(this.userId);
+            this.cropByPlotId = userCropDao.findByUserIdAndIsDeletedFalseOrderByIdAsc(this.userId)
+                    .stream().collect(Collectors.toMap(UserCrop::getPlotId, Function.identity()));
+        }
+    }
+
+    /* =========================================================
+     *  Public Methods
+     * ========================================================= */
 
     @Override
     @Transactional
     public PlantResultVO plant(PlantCropDTO params) {
-        ServiceGuard.requireNotNull(params, BizErrorCode.PARAM_INVALID, "请求参数不能为空");
-        Long userId = ServiceGuard.requirePositive(params.getUserId(), BizErrorCode.PARAM_INVALID, "用户ID无效");
-        Long plotId = ServiceGuard.requirePositive(params.getPlotId(), BizErrorCode.PARAM_INVALID, "地块ID无效");
-        Long seedTypeId = ServiceGuard.requirePositive(params.getSeedTypeId(), BizErrorCode.PARAM_INVALID, "参数 seedTypeId 无效");
+        requireNotNull(params);
+        Long seedTypeId = ServiceGuardUtils.requirePositive(params.getSeedTypeId(), BizErrorCode.PARAM_INVALID, "参数 seedTypeId 无效");
+        CropActionContext ctx = new CropActionContext(params.getUserId(), params.getPlotId(), false);
 
-        ServiceGuard.requirePresent(userDao.findByIdAndIsDeletedFalse(userId), BizErrorCode.USER_NOT_FOUND, "用户不存在");
-        UserPlot plot = ServiceGuard.requirePresent(
-                userPlotDao.findByIdAndUserIdAndIsDeletedFalse(plotId, userId),
-                BizErrorCode.PLOT_NOT_FOUND, "地块不存在"
+        SeedType seedType = ServiceGuardUtils.requirePresent(
+                seedTypeDao.findByIdAndIsDeletedFalse(seedTypeId), BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在"
         );
-        if (Boolean.TRUE.equals(plot.getIsLocked())) {
-            throw new ServiceException(BizErrorCode.PLOT_LOCKED, "地块已锁定");
-        }
+        SoilType soilType = ServiceGuardUtils.requirePresent(
+                soilTypeDao.findByIdAndIsDeletedFalse(ctx.plot.getSoilTypeId()), BizErrorCode.SOIL_TYPE_NOT_FOUND, "土壤类型不存在"
+        );
 
-        SeedType seedType = ServiceGuard.requirePresent(
-                seedTypeDao.findByIdAndIsDeletedFalse(seedTypeId),
-                BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在"
-        );
-        SoilType soilType = ServiceGuard.requirePresent(
-                soilTypeDao.findByIdAndIsDeletedFalse(plot.getSoilTypeId()),
-                BizErrorCode.SOIL_TYPE_NOT_FOUND, "土壤类型不存在"
-        );
-        if (!isSoilCompatible(seedType, soilType)) {
+        if (isSoilIncompatible(seedType, soilType)) {
             throw new ServiceException(BizErrorCode.SOIL_NOT_COMPATIBLE, "种子与土壤不兼容");
         }
 
-        if (userCropDao.findByUserIdAndPlotIdAndIsDeletedFalse(userId, plotId).isPresent()) {
-            throw new ServiceException(BizErrorCode.PLOT_ALREADY_HAS_CROP, "地块已有作物");
-        }
-
-        UserSeed userSeed = ServiceGuard.requirePresent(
-                userSeedDao.findByUserIdAndSeedTypeIdAndIsDeletedFalse(userId, seedTypeId),
-                BizErrorCode.SEED_INVENTORY_NOT_FOUND, "种子库存不存在"
-        );
+        UserSeed userSeed = getAndValidateUserSeed(ctx.userId, seedTypeId);
         long beforeSeedAmount = safeLong(userSeed.getQuantity());
         long beforeFrozenSeedAmount = safeLong(userSeed.getFrozenQuantity());
-        long availableSeed = beforeSeedAmount - beforeFrozenSeedAmount;
-        if (availableSeed <= 0) {
+        if (beforeSeedAmount - beforeFrozenSeedAmount <= 0) {
             throw new ServiceException(BizErrorCode.SEED_NOT_ENOUGH, "种子库存不足");
         }
 
@@ -149,70 +178,46 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
 
         OffsetDateTime now = OffsetDateTime.now();
         Short firstStageIndex = resolveFirstStageIndex(stages);
-        int growSeconds = calculateDurationSeconds(stages, null, normalizeMultiplier(soilType.getGrowSpeedMultiplier()));
-        int witherWindowSeconds = Math.max(3600, Math.max(growSeconds, 0));
+        int safeGrowSeconds = Math.max(calculateDurationSeconds(stages, null, normalizeMultiplier(soilType.getGrowSpeedMultiplier())), 0);
+        int witherWindowSeconds = Math.max(3600, safeGrowSeconds);
 
-        int seedUpdated = userSeedDao.decreaseAvailableQuantityIfEnough(userSeed.getId(), 1L, userId, now);
-        if (seedUpdated <= 0) {
+        if (userSeedDao.decreaseAvailableQuantityIfEnough(userSeed.getId(), 1L, ctx.userId, now) <= 0) {
             throw new ServiceException(BizErrorCode.SEED_NOT_ENOUGH, "种子库存不足");
         }
-        UserSeed latestUserSeed = ServiceGuard.requirePresent(
-                userSeedDao.findByUserIdAndSeedTypeIdAndIsDeletedFalse(userId, seedTypeId),
-                BizErrorCode.SEED_INVENTORY_NOT_FOUND,
-                "种子库存不存在"
-        );
-        long afterSeedAmount = safeLong(latestUserSeed.getQuantity());
+
+        long afterSeedAmount = safeLong(getAndValidateUserSeed(ctx.userId, seedTypeId).getQuantity());
 
         UserCrop crop = new UserCrop();
-        gameplayCoreService.initNewEntity(crop, userId, now);
-        crop.setUserId(userId);
-        crop.setPlotId(plotId);
+        gameplayCoreService.initNewEntity(crop, ctx.userId, now);
+        crop.setUserId(ctx.userId);
+        crop.setPlotId(ctx.plotId);
         crop.setSeedTypeId(seedTypeId);
         crop.setPlantedAt(now);
         crop.setStageStartedAt(now);
         crop.setCurrentStageIndex(firstStageIndex);
         crop.setHarvestCount((short) 0);
         crop.setBugCount((short) 0);
-        crop.setLastBugAt(null);
-        crop.setLastCareAt(null);
-        crop.setLastHarvestAt(null);
-        crop.setMaturedAt(growSeconds <= 0 ? now : null);
-        crop.setWitheredAt(null);
-        crop.setGrowStatus(growSeconds <= 0 ? GROW_STATUS_RIPE : GROW_STATUS_GROWING);
-        crop.setExpectedRipeAt(now.plusSeconds(Math.max(growSeconds, 0)));
+        crop.setGrowStatus(safeGrowSeconds == 0 ? GROW_STATUS_RIPE : GROW_STATUS_GROWING);
+        crop.setMaturedAt(safeGrowSeconds == 0 ? now : null);
+        crop.setExpectedRipeAt(now.plusSeconds(safeGrowSeconds));
         crop.setExpectedWitheredAt(crop.getExpectedRipeAt().plusSeconds(witherWindowSeconds));
         UserCrop savedCrop = userCropDao.save(crop);
 
         String bizId = "PLANT:" + savedCrop.getId() + ":" + now.toEpochSecond();
         userInventoryFlowDao.save(gameplayCoreService.buildInventoryFlow(
-                userId,
-                "SEED",
-                seedTypeId,
-                "EXPENSE",
-                1L,
-                beforeSeedAmount,
-                afterSeedAmount,
-                beforeFrozenSeedAmount,
-                beforeFrozenSeedAmount,
-                "PLANT",
-                bizId,
-                now,
-                "{\"plotId\":" + plotId + ",\"cropId\":" + savedCrop.getId() + "}"
+                ctx.userId, "SEED", seedTypeId, "EXPENSE", 1L,
+                beforeSeedAmount, afterSeedAmount, beforeFrozenSeedAmount, beforeFrozenSeedAmount,
+                "PLANT", bizId, now, "{\"plotId\":" + ctx.plotId + ",\"cropId\":" + savedCrop.getId() + "}"
         ));
+
         userCropActionLogDao.save(gameplayCoreService.buildCropActionLog(
-                userId,
-                plotId,
-                savedCrop.getId(),
-                seedTypeId,
-                "PLANT",
-                "SUCCESS",
-                now,
+                ctx.userId, ctx.plotId, savedCrop.getId(), seedTypeId, "PLANT", "SUCCESS", now,
                 "{\"seedTypeId\":" + seedTypeId + ",\"remainSeed\":" + afterSeedAmount + "}"
         ));
 
         PlantResultVO result = new PlantResultVO();
-        result.setUserId(userId);
-        result.setPlotId(plotId);
+        result.setUserId(ctx.userId);
+        result.setPlotId(ctx.plotId);
         result.setCropId(savedCrop.getId());
         result.setSeedTypeId(seedTypeId);
         result.setRemainSeedQuantity(afterSeedAmount);
@@ -226,175 +231,124 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
     @Override
     @Transactional
     public HarvestResultVO harvest(HarvestCropDTO params) {
-        ServiceGuard.requireNotNull(params, BizErrorCode.PARAM_INVALID, "请求参数不能为空");
-        Long userId = ServiceGuard.requirePositive(params.getUserId(), BizErrorCode.PARAM_INVALID, "用户ID无效");
-        Long plotId = ServiceGuard.requirePositive(params.getPlotId(), BizErrorCode.PARAM_INVALID, "地块ID无效");
+        requireNotNull(params);
+        CropActionContext ctx = new CropActionContext(params.getUserId(), params.getPlotId(), true);
 
-        User user = ServiceGuard.requirePresent(
-                userDao.findByIdAndIsDeletedFalse(userId),
-                "用户不存在"
-        );
-        UserPlot plot = ServiceGuard.requirePresent(
-                userPlotDao.findByIdAndUserIdAndIsDeletedFalse(plotId, userId),
-                BizErrorCode.PLOT_NOT_FOUND, "地块不存在"
-        );
-        if (Boolean.TRUE.equals(plot.getIsLocked())) {
-            throw new ServiceException(BizErrorCode.PLOT_LOCKED, "地块已锁定");
+        if (ctx.crop == null) {
+            throw new ServiceException(BizErrorCode.CROP_NOT_FOUND, "作物不存在");
         }
 
-        UserCrop crop = ServiceGuard.requirePresent(
-                userCropDao.findByUserIdAndPlotIdAndIsDeletedFalse(userId, plotId),
-                BizErrorCode.CROP_NOT_FOUND, "地块上作物不存在"
-        );
-        SeedType seedType = ServiceGuard.requirePresent(
-                seedTypeDao.findByIdAndIsDeletedFalse(crop.getSeedTypeId()),
+        SeedType seedType = ServiceGuardUtils.requirePresent(
+                seedTypeDao.findByIdAndIsDeletedFalse(ctx.crop.getSeedTypeId()),
                 BizErrorCode.SEED_TYPE_NOT_FOUND, "作物对应种子类型不存在"
         );
 
         OffsetDateTime now = OffsetDateTime.now();
-        syncCropStatus(crop, now);
-        if (crop.getGrowStatus() == GROW_STATUS_WITHERED) {
-            gameplayCoreService.touchForUpdate(crop, userId, now);
-            userCropDao.save(crop);
-            userCropActionLogDao.save(gameplayCoreService.buildCropActionLog(
-                    userId, plotId, crop.getId(), crop.getSeedTypeId(),
-                    "HARVEST", "FAIL", now, "{\"reason\":\"WITHERED\"}"
-            ));
-            throw new ServiceException(BizErrorCode.CROP_WITHERED, "作物已枯萎");
+        syncCropStatus(ctx.crop, now);
+
+        if (ctx.crop.getGrowStatus() == GROW_STATUS_WITHERED) {
+            saveHarvestFailLog(ctx.userId, ctx.plotId, ctx.crop, now, "WITHERED", BizErrorCode.CROP_WITHERED, "作物已枯萎");
         }
-        if (crop.getGrowStatus() != GROW_STATUS_RIPE) {
-            gameplayCoreService.touchForUpdate(crop, userId, now);
-            userCropDao.save(crop);
-            userCropActionLogDao.save(gameplayCoreService.buildCropActionLog(
-                    userId, plotId, crop.getId(), crop.getSeedTypeId(),
-                    "HARVEST", "FAIL", now, "{\"reason\":\"NOT_RIPE\"}"
-            ));
-            throw new ServiceException(BizErrorCode.CROP_NOT_RIPE, "作物未成熟");
+        if (ctx.crop.getGrowStatus() != GROW_STATUS_RIPE) {
+            saveHarvestFailLog(ctx.userId, ctx.plotId, ctx.crop, now, "NOT_RIPE", BizErrorCode.CROP_NOT_RIPE, "作物未成熟");
         }
 
         long baseFruitGain = Math.max(0L, safeInteger(seedType.getHarvestFruitNumber()));
-        short bugCountBefore = safeShort(crop.getBugCount());
+        short bugCountBefore = safeShort(ctx.crop.getBugCount());
         long fruitGain = Math.max(0L, baseFruitGain - bugCountBefore);
         long expGain = Math.max(0L, safeLong(seedType.getHarvestExperience()));
         long scoreGain = Math.max(0L, safeLong(seedType.getHarvestScore()));
 
-        UserFruit userFruit = userFruitDao.findByUserIdAndSeedTypeIdAndIsDeletedFalse(userId, crop.getSeedTypeId())
-                .orElseGet(() -> gameplayCoreService.createUserFruit(userId, crop.getSeedTypeId(), now));
-        long beforeFruitAmount = safeLong(userFruit.getQuantity());
+        UserFruit userFruit = userFruitDao.findByUserIdAndSeedTypeIdAndIsDeletedFalse(ctx.userId, ctx.crop.getSeedTypeId())
+                .orElseGet(() -> gameplayCoreService.createUserFruit(ctx.userId, ctx.crop.getSeedTypeId(), now));
         long beforeFrozenFruitAmount = safeLong(userFruit.getFrozenQuantity());
-        int fruitUpdated = userFruitDao.increaseQuantity(userFruit.getId(), fruitGain, userId, now);
-        if (fruitUpdated <= 0) {
+
+        if (userFruitDao.increaseQuantity(userFruit.getId(), fruitGain, ctx.userId, now) <= 0) {
             throw new ServiceException(BizErrorCode.FRUIT_INVENTORY_NOT_FOUND, "果实库存不存在");
         }
-        UserFruit latestUserFruit = ServiceGuard.requirePresent(
-                userFruitDao.findByUserIdAndSeedTypeIdAndIsDeletedFalse(userId, crop.getSeedTypeId()),
-                BizErrorCode.FRUIT_INVENTORY_NOT_FOUND,
-                "果实库存不存在"
+
+        UserFruit latestUserFruit = ServiceGuardUtils.requirePresent(
+                userFruitDao.findByUserIdAndSeedTypeIdAndIsDeletedFalse(ctx.userId, ctx.crop.getSeedTypeId()),
+                BizErrorCode.FRUIT_INVENTORY_NOT_FOUND, "果实库存不存在"
         );
         long afterFruitAmount = safeLong(latestUserFruit.getQuantity());
-        long beforeFruitAmountAccurate = afterFruitAmount - fruitGain;
 
-        int profileUpdated = userDao.increaseExperienceAndScore(userId, expGain, scoreGain, userId, now);
-        if (profileUpdated <= 0) {
+        if (userDao.increaseExperienceAndScore(ctx.userId, expGain, scoreGain, ctx.userId, now) <= 0) {
             throw new ServiceException(BizErrorCode.USER_NOT_FOUND, "用户不存在");
         }
-        User latestUser = ServiceGuard.requirePresent(
-                userDao.findByIdAndIsDeletedFalse(userId),
-                BizErrorCode.USER_NOT_FOUND,
-                "用户不存在"
-        );
-        long afterExp = safeLong(latestUser.getExperience());
-        long afterScore = safeLong(latestUser.getScore());
-        long beforeExp = afterExp - expGain;
-        long beforeScore = afterScore - scoreGain;
+
+        User latestUser = validateUser(ctx.userId);
 
         short maxHarvestCount = safeShort(seedType.getMaxHarvestCount()) <= 0 ? 1 : safeShort(seedType.getMaxHarvestCount());
-        short nextHarvestCount = (short) (safeShort(crop.getHarvestCount()) + 1);
-        crop.setHarvestCount(nextHarvestCount);
-        crop.setLastHarvestAt(now);
+        short nextHarvestCount = (short) (safeShort(ctx.crop.getHarvestCount()) + 1);
+        ctx.crop.setHarvestCount(nextHarvestCount);
+        ctx.crop.setLastHarvestAt(now);
 
         boolean cropCleared = nextHarvestCount >= maxHarvestCount;
-        Short nextGrowStatus;
-        Short nextStageIndex;
-        OffsetDateTime nextExpectedRipeAt;
-        OffsetDateTime nextExpectedWitheredAt;
-        short bugCountAfter;
+        Short nextGrowStatus = null;
+        Short nextStageIndex = null;
+        OffsetDateTime nextExpectedRipeAt = null;
+        OffsetDateTime nextExpectedWitheredAt = null;
+
         if (cropCleared) {
-            crop.setIsDeleted(true);
-            gameplayCoreService.touchForUpdate(crop, userId, now);
-            userCropDao.save(crop);
-            nextGrowStatus = null;
-            nextStageIndex = null;
-            nextExpectedRipeAt = null;
-            nextExpectedWitheredAt = null;
-            bugCountAfter = 0;
+            ctx.crop.setIsDeleted(true);
         } else {
             List<SeedGrowthStage> stages = seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(seedType.getId());
             if (stages.isEmpty()) {
                 throw new ServiceException(BizErrorCode.SEED_GROWTH_STAGE_NOT_CONFIGURED, "未配置种子生长阶段");
             }
-            SoilType soilType = soilTypeDao.findByIdAndIsDeletedFalse(plot.getSoilTypeId()).orElse(null);
+
+            SoilType soilType = soilTypeDao.findByIdAndIsDeletedFalse(ctx.plot.getSoilTypeId()).orElse(null);
             BigDecimal multiplier = soilType == null ? BigDecimal.ONE : normalizeMultiplier(soilType.getGrowSpeedMultiplier());
-            Short regrowStageIndex = seedType.getRegrowStageIndex() == null
-                    ? resolveFirstStageIndex(stages)
-                    : seedType.getRegrowStageIndex();
-            int regrowSeconds = calculateDurationSeconds(stages, regrowStageIndex, multiplier);
-            int witherWindowSeconds = Math.max(3600, Math.max(regrowSeconds, 0));
-            nextExpectedRipeAt = now.plusSeconds(Math.max(regrowSeconds, 0));
+            Short regrowStageIndex = seedType.getRegrowStageIndex() == null ? resolveFirstStageIndex(stages) : seedType.getRegrowStageIndex();
+
+            int safeRegrowSeconds = Math.max(calculateDurationSeconds(stages, regrowStageIndex, multiplier), 0);
+            int witherWindowSeconds = Math.max(3600, safeRegrowSeconds);
+
+            nextExpectedRipeAt = now.plusSeconds(safeRegrowSeconds);
             nextExpectedWitheredAt = nextExpectedRipeAt.plusSeconds(witherWindowSeconds);
-            nextGrowStatus = regrowSeconds <= 0 ? GROW_STATUS_RIPE : GROW_STATUS_GROWING;
+            nextGrowStatus = safeRegrowSeconds == 0 ? GROW_STATUS_RIPE : GROW_STATUS_GROWING;
             nextStageIndex = regrowStageIndex;
 
-            crop.setStageStartedAt(now);
-            crop.setCurrentStageIndex(regrowStageIndex);
-            crop.setGrowStatus(nextGrowStatus);
-            crop.setMaturedAt(regrowSeconds <= 0 ? now : null);
-            crop.setWitheredAt(null);
-            crop.setExpectedRipeAt(nextExpectedRipeAt);
-            crop.setExpectedWitheredAt(nextExpectedWitheredAt);
-            crop.setBugCount((short) 0);
-            crop.setLastBugAt(null);
-            crop.setLastCareAt(null);
-            gameplayCoreService.touchForUpdate(crop, userId, now);
-            userCropDao.save(crop);
-            bugCountAfter = 0;
+            ctx.crop.setStageStartedAt(now);
+            ctx.crop.setCurrentStageIndex(regrowStageIndex);
+            ctx.crop.setGrowStatus(nextGrowStatus);
+            ctx.crop.setMaturedAt(safeRegrowSeconds == 0 ? now : null);
+            ctx.crop.setWitheredAt(null);
+            ctx.crop.setExpectedRipeAt(nextExpectedRipeAt);
+            ctx.crop.setExpectedWitheredAt(nextExpectedWitheredAt);
+            ctx.crop.setBugCount((short) 0);
+            ctx.crop.setLastBugAt(null);
+            ctx.crop.setLastCareAt(null);
         }
+        gameplayCoreService.touchForUpdate(ctx.crop, ctx.userId, now);
+        userCropDao.save(ctx.crop);
 
-        String bizId = "HARVEST:" + crop.getId() + ":" + now.toEpochSecond();
+        String bizId = "HARVEST:" + ctx.crop.getId() + ":" + now.toEpochSecond();
         userInventoryFlowDao.save(gameplayCoreService.buildInventoryFlow(
-                userId,
-                "FRUIT",
-                crop.getSeedTypeId(),
-                "INCOME",
-                fruitGain,
-                beforeFruitAmountAccurate,
-                afterFruitAmount,
-                beforeFrozenFruitAmount,
-                beforeFrozenFruitAmount,
-                "HARVEST",
-                bizId,
-                now,
-                "{\"plotId\":" + plotId + ",\"cropId\":" + crop.getId() + "}"
+                ctx.userId, "FRUIT", ctx.crop.getSeedTypeId(), "INCOME", fruitGain,
+                afterFruitAmount - fruitGain, afterFruitAmount, beforeFrozenFruitAmount, beforeFrozenFruitAmount,
+                "HARVEST", bizId, now, "{\"plotId\":" + ctx.plotId + ",\"cropId\":" + ctx.crop.getId() + "}"
         ));
+
         userCropActionLogDao.save(gameplayCoreService.buildCropActionLog(
-                userId, plotId, crop.getId(), crop.getSeedTypeId(),
-                "HARVEST", "SUCCESS", now,
+                ctx.userId, ctx.plotId, ctx.crop.getId(), ctx.crop.getSeedTypeId(), "HARVEST", "SUCCESS", now,
                 "{\"fruitGain\":" + fruitGain + ",\"cropCleared\":" + cropCleared + "}"
         ));
 
         HarvestResultVO result = new HarvestResultVO();
-        result.setUserId(userId);
-        result.setPlotId(plotId);
-        result.setCropId(crop.getId());
-        result.setSeedTypeId(crop.getSeedTypeId());
+        result.setUserId(ctx.userId);
+        result.setPlotId(ctx.plotId);
+        result.setCropId(ctx.crop.getId());
+        result.setSeedTypeId(ctx.crop.getSeedTypeId());
         result.setHarvestFruitNumber(fruitGain);
         result.setTotalFruitQuantity(afterFruitAmount);
         result.setExperienceGain(expGain);
         result.setScoreGain(scoreGain);
-        result.setCurrentExperience(afterExp);
-        result.setCurrentScore(afterScore);
+        result.setCurrentExperience(safeLong(latestUser.getExperience()));
+        result.setCurrentScore(safeLong(latestUser.getScore()));
         result.setBugCountBefore(bugCountBefore);
-        result.setBugCountAfter(bugCountAfter);
+        result.setBugCountAfter((short) 0);
         result.setCropCleared(cropCleared);
         result.setNextGrowStatus(nextGrowStatus);
         result.setNextStageIndex(nextStageIndex);
@@ -406,209 +360,150 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
     @Override
     @Transactional
     public CareResultVO care(CareCropDTO params) {
-        ServiceGuard.requireNotNull(params, BizErrorCode.PARAM_INVALID, "请求参数不能为空");
-        Long userId = ServiceGuard.requirePositive(params.getUserId(), BizErrorCode.PARAM_INVALID, "用户ID无效");
-        Long plotId = ServiceGuard.requirePositive(params.getPlotId(), BizErrorCode.PARAM_INVALID, "地块ID无效");
+        requireNotNull(params);
+        CropActionContext ctx = new CropActionContext(params.getUserId(), params.getPlotId(), true);
 
-        ServiceGuard.requirePresent(userDao.findByIdAndIsDeletedFalse(userId), BizErrorCode.USER_NOT_FOUND, "用户不存在");
-        UserPlot plot = ServiceGuard.requirePresent(
-                userPlotDao.findByIdAndUserIdAndIsDeletedFalse(plotId, userId),
-                BizErrorCode.PLOT_NOT_FOUND, "地块不存在"
-        );
-        if (Boolean.TRUE.equals(plot.getIsLocked())) {
-            throw new ServiceException(BizErrorCode.PLOT_LOCKED, "地块已锁定");
+        if (ctx.crop == null) {
+            throw new ServiceException(BizErrorCode.CROP_NOT_FOUND, "作物不存在");
         }
 
-        UserCrop crop = ServiceGuard.requirePresent(
-                userCropDao.findByUserIdAndPlotIdAndIsDeletedFalse(userId, plotId),
-                BizErrorCode.CROP_NOT_FOUND, "地块上作物不存在"
-        );
-        SeedType seedType = ServiceGuard.requirePresent(
-                seedTypeDao.findByIdAndIsDeletedFalse(crop.getSeedTypeId()),
+        ServiceGuardUtils.requirePresent(
+                seedTypeDao.findByIdAndIsDeletedFalse(ctx.crop.getSeedTypeId()),
                 BizErrorCode.SEED_TYPE_NOT_FOUND, "作物对应种子类型不存在"
         );
 
         OffsetDateTime now = OffsetDateTime.now();
-        syncCropStatus(crop, now);
-        short bugCountBefore = safeShort(crop.getBugCount());
-        if (crop.getGrowStatus() == GROW_STATUS_WITHERED) {
+        syncCropStatus(ctx.crop, now);
+
+        short bugCountBefore = safeShort(ctx.crop.getBugCount());
+        if (ctx.crop.getGrowStatus() == GROW_STATUS_WITHERED) {
             userCropActionLogDao.save(gameplayCoreService.buildCropActionLog(
-                    userId, plotId, crop.getId(), crop.getSeedTypeId(),
-                    "CARE", "FAIL", now, "{\"reason\":\"WITHERED\"}"
+                    ctx.userId, ctx.plotId, ctx.crop.getId(), ctx.crop.getSeedTypeId(), "CARE", "FAIL", now, "{\"reason\":\"WITHERED\"}"
             ));
             throw new ServiceException(BizErrorCode.CROP_WITHERED, "作物已枯萎");
         }
 
         short bugCountAfter = bugCountBefore > 0 ? (short) (bugCountBefore - 1) : 0;
-        crop.setBugCount(bugCountAfter);
-        crop.setLastCareAt(now);
-        gameplayCoreService.touchForUpdate(crop, userId, now);
-        userCropDao.save(crop);
+        ctx.crop.setBugCount(bugCountAfter);
+        ctx.crop.setLastCareAt(now);
+        gameplayCoreService.touchForUpdate(ctx.crop, ctx.userId, now);
+        userCropDao.save(ctx.crop);
 
         userCropActionLogDao.save(gameplayCoreService.buildCropActionLog(
-                userId, plotId, crop.getId(), crop.getSeedTypeId(),
-                "CARE", "SUCCESS", now,
+                ctx.userId, ctx.plotId, ctx.crop.getId(), ctx.crop.getSeedTypeId(), "CARE", "SUCCESS", now,
                 "{\"bugCountBefore\":" + bugCountBefore + ",\"bugCountAfter\":" + bugCountAfter + "}"
         ));
 
         CareResultVO result = new CareResultVO();
-        result.setUserId(userId);
-        result.setPlotId(plotId);
-        result.setCropId(crop.getId());
-        result.setSeedTypeId(seedType.getId());
+        result.setUserId(ctx.userId);
+        result.setPlotId(ctx.plotId);
+        result.setCropId(ctx.crop.getId());
+        result.setSeedTypeId(ctx.crop.getSeedTypeId());
         result.setBugCountBefore(bugCountBefore);
         result.setBugCountAfter(bugCountAfter);
-        result.setCurrentStageIndex(crop.getCurrentStageIndex());
-        result.setGrowStatus(crop.getGrowStatus());
-        result.setLastCareAt(crop.getLastCareAt());
+        result.setCurrentStageIndex(ctx.crop.getCurrentStageIndex());
+        result.setGrowStatus(ctx.crop.getGrowStatus());
+        result.setLastCareAt(ctx.crop.getLastCareAt());
         return result;
     }
 
     @Override
     public MyFarmOverviewVO myFarmOverview(MyFarmOverviewDTO params) {
-        Long userId = ServiceGuard.requirePositive(params == null ? null : params.getUserId(), BizErrorCode.PARAM_INVALID, "用户ID无效");
-        ServiceGuard.requirePresent(userDao.findByIdAndIsDeletedFalse(userId), BizErrorCode.USER_NOT_FOUND, "用户不存在");
+        FarmViewContext ctx = new FarmViewContext(params == null ? null : params.getUserId());
 
-        OffsetDateTime now = OffsetDateTime.now();
-        List<UserPlot> plots = userPlotDao.findByUserIdAndIsDeletedFalseOrderByPlotIndexAsc(userId);
-        List<UserCrop> crops = userCropDao.findByUserIdAndIsDeletedFalseOrderByIdAsc(userId);
-        Map<Long, UserCrop> cropByPlotId = new HashMap<>();
-        for (UserCrop crop : crops) {
-            cropByPlotId.put(crop.getPlotId(), crop);
-        }
-        Long nextUnlockPlotId = null;
-        Short nextUnlockPlotIndex = null;
-        for (UserPlot plot : plots) {
-            if (Boolean.TRUE.equals(plot.getIsLocked())) {
-                nextUnlockPlotId = plot.getId();
-                nextUnlockPlotIndex = plot.getPlotIndex();
-                break;
-            }
-        }
+        UserPlot nextUnlockPlot = ctx.plots.stream().filter(this::isLocked).findFirst().orElse(null);
+        Map<Long, SoilType> soilTypeMap = getSoilTypeMap();
+        Map<Long, SeedType> seedTypeMap = getSeedTypeMap();
 
-        Map<Long, SoilType> soilTypeMap = buildSoilTypeMap();
-        Map<Long, SeedType> seedTypeMap = buildSeedTypeMap();
         List<PlotOverviewVO> plotVOs = new ArrayList<>();
-        int unlockedPlots = 0;
-        int lockedPlots = 0;
-        int occupiedPlots = 0;
-        int harvestableCount = 0;
-        for (UserPlot plot : plots) {
+        int unlockedPlots = 0, lockedPlots = 0, occupiedPlots = 0, harvestableCount = 0;
+
+        for (UserPlot plot : ctx.plots) {
             PlotOverviewVO plotVO = new PlotOverviewVO();
             plotVO.setPlotId(plot.getId());
             plotVO.setUserId(plot.getUserId());
             plotVO.setPlotIndex(plot.getPlotIndex());
-            plotVO.setLocked(Boolean.TRUE.equals(plot.getIsLocked()));
+            plotVO.setLocked(isLocked(plot));
             plotVO.setLockReason(gameplayCoreService.safeString(plot.getLockReason()));
             plotVO.setSoilTypeId(plot.getSoilTypeId());
+
             SoilType soilType = soilTypeMap.get(plot.getSoilTypeId());
             plotVO.setSoilBitCode(soilType == null ? null : soilType.getBitCode());
             plotVO.setSoilName(soilType == null ? "" : gameplayCoreService.safeString(soilType.getName()));
-            long unlockCostCoin = calculateUnlockCostCoin(plot.getPlotIndex());
-            plotVO.setUnlockCostCoin(unlockCostCoin);
-            plotVO.setCanUnlock(
-                    Boolean.TRUE.equals(plot.getIsLocked())
-                            && nextUnlockPlotId != null
-                            && nextUnlockPlotIndex != null
-                            && nextUnlockPlotId.equals(plot.getId())
-                            && nextUnlockPlotIndex.equals(plot.getPlotIndex())
-            );
+            plotVO.setUnlockCostCoin(plotGameplayService.calculateUnlockCostCoin(plot.getPlotIndex()));
+            plotVO.setCanUnlock(nextUnlockPlot != null && nextUnlockPlot.getId().equals(plot.getId()));
 
-            UserCrop crop = cropByPlotId.get(plot.getId());
-            boolean hasCrop = crop != null && !Boolean.TRUE.equals(crop.getIsDeleted());
+            UserCrop crop = ctx.cropByPlotId.get(plot.getId());
+            boolean hasCrop = crop != null && !isDeleted(crop);
+
             plotVO.setHasCrop(hasCrop);
-            plotVO.setOccupied(hasCrop && !Boolean.TRUE.equals(plot.getIsLocked()));
-            plotVO.setPlantable(!Boolean.TRUE.equals(plot.getIsLocked()) && !hasCrop);
+            plotVO.setOccupied(hasCrop && isUnlocked(plot));
+            plotVO.setPlantable(isUnlocked(plot) && !hasCrop);
 
-            if (Boolean.TRUE.equals(plot.getIsLocked())) {
-                lockedPlots++;
-            } else {
-                unlockedPlots++;
-            }
-            if (hasCrop && !Boolean.TRUE.equals(plot.getIsLocked())) {
+            if (isLocked(plot)) lockedPlots++; else unlockedPlots++;
+
+            if (hasCrop && isUnlocked(plot)) {
                 occupiedPlots++;
-                CropOverviewVO cropVO = buildCropOverview(crop, seedTypeMap.get(crop.getSeedTypeId()), now);
+                CropOverviewVO cropVO = buildCropOverview(crop, seedTypeMap.get(crop.getSeedTypeId()), ctx.now);
                 plotVO.setCrop(cropVO);
-                if (Boolean.TRUE.equals(cropVO.getHarvestable())) {
-                    harvestableCount++;
-                }
+                if (Boolean.TRUE.equals(cropVO.getHarvestable())) harvestableCount++;
             } else {
                 plotVO.setCrop(null);
             }
             plotVOs.add(plotVO);
         }
 
-        int totalPlots = plots.size();
         MyFarmOverviewVO result = new MyFarmOverviewVO();
-        result.setUserId(userId);
-        result.setServerTime(now);
-        result.setTotalPlots(totalPlots);
+        result.setUserId(ctx.userId);
+        result.setServerTime(ctx.now);
+        result.setTotalPlots(ctx.plots.size());
         result.setUnlockedPlots(unlockedPlots);
         result.setLockedPlots(lockedPlots);
         result.setOccupiedPlots(occupiedPlots);
         result.setEmptyUnlockedPlots(Math.max(unlockedPlots - occupiedPlots, 0));
         result.setHarvestableCount(harvestableCount);
-        result.setNextExpandCostCoin(calculateExpandCostCoin(totalPlots));
+        result.setNextExpandCostCoin(calculateExpandCostCoin(ctx.plots.size()));
         result.setPlots(plotVOs);
         return result;
     }
 
     @Override
     public MyPlantingPanelVO myPlantingPanel(MyPlantingPanelDTO params) {
-        Long userId = ServiceGuard.requirePositive(params == null ? null : params.getUserId(), BizErrorCode.PARAM_INVALID, "用户ID无效");
-        ServiceGuard.requirePresent(userDao.findByIdAndIsDeletedFalse(userId), BizErrorCode.USER_NOT_FOUND, "用户不存在");
+        FarmViewContext ctx = new FarmViewContext(params == null ? null : params.getUserId());
+        List<UserSeed> userSeeds = userSeedDao.findByUserIdAndIsDeletedFalseOrderByIdAsc(ctx.userId);
+        Map<Long, SeedType> seedTypeMap = getSeedTypeMap();
 
-        OffsetDateTime now = OffsetDateTime.now();
-        List<UserPlot> plots = userPlotDao.findByUserIdAndIsDeletedFalseOrderByPlotIndexAsc(userId);
-        List<UserCrop> crops = userCropDao.findByUserIdAndIsDeletedFalseOrderByIdAsc(userId);
-        List<UserSeed> userSeeds = userSeedDao.findByUserIdAndIsDeletedFalseOrderByIdAsc(userId);
-        Map<Long, UserCrop> cropByPlotId = new HashMap<>();
-        for (UserCrop crop : crops) {
-            cropByPlotId.put(crop.getPlotId(), crop);
-        }
-        Map<Long, SeedType> seedTypeMap = buildSeedTypeMap();
-
-        int unlockedPlotCount = 0;
-        int plantablePlotCount = 0;
-        for (UserPlot plot : plots) {
-            if (!Boolean.TRUE.equals(plot.getIsLocked())) {
-                unlockedPlotCount++;
-                if (!cropByPlotId.containsKey(plot.getId())) {
-                    plantablePlotCount++;
-                }
-            }
-        }
+        int unlockedPlotCount = (int) ctx.plots.stream().filter(this::isUnlocked).count();
+        int plantablePlotCount = (int) ctx.plots.stream()
+                .filter(plot -> isUnlocked(plot) && !ctx.cropByPlotId.containsKey(plot.getId()))
+                .count();
 
         List<SeedBackpackItemVO> seeds = new ArrayList<>();
         int selectableSeedTypeCount = 0;
+
         for (UserSeed userSeed : userSeeds) {
             SeedType seedType = seedTypeMap.get(userSeed.getSeedTypeId());
-            if (seedType == null) {
-                continue;
-            }
-            long quantity = safeLong(userSeed.getQuantity());
-            long frozenQuantity = safeLong(userSeed.getFrozenQuantity());
-            long availableQuantity = Math.max(quantity - frozenQuantity, 0L);
+            if (seedType == null) continue;
+
+            long availableQuantity = Math.max(safeLong(userSeed.getQuantity()) - safeLong(userSeed.getFrozenQuantity()), 0L);
             boolean selectable = availableQuantity > 0 && plantablePlotCount > 0;
-            if (selectable) {
-                selectableSeedTypeCount++;
-            }
+            if (selectable) selectableSeedTypeCount++;
 
             SeedBackpackItemVO itemVO = new SeedBackpackItemVO();
             itemVO.setUserSeedId(userSeed.getId());
             itemVO.setSeedTypeId(userSeed.getSeedTypeId());
             itemVO.setSeedTypeName(gameplayCoreService.safeString(seedType.getName()));
-            itemVO.setQuantity(quantity);
-            itemVO.setFrozenQuantity(frozenQuantity);
+            itemVO.setQuantity(safeLong(userSeed.getQuantity()));
+            itemVO.setFrozenQuantity(safeLong(userSeed.getFrozenQuantity()));
             itemVO.setAvailableQuantity(availableQuantity);
             itemVO.setSelectable(selectable);
             seeds.add(itemVO);
         }
 
         MyPlantingPanelVO result = new MyPlantingPanelVO();
-        result.setUserId(userId);
-        result.setServerTime(now);
-        result.setTotalPlotCount(plots.size());
+        result.setUserId(ctx.userId);
+        result.setServerTime(ctx.now);
+        result.setTotalPlotCount(ctx.plots.size());
         result.setUnlockedPlotCount(unlockedPlotCount);
         result.setPlantablePlotCount(plantablePlotCount);
         result.setBackpackSeedTypeCount(seeds.size());
@@ -619,49 +514,82 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
 
     @Override
     public SeedPlantablePlotsVO seedPlantablePlots(SeedPlantablePlotsDTO params) {
-        ServiceGuard.requireNotNull(params, BizErrorCode.PARAM_INVALID, "请求参数不能为空");
-        Long userId = ServiceGuard.requirePositive(params.getUserId(), BizErrorCode.PARAM_INVALID, "用户ID无效");
-        Long seedTypeId = ServiceGuard.requirePositive(params.getSeedTypeId(), BizErrorCode.PARAM_INVALID, "参数 seedTypeId 无效");
+        requireNotNull(params);
+        Long seedTypeId = ServiceGuardUtils.requirePositive(params.getSeedTypeId(), BizErrorCode.PARAM_INVALID, "参数 seedTypeId 无效");
+        FarmViewContext ctx = new FarmViewContext(params.getUserId());
 
-        ServiceGuard.requirePresent(userDao.findByIdAndIsDeletedFalse(userId), BizErrorCode.USER_NOT_FOUND, "用户不存在");
-        SeedType seedType = ServiceGuard.requirePresent(seedTypeDao.findByIdAndIsDeletedFalse(seedTypeId), BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在");
+        SeedType seedType = ServiceGuardUtils.requirePresent(
+                seedTypeDao.findByIdAndIsDeletedFalse(seedTypeId), BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在"
+        );
+        Map<Long, SoilType> soilTypeMap = getSoilTypeMap();
 
-        List<UserPlot> plots = userPlotDao.findByUserIdAndIsDeletedFalseOrderByPlotIndexAsc(userId);
-        List<UserCrop> crops = userCropDao.findByUserIdAndIsDeletedFalseOrderByIdAsc(userId);
-        Map<Long, UserCrop> cropByPlotId = new HashMap<>();
-        for (UserCrop crop : crops) {
-            cropByPlotId.put(crop.getPlotId(), crop);
-        }
-
-        Map<Long, SoilType> soilTypeMap = buildSoilTypeMap();
-        List<PlantablePlotVO> list = new ArrayList<>();
-        for (UserPlot plot : plots) {
-            if (Boolean.TRUE.equals(plot.getIsLocked())) {
-                continue;
-            }
-            if (cropByPlotId.containsKey(plot.getId())) {
-                continue;
-            }
-            SoilType soilType = soilTypeMap.get(plot.getSoilTypeId());
-            if (soilType == null || !isSoilCompatible(seedType, soilType)) {
-                continue;
-            }
-            PlantablePlotVO plotVO = new PlantablePlotVO();
-            plotVO.setPlotId(plot.getId());
-            plotVO.setPlotIndex(plot.getPlotIndex());
-            plotVO.setSoilTypeId(plot.getSoilTypeId());
-            plotVO.setSoilBitCode(soilType.getBitCode());
-            plotVO.setSoilName(gameplayCoreService.safeString(soilType.getName()));
-            list.add(plotVO);
-        }
+        List<PlantablePlotVO> list = ctx.plots.stream()
+                .filter(this::isUnlocked)
+                .filter(plot -> !ctx.cropByPlotId.containsKey(plot.getId()))
+                .filter(plot -> !isSoilIncompatible(seedType, soilTypeMap.get(plot.getSoilTypeId())))
+                .map(plot -> {
+                    SoilType soilType = soilTypeMap.get(plot.getSoilTypeId());
+                    PlantablePlotVO plotVO = new PlantablePlotVO();
+                    plotVO.setPlotId(plot.getId());
+                    plotVO.setPlotIndex(plot.getPlotIndex());
+                    plotVO.setSoilTypeId(plot.getSoilTypeId());
+                    plotVO.setSoilBitCode(soilType.getBitCode());
+                    plotVO.setSoilName(gameplayCoreService.safeString(soilType.getName()));
+                    return plotVO;
+                })
+                .collect(Collectors.toList());
 
         SeedPlantablePlotsVO result = new SeedPlantablePlotsVO();
-        result.setUserId(userId);
+        result.setUserId(ctx.userId);
         result.setSeedTypeId(seedTypeId);
-        result.setServerTime(OffsetDateTime.now());
+        result.setServerTime(ctx.now);
         result.setPlantableCount(list.size());
         result.setPlots(list);
         return result;
+    }
+
+    /* =========================================================
+     *  Private Core Logic Helpers
+     * ========================================================= */
+    // ... 下方所有的 private validateUser, saveHarvestFailLog, isSoilIncompatible 等方法均保持之前的实现 ...
+
+    private User validateUser(Long userId) {
+        return ServiceGuardUtils.requirePresent(userDao.findByIdAndIsDeletedFalse(userId), BizErrorCode.USER_NOT_FOUND, "用户不存在");
+    }
+
+    private UserPlot getAndValidateUnlockedPlot(Long userId, Long plotId) {
+        UserPlot plot = ServiceGuardUtils.requirePresent(
+                userPlotDao.findByIdAndUserIdAndIsDeletedFalse(plotId, userId),
+                BizErrorCode.PLOT_NOT_FOUND, "地块不存在"
+        );
+        if (isLocked(plot)) {
+            throw new ServiceException(BizErrorCode.PLOT_LOCKED, "地块已锁定");
+        }
+        return plot;
+    }
+
+    private UserCrop getAndValidateCrop(Long userId, Long plotId) {
+        return ServiceGuardUtils.requirePresent(
+                userCropDao.findByUserIdAndPlotIdAndIsDeletedFalse(userId, plotId),
+                BizErrorCode.CROP_NOT_FOUND, "地块上作物不存在"
+        );
+    }
+
+    private UserSeed getAndValidateUserSeed(Long userId, Long seedTypeId) {
+        return ServiceGuardUtils.requirePresent(
+                userSeedDao.findByUserIdAndSeedTypeIdAndIsDeletedFalse(userId, seedTypeId),
+                BizErrorCode.SEED_INVENTORY_NOT_FOUND, "种子库存不存在"
+        );
+    }
+
+    private void saveHarvestFailLog(Long userId, Long plotId, UserCrop crop, OffsetDateTime now, String reason, BizErrorCode errorCode, String errorMsg) {
+        gameplayCoreService.touchForUpdate(crop, userId, now);
+        userCropDao.save(crop);
+        userCropActionLogDao.save(gameplayCoreService.buildCropActionLog(
+                userId, plotId, crop.getId(), crop.getSeedTypeId(),
+                "HARVEST", "FAIL", now, "{\"reason\":\"" + reason + "\"}"
+        ));
+        throw new ServiceException(errorCode, errorMsg);
     }
 
     private CropOverviewVO buildCropOverview(UserCrop crop, SeedType seedType, OffsetDateTime now) {
@@ -688,132 +616,75 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
         Short runtimeStatus = calculateGrowStatus(crop, now);
         if (runtimeStatus != null && !runtimeStatus.equals(crop.getGrowStatus())) {
             crop.setGrowStatus(runtimeStatus);
-            if (runtimeStatus == GROW_STATUS_RIPE && crop.getMaturedAt() == null) {
-                crop.setMaturedAt(now);
-            }
-            if (runtimeStatus == GROW_STATUS_WITHERED && crop.getWitheredAt() == null) {
-                crop.setWitheredAt(now);
-            }
+            if (runtimeStatus == GROW_STATUS_RIPE && crop.getMaturedAt() == null) crop.setMaturedAt(now);
+            if (runtimeStatus == GROW_STATUS_WITHERED && crop.getWitheredAt() == null) crop.setWitheredAt(now);
         }
     }
 
     private Short calculateGrowStatus(UserCrop crop, OffsetDateTime now) {
-        if (crop == null) {
-            return null;
-        }
-        if (crop.getExpectedWitheredAt() != null && now.isAfter(crop.getExpectedWitheredAt())) {
-            return GROW_STATUS_WITHERED;
-        }
-        if (crop.getExpectedRipeAt() != null && !now.isBefore(crop.getExpectedRipeAt())) {
-            return GROW_STATUS_RIPE;
-        }
+        if (crop == null) return null;
+        if (crop.getExpectedWitheredAt() != null && now.isAfter(crop.getExpectedWitheredAt())) return GROW_STATUS_WITHERED;
+        if (crop.getExpectedRipeAt() != null && !now.isBefore(crop.getExpectedRipeAt())) return GROW_STATUS_RIPE;
         return crop.getGrowStatus() == null ? GROW_STATUS_GROWING : crop.getGrowStatus();
     }
 
-    private boolean isSoilCompatible(SeedType seedType, SoilType soilType) {
+    private boolean isSoilIncompatible(SeedType seedType, SoilType soilType) {
         if (seedType == null || soilType == null || soilType.getBitCode() == null || soilType.getBitCode() <= 0) {
-            return false;
+            return true;
         }
         long bits = safeLong(seedType.getEnableSoilTypeBits());
         int bitCode = soilType.getBitCode();
-        return (bits & bitCode) == bitCode;
+        return (bits & bitCode) != bitCode;
     }
 
     private BigDecimal normalizeMultiplier(BigDecimal multiplier) {
-        if (multiplier == null || multiplier.compareTo(BigDecimal.ZERO) <= 0) {
-            return BigDecimal.ONE;
-        }
-        return multiplier;
+        return (multiplier == null || multiplier.compareTo(BigDecimal.ZERO) <= 0) ? BigDecimal.ONE : multiplier;
     }
 
     private int calculateDurationSeconds(List<SeedGrowthStage> stages, Short startStageIndex, BigDecimal multiplier) {
-        int totalRawSeconds = 0;
-        for (SeedGrowthStage stage : stages) {
-            if (startStageIndex != null && safeShort(stage.getStageIndex()) < startStageIndex) {
-                continue;
-            }
-            totalRawSeconds += safeInteger(stage.getDurationSeconds());
-        }
-        if (totalRawSeconds <= 0) {
-            return 0;
-        }
+        int totalRawSeconds = stages.stream()
+                .filter(stage -> startStageIndex == null || safeShort(stage.getStageIndex()) >= startStageIndex)
+                .mapToInt(stage -> safeInteger(stage.getDurationSeconds()))
+                .sum();
+
+        if (totalRawSeconds <= 0) return 0;
         BigDecimal adjusted = BigDecimal.valueOf(totalRawSeconds).divide(
-                normalizeMultiplier(multiplier),
-                0,
-                RoundingMode.HALF_UP
+                normalizeMultiplier(multiplier), 0, RoundingMode.HALF_UP
         );
         return Math.max(adjusted.intValue(), 0);
     }
 
     private Short resolveFirstStageIndex(List<SeedGrowthStage> stages) {
-        if (stages == null || stages.isEmpty()) {
-            return 1;
-        }
-        Short index = stages.get(0).getStageIndex();
+        if (stages == null || stages.isEmpty()) return 1;
+        Short index = stages.getFirst().getStageIndex();
         return index == null || index <= 0 ? 1 : index;
     }
 
     private long calculateExpandCostCoin(int currentTotalPlots) {
-        int freeExpandPlotCountLimit = gameplayPolicyProperties.getPlot().getExpand().getFreePlotCountLimit();
-        long baseCostCoin = gameplayPolicyProperties.getPlot().getExpand().getBaseCostCoin();
-        long costStepCoin = gameplayPolicyProperties.getPlot().getExpand().getCostStepCoin();
-        if (currentTotalPlots < freeExpandPlotCountLimit) {
-            return 0L;
-        }
-        long costSteps = currentTotalPlots - freeExpandPlotCountLimit;
-        return baseCostCoin + costSteps * costStepCoin;
+        int freeLimit = gameplayPolicyProperties.getPlot().getExpand().getFreePlotCountLimit();
+        if (currentTotalPlots < freeLimit) return 0L;
+        return gameplayPolicyProperties.getPlot().getExpand().getBaseCostCoin()
+                + (currentTotalPlots - freeLimit) * gameplayPolicyProperties.getPlot().getExpand().getCostStepCoin();
     }
 
-    private long calculateUnlockCostCoin(Short plotIndex) {
-        int freeUnlockPlotIndexLimit = gameplayPolicyProperties.getPlot().getUnlock().getFreePlotIndexLimit();
-        long baseCostCoin = gameplayPolicyProperties.getPlot().getUnlock().getBaseCostCoin();
-        long costStepCoin = gameplayPolicyProperties.getPlot().getUnlock().getCostStepCoin();
-        short safePlotIndex = plotIndex == null || plotIndex <= 0 ? 1 : plotIndex;
-        if (safePlotIndex <= freeUnlockPlotIndexLimit) {
-            return 0L;
-        }
-        long costSteps = safePlotIndex - freeUnlockPlotIndexLimit - 1L;
-        return baseCostCoin + costSteps * costStepCoin;
+    private Map<Long, SoilType> getSoilTypeMap() {
+        return soilTypeDao.findByIsDeletedFalseOrderByIdAsc().stream()
+                .collect(Collectors.toMap(SoilType::getId, Function.identity()));
     }
 
-    private Map<Long, SoilType> buildSoilTypeMap() {
-        Map<Long, SoilType> map = new HashMap<>();
-        for (SoilType soilType : soilTypeDao.findByIsDeletedFalseOrderByIdAsc()) {
-            map.put(soilType.getId(), soilType);
-        }
-        return map;
+    private Map<Long, SeedType> getSeedTypeMap() {
+        return seedTypeDao.findByIsDeletedFalseOrderByIdAsc().stream()
+                .collect(Collectors.toMap(SeedType::getId, Function.identity()));
     }
 
-    private Map<Long, SeedType> buildSeedTypeMap() {
-        Map<Long, SeedType> map = new HashMap<>();
-        for (SeedType seedType : seedTypeDao.findByIsDeletedFalseOrderByIdAsc()) {
-            map.put(seedType.getId(), seedType);
-        }
-        return map;
-    }
-
+    private boolean isLocked(UserPlot plot) { return Boolean.TRUE.equals(plot.getIsLocked()); }
+    private boolean isUnlocked(UserPlot plot) { return !isLocked(plot); }
+    private boolean isDeleted(UserCrop crop) { return Boolean.TRUE.equals(crop.getIsDeleted()); }
     private long calcRemainSeconds(OffsetDateTime now, OffsetDateTime target) {
-        if (target == null) {
-            return 0L;
-        }
-        long seconds = Duration.between(now, target).getSeconds();
-        return Math.max(seconds, 0L);
+        return target == null ? 0L : Math.max(Duration.between(now, target).getSeconds(), 0L);
     }
 
-    private long safeLong(Long value) {
-        return gameplayCoreService.safeLong(value);
-    }
-
-    private int safeInteger(Integer value) {
-        return gameplayCoreService.safeInteger(value);
-    }
-
-    private short safeShort(Short value) {
-        return gameplayCoreService.safeShort(value);
-    }
+    private long safeLong(Long value) { return gameplayCoreService.safeLong(value); }
+    private int safeInteger(Integer value) { return gameplayCoreService.safeInteger(value); }
+    private short safeShort(Short value) { return gameplayCoreService.safeShort(value); }
 }
-
-
-
-
-

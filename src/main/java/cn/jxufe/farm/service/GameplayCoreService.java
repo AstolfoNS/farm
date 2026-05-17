@@ -32,6 +32,14 @@ public interface GameplayCoreService {
 
     short safeShort(Short value);
 
+    Long defaultLong(Long value, Long defaultValue);
+
+    Integer defaultInt(Integer value, Integer defaultValue);
+
+    long safeMultiply(long a, long b);
+
+    long safeAdd(long a, long b);
+
     void initNewEntity(BaseEntity entity, Long operatorId, OffsetDateTime now);
 
     void touchForUpdate(BaseEntity entity, Long operatorId, OffsetDateTime now);

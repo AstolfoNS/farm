@@ -1,5 +1,6 @@
 package cn.jxufe.farm.config;
 
+import cn.jxufe.farm.common.utils.FileAccessPathUtils;
 import cn.jxufe.farm.config.properties.LocalFileStorageProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -27,16 +28,6 @@ public class StaticResourceConfig implements WebMvcConfigurer {
     }
 
     private String normalizePublicPrefix(String prefix) {
-        if (prefix == null || prefix.isBlank()) {
-            return "/oss";
-        }
-        String trimmed = prefix.trim();
-        if (!trimmed.startsWith("/")) {
-            trimmed = "/" + trimmed;
-        }
-        if (trimmed.endsWith("/")) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-        }
-        return trimmed;
+        return FileAccessPathUtils.normalizePublicPrefix(prefix);
     }
 }

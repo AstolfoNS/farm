@@ -1,5 +1,8 @@
-package cn.jxufe.farm.common.constants;
+package cn.jxufe.farm.common.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum BizErrorCode {
 
     SERVICE_ERROR("SERVICE_ERROR", "服务执行失败"),
@@ -56,11 +59,4 @@ public enum BizErrorCode {
         this.defaultMessage = defaultMessage;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public String getDefaultMessage() {
-        return defaultMessage;
-    }
 }

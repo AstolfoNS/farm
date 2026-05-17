@@ -6,7 +6,7 @@ import cn.jxufe.farm.bean.vo.AvatarUploadVO;
 import cn.jxufe.farm.bean.vo.FileUrlVO;
 import cn.jxufe.farm.common.apis.R;
 import cn.jxufe.farm.common.exception.ServiceException;
-import cn.jxufe.farm.oss.FileService;
+import cn.jxufe.farm.service.FileService;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;

@@ -2,7 +2,7 @@ package cn.jxufe.farm.service.imp;
 
 import cn.jxufe.farm.bean.dto.CropActionLogQueryDTO;
 import cn.jxufe.farm.bean.vo.CropActionLogRecordVO;
-import cn.jxufe.farm.common.constants.BizErrorCode;
+import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.exception.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
 import cn.jxufe.farm.dao.SeedTypeDao;
@@ -27,10 +27,12 @@ public class GameplayLogQueryServiceImp implements GameplayLogQueryService {
     private final UserCropActionLogDao userCropActionLogDao;
     private final GameplayCoreService gameplayCoreService;
 
-    public GameplayLogQueryServiceImp(UserDao userDao,
-                                      SeedTypeDao seedTypeDao,
-                                      UserCropActionLogDao userCropActionLogDao,
-                                      GameplayCoreService gameplayCoreService) {
+    public GameplayLogQueryServiceImp(
+            UserDao userDao,
+            SeedTypeDao seedTypeDao,
+            UserCropActionLogDao userCropActionLogDao,
+            GameplayCoreService gameplayCoreService
+    ) {
         this.userDao = userDao;
         this.seedTypeDao = seedTypeDao;
         this.userCropActionLogDao = userCropActionLogDao;
@@ -88,10 +90,6 @@ public class GameplayLogQueryServiceImp implements GameplayLogQueryService {
             records.add(record);
         }
 
-        long total = records.size();
-        int fromIndex = Math.min((pageNo - 1) * pageSize, records.size());
-        int toIndex = Math.min(fromIndex + pageSize, records.size());
-        List<CropActionLogRecordVO> pageRecords = records.subList(fromIndex, toIndex);
-        return new PageResult<>((long) pageNo, (long) pageSize, total, pageRecords);
+        return PageResult.of(records, pageNo, pageSize);
     }
 }

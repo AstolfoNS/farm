@@ -26,10 +26,12 @@ public interface UserFruitDao extends JpaRepository<UserFruit, Long> {
              where f.id = :id
                and f.isDeleted = false
             """)
-    int increaseQuantity(@Param("id") Long id,
-                         @Param("amount") Long amount,
-                         @Param("updatedBy") Long updatedBy,
-                         @Param("updatedAt") OffsetDateTime updatedAt);
+    int increaseQuantity(
+            @Param("id") Long id,
+            @Param("amount") Long amount,
+            @Param("updatedBy") Long updatedBy,
+            @Param("updatedAt") OffsetDateTime updatedAt
+    );
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
@@ -41,8 +43,10 @@ public interface UserFruitDao extends JpaRepository<UserFruit, Long> {
                and f.isDeleted = false
                and (f.quantity - f.frozenQuantity) >= :amount
             """)
-    int decreaseAvailableQuantityIfEnough(@Param("id") Long id,
-                                          @Param("amount") Long amount,
-                                          @Param("updatedBy") Long updatedBy,
-                                          @Param("updatedAt") OffsetDateTime updatedAt);
+    int decreaseAvailableQuantityIfEnough(
+            @Param("id") Long id,
+            @Param("amount") Long amount,
+            @Param("updatedBy") Long updatedBy,
+            @Param("updatedAt") OffsetDateTime updatedAt
+    );
 }

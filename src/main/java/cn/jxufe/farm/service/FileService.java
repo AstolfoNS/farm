@@ -1,4 +1,4 @@
-package cn.jxufe.farm.oss;
+package cn.jxufe.farm.service;
 
 import cn.jxufe.farm.bean.dto.FileUploadResultDTO;
 import org.springframework.web.multipart.MultipartFile;

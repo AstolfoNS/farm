@@ -33,10 +33,12 @@ public interface UserDao extends JpaRepository<User, Long> {
                and u.isDeleted = false
                and u.coin >= :amount
             """)
-    int decreaseCoinIfEnough(@Param("userId") Long userId,
-                             @Param("amount") Long amount,
-                             @Param("updatedBy") Long updatedBy,
-                             @Param("updatedAt") OffsetDateTime updatedAt);
+    int decreaseCoinIfEnough(
+            @Param("userId") Long userId,
+            @Param("amount") Long amount,
+            @Param("updatedBy") Long updatedBy,
+            @Param("updatedAt") OffsetDateTime updatedAt
+    );
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
@@ -47,10 +49,12 @@ public interface UserDao extends JpaRepository<User, Long> {
              where u.id = :userId
                and u.isDeleted = false
             """)
-    int increaseCoin(@Param("userId") Long userId,
-                     @Param("amount") Long amount,
-                     @Param("updatedBy") Long updatedBy,
-                     @Param("updatedAt") OffsetDateTime updatedAt);
+    int increaseCoin(
+            @Param("userId") Long userId,
+            @Param("amount") Long amount,
+            @Param("updatedBy") Long updatedBy,
+            @Param("updatedAt") OffsetDateTime updatedAt
+    );
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
@@ -62,9 +66,11 @@ public interface UserDao extends JpaRepository<User, Long> {
              where u.id = :userId
                and u.isDeleted = false
             """)
-    int increaseExperienceAndScore(@Param("userId") Long userId,
-                                   @Param("expDelta") Long expDelta,
-                                   @Param("scoreDelta") Long scoreDelta,
-                                   @Param("updatedBy") Long updatedBy,
-                                   @Param("updatedAt") OffsetDateTime updatedAt);
+    int increaseExperienceAndScore(
+            @Param("userId") Long userId,
+            @Param("expDelta") Long expDelta,
+            @Param("scoreDelta") Long scoreDelta,
+            @Param("updatedBy") Long updatedBy,
+            @Param("updatedAt") OffsetDateTime updatedAt
+    );
 }

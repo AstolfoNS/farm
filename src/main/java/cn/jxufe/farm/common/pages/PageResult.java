@@ -20,4 +20,12 @@ public class PageResult<T> {
     private long total;
 
     private List<T> records;
+
+    public static <T> PageResult<T> of(List<T> totalRecords, long pageNo, long pageSize) {
+        int fromIndex = Math.toIntExact(Math.min((pageNo - 1) * pageSize, totalRecords.size()));
+        int toIndex = Math.toIntExact(Math.min(fromIndex + pageSize, totalRecords.size()));
+
+        return new PageResult<>(pageNo, pageSize, totalRecords.size(), totalRecords.subList(fromIndex, toIndex));
+    }
+
 }

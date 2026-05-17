@@ -39,14 +39,19 @@ import java.util.List;
 public class GameplayServiceImp implements GameplayService {
 
     private final CropLifecycleService cropLifecycleService;
+
     private final PlotManagementService plotManagementService;
+
     private final GameplayLogQueryService gameplayLogQueryService;
+
     private final RequestIdempotencyService requestIdempotencyService;
 
-    public GameplayServiceImp(CropLifecycleService cropLifecycleService,
-                              PlotManagementService plotManagementService,
-                              GameplayLogQueryService gameplayLogQueryService,
-                              RequestIdempotencyService requestIdempotencyService) {
+    public GameplayServiceImp(
+            CropLifecycleService cropLifecycleService,
+            PlotManagementService plotManagementService,
+            GameplayLogQueryService gameplayLogQueryService,
+            RequestIdempotencyService requestIdempotencyService
+    ) {
         this.cropLifecycleService = cropLifecycleService;
         this.plotManagementService = plotManagementService;
         this.gameplayLogQueryService = gameplayLogQueryService;

@@ -24,4 +24,6 @@ public interface PlotGameplayService {
     PageResult<PlotTradeRecordVO> pagePlotTrades(PlotTradeQueryDTO params);
 
     List<PlotTradeBizTypeOptionVO> listPlotTradeBizTypeOptions();
+
+    long calculateUnlockCostCoin(Short plotIndex);
 }

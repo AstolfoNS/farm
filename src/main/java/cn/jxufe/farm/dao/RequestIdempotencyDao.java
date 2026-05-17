@@ -9,7 +9,6 @@ import java.util.Optional;
 @Repository
 public interface RequestIdempotencyDao extends JpaRepository<RequestIdempotency, Long> {
 
-    Optional<RequestIdempotency> findByUserIdAndBizTypeAndRequestIdAndIsDeletedFalse(Long userId,
-                                                                                       String bizType,
-                                                                                       String requestId);
+    Optional<RequestIdempotency> findByUserIdAndBizTypeAndRequestIdAndIsDeletedFalse(Long userId, String bizType, String requestId);
+
 }

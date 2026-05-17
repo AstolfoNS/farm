@@ -1,7 +1,9 @@
 package cn.jxufe.farm.common.exception;
 
-import cn.jxufe.farm.common.constants.BizErrorCode;
+import cn.jxufe.farm.common.enums.BizErrorCode;
+import lombok.Getter;
 
+@Getter
 public class ServiceException extends RuntimeException {
 
     private final BizErrorCode bizCode;
@@ -19,7 +21,4 @@ public class ServiceException extends RuntimeException {
         this.bizCode = bizCode == null ? BizErrorCode.SERVICE_ERROR : bizCode;
     }
 
-    public BizErrorCode getBizCode() {
-        return bizCode;
-    }
 }

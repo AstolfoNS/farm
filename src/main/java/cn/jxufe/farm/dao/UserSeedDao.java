@@ -26,10 +26,12 @@ public interface UserSeedDao extends JpaRepository<UserSeed, Long> {
              where s.id = :id
                and s.isDeleted = false
             """)
-    int increaseQuantity(@Param("id") Long id,
-                         @Param("amount") Long amount,
-                         @Param("updatedBy") Long updatedBy,
-                         @Param("updatedAt") OffsetDateTime updatedAt);
+    int increaseQuantity(
+            @Param("id") Long id,
+            @Param("amount") Long amount,
+            @Param("updatedBy") Long updatedBy,
+            @Param("updatedAt") OffsetDateTime updatedAt
+    );
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
@@ -41,8 +43,10 @@ public interface UserSeedDao extends JpaRepository<UserSeed, Long> {
                and s.isDeleted = false
                and (s.quantity - s.frozenQuantity) >= :amount
             """)
-    int decreaseAvailableQuantityIfEnough(@Param("id") Long id,
-                                          @Param("amount") Long amount,
-                                          @Param("updatedBy") Long updatedBy,
-                                          @Param("updatedAt") OffsetDateTime updatedAt);
+    int decreaseAvailableQuantityIfEnough(
+            @Param("id") Long id,
+            @Param("amount") Long amount,
+            @Param("updatedBy") Long updatedBy,
+            @Param("updatedAt") OffsetDateTime updatedAt
+    );
 }

@@ -1,6 +1,6 @@
 package cn.jxufe.farm.service.imp;
 
-import cn.jxufe.farm.common.constants.BizErrorCode;
+import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.exception.ServiceException;
 import cn.jxufe.farm.dao.RequestIdempotencyDao;
 import cn.jxufe.farm.entity.RequestIdempotency;
@@ -18,10 +18,13 @@ import java.util.Optional;
 public class RequestIdempotencyServiceImp implements RequestIdempotencyService {
 
     private static final String STATUS_PROCESSING = "PROCESSING";
+
     private static final String STATUS_SUCCESS = "SUCCESS";
+
     private static final String STATUS_FAILED = "FAILED";
 
     private final RequestIdempotencyDao requestIdempotencyDao;
+
     private final ObjectMapper objectMapper;
 
     public RequestIdempotencyServiceImp(RequestIdempotencyDao requestIdempotencyDao, ObjectMapper objectMapper) {

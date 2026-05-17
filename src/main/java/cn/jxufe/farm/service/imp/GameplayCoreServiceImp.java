@@ -9,121 +9,112 @@ import cn.jxufe.farm.service.GameplayCoreService;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class GameplayCoreServiceImp implements GameplayCoreService {
 
     private static final int MAX_PAGE_SIZE = 100;
 
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
+    private static final int DEFAULT_PAGE_NO = 1;
+
     @Override
     public boolean isPlotBizType(String bizType) {
-        return "UNLOCK_PLOT".equalsIgnoreCase(bizType) || "EXPAND_PLOT".equalsIgnoreCase(bizType);
+        return !normalizePlotBizType(bizType).isEmpty();
     }
 
     @Override
     public boolean isCropActionType(String actionType) {
-        return "CARE".equalsIgnoreCase(actionType)
-                || "HARVEST".equalsIgnoreCase(actionType)
-                || "PLANT".equalsIgnoreCase(actionType);
+        return !normalizeCropActionType(actionType).isEmpty();
     }
 
     @Override
     public String normalizePlotBizType(String bizType) {
-        String value = safeString(bizType).trim().toUpperCase();
-        if (value.isBlank()) {
-            return "";
-        }
-        if ("UNLOCK".equals(value) || "UNLOCK_PLOT".equals(value)) {
-            return "UNLOCK_PLOT";
-        }
-        if ("EXPAND".equals(value) || "EXPAND_PLOT".equals(value)) {
-            return "EXPAND_PLOT";
-        }
-        return "";
+        if (bizType == null || bizType.isBlank()) return "";
+        return switch (bizType.trim().toUpperCase()) {
+            case "UNLOCK", "UNLOCK_PLOT" -> "UNLOCK_PLOT";
+            case "EXPAND", "EXPAND_PLOT" -> "EXPAND_PLOT";
+            default -> "";
+        };
     }
 
     @Override
     public String normalizeCropActionType(String actionType) {
-        String value = safeString(actionType).trim().toUpperCase();
-        if (value.isBlank()) {
-            return "";
-        }
-        if ("CARE".equals(value)) {
-            return "CARE";
-        }
-        if ("HARVEST".equals(value)) {
-            return "HARVEST";
-        }
-        if ("PLANT".equals(value)) {
-            return "PLANT";
-        }
-        return "";
+        if (actionType == null || actionType.isBlank()) return "";
+        return switch (actionType.trim().toUpperCase()) {
+            case "CARE" -> "CARE";
+            case "HARVEST" -> "HARVEST";
+            case "PLANT" -> "PLANT";
+            default -> "";
+        };
     }
 
     @Override
     public int normalizePageNo(Integer pageNo) {
-        if (pageNo == null || pageNo <= 0) {
-            return 1;
-        }
-        return pageNo;
+        return (pageNo == null || pageNo <= 0) ? DEFAULT_PAGE_NO : pageNo;
     }
 
     @Override
     public int normalizePageSize(Integer pageSize) {
-        if (pageSize == null || pageSize <= 0) {
-            return 10;
-        }
-        return Math.min(pageSize, MAX_PAGE_SIZE);
+        return (pageSize == null || pageSize <= 0) ? DEFAULT_PAGE_SIZE : Math.min(pageSize, MAX_PAGE_SIZE);
     }
 
     @Override
     public Long extractLongFromExtData(String extData, String key) {
-        if (extData == null || extData.isBlank() || key == null || key.isBlank()) {
-            return null;
+        if (extData == null || extData.isBlank() || key == null || key.isBlank()) return null;
+
+        String regex = "\"" + Pattern.quote(key) + "\"\\s*:\\s*(\\d+)";
+        Matcher matcher = Pattern.compile(regex).matcher(extData);
+        if (matcher.find()) {
+            try { return Long.parseLong(matcher.group(1)); }
+            catch (NumberFormatException ignored) { return null; }
         }
-        String pattern = "\"" + key + "\":";
-        int start = extData.indexOf(pattern);
-        if (start < 0) {
-            return null;
-        }
-        int valueStart = start + pattern.length();
-        int valueEnd = valueStart;
-        while (valueEnd < extData.length() && Character.isWhitespace(extData.charAt(valueEnd))) {
-            valueEnd++;
-        }
-        int numberStart = valueEnd;
-        while (valueEnd < extData.length() && Character.isDigit(extData.charAt(valueEnd))) {
-            valueEnd++;
-        }
-        if (numberStart == valueEnd) {
-            return null;
-        }
+        return null;
+    }
+
+    /* =========================================================
+     *  新增 & 强化的安全类型与计算工具
+     * ========================================================= */
+
+    @Override
+    public String safeString(String value) { return value == null ? "" : value; }
+
+    @Override
+    public long safeLong(Long value) { return value == null ? 0L : value; }
+
+    @Override
+    public int safeInteger(Integer value) { return value == null ? 0 : value; }
+
+    @Override
+    public short safeShort(Short value) { return value == null ? 0 : value; }
+
+    @Override
+    public Long defaultLong(Long value, Long defaultValue) { return value == null ? defaultValue : value; }
+
+    @Override
+    public Integer defaultInt(Integer value, Integer defaultValue) { return value == null ? defaultValue : value; }
+
+    @Override
+    public long safeMultiply(long a, long b) {
+        try { return Math.multiplyExact(a, b); }
+        catch (ArithmeticException ex) { return Long.MAX_VALUE; }
+    }
+
+    @Override
+    public long safeAdd(long a, long b) {
         try {
-            return Long.parseLong(extData.substring(numberStart, valueEnd));
-        } catch (NumberFormatException ex) {
-            return null;
+            return Math.addExact(a, b);
+        } catch (ArithmeticException ex) {
+            return Long.MAX_VALUE;
         }
     }
 
-    @Override
-    public String safeString(String value) {
-        return value == null ? "" : value;
-    }
-
-    @Override
-    public long safeLong(Long value) {
-        return value == null ? 0L : value;
-    }
-
-    @Override
-    public int safeInteger(Integer value) {
-        return value == null ? 0 : value;
-    }
-
-    @Override
-    public short safeShort(Short value) {
-        return value == null ? 0 : value;
-    }
+    /* =========================================================
+     *  实体初始化与流水构建
+     * ========================================================= */
 
     @Override
     public void initNewEntity(BaseEntity entity, Long operatorId, OffsetDateTime now) {
@@ -154,19 +145,21 @@ public class GameplayCoreServiceImp implements GameplayCoreService {
     }
 
     @Override
-    public UserInventoryFlow buildInventoryFlow(Long userId,
-                                                String itemType,
-                                                Long seedTypeId,
-                                                String operationType,
-                                                Long changeAmount,
-                                                Long beforeAmount,
-                                                Long afterAmount,
-                                                Long beforeFrozenAmount,
-                                                Long afterFrozenAmount,
-                                                String bizType,
-                                                String bizId,
-                                                OffsetDateTime now,
-                                                String extData) {
+    public UserInventoryFlow buildInventoryFlow(
+            Long userId,
+            String itemType,
+            Long seedTypeId,
+            String operationType,
+            Long changeAmount,
+            Long beforeAmount,
+            Long afterAmount,
+            Long beforeFrozenAmount,
+            Long afterFrozenAmount,
+            String bizType,
+            String bizId,
+            OffsetDateTime now,
+            String extData
+    ) {
         UserInventoryFlow flow = new UserInventoryFlow();
         initNewEntity(flow, userId, now);
         flow.setUserId(userId);
@@ -186,16 +179,18 @@ public class GameplayCoreServiceImp implements GameplayCoreService {
     }
 
     @Override
-    public UserAssetFlow buildAssetFlow(Long userId,
-                                        String assetType,
-                                        String operationType,
-                                        Long changeAmount,
-                                        Long beforeAmount,
-                                        Long afterAmount,
-                                        String bizType,
-                                        String bizId,
-                                        OffsetDateTime now,
-                                        String extData) {
+    public UserAssetFlow buildAssetFlow(
+            Long userId,
+            String assetType,
+            String operationType,
+            Long changeAmount,
+            Long beforeAmount,
+            Long afterAmount,
+            String bizType,
+            String bizId,
+            OffsetDateTime now,
+            String extData
+    ) {
         UserAssetFlow flow = new UserAssetFlow();
         initNewEntity(flow, userId, now);
         flow.setUserId(userId);
@@ -212,14 +207,16 @@ public class GameplayCoreServiceImp implements GameplayCoreService {
     }
 
     @Override
-    public UserCropActionLog buildCropActionLog(Long userId,
-                                                Long plotId,
-                                                Long cropId,
-                                                Long seedTypeId,
-                                                String actionType,
-                                                String actionResult,
-                                                OffsetDateTime now,
-                                                String snapshot) {
+    public UserCropActionLog buildCropActionLog(
+            Long userId,
+            Long plotId,
+            Long cropId,
+            Long seedTypeId,
+            String actionType,
+            String actionResult,
+            OffsetDateTime now,
+            String snapshot
+    ) {
         UserCropActionLog log = new UserCropActionLog();
         initNewEntity(log, userId, now);
         log.setUserId(userId);
@@ -233,4 +230,3 @@ public class GameplayCoreServiceImp implements GameplayCoreService {
         return log;
     }
 }
-

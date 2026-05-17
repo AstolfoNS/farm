@@ -1,10 +1,10 @@
-package cn.jxufe.farm.oss.imp;
+package cn.jxufe.farm.service.imp;
 
 import cn.jxufe.farm.bean.dto.FileUploadResultDTO;
 import cn.jxufe.farm.common.utils.FileAccessPathUtils;
 import cn.jxufe.farm.common.utils.FilePathUtils;
 import cn.jxufe.farm.config.properties.LocalFileStorageProperties;
-import cn.jxufe.farm.oss.FileService;
+import cn.jxufe.farm.service.FileService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,11 +15,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 @Service
-public class FileImp implements FileService {
+public class FileServiceImp implements FileService {
 
     private final LocalFileStorageProperties fileStorageProperties;
 
-    public FileImp(LocalFileStorageProperties fileStorageProperties) {
+    public FileServiceImp(LocalFileStorageProperties fileStorageProperties) {
         this.fileStorageProperties = fileStorageProperties;
     }
 
