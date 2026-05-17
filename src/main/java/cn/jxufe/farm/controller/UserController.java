@@ -1,26 +1,32 @@
 package cn.jxufe.farm.controller;
 
-import cn.jxufe.farm.model.bean.EasyUIData;
-import cn.jxufe.farm.model.bean.EasyUIDataPageRequest;
-import cn.jxufe.farm.model.bean.Message;
-import cn.jxufe.farm.model.entity.User;
+import cn.jxufe.farm.bean.dto.PageQueryDTO;
+import cn.jxufe.farm.bean.dto.SetCurUserDTO;
+import cn.jxufe.farm.bean.dto.UserAddOrUpdateDTO;
+import cn.jxufe.farm.bean.dto.IdDTO;
+import cn.jxufe.farm.bean.dto.UserGridQueryDTO;
+import cn.jxufe.farm.bean.dto.UserAvatarUpdateDTO;
+import cn.jxufe.farm.bean.vo.CurUserVO;
+import cn.jxufe.farm.bean.vo.UserAvatarVO;
+import cn.jxufe.farm.bean.vo.UserInfoVO;
+import cn.jxufe.farm.common.pages.PageResult;
+import cn.jxufe.farm.common.apis.R;
 import cn.jxufe.farm.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
-import java.util.Map;
 
-@Controller
-@RequestMapping("/user")
+@RestController
+@RequestMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -29,60 +35,51 @@ public class UserController {
         this.userService = userService;
     }
 
-    @RequestMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public EasyUIData list() {
-        return userService.list();
+    @GetMapping("/list")
+    public R<PageResult<UserInfoVO>> list() {
+        return R.ok(userService.list());
     }
 
-    @RequestMapping(value = "/gridDataFilterSortPage", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public EasyUIData gridDataFilterSortPageGet(@RequestParam(required = false, defaultValue = "") String name,
-                                                EasyUIDataPageRequest pageRequest) {
-        return userService.gridDataFilterSortPage(name, pageRequest);
+    @PostMapping(value = "/gridDataFilterSortPage", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public R<PageResult<UserInfoVO>> gridDataFilterSortPage(
+            @Valid @RequestBody(required = false) UserGridQueryDTO query) {
+        UserGridQueryDTO request = query == null ? new UserGridQueryDTO() : query;
+        PageQueryDTO pageQuery = new PageQueryDTO();
+        pageQuery.setPage(request.getPage());
+        pageQuery.setRows(request.getRows());
+        pageQuery.setSort(request.getSort());
+        pageQuery.setOrder(request.getOrder());
+        return R.ok(userService.gridDataFilterSortPage(request.getName(), pageQuery));
     }
 
-    @PostMapping(value = "/gridDataFilterSortPage", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public EasyUIData gridDataFilterSortPage(@RequestParam(required = false, defaultValue = "") String name,
-                                             EasyUIDataPageRequest pageRequest) {
-        return userService.gridDataFilterSortPage(name, pageRequest);
+    @PostMapping(value = "/addOrUpdate", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public R<UserInfoVO> addOrUpdate(@Valid @RequestBody UserAddOrUpdateDTO params) {
+        return R.ok(userService.addOrUpdate(params));
     }
 
-    @PostMapping(value = "/addOrUpdate", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Message addOrUpdate(@RequestParam Map<String, String> params) {
-        return userService.addOrUpdate(params);
+    @PostMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public R<Void> delete(@Valid @RequestBody IdDTO params) {
+        userService.delete(params);
+        return R.ok();
     }
 
-    @PostMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Message delete(@RequestParam("id") Long id) {
-        return userService.delete(id);
+    @PostMapping(value = "/updateAvatar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public R<UserAvatarVO> updateAvatar(@Valid @RequestBody UserAvatarUpdateDTO params) {
+        return R.ok(userService.updateAvatar(params));
     }
 
-    @PostMapping(value = "/updateAvatar", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Message updateAvatar(@RequestParam("id") Long id,
-                                @RequestParam("avatarPath") String avatarPath) {
-        return userService.updateAvatar(id, avatarPath);
+    @GetMapping("/loginOptions")
+    public R<List<UserInfoVO>> loginOptions() {
+        return R.ok(userService.loginUserOptions());
     }
 
-    @GetMapping(value = "/loginOptions", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public List<Map<String, Object>> loginOptions() {
-        return userService.loginUserOptions();
+    @PostMapping(value = "/setCurUser", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public R<CurUserVO> setCurUser(HttpSession session, @Valid @RequestBody SetCurUserDTO user) {
+        return R.ok(userService.setCurUser(session, user));
     }
 
-    @PostMapping(value = "/setCurUser", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Message setCurUser(HttpSession session, @RequestBody User user) {
-        return userService.setCurUser(session, user);
-    }
-
-    @RequestMapping(value = "/getCurUser", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Message getCurUser(HttpSession session) {
-        return userService.getCurUser(session);
+    @GetMapping("/getCurUser")
+    public R<CurUserVO> getCurUser(HttpSession session) {
+        return R.ok(userService.getCurUser(session));
     }
 }

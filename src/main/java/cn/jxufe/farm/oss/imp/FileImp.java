@@ -1,17 +1,18 @@
 package cn.jxufe.farm.oss.imp;
 
+import cn.jxufe.farm.bean.dto.FileUploadResultDTO;
+import cn.jxufe.farm.common.utils.FileAccessPathUtils;
+import cn.jxufe.farm.common.utils.FilePathUtils;
 import cn.jxufe.farm.config.properties.LocalFileStorageProperties;
-import cn.jxufe.farm.model.bean.FileUploadResult;
 import cn.jxufe.farm.oss.FileService;
-import cn.jxufe.farm.common.util.FilePathUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class FileImp implements FileService {
@@ -23,7 +24,7 @@ public class FileImp implements FileService {
     }
 
     @Override
-    public FileUploadResult upload(MultipartFile file, String category) {
+    public FileUploadResultDTO upload(MultipartFile file, String category) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("上传文件不能为空");
         }
@@ -37,12 +38,12 @@ public class FileImp implements FileService {
         Path targetPath = resolveSafePath(rootPath, relativePath);
         try {
             Files.createDirectories(targetPath.getParent());
-            file.transferTo(targetPath);
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
             throw new RuntimeException("保存文件失败: " + ex.getMessage(), ex);
         }
 
-        FileUploadResult result = new FileUploadResult();
+        FileUploadResultDTO result = new FileUploadResultDTO();
         result.setRelativePath(relativePath);
         result.setAccessUrl(buildAccessUrl(relativePath));
         result.setOriginalName(file.getOriginalFilename());
@@ -72,8 +73,7 @@ public class FileImp implements FileService {
         if (normalized.isBlank()) {
             throw new IllegalArgumentException("文件路径不能为空");
         }
-        String publicPrefix = normalizePublicPrefix(fileStorageProperties.getPublicPrefix());
-        return publicPrefix + "/" + normalized;
+        return FileAccessPathUtils.normalizePublicPrefix(fileStorageProperties.getPublicPrefix()) + "/" + normalized;
     }
 
     @Override
@@ -106,47 +106,6 @@ public class FileImp implements FileService {
     }
 
     private String normalizeIncomingPath(String input) {
-        if (input == null || input.isBlank()) {
-            return "";
-        }
-        String raw = input.trim();
-        try {
-            URI uri = URI.create(raw);
-            if (uri.getScheme() != null && uri.getPath() != null) {
-                raw = uri.getPath();
-            }
-        } catch (Exception ignored) {
-        }
-
-        int queryIndex = raw.indexOf('?');
-        if (queryIndex >= 0) {
-            raw = raw.substring(0, queryIndex);
-        }
-        int fragmentIndex = raw.indexOf('#');
-        if (fragmentIndex >= 0) {
-            raw = raw.substring(0, fragmentIndex);
-        }
-
-        String relative = FilePathUtils.sanitizeToRelativePath(raw);
-        String publicPrefix = normalizePublicPrefix(fileStorageProperties.getPublicPrefix());
-        String normalizedPrefix = FilePathUtils.sanitizeToRelativePath(publicPrefix);
-        if (relative.startsWith(normalizedPrefix + "/")) {
-            return relative.substring(normalizedPrefix.length() + 1);
-        }
-        return relative;
-    }
-
-    private String normalizePublicPrefix(String prefix) {
-        if (prefix == null || prefix.isBlank()) {
-            return "/oss";
-        }
-        String trimmed = prefix.trim();
-        if (!trimmed.startsWith("/")) {
-            trimmed = "/" + trimmed;
-        }
-        if (trimmed.endsWith("/")) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-        }
-        return trimmed;
+        return FileAccessPathUtils.normalizeIncomingRelativePath(input, fileStorageProperties.getPublicPrefix());
     }
 }

@@ -1,11 +1,17 @@
 spring:
   application:
     name: farm
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 20MB
   datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DB_HOST:8.154.36.28}:5432/misdb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&autoReconnect=true
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:1234567890}
@@ -33,3 +39,17 @@ farm:
   file:
     storage-root: ${FILE_STORAGE_ROOT:./static/oss}
     public-prefix: ${FILE_PUBLIC_PREFIX:/oss}
+  gameplay:
+    policy:
+      plot:
+        unlock:
+          free-plot-index-limit: ${PLOT_UNLOCK_FREE_INDEX_LIMIT:3}
+          base-cost-coin: ${PLOT_UNLOCK_BASE_COST_COIN:80}
+          cost-step-coin: ${PLOT_UNLOCK_COST_STEP_COIN:40}
+        expand:
+          free-plot-count-limit: ${PLOT_EXPAND_FREE_COUNT_LIMIT:3}
+          base-cost-coin: ${PLOT_EXPAND_BASE_COST_COIN:100}
+          cost-step-coin: ${PLOT_EXPAND_COST_STEP_COIN:50}
+        defaults:
+          total-plot-count: ${PLOT_DEFAULT_TOTAL_COUNT:6}
+          unlocked-plot-count: ${PLOT_DEFAULT_UNLOCKED_COUNT:1}

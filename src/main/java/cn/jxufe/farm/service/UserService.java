@@ -1,29 +1,33 @@
 package cn.jxufe.farm.service;
 
-import cn.jxufe.farm.model.bean.EasyUIData;
-import cn.jxufe.farm.model.bean.EasyUIDataPageRequest;
-import cn.jxufe.farm.model.bean.Message;
-import cn.jxufe.farm.model.entity.User;
+import cn.jxufe.farm.bean.dto.PageQueryDTO;
+import cn.jxufe.farm.bean.dto.UserAddOrUpdateDTO;
+import cn.jxufe.farm.bean.dto.IdDTO;
+import cn.jxufe.farm.bean.dto.SetCurUserDTO;
+import cn.jxufe.farm.bean.dto.UserAvatarUpdateDTO;
+import cn.jxufe.farm.bean.vo.CurUserVO;
+import cn.jxufe.farm.bean.vo.UserAvatarVO;
+import cn.jxufe.farm.bean.vo.UserInfoVO;
+import cn.jxufe.farm.common.pages.PageResult;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
-import java.util.Map;
 
 public interface UserService {
 
-    EasyUIData list();
+    PageResult<UserInfoVO> list();
 
-    EasyUIData gridDataFilterSortPage(String name, EasyUIDataPageRequest pageRequest);
+    PageResult<UserInfoVO> gridDataFilterSortPage(String name, PageQueryDTO pageRequest);
 
-    Message addOrUpdate(Map<String, String> params);
+    UserInfoVO addOrUpdate(UserAddOrUpdateDTO params);
 
-    Message delete(Long id);
+    void delete(IdDTO params);
 
-    Message updateAvatar(Long id, String avatarPath);
+    UserAvatarVO updateAvatar(UserAvatarUpdateDTO params);
 
-    List<Map<String, Object>> loginUserOptions();
+    List<UserInfoVO> loginUserOptions();
 
-    Message setCurUser(HttpSession session, User user);
+    CurUserVO setCurUser(HttpSession session, SetCurUserDTO user);
 
-    Message getCurUser(HttpSession session);
+    CurUserVO getCurUser(HttpSession session);
 }
