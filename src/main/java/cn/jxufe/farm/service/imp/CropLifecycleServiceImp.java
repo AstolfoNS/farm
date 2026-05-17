@@ -10,7 +10,7 @@ import cn.jxufe.farm.dao.*;
 import cn.jxufe.farm.entity.*;
 import cn.jxufe.farm.service.CropLifecycleService;
 import cn.jxufe.farm.service.GameplayCoreService;
-import cn.jxufe.farm.service.PlotGameplayService;
+import cn.jxufe.farm.service.PlotCostService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +55,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
 
     private final GameplayCoreService gameplayCoreService;
 
-    private final PlotGameplayService plotGameplayService;
+    private final PlotCostService  plotCostService;
 
     private final GameplayPolicyProperties gameplayPolicyProperties;
 
@@ -71,7 +71,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
             UserInventoryFlowDao userInventoryFlowDao,
             UserCropActionLogDao userCropActionLogDao,
             GameplayCoreService gameplayCoreService,
-            PlotGameplayService plotGameplayService,
+            PlotCostService plotCostService,
             GameplayPolicyProperties gameplayPolicyProperties
     ) {
         this.userDao = userDao;
@@ -85,7 +85,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
         this.userInventoryFlowDao = userInventoryFlowDao;
         this.userCropActionLogDao = userCropActionLogDao;
         this.gameplayCoreService = gameplayCoreService;
-        this.plotGameplayService = plotGameplayService;
+        this.plotCostService = plotCostService;
         this.gameplayPolicyProperties = gameplayPolicyProperties;
     }
 
@@ -430,7 +430,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
             SoilType soilType = soilTypeMap.get(plot.getSoilTypeId());
             plotVO.setSoilBitCode(soilType == null ? null : soilType.getBitCode());
             plotVO.setSoilName(soilType == null ? "" : gameplayCoreService.safeString(soilType.getName()));
-            plotVO.setUnlockCostCoin(plotGameplayService.calculateUnlockCostCoin(plot.getPlotIndex()));
+            plotVO.setUnlockCostCoin(plotCostService.calculateUnlockCostCoin(plot.getPlotIndex()));
             plotVO.setCanUnlock(nextUnlockPlot != null && nextUnlockPlot.getId().equals(plot.getId()));
 
             UserCrop crop = ctx.cropByPlotId.get(plot.getId());

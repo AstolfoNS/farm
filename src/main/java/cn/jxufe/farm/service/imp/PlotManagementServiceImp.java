@@ -9,10 +9,7 @@ import cn.jxufe.farm.common.utils.ServiceGuardUtils;
 import cn.jxufe.farm.config.properties.GameplayPolicyProperties;
 import cn.jxufe.farm.dao.*;
 import cn.jxufe.farm.entity.*;
-import cn.jxufe.farm.service.CropLifecycleService;
-import cn.jxufe.farm.service.GameplayCoreService;
-import cn.jxufe.farm.service.PlotGameplayService;
-import cn.jxufe.farm.service.PlotManagementService;
+import cn.jxufe.farm.service.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +33,7 @@ public class PlotManagementServiceImp implements PlotManagementService {
 
     private final GameplayCoreService gameplayCoreService;
 
-    private final PlotGameplayService  plotGameplayService;
+    private final PlotCostService plotCostService;
 
     private final GameplayPolicyProperties gameplayPolicyProperties;
 
@@ -47,7 +44,7 @@ public class PlotManagementServiceImp implements PlotManagementService {
             UserAssetFlowDao userAssetFlowDao,
             CropLifecycleService cropLifecycleService,
             GameplayCoreService gameplayCoreService,
-            PlotGameplayService plotGameplayService,
+            PlotCostService plotCostService,
             GameplayPolicyProperties gameplayPolicyProperties
     ) {
         this.userDao = userDao;
@@ -56,7 +53,7 @@ public class PlotManagementServiceImp implements PlotManagementService {
         this.userAssetFlowDao = userAssetFlowDao;
         this.cropLifecycleService = cropLifecycleService;
         this.gameplayCoreService = gameplayCoreService;
-        this.plotGameplayService = plotGameplayService;
+        this.plotCostService = plotCostService;
         this.gameplayPolicyProperties = gameplayPolicyProperties;
     }
 
@@ -118,7 +115,7 @@ public class PlotManagementServiceImp implements PlotManagementService {
             throw new ServiceException(BizErrorCode.PLOT_UNLOCK_ORDER_INVALID, "请先解锁前置地块");
         }
 
-        long unlockCostCoin = plotGameplayService.calculateUnlockCostCoin(plot.getPlotIndex());
+        long unlockCostCoin = plotCostService.calculateUnlockCostCoin(plot.getPlotIndex());
         ctx.deductCoin(unlockCostCoin);
         long afterCoin = ctx.getLatestCoin();
         long beforeCoin = afterCoin + unlockCostCoin;
