@@ -22,14 +22,10 @@ public class PlotGameplayServiceImp implements PlotGameplayService {
 
     private final GameplayService gameplayService;
 
-    private final GameplayPolicyProperties gameplayPolicyProperties;
-
     public PlotGameplayServiceImp(
-            GameplayService gameplayService,
-            GameplayPolicyProperties gameplayPolicyProperties
+            GameplayService gameplayService
     ) {
         this.gameplayService = gameplayService;
-        this.gameplayPolicyProperties = gameplayPolicyProperties;
     }
 
     @Override
@@ -55,15 +51,6 @@ public class PlotGameplayServiceImp implements PlotGameplayService {
     @Override
     public List<PlotTradeBizTypeOptionVO> listPlotTradeBizTypeOptions() {
         return gameplayService.listPlotTradeBizTypeOptions();
-    }
-
-    @Override
-    public long calculateUnlockCostCoin(Short plotIndex) {
-        int freeLimit = gameplayPolicyProperties.getPlot().getUnlock().getFreePlotIndexLimit();
-        short safePlotIndex = plotIndex == null || plotIndex <= 0 ? 1 : plotIndex;
-        if (safePlotIndex <= freeLimit) return 0L;
-        return gameplayPolicyProperties.getPlot().getUnlock().getBaseCostCoin()
-                + (safePlotIndex - freeLimit - 1L) * gameplayPolicyProperties.getPlot().getUnlock().getCostStepCoin();
     }
 
 }

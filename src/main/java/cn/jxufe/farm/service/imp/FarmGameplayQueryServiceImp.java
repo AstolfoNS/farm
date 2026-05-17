@@ -15,7 +15,9 @@ public class FarmGameplayQueryServiceImp implements FarmGameplayQueryService {
 
     private final GameplayService gameplayService;
 
-    public FarmGameplayQueryServiceImp(GameplayService gameplayService) {
+    public FarmGameplayQueryServiceImp(
+            GameplayService gameplayService
+    ) {
         this.gameplayService = gameplayService;
     }
 

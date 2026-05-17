@@ -25,5 +25,4 @@ public interface PlotGameplayService {
 
     List<PlotTradeBizTypeOptionVO> listPlotTradeBizTypeOptions();
 
-    long calculateUnlockCostCoin(Short plotIndex);
 }
