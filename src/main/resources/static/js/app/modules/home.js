@@ -18,7 +18,7 @@
 
     function renderTopUser(user) {
         var data = user || {};
-        var head = data.head || farmResolveImg("domain/user/default-avatars/unknown-user.png");
+        var head = data.head || farmResolveImg("ui/user/default-avatar.png");
         var nickname = data.nickname || "未知用户";
         var exp = Number(data.experience || 0);
         var coin = Number(data.coin || 0);
@@ -61,6 +61,9 @@
             window.FarmAppState.currentUser = res.data;
             renderTopUser(res.data);
             syncRealtime();
+            if (window.FarmAudio && $.isFunction(window.FarmAudio.reloadSettings)) {
+                window.FarmAudio.reloadSettings();
+            }
             if (window.FarmAppState.currentModule === "farm" && window.FarmModule) {
                 window.FarmModule.loadOverviewByUser(currentUserId(), true);
             }
@@ -89,7 +92,7 @@
             method: "get",
             url: "/user/loginOptions",
             formatter: function (row) {
-                var head = row.head || farmResolveImg("domain/user/default-avatars/unknown-user.png");
+                var head = row.head || farmResolveImg("ui/user/default-avatar.png");
                 return "<div style='display:flex;align-items:center;'>" +
                     "<img src='" + head + "' style='width:24px;height:24px;border-radius:4px;margin-right:6px;' alt=''>" +
                     "<span>" + (row.nickname || "") + "</span>" +
@@ -107,6 +110,7 @@
         hidePanel($("#profilePanel"));
         hidePanel($("#homePanel"));
         hidePanel($("#seedAdminPanel"));
+        hidePanel($("#settingsPanel"));
         hidePanel($("#farmStage .farm-stage-watermark"));
     }
 
@@ -114,7 +118,9 @@
         var feedbackMs = motion().actionFeedbackMs;
         window.FarmAppState.currentModule = moduleName;
         $(".topbar-nav-item").removeClass("is-active");
-        $(".topbar-nav-item[data-module='" + moduleName + "']").addClass("is-active");
+        if (moduleName !== "home") {
+            $(".topbar-nav-item[data-module='" + moduleName + "']").addClass("is-active");
+        }
 
         hideBasicPanels();
 
@@ -126,6 +132,11 @@
         }
         if (window.FarmStoreModule) {
             window.FarmStoreModule.setActive(false);
+        }
+
+        if (moduleName === "home") {
+            showPanel($("#farmStage .farm-stage-watermark"));
+            return;
         }
 
         if (moduleName === "profile") {
@@ -167,10 +178,19 @@
             return;
         }
 
+        if (moduleName === "settings") {
+            showPanel($("#settingsPanel"));
+            showPanel($("#farmStage .farm-stage-watermark"));
+            if (window.FarmAudio && $.isFunction(window.FarmAudio.renderSettings)) {
+                window.FarmAudio.renderSettings();
+            }
+            return;
+        }
+
         showPanel($("#farmStage .farm-stage-watermark"));
         $.messager.show({
             title: "提示",
-            msg: "模块 " + moduleName + " 正在按计划重构中。",
+            msg: "模块 " + moduleName + " 正在重构中。",
             timeout: feedbackMs,
             showType: "slide"
         });
@@ -213,15 +233,14 @@
     }
 
     function resolveInitialModule() {
-        var moduleName = "profile";
+        var moduleName = "home";
         try {
-            var search = window.location.search || "";
-            var query = new URLSearchParams(search);
+            var query = new URLSearchParams(window.location.search || "");
             var mod = String(query.get("module") || "").toLowerCase();
             if (mod === "home") {
-                moduleName = "profile";
+                moduleName = "home";
             }
-            if (mod === "profile" || mod === "user-select" || mod === "farm" || mod === "shop" || mod === "store" || mod === "seed-admin") {
+            if (mod === "profile" || mod === "user-select" || mod === "farm" || mod === "shop" || mod === "store" || mod === "seed-admin" || mod === "settings" || mod === "home") {
                 moduleName = mod;
             }
         } catch (e) {
@@ -242,3 +261,4 @@
         switchModule: switchModule
     };
 })(window, window.jQuery);
+

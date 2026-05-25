@@ -5,9 +5,11 @@ import cn.jxufe.farm.bean.dto.UserAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.IdDTO;
 import cn.jxufe.farm.bean.dto.SetCurUserDTO;
 import cn.jxufe.farm.bean.dto.UserAvatarUpdateDTO;
+import cn.jxufe.farm.bean.dto.UserSettingsUpdateDTO;
 import cn.jxufe.farm.bean.vo.CurUserVO;
 import cn.jxufe.farm.bean.vo.UserAvatarVO;
 import cn.jxufe.farm.bean.vo.UserInfoVO;
+import cn.jxufe.farm.bean.vo.UserSettingsVO;
 import cn.jxufe.farm.common.pages.PageResult;
 import jakarta.servlet.http.HttpSession;
 
@@ -30,4 +32,8 @@ public interface UserService {
     CurUserVO setCurUser(HttpSession session, SetCurUserDTO user);
 
     CurUserVO getCurUser(HttpSession session);
+
+    UserSettingsVO getCurUserSettings(HttpSession session);
+
+    UserSettingsVO saveCurUserSettings(HttpSession session, UserSettingsUpdateDTO params);
 }

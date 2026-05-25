@@ -4,7 +4,7 @@
         imgRoot: "/resources/imgs",
         soundRoot: "/resources/sounds",
         currentUser: null,
-        currentModule: "profile",
+        currentModule: "home",
         motion: {
             moduleEnterMs: 260,
             pageSwitchMs: 220,

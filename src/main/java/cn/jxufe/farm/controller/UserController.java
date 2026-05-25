@@ -6,9 +6,11 @@ import cn.jxufe.farm.bean.dto.UserAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.IdDTO;
 import cn.jxufe.farm.bean.dto.UserGridQueryDTO;
 import cn.jxufe.farm.bean.dto.UserAvatarUpdateDTO;
+import cn.jxufe.farm.bean.dto.UserSettingsUpdateDTO;
 import cn.jxufe.farm.bean.vo.CurUserVO;
 import cn.jxufe.farm.bean.vo.UserAvatarVO;
 import cn.jxufe.farm.bean.vo.UserInfoVO;
+import cn.jxufe.farm.bean.vo.UserSettingsVO;
 import cn.jxufe.farm.common.pages.PageResult;
 import cn.jxufe.farm.common.apis.R;
 import cn.jxufe.farm.service.UserService;
@@ -81,5 +83,19 @@ public class UserController {
     @GetMapping("/getCurUser")
     public R<CurUserVO> getCurUser(HttpSession session) {
         return R.ok(userService.getCurUser(session));
+    }
+
+    @GetMapping("/settings/get")
+    public R<UserSettingsVO> getCurUserSettings(HttpSession session) {
+        return R.ok(userService.getCurUserSettings(session));
+    }
+
+    @PostMapping(value = "/settings/save", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public R<UserSettingsVO> saveCurUserSettings(
+            HttpSession session,
+            @Valid @RequestBody(required = false) UserSettingsUpdateDTO params
+    ) {
+        UserSettingsUpdateDTO request = params == null ? new UserSettingsUpdateDTO() : params;
+        return R.ok(userService.saveCurUserSettings(session, request));
     }
 }

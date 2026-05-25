@@ -29,49 +29,61 @@
 <div id="appShell" class="app-shell">
     <header class="farm-topbar">
         <div class="topbar-user">
-            <img id="topUserAvatar" class="topbar-user-avatar" src="/resources/imgs/domain/user/default-avatars/unknown-user.png" alt="avatar">
+            <img id="topUserAvatar" class="topbar-user-avatar" src="/resources/imgs/ui/user/default-avatar.png" alt="avatar">
             <div class="topbar-user-meta">
                 <div id="topUserName" class="topbar-user-name">未知用户</div>
                 <div class="topbar-user-stats">
-                    <span class="topbar-stat-item"><img src="/resources/imgs/domain/user/icons/exp.png" alt="exp"><span id="topUserExp">0</span></span>
-                    <span class="topbar-stat-item"><img src="/resources/imgs/domain/user/icons/gold.png" alt="coin"><span id="topUserCoin">0</span></span>
-                    <span class="topbar-stat-item"><img src="/resources/imgs/domain/user/icons/score.png" alt="score"><span id="topUserScore">0</span></span>
+                    <span class="topbar-stat-item">
+                        <img src="/resources/imgs/ui/user/stat-exp.png" alt="exp">
+                        <em id="topUserExp">0</em>
+                    </span>
+                    <span class="topbar-stat-item">
+                        <img src="/resources/imgs/ui/user/stat-gold.png" alt="coin">
+                        <em id="topUserCoin">0</em>
+                    </span>
+                    <span class="topbar-stat-item">
+                        <img src="/resources/imgs/ui/user/stat-score.png" alt="score">
+                        <em id="topUserScore">0</em>
+                    </span>
                 </div>
             </div>
         </div>
-        <div class="topbar-nav">
-            <a href="javascript:void(0)" class="topbar-nav-item is-active" data-module="profile" title="个人用户">
-                <img src="/resources/imgs/domain/user/menus/self.png" alt="profile">
-                <span>个人用户</span>
+        <nav class="topbar-nav">
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="profile" title="个人用户">
+                <img src="/resources/imgs/ui/menu/menu-self.png" alt="个人用户">
+                <span class="topbar-nav-text">个人用户</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="user-select" title="用户选择">
-                <img src="/resources/imgs/domain/user/menus/user.png" alt="user-select">
-                <span>用户选择</span>
+                <img src="/resources/imgs/ui/menu/menu-user-select.png" alt="用户选择">
+                <span class="topbar-nav-text">用户选择</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="farm" title="农场">
-                <img src="/resources/imgs/domain/farm/menus/farm.png" alt="farm">
-                <span>农场</span>
+                <img src="/resources/imgs/ui/menu/menu-farm.png" alt="农场">
+                <span class="topbar-nav-text">农场</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="shop" title="商店">
-                <img src="/resources/imgs/domain/shop/menus/shop.png" alt="shop">
-                <span>商店</span>
+                <img src="/resources/imgs/ui/menu/menu-shop.png" alt="商店">
+                <span class="topbar-nav-text">商店</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="store" title="仓库">
-                <img src="/resources/imgs/domain/store/menus/store.png" alt="store">
-                <span>仓库</span>
+                <img src="/resources/imgs/ui/menu/menu-store.png" alt="仓库">
+                <span class="topbar-nav-text">仓库</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="seed-admin" title="种子管理">
-                <img src="/resources/imgs/domain/seed/menus/seed.png" alt="seed-admin">
-                <span>种子管理</span>
+                <img src="/resources/imgs/ui/menu/menu-seed-admin.png" alt="种子管理">
+                <span class="topbar-nav-text">种子管理</span>
             </a>
-            <a id="audioToggleBtn" href="javascript:void(0)" class="topbar-audio-btn" title="音效开关">音效: 开</a>
-        </div>
+            <a href="javascript:void(0)" class="topbar-nav-item topbar-nav-item-setting" data-module="settings" title="设置">
+                <span class="topbar-nav-gear" aria-hidden="true"></span>
+                <span class="topbar-nav-text">设置</span>
+            </a>
+        </nav>
     </header>
 
     <main id="farmStage" class="farm-stage">
         <div class="farm-stage-watermark">
-            <div class="farm-stage-watermark-title">我的农场</div>
-            <div class="farm-stage-watermark-sub">MY FARM</div>
+            <div class="farm-stage-watermark-main">我 的 农 场</div>
+            <div class="farm-stage-watermark-sub">www.myfarm.com</div>
         </div>
 
         <section id="farmPanel" class="farm-panel">
@@ -91,29 +103,34 @@
         </section>
 
         <section id="shopPanel" class="shop-panel">
-            <div class="shop-toolbar">
-                <div class="shop-overview-item">当前金币: <span id="shopCurrentCoin">0</span></div>
-                <div class="shop-overview-item">可售总价值: <span id="shopSellableValue">0</span></div>
-                <div class="shop-overview-item">可售果实数: <span id="shopSellableFruitCount">0</span></div>
-                <div class="shop-overview-item">可购买种类: <span id="shopPurchasableTypeCount">0</span></div>
-            </div>
-            <div class="shop-main">
-                <div class="shop-seed-area">
-                    <div class="shop-block-title">种子商店</div>
-                    <div class="shop-filter-bar">
-                        <input id="shopSeedName" class="shop-filter-input" placeholder="按名称筛选">
-                        <input id="shopSeedQuality" class="shop-filter-select" style="width:130px;">
-                        <input id="shopSeedLevel" class="shop-filter-select" style="width:110px;">
-                        <a id="shopSeedFilterBtn" href="javascript:void(0)" class="easyui-linkbutton c1">查询</a>
-                        <a id="shopSeedResetBtn" href="javascript:void(0)" class="easyui-linkbutton">重置</a>
-                    </div>
+            <div class="shop-board">
+                <div class="shop-board-title">种子仓库</div>
+                <div class="shop-overview-strip">
+                    <span class="shop-overview-item">金币 <em id="shopCurrentCoin">0</em></span>
+                    <span class="shop-overview-item">可售总值 <em id="shopSellableValue">0</em></span>
+                    <span class="shop-overview-item">果实总数 <em id="shopSellableFruitCount">0</em></span>
+                    <span class="shop-overview-item">可买种类 <em id="shopPurchasableTypeCount">0</em></span>
+                </div>
+                <div class="shop-filter-bar">
+                    <input id="shopSeedName" class="shop-filter-input" placeholder="种子名称">
+                    <input id="shopSeedQuality" class="shop-filter-select" style="width:130px;">
+                    <input id="shopSeedLevel" class="shop-filter-select" style="width:110px;">
+                    <a id="shopSeedFilterBtn" href="javascript:void(0)" class="easyui-linkbutton c1">查询</a>
+                    <a id="shopSeedResetBtn" href="javascript:void(0)" class="easyui-linkbutton">重置</a>
+                </div>
+                <div class="shop-content-tabs">
+                    <a id="shopTabSeed" href="javascript:void(0)" class="shop-tab is-active" data-tab="seed">种子商店</a>
+                    <a id="shopTabFruit" href="javascript:void(0)" class="shop-tab" data-tab="fruit">果实仓库</a>
+                    <a id="shopTabTrade" href="javascript:void(0)" class="shop-tab" data-tab="trade">交易记录</a>
+                </div>
+                <div id="shopSeedPane" class="shop-pane is-active">
                     <div id="shopSeedList" class="shop-seed-list"></div>
                     <div id="shopSeedPager" class="shop-seed-pager"></div>
                 </div>
-                <div class="shop-side-area">
-                    <div class="shop-block-title">果实仓库</div>
+                <div id="shopFruitPane" class="shop-pane">
                     <div id="shopFruitList" class="shop-fruit-list"></div>
-                    <div class="shop-block-title trade-title">交易记录</div>
+                </div>
+                <div id="shopTradePane" class="shop-pane">
                     <div id="shopTradeList" class="shop-trade-list"></div>
                 </div>
             </div>
@@ -123,7 +140,7 @@
             <div class="home-panel-title">个人用户</div>
             <div class="home-panel-body">
                 <div class="profile-main">
-                    <img id="profileAvatar" class="profile-avatar" src="/resources/imgs/domain/user/default-avatars/unknown-user.png" alt="avatar">
+                    <img id="profileAvatar" class="profile-avatar" src="/resources/imgs/ui/user/default-avatar.png" alt="avatar">
                     <div class="profile-info">
                         <div class="profile-name" id="profileUserName">未知用户</div>
                         <div class="profile-row">经验值：<span id="profileUserExp">0</span></div>
@@ -131,7 +148,7 @@
                         <div class="profile-row">积分：<span id="profileUserScore">0</span></div>
                     </div>
                 </div>
-                <div class="home-form-tip">这里是个人信息总览。点击顶部“用户选择”可以切换当前用户。</div>
+                <div class="home-form-tip">这里是个人信息总览，点击顶部“用户选择”可以切换当前用户。</div>
             </div>
         </section>
 
@@ -173,9 +190,37 @@
         <section id="seedAdminPanel" class="home-panel seed-admin-panel">
             <div class="home-panel-title">种子管理</div>
             <div class="home-panel-body">
-                <div class="seed-admin-tip">
-                    当前先统一风格与模块入口，种子管理表格与阶段编辑弹窗会在下一阶段接入。
+                <div class="seed-admin-tip">种子管理模块将保持参考页面风格，并与现有后端 CRUD 接口对接。</div>
+            </div>
+        </section>
+
+        <section id="settingsPanel" class="home-panel settings-panel">
+            <div class="home-panel-title">系统设置</div>
+            <div class="home-panel-body">
+                <div class="settings-row">
+                    <label class="settings-label">游戏音效</label>
+                    <input id="settingEffectEnable" type="checkbox" checked="checked">
+                    <span id="settingEffectText" class="settings-value">开启</span>
                 </div>
+                <div class="settings-row">
+                    <label class="settings-label">音效音量</label>
+                    <input id="settingEffectVolume" type="range" min="0" max="1" step="0.05" value="0.8">
+                    <span id="settingEffectVolumeText" class="settings-value">80%</span>
+                </div>
+                <div class="settings-row">
+                    <label class="settings-label">背景音乐</label>
+                    <input id="settingBgmEnable" type="checkbox">
+                    <span id="settingBgmText" class="settings-value">关闭</span>
+                </div>
+                <div class="settings-row">
+                    <label class="settings-label">音乐音量</label>
+                    <input id="settingBgmVolume" type="range" min="0" max="1" step="0.05" value="0.6">
+                    <span id="settingBgmVolumeText" class="settings-value">60%</span>
+                </div>
+                <div class="home-form-actions settings-actions">
+                    <a id="settingApplyBtn" href="javascript:void(0)" class="easyui-linkbutton c1">应用设置</a>
+                </div>
+                <div class="home-form-tip">说明：背景音乐默认未绑定独立曲目，后续补充资源后会自动生效。</div>
             </div>
         </section>
     </main>
@@ -184,3 +229,4 @@
 </div>
 </body>
 </html>
+

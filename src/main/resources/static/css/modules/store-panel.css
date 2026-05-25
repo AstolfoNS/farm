@@ -78,7 +78,7 @@
     inset: 0;
     pointer-events: none;
     opacity: 0.16;
-    background-image: url("/resources/imgs/domain/shop/components/seed-storage-frame.png");
+    background-image: url("/resources/imgs/ui/panel/seed-storage-frame.png");
     background-size: cover;
     background-position: center;
 }
@@ -120,3 +120,4 @@
         transform: translateY(0);
     }
 }
+

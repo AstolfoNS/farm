@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 
 @Getter
 @Setter
@@ -36,4 +37,8 @@ public class User extends BaseEntity {
 
     @Column(name = "coin", nullable = false)
     private Long coin;
+
+    @Column(name = "preferences_json", nullable = false, columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
+    private String preferencesJson;
 }

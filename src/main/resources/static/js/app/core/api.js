@@ -23,6 +23,44 @@
         });
     };
 
+    FarmApi.getCurUserSettings = function (onSuccess, onError) {
+        $.ajax({
+            url: "/user/settings/get",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.saveCurUserSettings = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/user/settings/save",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
     FarmApi.loginOptions = function (onSuccess, onError) {
         $.ajax({
             url: "/user/loginOptions",

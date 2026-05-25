@@ -19,10 +19,11 @@ CREATE TABLE farm.users
     nickname                    VARCHAR(500)        NOT NULL,
     password_hash               VARCHAR(500)        NOT NULL,
     email                       citext              NOT NULL,
-    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '/resources/imgs/domain/user/default-avatars/unknown-user.png',
+    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '/resources/imgs/ui/user/default-avatar.png',
     experience                  BIGINT              NOT NULL DEFAULT 0,
     score                       BIGINT              NOT NULL DEFAULT 0,
     coin                        BIGINT              NOT NULL DEFAULT 0,
+    preferences_json            JSONB               NOT NULL DEFAULT '{}'::jsonb,
 
     created_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,

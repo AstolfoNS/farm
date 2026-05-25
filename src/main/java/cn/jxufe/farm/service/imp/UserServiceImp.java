@@ -1,13 +1,18 @@
 package cn.jxufe.farm.service.imp;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import cn.jxufe.farm.bean.dto.IdDTO;
 import cn.jxufe.farm.bean.dto.PageQueryDTO;
 import cn.jxufe.farm.bean.dto.SetCurUserDTO;
 import cn.jxufe.farm.bean.dto.UserAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.UserAvatarUpdateDTO;
+import cn.jxufe.farm.bean.dto.UserSettingsUpdateDTO;
 import cn.jxufe.farm.bean.vo.CurUserVO;
 import cn.jxufe.farm.bean.vo.UserAvatarVO;
 import cn.jxufe.farm.bean.vo.UserInfoVO;
+import cn.jxufe.farm.bean.vo.UserSettingsVO;
 import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.constants.SessionKeys;
 import cn.jxufe.farm.common.exception.ServiceException;
@@ -41,7 +46,8 @@ import java.util.stream.IntStream;
 @Service
 public class UserServiceImp implements UserService {
 
-    private static final String DEFAULT_AVATAR_URL = "/resources/imgs/domain/user/default-avatars/unknown-user.png";
+    private static final String DEFAULT_AVATAR_URL = "/resources/imgs/ui/user/default-avatar.png";
+    private static final String DEFAULT_PREFERENCES_JSON = "{\"audio\":{\"effectEnabled\":true,\"effectVolume\":0.8,\"bgmEnabled\":false,\"bgmVolume\":0.6}}";
 
     private final UserDao userDao;
 
@@ -54,6 +60,7 @@ public class UserServiceImp implements UserService {
     private final LocalFileStorageProperties fileStorageProperties;
 
     private final GameplayPolicyProperties gameplayPolicyProperties;
+    private final ObjectMapper objectMapper;
 
     public UserServiceImp(
             UserDao userDao,
@@ -61,7 +68,8 @@ public class UserServiceImp implements UserService {
             SoilTypeDao soilTypeDao,
             FileService fileService,
             LocalFileStorageProperties fileStorageProperties,
-            GameplayPolicyProperties gameplayPolicyProperties
+            GameplayPolicyProperties gameplayPolicyProperties,
+            ObjectMapper objectMapper
     ) {
         this.userDao = userDao;
         this.userPlotDao = userPlotDao;
@@ -69,6 +77,7 @@ public class UserServiceImp implements UserService {
         this.fileService = fileService;
         this.fileStorageProperties = fileStorageProperties;
         this.gameplayPolicyProperties = gameplayPolicyProperties;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -205,6 +214,50 @@ public class UserServiceImp implements UserService {
                 });
     }
 
+    @Override
+    public UserSettingsVO getCurUserSettings(HttpSession session) {
+        Object sessionUser = session.getAttribute(SessionKeys.CUR_USER);
+        if (!(sessionUser instanceof User user)) {
+            return buildGuestSettings();
+        }
+        return userDao.findByIdAndIsDeletedFalse(user.getId())
+                .map(this::buildUserSettings)
+                .orElseGet(() -> {
+                    session.removeAttribute(SessionKeys.CUR_USER);
+                    return buildGuestSettings();
+                });
+    }
+
+    @Override
+    @Transactional
+    public UserSettingsVO saveCurUserSettings(HttpSession session, UserSettingsUpdateDTO params) {
+        User entity = requireSessionUser(session);
+        UserSettingsUpdateDTO request = params == null ? new UserSettingsUpdateDTO() : params;
+
+        ObjectNode root = parseOrDefaultRoot(entity.getPreferencesJson());
+        ObjectNode audio = root.with("audio");
+
+        if (request.getEffectEnabled() != null) {
+            audio.put("effectEnabled", request.getEffectEnabled());
+        }
+        if (request.getEffectVolume() != null) {
+            audio.put("effectVolume", clampVolume(request.getEffectVolume()));
+        }
+        if (request.getBgmEnabled() != null) {
+            audio.put("bgmEnabled", request.getBgmEnabled());
+        }
+        if (request.getBgmVolume() != null) {
+            audio.put("bgmVolume", clampVolume(request.getBgmVolume()));
+        }
+
+        entity.setPreferencesJson(root.toString());
+        entity.setUpdatedAt(OffsetDateTime.now());
+        entity.setUpdatedBy(entity.getId());
+        User saved = userDao.save(entity);
+        session.setAttribute(SessionKeys.CUR_USER, saved);
+        return buildUserSettings(saved);
+    }
+
     /* =========================================================
      *  Private Utility Helpers
      * ========================================================= */
@@ -219,6 +272,7 @@ public class UserServiceImp implements UserService {
         entity.setPasswordHash("123456");
         entity.setEmail(username + "_" + System.currentTimeMillis() + "@farm.local");
         entity.setAvatarUrl(DEFAULT_AVATAR_URL);
+        entity.setPreferencesJson(DEFAULT_PREFERENCES_JSON);
         return entity;
     }
 
@@ -265,6 +319,77 @@ public class UserServiceImp implements UserService {
         guest.setHead(DEFAULT_AVATAR_URL);
         guest.setLoggedIn(false);
         return guest;
+    }
+
+    private UserSettingsVO buildGuestSettings() {
+        UserSettingsVO vo = new UserSettingsVO();
+        vo.setUserId(0L);
+        vo.setLoggedIn(false);
+        vo.setEffectEnabled(true);
+        vo.setEffectVolume(0.8);
+        vo.setBgmEnabled(false);
+        vo.setBgmVolume(0.6);
+        vo.setPreferencesJson(DEFAULT_PREFERENCES_JSON);
+        return vo;
+    }
+
+    private UserSettingsVO buildUserSettings(User user) {
+        ObjectNode root = parseOrDefaultRoot(user.getPreferencesJson());
+        ObjectNode audio = root.with("audio");
+
+        UserSettingsVO vo = new UserSettingsVO();
+        vo.setUserId(user.getId());
+        vo.setLoggedIn(true);
+        vo.setEffectEnabled(audio.path("effectEnabled").asBoolean(true));
+        vo.setEffectVolume(clampVolume(audio.path("effectVolume").asDouble(0.8)));
+        vo.setBgmEnabled(audio.path("bgmEnabled").asBoolean(false));
+        vo.setBgmVolume(clampVolume(audio.path("bgmVolume").asDouble(0.6)));
+        vo.setPreferencesJson(root.toString());
+        return vo;
+    }
+
+    private User requireSessionUser(HttpSession session) {
+        Object sessionUser = session.getAttribute(SessionKeys.CUR_USER);
+        if (!(sessionUser instanceof User user)) {
+            throw new ServiceException(BizErrorCode.USER_NOT_FOUND, "请先选择用户");
+        }
+        return ServiceGuardUtils.requirePresent(
+                userDao.findByIdAndIsDeletedFalse(user.getId()),
+                BizErrorCode.USER_NOT_FOUND,
+                "当前用户不存在"
+        );
+    }
+
+    private ObjectNode parseOrDefaultRoot(String json) {
+        String raw = safeString(json).trim();
+        if (raw.isBlank()) {
+            raw = DEFAULT_PREFERENCES_JSON;
+        }
+        try {
+            JsonNode node = objectMapper.readTree(raw);
+            if (node != null && node.isObject()) {
+                return (ObjectNode) node;
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            return (ObjectNode) objectMapper.readTree(DEFAULT_PREFERENCES_JSON);
+        } catch (Exception ignored) {
+            ObjectNode fallback = objectMapper.createObjectNode();
+            ObjectNode audio = fallback.putObject("audio");
+            audio.put("effectEnabled", true);
+            audio.put("effectVolume", 0.8);
+            audio.put("bgmEnabled", false);
+            audio.put("bgmVolume", 0.6);
+            return fallback;
+        }
+    }
+
+    private double clampVolume(Double value) {
+        if (value == null || value.isNaN()) {
+            return 0.0;
+        }
+        return Math.max(0.0, Math.min(1.0, value));
     }
 
     private String resolveAvatarAccessUrl(String avatarPath) {

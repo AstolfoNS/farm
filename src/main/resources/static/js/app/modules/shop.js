@@ -5,6 +5,7 @@
         inited: false,
         userId: 0,
         loading: false,
+        currentTab: "seed",
         seedQuery: {
             page: 1,
             rows: 8,
@@ -16,11 +17,11 @@
         },
         fruitQuery: {
             page: 1,
-            rows: 6
+            rows: 10
         },
         tradeQuery: {
             page: 1,
-            rows: 8
+            rows: 10
         }
     };
 
@@ -87,6 +88,22 @@
         $("#shopSellableValue").text(asNumber(data.sellableTotalValue, 0));
         $("#shopSellableFruitCount").text(asNumber(data.sellableFruitTotalCount, 0));
         $("#shopPurchasableTypeCount").text(asNumber(data.purchasableSeedTypeCount, 0));
+    }
+
+    function switchTab(tabName) {
+        state.currentTab = tabName;
+        $(".shop-tab").removeClass("is-active");
+        $(".shop-tab[data-tab='" + tabName + "']").addClass("is-active");
+        $(".shop-pane").removeClass("is-active");
+        if (tabName === "fruit") {
+            $("#shopFruitPane").addClass("is-active");
+            return;
+        }
+        if (tabName === "trade") {
+            $("#shopTradePane").addClass("is-active");
+            return;
+        }
+        $("#shopSeedPane").addClass("is-active");
     }
 
     function buildLevelOptions() {
@@ -205,7 +222,7 @@
         if (url && $.trim(url).length > 0) {
             return url;
         }
-        return farmResolveImg("domain/user/default-avatars/unknown-user.png");
+        return farmResolveImg("ui/user/default-avatar.png");
     }
 
     function renderSeedList(pageData) {
@@ -221,18 +238,14 @@
             var price = asNumber(row.price, 0);
             html.push(
                 "<div class='shop-seed-card'>" +
-                "<div class='shop-seed-head'>" +
-                "<img class='shop-seed-cover' src='" + escapeAttr(resolveCover(row.coverImageUrl)) + "' alt=''>" +
-                "<div>" +
                 "<div class='shop-seed-name'>" + escapeHtml(row.name || ("种子#" + seedTypeId)) + "</div>" +
                 "<div class='shop-seed-meta'>品质: " + escapeHtml(row.seedQualityName || "-") + " | 等级: " + asNumber(row.level, 0) + "</div>" +
-                "<div class='shop-seed-meta'>适配土地: " + escapeHtml(row.enableSoilTypeNames || "-") + "</div>" +
-                "</div>" +
-                "</div>" +
+                "<div class='shop-seed-meta'>土地需求: " + escapeHtml(row.enableSoilTypeNames || "-") + "</div>" +
                 "<div class='shop-seed-desc'>" + escapeHtml(row.description || "暂无描述") + "</div>" +
-                "<div class='shop-seed-price'>价格: " + price + " 金币 | 预计净值: " + asNumber(row.estimatedNetValue, 0) + "</div>" +
+                "<img class='shop-seed-cover' src='" + escapeAttr(resolveCover(row.coverImageUrl)) + "' alt=''>" +
+                "<div class='shop-seed-price'>采购价: " + price + " 金币 | 预估净值: " + asNumber(row.estimatedNetValue, 0) + "</div>" +
                 "<div class='shop-seed-actions'>" +
-                "<a href='javascript:void(0)' class='easyui-linkbutton c1 shop-buy-btn' data-seed-type-id='" + seedTypeId + "' data-price='" + price + "' data-seed-name='" + escapeAttr(row.name || "") + "'>购买</a>" +
+                "<a href='javascript:void(0)' class='easyui-linkbutton c1 shop-buy-btn' data-seed-type-id='" + seedTypeId + "' data-price='" + price + "' data-seed-name='" + escapeAttr(row.name || "") + "'>我要购买</a>" +
                 "</div>" +
                 "</div>"
             );
@@ -246,14 +259,13 @@
     function renderSeedPager(pageData) {
         var pageNo = asNumber(pageData && pageData.pageNo, 1);
         var pages = totalPages(pageData || {});
-        var prevDisabled = pageNo <= 1 ? "disabled='disabled'" : "";
-        var nextDisabled = pageNo >= pages ? "disabled='disabled'" : "";
+        var prevDisabled = pageNo <= 1 ? "disabled" : "";
+        var nextDisabled = pageNo >= pages ? "disabled" : "";
         var html = "" +
-            "<a href='javascript:void(0)' class='easyui-linkbutton shop-page-prev' " + prevDisabled + ">上一页</a>" +
-            "<span style='margin:0 8px;color:#fff4c1;'>第 " + pageNo + " / " + pages + " 页</span>" +
-            "<a href='javascript:void(0)' class='easyui-linkbutton shop-page-next' " + nextDisabled + ">下一页</a>";
+            "<button type='button' class='shop-page-btn prev shop-page-prev' " + prevDisabled + "></button>" +
+            "<span class='shop-page-label'>第 " + pageNo + " / " + pages + " 页</span>" +
+            "<button type='button' class='shop-page-btn next shop-page-next' " + nextDisabled + "></button>";
         $("#shopSeedPager").html(html);
-        $("#shopSeedPager .easyui-linkbutton").linkbutton();
         $("#shopSeedPager .shop-page-prev").off("click").on("click", function () {
             if (state.seedQuery.page <= 1) {
                 return;
@@ -287,7 +299,7 @@
                 "<div class='shop-fruit-item'>" +
                 "<div class='shop-fruit-name'>" + escapeHtml(row.seedName || ("果实#" + seedTypeId)) + "</div>" +
                 "<div class='shop-fruit-meta'>可售: " + available + " | 冻结: " + asNumber(row.frozenQuantity, 0) + " | 单价: " + unitPrice + "</div>" +
-                "<div class='shop-fruit-meta'>估值: " + asNumber(row.estimatedIncomeCoin, 0) + " 金币</div>" +
+                "<div class='shop-fruit-meta'>预计可售: " + asNumber(row.estimatedIncomeCoin, 0) + " 金币</div>" +
                 "<div class='shop-seed-actions'>" +
                 "<a href='javascript:void(0)' class='easyui-linkbutton shop-sell-btn' data-seed-type-id='" + seedTypeId + "' data-seed-name='" + escapeAttr(row.seedName || "") + "' data-available='" + available + "' data-unit-price='" + unitPrice + "' " + (available <= 0 ? "disabled='disabled'" : "") + ">出售</a>" +
                 "</div>" +
@@ -609,17 +621,26 @@
         });
     }
 
+    function bindTabs() {
+        $(".shop-tab").off("click").on("click", function () {
+            switchTab(String($(this).attr("data-tab") || "seed"));
+            playSound("click");
+        });
+    }
+
     function setActive(flag) {
         state.active = !!flag;
         if (state.active) {
             if (!state.inited) {
                 initFilterBar();
+                bindTabs();
                 state.inited = true;
             }
             $("#shopPanel").addClass("is-active is-module-enter");
             window.setTimeout(function () {
                 $("#shopPanel").removeClass("is-module-enter");
             }, motion().moduleEnterMs);
+            switchTab(state.currentTab || "seed");
             reload();
             return;
         }
@@ -631,3 +652,4 @@
 
     window.FarmShopModule = FarmShopModule;
 })(window, window.jQuery);
+
