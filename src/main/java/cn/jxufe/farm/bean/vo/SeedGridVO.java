@@ -22,6 +22,10 @@ public class SeedGridVO implements Serializable {
     private Long price;
     private Long harvestExperience;
     private Integer harvestFruitNumber;
+    private Integer fruitLossPerBug;
+    private Long bugKillCoinReward;
+    private Long bugKillExperienceReward;
+    private Long bugKillScoreReward;
     private Long fruitPrice;
     private Long harvestScore;
     private Integer totalGrowSeconds;

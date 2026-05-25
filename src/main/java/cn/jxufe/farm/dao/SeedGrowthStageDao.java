@@ -14,4 +14,6 @@ public interface SeedGrowthStageDao extends JpaRepository<SeedGrowthStage, Long>
     Optional<SeedGrowthStage> findByIdAndIsDeletedFalse(Long id);
 
     Optional<SeedGrowthStage> findBySeedTypeIdAndStageIndexAndIsDeletedFalse(Long seedTypeId, Short stageIndex);
+
+    List<SeedGrowthStage> findBySeedTypeIdInAndIsDeletedFalseOrderBySeedTypeIdAscStageIndexAsc(List<Long> seedTypeIds);
 }

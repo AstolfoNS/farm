@@ -53,7 +53,7 @@ public class GameplayLogQueryServiceImp implements GameplayLogQueryService {
         int pageSize = gameplayCoreService.normalizePageSize(request.getRows());
         String actionTypeFilter = gameplayCoreService.normalizeCropActionType(request.getActionType());
         if (request.getActionType() != null && !request.getActionType().isBlank() && actionTypeFilter.isBlank()) {
-            throw new ServiceException(BizErrorCode.CROP_ACTION_TYPE_UNSUPPORTED, "actionType 仅支持 CARE / HARVEST / PLANT");
+            throw new ServiceException(BizErrorCode.CROP_ACTION_TYPE_UNSUPPORTED, "actionType 仅支持 CARE / HARVEST / PLANT / BUG_SPAWN");
         }
         Long plotIdFilter = request.getPlotId();
 

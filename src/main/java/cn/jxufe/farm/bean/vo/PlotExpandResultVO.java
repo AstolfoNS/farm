@@ -12,6 +12,8 @@ public class PlotExpandResultVO implements Serializable {
     private Short plotIndex;
     private Long soilTypeId;
     private String soilName;
+    private Long soilUnlockRequiredExperience;
+    private Long currentExperience;
     private Long expandCostCoin;
     private Long beforeCoin;
     private Long afterCoin;

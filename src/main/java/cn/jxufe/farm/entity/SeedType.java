@@ -49,6 +49,18 @@ public class SeedType extends BaseEntity {
     @Column(name = "harvest_fruit_number", nullable = false)
     private Integer harvestFruitNumber;
 
+    @Column(name = "fruit_loss_per_bug", nullable = false)
+    private Integer fruitLossPerBug;
+
+    @Column(name = "bug_kill_coin_reward", nullable = false)
+    private Long bugKillCoinReward;
+
+    @Column(name = "bug_kill_experience_reward", nullable = false)
+    private Long bugKillExperienceReward;
+
+    @Column(name = "bug_kill_score_reward", nullable = false)
+    private Long bugKillScoreReward;
+
     @Column(name = "fruit_price", nullable = false)
     private Long fruitPrice;
 

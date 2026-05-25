@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的农场</title>
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/js/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/css/base.css">
+    <link rel="stylesheet" type="text/css" href="/css/theme-farm.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/home-shell.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/farm-stage.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/shop-panel.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/store-panel.css">
+    <script src="/js/easyui/jquery.min.js"></script>
+    <script src="/js/easyui/jquery.easyui.min.js"></script>
+    <script src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script src="/js/farm-realtime.js"></script>
+    <script src="/js/app/core/state.js"></script>
+    <script src="/js/app/core/api.js"></script>
+    <script src="/js/app/core/ws.js"></script>
+    <script src="/js/app/core/audio.js"></script>
+    <script src="/js/app/modules/farm.js"></script>
+    <script src="/js/app/modules/shop.js"></script>
+    <script src="/js/app/modules/store.js"></script>
+    <script src="/js/app/modules/home.js"></script>
+</head>
+<body class="farm-body">
+<div id="appShell" class="app-shell">
+    <header class="farm-topbar">
+        <div class="topbar-user">
+            <img id="topUserAvatar" class="topbar-user-avatar" src="/resources/imgs/domain/user/default-avatars/unknown-user.png" alt="avatar">
+            <div class="topbar-user-meta">
+                <div id="topUserName" class="topbar-user-name">未知用户</div>
+                <div class="topbar-user-stats">
+                    <span class="topbar-stat-item"><img src="/resources/imgs/domain/user/icons/exp.png" alt="exp"><span id="topUserExp">0</span></span>
+                    <span class="topbar-stat-item"><img src="/resources/imgs/domain/user/icons/gold.png" alt="coin"><span id="topUserCoin">0</span></span>
+                    <span class="topbar-stat-item"><img src="/resources/imgs/domain/user/icons/score.png" alt="score"><span id="topUserScore">0</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="topbar-nav">
+            <a href="javascript:void(0)" class="topbar-nav-item is-active" data-module="profile" title="个人用户">
+                <img src="/resources/imgs/domain/user/menus/self.png" alt="profile">
+                <span>个人用户</span>
+            </a>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="user-select" title="用户选择">
+                <img src="/resources/imgs/domain/user/menus/user.png" alt="user-select">
+                <span>用户选择</span>
+            </a>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="farm" title="农场">
+                <img src="/resources/imgs/domain/farm/menus/farm.png" alt="farm">
+                <span>农场</span>
+            </a>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="shop" title="商店">
+                <img src="/resources/imgs/domain/shop/menus/shop.png" alt="shop">
+                <span>商店</span>
+            </a>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="store" title="仓库">
+                <img src="/resources/imgs/domain/store/menus/store.png" alt="store">
+                <span>仓库</span>
+            </a>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="seed-admin" title="种子管理">
+                <img src="/resources/imgs/domain/seed/menus/seed.png" alt="seed-admin">
+                <span>种子管理</span>
+            </a>
+            <a id="audioToggleBtn" href="javascript:void(0)" class="topbar-audio-btn" title="音效开关">音效: 开</a>
+        </div>
+    </header>
+
+    <main id="farmStage" class="farm-stage">
+        <div class="farm-stage-watermark">
+            <div class="farm-stage-watermark-title">我的农场</div>
+            <div class="farm-stage-watermark-sub">MY FARM</div>
+        </div>
+
+        <section id="farmPanel" class="farm-panel">
+            <div id="farmMetaBar" class="farm-meta-bar">
+                <div class="farm-meta-item">地块: <span data-key="unlocked">0</span>/<span data-key="total">0</span></div>
+                <div class="farm-meta-item">占用: <span data-key="occupied">0</span></div>
+                <div class="farm-meta-item">可收获: <span data-key="harvestable">0</span></div>
+                <div class="farm-meta-right">
+                    <span id="farmWsStatus" class="farm-ws-status is-idle">WS: IDLE</span>
+                    <label class="farm-fallback-switch">
+                        <input id="farmFallbackSwitch" type="checkbox" checked="checked">
+                        断线轮询
+                    </label>
+                </div>
+            </div>
+            <div id="farmIsoContainer" class="farm-iso-container"></div>
+        </section>
+
+        <section id="shopPanel" class="shop-panel">
+            <div class="shop-toolbar">
+                <div class="shop-overview-item">当前金币: <span id="shopCurrentCoin">0</span></div>
+                <div class="shop-overview-item">可售总价值: <span id="shopSellableValue">0</span></div>
+                <div class="shop-overview-item">可售果实数: <span id="shopSellableFruitCount">0</span></div>
+                <div class="shop-overview-item">可购买种类: <span id="shopPurchasableTypeCount">0</span></div>
+            </div>
+            <div class="shop-main">
+                <div class="shop-seed-area">
+                    <div class="shop-block-title">种子商店</div>
+                    <div class="shop-filter-bar">
+                        <input id="shopSeedName" class="shop-filter-input" placeholder="按名称筛选">
+                        <input id="shopSeedQuality" class="shop-filter-select" style="width:130px;">
+                        <input id="shopSeedLevel" class="shop-filter-select" style="width:110px;">
+                        <a id="shopSeedFilterBtn" href="javascript:void(0)" class="easyui-linkbutton c1">查询</a>
+                        <a id="shopSeedResetBtn" href="javascript:void(0)" class="easyui-linkbutton">重置</a>
+                    </div>
+                    <div id="shopSeedList" class="shop-seed-list"></div>
+                    <div id="shopSeedPager" class="shop-seed-pager"></div>
+                </div>
+                <div class="shop-side-area">
+                    <div class="shop-block-title">果实仓库</div>
+                    <div id="shopFruitList" class="shop-fruit-list"></div>
+                    <div class="shop-block-title trade-title">交易记录</div>
+                    <div id="shopTradeList" class="shop-trade-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="profilePanel" class="home-panel profile-panel">
+            <div class="home-panel-title">个人用户</div>
+            <div class="home-panel-body">
+                <div class="profile-main">
+                    <img id="profileAvatar" class="profile-avatar" src="/resources/imgs/domain/user/default-avatars/unknown-user.png" alt="avatar">
+                    <div class="profile-info">
+                        <div class="profile-name" id="profileUserName">未知用户</div>
+                        <div class="profile-row">经验值：<span id="profileUserExp">0</span></div>
+                        <div class="profile-row">金币：<span id="profileUserCoin">0</span></div>
+                        <div class="profile-row">积分：<span id="profileUserScore">0</span></div>
+                    </div>
+                </div>
+                <div class="home-form-tip">这里是个人信息总览。点击顶部“用户选择”可以切换当前用户。</div>
+            </div>
+        </section>
+
+        <section id="homePanel" class="home-panel user-select-panel">
+            <div class="home-panel-title">用户选择</div>
+            <div class="home-panel-body">
+                <div class="home-form-row">
+                    <label class="home-form-label">当前用户</label>
+                    <input id="homeUserSelect" style="width:100%">
+                </div>
+                <div class="home-form-actions">
+                    <a id="homeConfirmUserBtn" href="javascript:void(0)" class="easyui-linkbutton c1">确认切换</a>
+                </div>
+                <div class="home-form-tip">请选择用户后再进入农场、商店、仓库模块操作。</div>
+            </div>
+        </section>
+
+        <section id="storePanel" class="store-panel">
+            <div class="store-toolbar">
+                <div class="store-toolbar-title">仓库总览</div>
+                <a id="storeRefreshBtn" href="javascript:void(0)" class="easyui-linkbutton c1">刷新仓库</a>
+            </div>
+            <div class="store-main">
+                <div class="store-block">
+                    <div class="store-block-title">种子库存</div>
+                    <div id="storeSeedList" class="store-list"></div>
+                </div>
+                <div class="store-block">
+                    <div class="store-block-title">果实库存</div>
+                    <div id="storeFruitList" class="store-list"></div>
+                </div>
+                <div class="store-block">
+                    <div class="store-block-title">可种地块</div>
+                    <div id="storePlotSummary" class="store-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="seedAdminPanel" class="home-panel seed-admin-panel">
+            <div class="home-panel-title">种子管理</div>
+            <div class="home-panel-body">
+                <div class="seed-admin-tip">
+                    当前先统一风格与模块入口，种子管理表格与阶段编辑弹窗会在下一阶段接入。
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="farm-bottombar"></footer>
+</div>
+</body>
+</html>

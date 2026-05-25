@@ -20,6 +20,8 @@ public class PlotOverviewVO implements Serializable {
     private Boolean occupied;
     private Boolean plantable;
     private Long unlockCostCoin;
+    private Long unlockRequiredExperience;
+    private Boolean unlockableByExperience;
     private Boolean canUnlock;
     private CropOverviewVO crop;
 }

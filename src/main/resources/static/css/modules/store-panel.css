@@ -1,0 +1,122 @@
+.store-panel {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 16px;
+    bottom: 16px;
+    display: none;
+    background: rgba(12, 92, 20, 0.62);
+    border: 1px solid rgba(137, 223, 113, 0.58);
+    border-radius: 8px;
+    padding: 10px;
+    animation: storePanelEnter var(--farm-motion-module-ms, 260ms) ease both;
+}
+
+.store-panel.is-active {
+    display: block;
+}
+
+.store-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.store-toolbar-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffe478;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.45);
+}
+
+.store-main {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 56px;
+    bottom: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.store-block {
+    background: rgba(9, 73, 15, 0.62);
+    border: 1px solid rgba(163, 238, 141, 0.56);
+    border-radius: 8px;
+    padding: 8px;
+    overflow: auto;
+}
+
+.store-block-title {
+    font-size: 18px;
+    color: #fff4bd;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.store-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.store-item {
+    position: relative;
+    border: 1px solid rgba(175, 239, 150, 0.52);
+    border-radius: 6px;
+    background: rgba(0, 96, 8, 0.45);
+    padding: 8px;
+    overflow: hidden;
+}
+
+.store-item::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.16;
+    background-image: url("/resources/imgs/domain/shop/components/seed-storage-frame.png");
+    background-size: cover;
+    background-position: center;
+}
+
+.store-item-name {
+    font-size: 14px;
+    color: #fff0be;
+    font-weight: 700;
+}
+
+.store-item-meta {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #ddffd3;
+}
+
+.store-empty {
+    border: 1px dashed rgba(204, 251, 174, 0.66);
+    border-radius: 6px;
+    padding: 10px;
+    color: #dfffd6;
+    font-size: 13px;
+    text-align: center;
+}
+
+@media screen and (max-width: 1200px) {
+    .store-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+@keyframes storePanelEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

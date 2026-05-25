@@ -13,6 +13,9 @@ public class HarvestResultVO implements Serializable {
     private Long plotId;
     private Long cropId;
     private Long seedTypeId;
+    private Long baseHarvestFruitNumber;
+    private Long bugPenaltyPerBug;
+    private Long totalBugPenaltyFruit;
     private Long harvestFruitNumber;
     private Long totalFruitQuantity;
     private Long experienceGain;

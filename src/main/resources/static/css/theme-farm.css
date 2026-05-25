@@ -1,0 +1,169 @@
+.farm-body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: #0a4f16;
+    color: #fff;
+}
+
+.app-shell {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-image: url("/resources/imgs/domain/home/components/background.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    background-color: #0a4f16;
+    position: relative;
+}
+
+.farm-topbar {
+    height: 62px;
+    background-image: url("/resources/imgs/domain/home/components/topbar.png");
+    background-repeat: repeat-x;
+    background-size: auto 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    border-bottom: 1px solid #005d10;
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    min-width: 272px;
+    background: rgba(24, 130, 170, 0.65);
+    border: 1px solid #0d4f76;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+.topbar-user-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 6px;
+    border: 1px solid #0f3b59;
+    background: #fff;
+}
+
+.topbar-user-meta {
+    margin-left: 8px;
+}
+
+.topbar-user-name {
+    font-size: 26px;
+    line-height: 1;
+    color: #ffd53a;
+    text-shadow: 1px 1px 1px #2b2b2b;
+}
+
+.topbar-user-stats {
+    margin-top: 3px;
+    font-size: 16px;
+    color: #70d7ff;
+    text-shadow: 1px 1px 1px #2b2b2b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar-stat-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.topbar-stat-item img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.5));
+}
+
+.topbar-stat-item span {
+    color: #dffbff;
+    font-weight: 700;
+}
+
+.topbar-nav {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.topbar-nav-item {
+    min-width: 74px;
+    height: 56px;
+    padding: 0 4px;
+    border: 1px solid #0f5d20;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.16);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    transition: transform var(--farm-motion-module-ms, 260ms) ease, background var(--farm-motion-page-ms, 220ms) ease;
+}
+
+.topbar-nav-item img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+}
+
+.topbar-nav-item span {
+    font-size: 12px;
+    line-height: 1;
+    color: #e7ffd7;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.55);
+}
+
+.topbar-nav-item.is-active {
+    box-shadow: 0 0 0 2px #80ff7a inset, 0 0 10px rgba(140, 255, 104, 0.55);
+    transform: translateY(-1px);
+}
+
+.topbar-nav-item:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.farm-stage {
+    height: calc(100% - 112px);
+    position: relative;
+    border-top: 1px solid rgba(0, 0, 0, 0.28);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.28);
+    overflow: hidden;
+}
+
+.farm-stage-watermark {
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    transform: translate(-50%, -50%);
+    color: rgba(0, 60, 0, 0.65);
+    text-align: center;
+    pointer-events: none;
+}
+
+.farm-stage-watermark-title {
+    font-size: 92px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 12px;
+}
+
+.farm-stage-watermark-sub {
+    font-size: 38px;
+    line-height: 1;
+    letter-spacing: 7px;
+    margin-top: 8px;
+}
+
+.farm-bottombar {
+    height: 50px;
+    background-image: url("/resources/imgs/domain/home/components/bottom.png");
+    background-repeat: repeat-x;
+    background-size: auto 50px;
+    border-top: 1px solid #3e9a35;
+}

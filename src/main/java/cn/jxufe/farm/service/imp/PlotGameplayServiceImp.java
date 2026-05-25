@@ -10,7 +10,6 @@ import cn.jxufe.farm.bean.vo.PlotTradeBizTypeOptionVO;
 import cn.jxufe.farm.bean.vo.PlotTradeRecordVO;
 import cn.jxufe.farm.bean.vo.PlotUnlockResultVO;
 import cn.jxufe.farm.common.pages.PageResult;
-import cn.jxufe.farm.config.properties.GameplayPolicyProperties;
 import cn.jxufe.farm.service.GameplayService;
 import cn.jxufe.farm.service.PlotGameplayService;
 import org.springframework.stereotype.Service;

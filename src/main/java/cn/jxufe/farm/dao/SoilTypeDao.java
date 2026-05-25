@@ -14,4 +14,6 @@ public interface SoilTypeDao extends JpaRepository<SoilType, Long> {
     Optional<SoilType> findByIdAndIsDeletedFalse(Long id);
 
     Optional<SoilType> findFirstByIsDeletedFalseOrderByLevelAscIdAsc();
+
+    List<SoilType> findByIdInAndIsDeletedFalse(List<Long> ids);
 }

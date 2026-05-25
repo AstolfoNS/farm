@@ -31,7 +31,6 @@ springdoc:
   swagger-ui:
     path: /test
 
-
 server:
   port: 8080
 
@@ -40,6 +39,11 @@ farm:
     storage-root: ${FILE_STORAGE_ROOT:./static/oss}
     public-prefix: ${FILE_PUBLIC_PREFIX:/oss}
   gameplay:
+    realtime:
+      crop-status-refresh-interval-ms: ${CROP_STATUS_REFRESH_INTERVAL_MS:1000}
+      scheduler:
+        parallelism: ${CROP_STATUS_SCHEDULER_PARALLELISM:4}
+        partition-size: ${CROP_STATUS_SCHEDULER_PARTITION_SIZE:500}
     policy:
       plot:
         unlock:

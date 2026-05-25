@@ -16,4 +16,6 @@ public interface SeedTypeDao extends JpaRepository<SeedType, Long> {
     List<SeedType> findByIsDeletedFalseOrderByIdAsc();
 
     Optional<SeedType> findByIdAndIsDeletedFalse(Long id);
+
+    List<SeedType> findByIdInAndIsDeletedFalse(List<Long> ids);
 }

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="/js/easyui/jquery.min.js"></script>
+    <script src="/js/farm-realtime.js"></script>
     <style>
         body {
             margin: 0;
@@ -74,6 +75,39 @@
             gap: 8px;
         }
 
+        .realtime-state {
+            position: absolute;
+            right: 176px;
+            top: 22px;
+            min-width: 62px;
+            text-align: center;
+            padding: 1px 6px;
+            border-radius: 10px;
+            border: 1px solid #3b4f60;
+            font-size: 12px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.35);
+            user-select: none;
+        }
+
+        .realtime-state.connected {
+            background: rgba(34, 139, 34, 0.78);
+            border-color: #59cf59;
+        }
+
+        .realtime-state.connecting,
+        .realtime-state.reconnecting {
+            background: rgba(206, 136, 0, 0.82);
+            border-color: #ffd27f;
+        }
+
+        .realtime-state.closed,
+        .realtime-state.error,
+        .realtime-state.stopped {
+            background: rgba(159, 42, 42, 0.82);
+            border-color: #ff9999;
+        }
+
         .nav-icon {
             width: 46px;
             height: 46px;
@@ -108,6 +142,8 @@
     </div>
 </div>
 
+<div id="realtimeState" class="realtime-state">未连接</div>
+
 <div class="nav-container">
     <img id="loginUserIcon" src="/images/userSelect.png" class="nav-icon" title="用户登录">
     <img id="userManagerIcon" src="/images/userManager.png" class="nav-icon" title="玩家管理">
@@ -116,6 +152,28 @@
 
 <script>
     $(function () {
+        var currentRealtimeUserId = 0;
+        var latestUserRefreshAt = 0;
+
+        function setRealtimeStateClass(name) {
+            var cls = 'idle connecting connected reconnecting closed error stopped';
+            $('#realtimeState').removeClass(cls).addClass(name || 'idle');
+        }
+
+        function setRealtimeStateText(name) {
+            var textMap = {
+                idle: '未连接',
+                connecting: '连接中',
+                connected: '实时在线',
+                reconnecting: '重连中',
+                closed: '已断开',
+                error: '连接异常',
+                stopped: '已停止'
+            };
+            $('#realtimeState').text(textMap[name] || '未连接');
+            setRealtimeStateClass(name);
+        }
+
         function renderTopUser(user) {
             var data = user || {};
             $('#curUserHead').attr('src', data.head || '/images/unknownUser.png');
@@ -125,10 +183,43 @@
             $('#curUserScore').text(Number(data.score || 0));
         }
 
-        function refreshCurrentUserInfo() {
+        function ensureRealtimeClient(user) {
+            var uid = Number((user && user.id) || 0);
+            if (!uid || uid <= 0) {
+                if (window.FarmRealtimeClient) {
+                    window.FarmRealtimeClient.stop();
+                }
+                currentRealtimeUserId = 0;
+                setRealtimeStateText('stopped');
+                return;
+            }
+            if (!window.FarmRealtimeClient) {
+                return;
+            }
+            if (!currentRealtimeUserId) {
+                currentRealtimeUserId = uid;
+                window.FarmRealtimeClient.start({
+                    userId: uid,
+                    onStatus: function (statusName) {
+                        setRealtimeStateText(statusName);
+                    }
+                });
+                return;
+            }
+            if (currentRealtimeUserId !== uid) {
+                currentRealtimeUserId = uid;
+                window.FarmRealtimeClient.switchUser(uid);
+            }
+        }
+
+        function refreshCurrentUserInfo(force) {
             $.getJSON('/user/getCurUser', function (res) {
                 if (res && res.code === 0 && res.data) {
                     renderTopUser(res.data);
+                    ensureRealtimeClient(res.data);
+                    if (force) {
+                        latestUserRefreshAt = Date.now();
+                    }
                 }
             });
         }
@@ -172,11 +263,32 @@
             setActiveByWorkspace();
         });
 
+        $(document).on('farm:realtime:overview', function (event, payload) {
+            var data = payload || {};
+            var overview = data.overview || {};
+
+            var workspace = parent.frames['workspace'];
+            if (workspace && typeof workspace.onFarmRealtimeOverview === 'function') {
+                workspace.onFarmRealtimeOverview(overview, data);
+            }
+
+            if (overview && Number(overview.userId || 0) === Number(currentRealtimeUserId || 0)) {
+                var now = Date.now();
+                if (now - latestUserRefreshAt >= 1500) {
+                    latestUserRefreshAt = now;
+                    refreshCurrentUserInfo(false);
+                }
+            }
+        });
+
         window.refreshCurrentUserInfo = refreshCurrentUserInfo;
-        refreshCurrentUserInfo();
+        refreshCurrentUserInfo(true);
+        setRealtimeStateText('idle');
         setActiveByWorkspace();
         setInterval(setActiveByWorkspace, 800);
-        setInterval(refreshCurrentUserInfo, 5000);
+        setInterval(function () {
+            refreshCurrentUserInfo(false);
+        }, 5000);
     });
 </script>
 </body>

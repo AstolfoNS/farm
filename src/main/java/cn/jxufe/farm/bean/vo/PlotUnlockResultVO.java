@@ -10,6 +10,8 @@ public class PlotUnlockResultVO implements Serializable {
     private Long userId;
     private Long plotId;
     private Short plotIndex;
+    private Long unlockRequiredExperience;
+    private Long currentExperience;
     private Long unlockCostCoin;
     private Long beforeCoin;
     private Long afterCoin;

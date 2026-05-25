@@ -1,0 +1,264 @@
+.topbar-audio-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 54px;
+    min-width: 82px;
+    padding: 0 12px;
+    border: 1px solid #0f5d20;
+    border-radius: 3px;
+    color: #fff7cc;
+    font-size: 14px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.topbar-audio-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.shop-panel {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 16px;
+    bottom: 16px;
+    display: none;
+    background: rgba(10, 92, 24, 0.6);
+    border: 1px solid rgba(132, 218, 112, 0.45);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.shop-panel.is-active {
+    display: block;
+}
+
+.shop-panel.is-module-enter {
+    animation: farmModuleEnter var(--farm-motion-module-ms, 260ms) ease both;
+}
+
+.shop-toolbar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.shop-overview-item {
+    min-height: 40px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(145, 255, 142, 0.44);
+    background: rgba(0, 86, 23, 0.72);
+    font-size: 16px;
+    color: #eaffd1;
+}
+
+.shop-overview-item span {
+    color: #ffe169;
+    font-weight: 700;
+}
+
+.shop-main {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 66px;
+    bottom: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 10px;
+}
+
+.shop-seed-area,
+.shop-side-area {
+    background: rgba(15, 78, 18, 0.72);
+    border: 1px solid rgba(139, 214, 117, 0.55);
+    border-radius: 8px;
+    padding: 10px;
+    overflow: auto;
+}
+
+.shop-block-title {
+    margin-bottom: 10px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background: rgba(0, 130, 0, 0.66);
+    color: #ffe478;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.shop-filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(177, 236, 148, 0.42);
+    background: rgba(16, 66, 20, 0.6);
+}
+
+.shop-filter-input {
+    width: 180px;
+    height: 30px;
+    border: 1px solid #8ccd7c;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #1a3d1a;
+    padding: 0 8px;
+    outline: none;
+}
+
+.shop-filter-input:focus {
+    border-color: #4ead35;
+}
+
+.trade-title {
+    margin-top: 14px;
+}
+
+.shop-seed-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    transition: opacity var(--farm-motion-page-ms, 220ms) ease, transform var(--farm-motion-page-ms, 220ms) ease;
+}
+
+.shop-seed-card {
+    position: relative;
+    border: 1px solid rgba(184, 235, 159, 0.58);
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(70, 130, 48, 0.56), rgba(30, 91, 23, 0.6));
+    padding: 8px;
+    overflow: hidden;
+}
+
+.shop-seed-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.2;
+    background-image: url("/resources/imgs/domain/shop/components/seed-storage-frame.png");
+    background-size: cover;
+    background-position: center;
+}
+
+.shop-seed-head {
+    display: flex;
+    gap: 8px;
+}
+
+.shop-seed-cover {
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.25);
+    object-fit: cover;
+}
+
+.shop-seed-name {
+    font-size: 16px;
+    color: #fff6d2;
+    font-weight: 700;
+}
+
+.shop-seed-meta {
+    margin-top: 2px;
+    font-size: 12px;
+    color: #ddffd4;
+}
+
+.shop-seed-desc {
+    margin-top: 8px;
+    min-height: 34px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #f0ffd6;
+}
+
+.shop-seed-price {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #ffe169;
+}
+
+.shop-seed-actions {
+    margin-top: 8px;
+    text-align: right;
+}
+
+.shop-seed-pager {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.shop-fruit-list,
+.shop-trade-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: opacity var(--farm-motion-page-ms, 220ms) ease, transform var(--farm-motion-page-ms, 220ms) ease;
+}
+
+.shop-seed-list.is-page-switching,
+.shop-fruit-list.is-page-switching,
+.shop-trade-list.is-page-switching {
+    opacity: 0.38;
+    transform: translateY(4px);
+}
+
+.shop-fruit-item,
+.shop-trade-item {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(158, 228, 136, 0.5);
+    background: rgba(9, 66, 18, 0.55);
+}
+
+.shop-fruit-name {
+    color: #fff0bc;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.shop-fruit-meta,
+.shop-trade-meta {
+    margin-top: 4px;
+    color: #d7f9d0;
+    font-size: 12px;
+}
+
+.shop-trade-type {
+    color: #ffe26f;
+    font-weight: 700;
+}
+
+.shop-empty {
+    border: 1px dashed rgba(204, 251, 174, 0.66);
+    border-radius: 6px;
+    padding: 10px;
+    color: #dfffd6;
+    font-size: 13px;
+    text-align: center;
+}
+
+@media screen and (max-width: 1200px) {
+    .shop-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+@keyframes farmModuleEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

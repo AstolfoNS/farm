@@ -9,6 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface UserCropDao extends JpaRepository<UserCrop, Long> {
+
+    List<UserCrop> findByIsDeletedFalseOrderByIdAsc();
+
     List<UserCrop> findByUserIdAndIsDeletedFalseOrderByIdAsc(Long userId);
 
     Optional<UserCrop> findByPlotIdAndIsDeletedFalse(Long plotId);

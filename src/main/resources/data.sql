@@ -1,5 +1,6 @@
 -- ==========================================
 -- 农场基础字典与种子配置初始化数据（UTF-8）
+-- 说明：仅做数据初始化，不做表结构变更
 -- ==========================================
 
 -- 1) 种子品质字典
@@ -16,16 +17,16 @@ SELECT '稀有', '稀有品质种子'
 WHERE NOT EXISTS (SELECT 1 FROM farm.seed_qualities WHERE name = '稀有' AND is_deleted = false);
 
 -- 2) 土地类型字典（bit_code 用于位运算）
-INSERT INTO farm.soil_types (name, bit_code, level, grow_speed_multiplier, description)
-SELECT '黄土地', 1, 1, 1.00, '基础土地，适配多数作物'
+INSERT INTO farm.soil_types (name, bit_code, level, unlock_experience_required, grow_speed_multiplier, description)
+SELECT '黄土地', 1, 1, 0, 1.00, '基础土地，适配多数作物'
 WHERE NOT EXISTS (SELECT 1 FROM farm.soil_types WHERE bit_code = 1 AND is_deleted = false);
 
-INSERT INTO farm.soil_types (name, bit_code, level, grow_speed_multiplier, description)
-SELECT '黑土地', 2, 2, 0.90, '生长速度更快的改良土地'
+INSERT INTO farm.soil_types (name, bit_code, level, unlock_experience_required, grow_speed_multiplier, description)
+SELECT '黑土地', 2, 2, 500, 0.90, '生长速度更快的改良土地'
 WHERE NOT EXISTS (SELECT 1 FROM farm.soil_types WHERE bit_code = 2 AND is_deleted = false);
 
-INSERT INTO farm.soil_types (name, bit_code, level, grow_speed_multiplier, description)
-SELECT '金土地', 4, 3, 0.80, '高级土地，适配高级作物'
+INSERT INTO farm.soil_types (name, bit_code, level, unlock_experience_required, grow_speed_multiplier, description)
+SELECT '金土地', 4, 3, 2000, 0.80, '高级土地，适配高等级作物'
 WHERE NOT EXISTS (SELECT 1 FROM farm.soil_types WHERE bit_code = 4 AND is_deleted = false);
 
 -- 3) 生长阶段字典
@@ -54,12 +55,16 @@ INSERT INTO farm.seed_types
 (
     name, seed_quality_id, enable_soil_type_bits, level, description,
     max_bug_limit, max_harvest_count, regrow_stage_index,
-    price, harvest_experience, harvest_fruit_number, fruit_price, harvest_score
+    price, harvest_experience, harvest_fruit_number, fruit_loss_per_bug,
+    bug_kill_coin_reward, bug_kill_experience_reward, bug_kill_score_reward,
+    fruit_price, harvest_score
 )
 SELECT
     '草莓', q.id, 1, 1, '草莓果实鲜红，口感清甜',
     3, 1, NULL,
-    5, 50, 10, 10, 10
+    5, 50, 10, 1,
+    2, 2, 1,
+    10, 10
 FROM farm.seed_qualities q
 WHERE q.name = '普通' AND q.is_deleted = false
   AND NOT EXISTS (SELECT 1 FROM farm.seed_types s WHERE s.name = '草莓' AND s.is_deleted = false);
@@ -68,12 +73,16 @@ INSERT INTO farm.seed_types
 (
     name, seed_quality_id, enable_soil_type_bits, level, description,
     max_bug_limit, max_harvest_count, regrow_stage_index,
-    price, harvest_experience, harvest_fruit_number, fruit_price, harvest_score
+    price, harvest_experience, harvest_fruit_number, fruit_loss_per_bug,
+    bug_kill_coin_reward, bug_kill_experience_reward, bug_kill_score_reward,
+    fruit_price, harvest_score
 )
 SELECT
     '茄子', q.id, 1, 1, '常见蔬果作物，产量稳定',
     3, 1, NULL,
-    6, 50, 15, 20, 15
+    6, 50, 15, 1,
+    2, 2, 1,
+    20, 15
 FROM farm.seed_qualities q
 WHERE q.name = '优质' AND q.is_deleted = false
   AND NOT EXISTS (SELECT 1 FROM farm.seed_types s WHERE s.name = '茄子' AND s.is_deleted = false);
@@ -82,17 +91,21 @@ INSERT INTO farm.seed_types
 (
     name, seed_quality_id, enable_soil_type_bits, level, description,
     max_bug_limit, max_harvest_count, regrow_stage_index,
-    price, harvest_experience, harvest_fruit_number, fruit_price, harvest_score
+    price, harvest_experience, harvest_fruit_number, fruit_loss_per_bug,
+    bug_kill_coin_reward, bug_kill_experience_reward, bug_kill_score_reward,
+    fruit_price, harvest_score
 )
 SELECT
     '玉米', q.id, 3, 2, '高产作物，适配黄土地和黑土地',
     4, 1, NULL,
-    10, 80, 18, 24, 20
+    10, 80, 18, 1,
+    3, 3, 2,
+    24, 20
 FROM farm.seed_qualities q
 WHERE q.name = '稀有' AND q.is_deleted = false
   AND NOT EXISTS (SELECT 1 FROM farm.seed_types s WHERE s.name = '玉米' AND s.is_deleted = false);
 
--- 5) 种子生长阶段配置（每种作物5阶段，按阶段配置 bug_probability）
+-- 5) 种子生长阶段配置（每种作物 5 阶段）
 WITH stage_dict AS (
     SELECT id, name FROM farm.growth_stages WHERE is_deleted = false
 ),

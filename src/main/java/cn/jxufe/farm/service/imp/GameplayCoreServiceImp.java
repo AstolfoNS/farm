@@ -48,6 +48,7 @@ public class GameplayCoreServiceImp implements GameplayCoreService {
             case "CARE" -> "CARE";
             case "HARVEST" -> "HARVEST";
             case "PLANT" -> "PLANT";
+            case "BUG_SPAWN" -> "BUG_SPAWN";
             default -> "";
         };
     }

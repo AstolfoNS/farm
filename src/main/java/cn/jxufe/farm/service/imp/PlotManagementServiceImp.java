@@ -9,7 +9,10 @@ import cn.jxufe.farm.common.utils.ServiceGuardUtils;
 import cn.jxufe.farm.config.properties.GameplayPolicyProperties;
 import cn.jxufe.farm.dao.*;
 import cn.jxufe.farm.entity.*;
-import cn.jxufe.farm.service.*;
+import cn.jxufe.farm.service.CropLifecycleService;
+import cn.jxufe.farm.service.GameplayCoreService;
+import cn.jxufe.farm.service.PlotCostService;
+import cn.jxufe.farm.service.PlotManagementService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -64,10 +67,12 @@ public class PlotManagementServiceImp implements PlotManagementService {
     private class UserActionContext {
         final Long userId;
         final OffsetDateTime now;
+        final long currentExperience;
 
         UserActionContext(Long rawUserId) {
             this.userId = ServiceGuardUtils.requirePositive(rawUserId, BizErrorCode.PARAM_INVALID, "用户ID无效");
-            validateUserExists();
+            User user = validateUserExists();
+            this.currentExperience = gameplayCoreService.safeLong(user.getExperience());
             this.now = OffsetDateTime.now();
         }
 
@@ -84,8 +89,8 @@ public class PlotManagementServiceImp implements PlotManagementService {
             return gameplayCoreService.safeLong(user.getCoin());
         }
 
-        private void validateUserExists() {
-            ServiceGuardUtils.requirePresent(
+        private User validateUserExists() {
+            return ServiceGuardUtils.requirePresent(
                     userDao.findByIdAndIsDeletedFalse(userId), BizErrorCode.USER_NOT_FOUND, "用户不存在"
             );
         }
@@ -108,6 +113,10 @@ public class PlotManagementServiceImp implements PlotManagementService {
         );
         if (isUnlocked(plot)) {
             throw new ServiceException(BizErrorCode.PLOT_ALREADY_UNLOCKED, "地块已解锁");
+        }
+        long unlockRequiredExperience = gameplayCoreService.safeLong(plot.getUnlockExperienceRequired());
+        if (ctx.currentExperience < unlockRequiredExperience) {
+            throw new ServiceException(BizErrorCode.EXPERIENCE_NOT_ENOUGH, "经验不足，无法解锁该地块");
         }
 
         UserPlot nextUnlockPlot = findNextLockedPlot(ctx.userId);
@@ -142,6 +151,8 @@ public class PlotManagementServiceImp implements PlotManagementService {
         result.setUserId(ctx.userId);
         result.setPlotId(plot.getId());
         result.setPlotIndex(plot.getPlotIndex());
+        result.setUnlockRequiredExperience(unlockRequiredExperience);
+        result.setCurrentExperience(ctx.currentExperience);
         result.setUnlockCostCoin(unlockCostCoin);
         result.setBeforeCoin(beforeCoin);
         result.setAfterCoin(afterCoin);
@@ -160,6 +171,11 @@ public class PlotManagementServiceImp implements PlotManagementService {
         SoilType soilType = (params.getSoilTypeId() != null && params.getSoilTypeId() > 0)
                 ? ServiceGuardUtils.requirePresent(soilTypeDao.findByIdAndIsDeletedFalse(params.getSoilTypeId()), BizErrorCode.SOIL_TYPE_NOT_FOUND, "土壤类型不存在")
                 : ServiceGuardUtils.requirePresent(soilTypeDao.findFirstByIsDeletedFalseOrderByLevelAscIdAsc(), BizErrorCode.SOIL_TYPE_NOT_FOUND, "默认土壤类型未配置");
+
+        long soilUnlockRequiredExperience = gameplayCoreService.safeLong(soilType.getUnlockExperienceRequired());
+        if (ctx.currentExperience < soilUnlockRequiredExperience) {
+            throw new ServiceException(BizErrorCode.EXPERIENCE_NOT_ENOUGH, "经验不足，无法扩展为该品质土地");
+        }
 
         List<UserPlot> currentPlots = userPlotDao.findByUserIdAndIsDeletedFalseOrderByPlotIndexAsc(ctx.userId);
         int currentTotalPlots = currentPlots.size();
@@ -180,6 +196,7 @@ public class PlotManagementServiceImp implements PlotManagementService {
         newPlot.setUserId(ctx.userId);
         newPlot.setSoilTypeId(soilType.getId());
         newPlot.setPlotIndex(nextPlotIndex);
+        newPlot.setUnlockExperienceRequired(calculatePlotUnlockRequiredExperience(nextPlotIndex));
         newPlot.setIsLocked(false);
         newPlot.setUnlockedAt(ctx.now);
         newPlot.setLockReason(null);
@@ -202,6 +219,8 @@ public class PlotManagementServiceImp implements PlotManagementService {
         result.setPlotIndex(savedPlot.getPlotIndex());
         result.setSoilTypeId(soilType.getId());
         result.setSoilName(gameplayCoreService.safeString(soilType.getName()));
+        result.setSoilUnlockRequiredExperience(soilUnlockRequiredExperience);
+        result.setCurrentExperience(ctx.currentExperience);
         result.setExpandCostCoin(expandCostCoin);
         result.setBeforeCoin(beforeCoin);
         result.setAfterCoin(afterCoin);
@@ -228,6 +247,12 @@ public class PlotManagementServiceImp implements PlotManagementService {
         result.setOccupiedPlots(overviewVO.getOccupiedPlots());
         result.setEmptyUnlockedPlots(overviewVO.getEmptyUnlockedPlots());
         result.setHarvestablePlots(overviewVO.getHarvestableCount());
+        User user = ServiceGuardUtils.requirePresent(
+                userDao.findByIdAndIsDeletedFalse(userId),
+                BizErrorCode.USER_NOT_FOUND,
+                "用户不存在"
+        );
+        result.setCurrentExperience(gameplayCoreService.safeLong(user.getExperience()));
         result.setNextExpandCostCoin(overviewVO.getNextExpandCostCoin());
         result.setPlots(overviewVO.getPlots());
 
@@ -238,6 +263,8 @@ public class PlotManagementServiceImp implements PlotManagementService {
                     .ifPresent(plot -> {
                         result.setNextUnlockPlotId(plot.getPlotId());
                         result.setNextUnlockPlotIndex(plot.getPlotIndex());
+                        result.setNextUnlockRequiredExperience(plot.getUnlockRequiredExperience());
+                        result.setNextUnlockableByExperience(plot.getUnlockableByExperience());
                     });
         }
         return result;
@@ -311,6 +338,17 @@ public class PlotManagementServiceImp implements PlotManagementService {
         if (currentTotalPlots < freeLimit) return 0L;
         return gameplayPolicyProperties.getPlot().getExpand().getBaseCostCoin()
                 + (currentTotalPlots - freeLimit) * gameplayPolicyProperties.getPlot().getExpand().getCostStepCoin();
+    }
+
+    private long calculatePlotUnlockRequiredExperience(short plotIndex) {
+        short initialUnlocked = gameplayPolicyProperties.getPlot().getDefaults().getUnlockedPlotCount();
+        if (plotIndex <= initialUnlocked) {
+            return 0L;
+        }
+        long base = gameplayPolicyProperties.getPlot().getUnlock().getBaseRequiredExperience();
+        long step = gameplayPolicyProperties.getPlot().getUnlock().getRequiredExperienceStep();
+        long stepTimes = Math.max(0, plotIndex - initialUnlocked - 1);
+        return Math.max(0L, base + stepTimes * step);
     }
 
     private UserPlot findNextLockedPlot(Long userId) {

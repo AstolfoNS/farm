@@ -24,6 +24,9 @@ public class UserPlot extends BaseEntity {
     @Column(name = "plot_index", nullable = false)
     private Short plotIndex;
 
+    @Column(name = "unlock_experience_required", nullable = false)
+    private Long unlockExperienceRequired;
+
     @Column(name = "is_locked", nullable = false)
     private Boolean isLocked;
 

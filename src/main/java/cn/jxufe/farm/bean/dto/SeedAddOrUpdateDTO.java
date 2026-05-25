@@ -1,7 +1,7 @@
 package cn.jxufe.farm.bean.dto;
 
-import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
 import java.io.Serializable;
 
@@ -9,8 +9,10 @@ import java.io.Serializable;
 public class SeedAddOrUpdateDTO implements Serializable {
 
     private Long id;
+
     @NotBlank(message = "种子名称不能为空")
     private String name;
+
     private String coverImageUrl;
     private Long seedQualityId;
     private String soilTypeIds;
@@ -28,6 +30,10 @@ public class SeedAddOrUpdateDTO implements Serializable {
     private Long harvestExperience;
     private Long exp;
     private Integer harvestFruitNumber;
+    private Integer fruitLossPerBug;
+    private Long bugKillCoinReward;
+    private Long bugKillExperienceReward;
+    private Long bugKillScoreReward;
     private Integer harvestCount;
     private Long fruitPrice;
     private Long harvestScore;

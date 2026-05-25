@@ -41,6 +41,8 @@ import java.util.stream.IntStream;
 @Service
 public class UserServiceImp implements UserService {
 
+    private static final String DEFAULT_AVATAR_URL = "/resources/imgs/domain/user/default-avatars/unknown-user.png";
+
     private final UserDao userDao;
 
     private final UserPlotDao userPlotDao;
@@ -127,7 +129,7 @@ public class UserServiceImp implements UserService {
         entity.setCoin(Math.max(0L, parseLong(params.getCoin(), 0L)));
 
         String avatarPath = normalizeAvatarPath(params.getAvatarPath());
-        entity.setAvatarUrl(avatarPath.isBlank() ? "images/headImages/none.png" : avatarPath);
+        entity.setAvatarUrl(avatarPath.isBlank() ? DEFAULT_AVATAR_URL : avatarPath);
 
         entity.setUpdatedAt(OffsetDateTime.now());
         entity.setUpdatedBy(0L);
@@ -216,6 +218,7 @@ public class UserServiceImp implements UserService {
         entity.setOptLockVersion(0);
         entity.setPasswordHash("123456");
         entity.setEmail(username + "_" + System.currentTimeMillis() + "@farm.local");
+        entity.setAvatarUrl(DEFAULT_AVATAR_URL);
         return entity;
     }
 
@@ -259,17 +262,18 @@ public class UserServiceImp implements UserService {
         guest.setScore(0L);
         guest.setCoin(0L);
         guest.setAvatarPath("");
-        guest.setHead("/images/unknownUser.png");
+        guest.setHead(DEFAULT_AVATAR_URL);
         guest.setLoggedIn(false);
         return guest;
     }
 
     private String resolveAvatarAccessUrl(String avatarPath) {
         String value = safeString(avatarPath).trim();
-        if (value.isBlank()) return "/images/unknownUser.png";
+        if (value.isBlank()) return DEFAULT_AVATAR_URL;
 
         String lower = value.toLowerCase();
-        if (lower.startsWith("http://") || lower.startsWith("https://") || value.startsWith("/images/")) {
+        if (lower.startsWith("http://") || lower.startsWith("https://")
+                || value.startsWith("/images/") || value.startsWith("/resources/")) {
             return value;
         }
         return fileService.buildAccessUrl(value);
@@ -312,6 +316,7 @@ public class UserServiceImp implements UserService {
                     plot.setUserId(userId);
                     plot.setSoilTypeId(defaultSoilTypeId);
                     plot.setPlotIndex((short) index);
+                    plot.setUnlockExperienceRequired(calculatePlotUnlockRequiredExperience((short) index));
                     plot.setIsLocked(locked);
                     plot.setLockReason(locked ? "待解锁" : null);
                     plot.setUnlockedAt(locked ? null : now);
@@ -327,5 +332,16 @@ public class UserServiceImp implements UserService {
                 .collect(Collectors.toList());
 
         userPlotDao.saveAll(initPlots);
+    }
+
+    private long calculatePlotUnlockRequiredExperience(short plotIndex) {
+        short initialUnlocked = gameplayPolicyProperties.getPlot().getDefaults().getUnlockedPlotCount();
+        if (plotIndex <= initialUnlocked) {
+            return 0L;
+        }
+        long base = gameplayPolicyProperties.getPlot().getUnlock().getBaseRequiredExperience();
+        long step = gameplayPolicyProperties.getPlot().getUnlock().getRequiredExperienceStep();
+        long stepTimes = Math.max(0, plotIndex - initialUnlocked - 1);
+        return Math.max(0L, base + stepTimes * step);
     }
 }

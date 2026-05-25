@@ -23,4 +23,9 @@ public class CropOverviewVO implements Serializable {
     private Short maxBugLimit;
     private Boolean canCare;
     private Boolean harvestable;
+    private String stageAssetUrl;
+    private Integer stageWidth;
+    private Integer stageHeight;
+    private Integer stageOffsetX;
+    private Integer stageOffsetY;
 }

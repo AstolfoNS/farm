@@ -18,7 +18,7 @@ public class CropActionLogQueryDTO implements Serializable {
     @Positive(message = "用户ID必须大于0")
     private Long userId;
 
-    @Schema(description = "操作类型筛选，仅支持 CARE / HARVEST / PLANT", example = "CARE")
+    @Schema(description = "操作类型筛选，仅支持 CARE / HARVEST / PLANT / BUG_SPAWN", example = "CARE")
     private String actionType;
 
     @Schema(description = "地块ID筛选", example = "1")

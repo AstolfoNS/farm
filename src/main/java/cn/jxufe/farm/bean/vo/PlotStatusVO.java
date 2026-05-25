@@ -17,8 +17,11 @@ public class PlotStatusVO implements Serializable {
     private Integer occupiedPlots;
     private Integer emptyUnlockedPlots;
     private Integer harvestablePlots;
+    private Long currentExperience;
     private Long nextExpandCostCoin;
     private Long nextUnlockPlotId;
     private Short nextUnlockPlotIndex;
+    private Long nextUnlockRequiredExperience;
+    private Boolean nextUnlockableByExperience;
     private List<PlotOverviewVO> plots;
 }

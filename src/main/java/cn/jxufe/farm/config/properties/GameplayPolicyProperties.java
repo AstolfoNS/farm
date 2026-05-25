@@ -33,6 +33,10 @@ public class GameplayPolicyProperties {
 
         private long costStepCoin = 40L;
 
+        private long baseRequiredExperience = 100L;
+
+        private long requiredExperienceStep = 100L;
+
     }
 
     @Setter

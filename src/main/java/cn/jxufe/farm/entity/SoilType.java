@@ -27,6 +27,9 @@ public class SoilType extends BaseEntity {
     @Column(name = "level", nullable = false)
     private Short level;
 
+    @Column(name = "unlock_experience_required", nullable = false)
+    private Long unlockExperienceRequired;
+
     @Column(name = "grow_speed_multiplier", nullable = false, precision = 5, scale = 2)
     private BigDecimal growSpeedMultiplier;
 

@@ -18,6 +18,10 @@ public class SeedShopItemVO implements Serializable {
     private String description;
     private Long price;
     private Integer harvestFruitNumber;
+    private Integer fruitLossPerBug;
+    private Long bugKillCoinReward;
+    private Long bugKillExperienceReward;
+    private Long bugKillScoreReward;
     private Long fruitPrice;
     private Long harvestExperience;
     private Long harvestScore;
