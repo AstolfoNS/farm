@@ -141,6 +141,7 @@
         }
 
         if (moduleName === "home") {
+            showPanel($("#homePanel"));
             return;
         }
 

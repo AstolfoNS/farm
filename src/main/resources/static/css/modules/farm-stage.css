@@ -1,14 +1,13 @@
 .farm-panel {
     position: absolute;
-    left: 24px;
-    right: 24px;
-    top: 16px;
-    bottom: 16px;
+    left: 12px;
+    right: 12px;
+    top: 8px;
+    bottom: 8px;
     display: none;
-    background: rgba(10, 92, 24, 0.6);
-    border: 1px solid rgba(132, 218, 112, 0.45);
-    border-radius: 8px;
-    padding: 10px;
+    background: transparent;
+    border: 0;
+    padding: 0;
 }
 
 .farm-panel.is-active {
@@ -23,13 +22,14 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 18px;
-    min-height: 40px;
-    padding: 8px 12px;
-    background: rgba(0, 86, 23, 0.72);
-    border: 1px solid rgba(145, 255, 142, 0.44);
-    border-radius: 6px;
-    font-size: 18px;
+    gap: 16px;
+    min-height: 38px;
+    margin: 0 10px;
+    padding: 6px 12px;
+    background: rgba(0, 84, 24, 0.6);
+    border: 1px solid rgba(128, 214, 109, 0.6);
+    border-radius: 5px;
+    font-size: 16px;
     color: #eaffd1;
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.35);
 }
@@ -95,74 +95,80 @@
     position: absolute;
     left: 10px;
     right: 10px;
-    top: 66px;
-    bottom: 10px;
+    top: 52px;
+    bottom: 8px;
     overflow: auto;
-    padding: 26px 16px 18px;
+    padding: 16px 20px;
     background:
-        radial-gradient(circle at 20% 20%, rgba(162, 225, 99, 0.26), transparent 36%),
-        radial-gradient(circle at 85% 15%, rgba(120, 201, 84, 0.19), transparent 35%),
-        linear-gradient(180deg, rgba(56, 143, 32, 0.18) 0%, rgba(24, 93, 23, 0.32) 100%);
-    border: 1px solid rgba(132, 218, 112, 0.45);
-    border-radius: 8px;
+        radial-gradient(circle at 22% 18%, rgba(161, 229, 94, 0.26), transparent 35%),
+        radial-gradient(circle at 80% 16%, rgba(135, 215, 88, 0.16), transparent 34%);
 }
 
 .farm-iso-grid {
     position: relative;
-    min-width: 760px;
-    min-height: 520px;
+    min-width: 1180px;
+    min-height: 740px;
 }
 
 .farm-plot {
     position: absolute;
-    width: 132px;
-    height: 72px;
-    transform: rotate(-45deg) skew(15deg, 15deg);
-    transform-origin: center center;
-    border-radius: 6px;
-    border: 2px solid rgba(77, 60, 29, 0.82);
-    background: linear-gradient(135deg, #80622e 0%, #6d5529 45%, #594821 100%);
-    box-shadow: 0 7px 12px rgba(0, 0, 0, 0.32);
+    width: 201px;
+    height: 102px;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-image: url("/resources/imgs/domain/farm/components/soil-land.png");
+    filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
+    transition: transform var(--farm-motion-page-ms, 220ms) ease, filter var(--farm-motion-page-ms, 220ms) ease;
+}
+
+.farm-plot:hover {
+    transform: translateY(-3px);
+}
+
+.farm-plot.is-soil-base {
+    background-image: url("/resources/imgs/domain/farm/components/soil-land.png");
+}
+
+.farm-plot.is-soil-black {
+    background-image: url("/resources/imgs/domain/farm/components/soil-land-black.png");
+}
+
+.farm-plot.is-soil-red {
+    background-image: url("/resources/imgs/domain/farm/components/soil-land-red.png");
+}
+
+.farm-plot.is-soil-gold {
+    background-image: url("/resources/imgs/domain/farm/components/soil-land-gold.png");
 }
 
 .farm-plot.is-locked {
-    background: linear-gradient(135deg, #5f5f5f 0%, #4c4c4c 48%, #3f3f3f 100%);
-    border-color: rgba(35, 35, 35, 0.9);
+    filter: grayscale(0.25) brightness(0.98) drop-shadow(0 4px 5px rgba(0, 0, 0, 0.45));
+}
+
+.farm-plot.is-locked::before {
+    content: "锁";
+    position: absolute;
+    left: 50%;
+    top: 32%;
+    transform: translate(-50%, -50%);
+    width: 52px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    border-radius: 16px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffe9af;
+    background: rgba(72, 72, 72, 0.8);
+    border: 1px solid rgba(255, 221, 156, 0.7);
 }
 
 .farm-plot.is-harvestable {
-    box-shadow: 0 0 0 3px rgba(255, 204, 63, 0.86), 0 6px 12px rgba(0, 0, 0, 0.34);
-}
-
-.farm-plot.is-has-crop {
-    border-color: rgba(255, 255, 255, 0.65);
+    filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)) drop-shadow(0 0 11px rgba(255, 227, 121, 0.95));
 }
 
 .farm-plot-surface {
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    top: 8px;
-    bottom: 8px;
-    border-radius: 4px;
-    border: 1px solid rgba(95, 74, 40, 0.55);
-}
-
-.farm-plot.is-soil-base .farm-plot-surface {
-    background: radial-gradient(circle at 30% 25%, #8a7a51 0%, #7b6841 48%, #695637 100%);
-}
-
-.farm-plot.is-soil-black .farm-plot-surface {
-    background: radial-gradient(circle at 30% 25%, #4a4438 0%, #3f382e 48%, #2f2a23 100%);
-}
-
-.farm-plot.is-soil-red .farm-plot-surface {
-    background: radial-gradient(circle at 30% 25%, #8e5234 0%, #7b4129 48%, #612f1d 100%);
-}
-
-.farm-plot.is-soil-gold .farm-plot-surface {
-    background: radial-gradient(circle at 30% 25%, #e6c35a 0%, #d9b44a 42%, #b4882c 100%);
-    border-color: rgba(245, 210, 111, 0.8);
+    display: none;
 }
 
 .farm-plot.farm-plot-anim {
@@ -179,28 +185,31 @@
 
 .farm-plot-content {
     position: absolute;
-    left: 12px;
-    top: -35px;
-    width: 108px;
-    transform: rotate(45deg) skew(-15deg, -15deg);
+    left: 8px;
+    right: 8px;
+    bottom: -18px;
     text-align: center;
     color: #fff7d2;
+    display: none;
+}
+
+.farm-plot:hover .farm-plot-content {
+    display: block;
 }
 
 .farm-crop-sprite {
     position: absolute;
-    left: 22px;
-    top: -54px;
-    width: 86px;
-    height: 86px;
+    left: 36px;
+    top: -86px;
+    width: 132px;
+    height: 132px;
     object-fit: contain;
-    transform: rotate(45deg) skew(-15deg, -15deg);
-    filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.35));
+    filter: drop-shadow(0 6px 5px rgba(0, 0, 0, 0.4));
     pointer-events: none;
 }
 
 .farm-plot-title {
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.1;
     font-weight: 700;
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.65);
@@ -210,29 +219,28 @@
 }
 
 .farm-plot-sub {
-    margin-top: 3px;
-    font-size: 11px;
+    margin-top: 1px;
+    font-size: 10px;
     color: #caf9ff;
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.58);
 }
 
 .farm-plot-badges {
     position: absolute;
-    right: -8px;
-    top: -8px;
+    right: 6px;
+    top: 8px;
     display: flex;
     align-items: center;
     gap: 4px;
-    transform: rotate(45deg) skew(-15deg, -15deg);
 }
 
 .farm-plot-badge {
-    min-width: 18px;
-    height: 18px;
+    min-width: 20px;
+    height: 20px;
     padding: 0 4px;
-    border-radius: 9px;
-    font-size: 10px;
-    line-height: 18px;
+    border-radius: 10px;
+    font-size: 11px;
+    line-height: 20px;
     text-align: center;
     color: #fff;
     background: rgba(0, 0, 0, 0.62);
@@ -341,30 +349,31 @@
 
 @keyframes farmPlotPulseSuccess {
     0% {
-        box-shadow: 0 0 0 0 rgba(113, 255, 117, 0);
+        filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
     }
     50% {
-        box-shadow: 0 0 0 4px rgba(113, 255, 117, 0.95), 0 6px 12px rgba(0, 0, 0, 0.34);
+        filter: drop-shadow(0 0 16px rgba(113, 255, 117, 0.95));
     }
     100% {
-        box-shadow: 0 0 0 0 rgba(113, 255, 117, 0), 0 6px 12px rgba(0, 0, 0, 0.28);
+        filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.38));
     }
 }
 
 @keyframes farmPlotPulseWarning {
     0% {
-        box-shadow: 0 0 0 0 rgba(255, 170, 72, 0);
+        filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
     }
     50% {
-        box-shadow: 0 0 0 4px rgba(255, 170, 72, 0.95), 0 6px 12px rgba(0, 0, 0, 0.34);
+        filter: drop-shadow(0 0 16px rgba(255, 170, 72, 0.95));
     }
     100% {
-        box-shadow: 0 0 0 0 rgba(255, 170, 72, 0), 0 6px 12px rgba(0, 0, 0, 0.28);
+        filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.38));
     }
 }
 
 .farm-action-dialog {
-    color: #20411f;
+    color: #f0ffd7;
+    background: rgba(0, 106, 0, 0.9);
 }
 
 .farm-action-row {

@@ -3,11 +3,13 @@
     left: 50%;
     top: 52%;
     transform: translate(-50%, -50%);
-    width: 520px;
-    background: linear-gradient(180deg, rgba(0, 126, 0, 0.92), rgba(0, 104, 0, 0.9));
-    border: 2px solid #02df0a;
-    border-radius: 6px;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+    width: 430px;
+    background: linear-gradient(180deg, rgba(0, 120, 0, 0.93), rgba(0, 94, 0, 0.92));
+    border: 2px solid #00e10c;
+    border-radius: 5px;
+    box-shadow:
+        0 0 0 2px rgba(0, 54, 0, 0.65) inset,
+        0 10px 20px rgba(0, 0, 0, 0.48);
     display: none;
     animation: homePanelEnter var(--farm-motion-module-ms, 260ms) ease both;
 }
@@ -15,12 +17,13 @@
 .home-panel-title {
     height: 40px;
     line-height: 40px;
-    padding: 0 12px;
-    font-size: 26px;
+    padding: 0 14px;
+    font-size: 31px;
     font-weight: 700;
-    color: #f7ffd6;
-    background: rgba(4, 175, 0, 0.78);
-    border-bottom: 1px solid rgba(170, 255, 139, 0.75);
+    color: #f2ffd7;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(180deg, rgba(0, 167, 0, 0.92), rgba(0, 140, 0, 0.92));
+    border-bottom: 1px solid rgba(160, 255, 135, 0.78);
 }
 
 .home-panel-body {
@@ -33,26 +36,56 @@
 
 .home-form-label {
     display: block;
-    margin-bottom: 6px;
-    font-size: 24px;
+    margin-bottom: 8px;
+    font-size: 32px;
+    line-height: 1;
+    color: #f5ffdf;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
     font-weight: 700;
 }
 
 .home-form-actions {
     text-align: right;
+    margin-top: 8px;
     margin-bottom: 10px;
 }
 
 .home-form-tip {
-    font-size: 18px;
-    line-height: 1.4;
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 1.5;
     color: #e0ffdb;
-    border-top: 1px dashed rgba(140, 227, 143, 0.9);
+    border-top: 1px solid rgba(130, 230, 130, 0.9);
     padding-top: 10px;
 }
 
+.user-select-panel {
+    width: 430px;
+}
+
+.user-select-panel .textbox,
+.user-select-panel .combo {
+    width: 100% !important;
+}
+
+.user-select-panel .textbox .textbox-text {
+    height: 32px !important;
+    line-height: 32px !important;
+    font-size: 20px;
+}
+
+.user-select-panel .l-btn {
+    min-width: 92px;
+    border-radius: 6px;
+}
+
+.user-select-panel .l-btn-text {
+    font-size: 22px;
+    font-weight: 700;
+}
+
 .profile-panel {
-    width: 560px;
+    width: 500px;
 }
 
 .profile-main {
@@ -63,8 +96,8 @@
 }
 
 .profile-avatar {
-    width: 118px;
-    height: 118px;
+    width: 104px;
+    height: 104px;
     border: 2px solid rgba(177, 255, 155, 0.85);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.12);
@@ -75,7 +108,7 @@
 }
 
 .profile-name {
-    font-size: 30px;
+    font-size: 33px;
     color: #ffe371;
     font-weight: 700;
     margin-bottom: 8px;
@@ -83,8 +116,8 @@
 }
 
 .profile-row {
-    font-size: 20px;
-    line-height: 1.5;
+    font-size: 24px;
+    line-height: 1.45;
     color: #dbffe1;
 }
 

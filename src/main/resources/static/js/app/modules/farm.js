@@ -2,10 +2,10 @@
     var FarmModule = {};
     var layout = {
         cols: 5,
-        tileX: 78,
-        tileY: 42,
-        baseX: 300,
-        baseY: 28
+        tileX: 118,
+        tileY: 54,
+        baseX: 460,
+        baseY: 36
     };
     var state = {
         active: false,
@@ -205,18 +205,18 @@
     }
 
     function resolveCropStyle(crop) {
-        var width = asNumber(crop && crop.stageWidth, 86);
-        var height = asNumber(crop && crop.stageHeight, 86);
+        var width = asNumber(crop && crop.stageWidth, 132);
+        var height = asNumber(crop && crop.stageHeight, 132);
         var offsetX = asNumber(crop && crop.stageOffsetX, 0);
         var offsetY = asNumber(crop && crop.stageOffsetY, 0);
         if (width <= 0) {
-            width = 86;
+            width = 132;
         }
         if (height <= 0) {
-            height = 86;
+            height = 132;
         }
-        var left = 22 + offsetX;
-        var top = -54 + offsetY;
+        var left = 36 + Math.round(offsetX * 0.68);
+        var top = -86 + Math.round(offsetY * 0.68);
         return "left:" + left + "px;top:" + top + "px;width:" + width + "px;height:" + height + "px;";
     }
 
@@ -476,8 +476,8 @@
         if ($grid.length === 0) {
             return;
         }
-        var left = parsePixel($plot.css("left"), 0) + 36;
-        var top = parsePixel($plot.css("top"), 0) - 16;
+        var left = parsePixel($plot.css("left"), 0) + 82;
+        var top = parsePixel($plot.css("top"), 0) - 24;
         var safeText = escapeHtml(tipText || "操作成功");
         var $tip = $("<div class='farm-plot-float-tip type-" + safeActionType + "'>" + safeText + "</div>");
         $tip.css({left: left + "px", top: top + "px"});
