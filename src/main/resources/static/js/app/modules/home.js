@@ -111,12 +111,18 @@
         hidePanel($("#homePanel"));
         hidePanel($("#seedAdminPanel"));
         hidePanel($("#settingsPanel"));
-        hidePanel($("#farmStage .farm-stage-watermark"));
+    }
+
+    function applyShellBackground(moduleName) {
+        var isHome = moduleName === "home";
+        $("#appShell").toggleClass("is-homepage", isHome);
+        $("#appShell").toggleClass("is-subpage", !isHome);
     }
 
     function switchModule(moduleName) {
         var feedbackMs = motion().actionFeedbackMs;
         window.FarmAppState.currentModule = moduleName;
+        applyShellBackground(moduleName);
         $(".topbar-nav-item").removeClass("is-active");
         if (moduleName !== "home") {
             $(".topbar-nav-item[data-module='" + moduleName + "']").addClass("is-active");
@@ -135,19 +141,16 @@
         }
 
         if (moduleName === "home") {
-            showPanel($("#farmStage .farm-stage-watermark"));
             return;
         }
 
         if (moduleName === "profile") {
             showPanel($("#profilePanel"));
-            showPanel($("#farmStage .farm-stage-watermark"));
             return;
         }
 
         if (moduleName === "user-select") {
             showPanel($("#homePanel"));
-            showPanel($("#farmStage .farm-stage-watermark"));
             return;
         }
 
@@ -174,20 +177,16 @@
 
         if (moduleName === "seed-admin") {
             showPanel($("#seedAdminPanel"));
-            showPanel($("#farmStage .farm-stage-watermark"));
             return;
         }
 
         if (moduleName === "settings") {
             showPanel($("#settingsPanel"));
-            showPanel($("#farmStage .farm-stage-watermark"));
             if (window.FarmAudio && $.isFunction(window.FarmAudio.renderSettings)) {
                 window.FarmAudio.renderSettings();
             }
             return;
         }
-
-        showPanel($("#farmStage .farm-stage-watermark"));
         $.messager.show({
             title: "提示",
             msg: "模块 " + moduleName + " 正在重构中。",

@@ -6,6 +6,16 @@ body {
     height: 100%;
 }
 
+:root {
+    --farm-topbar-height: 62px;
+    --farm-bottombar-height: 44px;
+    --farm-menu-icon-box-width: 62px;
+    --farm-menu-icon-box-height: 58px;
+    --farm-menu-icon-size: 54px;
+    --farm-shell-bg-home: url("/resources/imgs/ui/home/watermark.png");
+    --farm-shell-bg-subpage: url("/resources/imgs/ui/home/background.png");
+}
+
 * {
     box-sizing: border-box;
 }
