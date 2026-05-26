@@ -220,7 +220,12 @@
         $("#homeConfirmUserBtn").on("click", function () {
             var userId = Number($("#homeUserSelect").combobox("getValue") || 0);
             if (!userId) {
-                $.messager.alert("提示", "请先选择用户");
+                $.messager.show({
+                    title: "消息",
+                    msg: "请先选择用户",
+                    timeout: motion().actionFeedbackMs,
+                    showType: "slide"
+                });
                 return;
             }
             FarmApi.setCurUser(userId, function (res) {

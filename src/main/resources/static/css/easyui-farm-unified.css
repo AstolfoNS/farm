@@ -46,3 +46,29 @@
 .messager-window .messager-icon {
     opacity: 0.95;
 }
+
+/* combobox / dropdown panel */
+.combo-panel,
+.combo-p,
+.combo-panel .panel-body {
+    background: #0b8f10 !important;
+    border-color: #29d332 !important;
+}
+
+.combobox-item {
+    color: #efffdf !important;
+    font-size: 14px;
+    line-height: 30px;
+    border-bottom: 1px dashed rgba(166, 245, 150, 0.25);
+}
+
+.combobox-item-hover {
+    background: #17a921 !important;
+    color: #ffffff !important;
+}
+
+.combobox-item-selected {
+    background: #25bf2f !important;
+    color: #fff9d4 !important;
+    font-weight: 700;
+}
