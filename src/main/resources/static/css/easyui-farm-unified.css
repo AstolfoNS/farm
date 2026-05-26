@@ -1,0 +1,48 @@
+/* Unified EasyUI popup/dialog theme for farm pages */
+.window,
+.window-shadow {
+    border: 1px solid #19d022 !important;
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px rgba(0, 82, 0, 0.66) inset, 0 10px 18px rgba(0, 0, 0, 0.42) !important;
+}
+
+.window .panel-header,
+.messager-window .panel-header {
+    background: linear-gradient(180deg, #0ca80d, #067906) !important;
+    border-bottom: 1px solid #4cf44c !important;
+    border-top: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+}
+
+.window .panel-title,
+.messager-window .panel-title {
+    color: #f3ffd8 !important;
+    font-weight: 700;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.48);
+}
+
+.window .panel-body,
+.messager-window .panel-body {
+    background: linear-gradient(180deg, rgba(0, 124, 0, 0.95), rgba(0, 92, 0, 0.95)) !important;
+    color: #f0ffd8 !important;
+    border: 0 !important;
+}
+
+.dialog-button {
+    background: rgba(0, 83, 0, 0.94) !important;
+    border-top: 1px solid rgba(146, 255, 120, 0.7) !important;
+}
+
+.dialog-button .l-btn {
+    border-radius: 5px !important;
+}
+
+.messager-window .messager-body {
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.messager-window .messager-icon {
+    opacity: 0.95;
+}

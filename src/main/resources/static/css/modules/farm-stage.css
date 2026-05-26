@@ -37,9 +37,9 @@
 .farm-tool-bar {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     margin: 0 10px;
-    padding: 6px 10px;
+    padding: 5px 10px;
     background: rgba(0, 88, 24, 0.64);
     border: 1px solid rgba(128, 214, 109, 0.6);
     border-radius: 5px;
@@ -48,43 +48,50 @@
 .farm-tool-btn {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    height: 34px;
-    padding: 0 10px 0 8px;
-    border: 1px solid rgba(128, 214, 109, 0.7);
+    gap: 5px;
+    height: 36px;
+    min-width: 82px;
+    padding: 0 10px 0 7px;
+    border: 1px solid rgba(148, 228, 117, 0.78);
     border-radius: 4px;
-    background: linear-gradient(180deg, rgba(45, 145, 52, 0.9), rgba(25, 105, 33, 0.92));
+    background: linear-gradient(180deg, rgba(56, 165, 58, 0.94), rgba(22, 116, 29, 0.94));
     color: #ecffdb;
     text-decoration: none;
-    transition: filter var(--farm-motion-page-ms, 220ms) ease, transform var(--farm-motion-page-ms, 220ms) ease;
+    box-shadow: 0 0 0 1px rgba(0, 72, 0, 0.55) inset;
+    transition: filter var(--farm-motion-page-ms, 220ms) ease, transform var(--farm-motion-page-ms, 220ms) ease, box-shadow var(--farm-motion-page-ms, 220ms) ease;
 }
 
 .farm-tool-btn:hover {
-    filter: brightness(1.05);
+    filter: brightness(1.1);
     transform: translateY(-1px);
+    box-shadow: 0 0 0 1px rgba(177, 255, 148, 0.52) inset, 0 0 8px rgba(130, 255, 113, 0.3);
 }
 
 .farm-tool-btn.is-active {
-    box-shadow: 0 0 0 1px rgba(196, 255, 166, 0.74) inset, 0 0 10px rgba(153, 255, 126, 0.44);
+    box-shadow: 0 0 0 1px rgba(196, 255, 166, 0.8) inset, 0 0 11px rgba(153, 255, 126, 0.52);
     border-color: rgba(196, 255, 166, 0.84);
+    filter: brightness(1.08);
 }
 
 .farm-tool-btn img {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     object-fit: contain;
     pointer-events: none;
 }
 
 .farm-tool-btn span {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
 }
 
 .farm-tool-hint {
     margin-left: auto;
-    font-size: 14px;
+    font-size: 13px;
     color: #ddffcf;
+    letter-spacing: 0.01em;
 }
 
 .farm-meta-item span {
@@ -426,12 +433,13 @@
 
 .farm-action-dialog {
     color: #f0ffd7;
-    background: rgba(0, 106, 0, 0.9);
+    background: transparent;
 }
 
 .farm-action-row {
-    margin-bottom: 8px;
-    line-height: 1.5;
+    margin-bottom: 9px;
+    line-height: 1.55;
+    font-size: 14px;
 }
 
 .farm-action-buttons {
@@ -439,6 +447,8 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 12px;
+    border-top: 1px solid rgba(145, 247, 120, 0.65);
+    padding-top: 10px;
 }
 
 .farm-seed-select {
