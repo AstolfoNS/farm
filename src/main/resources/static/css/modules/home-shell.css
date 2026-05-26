@@ -1,9 +1,9 @@
 .home-panel {
     position: absolute;
     left: 50%;
-    top: 52%;
+    top: 50%;
     transform: translate(-50%, -50%);
-    width: 430px;
+    width: 500px;
     background: linear-gradient(180deg, rgba(0, 120, 0, 0.93), rgba(0, 94, 0, 0.92));
     border: 2px solid #00e10c;
     border-radius: 5px;
@@ -15,10 +15,10 @@
 }
 
 .home-panel-title {
-    height: 40px;
-    line-height: 40px;
+    height: 42px;
+    line-height: 42px;
     padding: 0 14px;
-    font-size: 31px;
+    font-size: 30px;
     font-weight: 700;
     color: #f2ffd7;
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
@@ -27,7 +27,7 @@
 }
 
 .home-panel-body {
-    padding: 16px 14px 14px;
+    padding: 16px 16px 15px;
 }
 
 .home-form-row {
@@ -37,7 +37,7 @@
 .home-form-label {
     display: block;
     margin-bottom: 8px;
-    font-size: 32px;
+    font-size: 30px;
     line-height: 1;
     color: #f5ffdf;
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
@@ -52,7 +52,7 @@
 
 .home-form-tip {
     margin-top: 8px;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.5;
     color: #e0ffdb;
     border-top: 1px solid rgba(130, 230, 130, 0.9);
@@ -60,7 +60,7 @@
 }
 
 .user-select-panel {
-    width: 430px;
+    width: 500px;
 }
 
 .user-select-panel .textbox,
@@ -69,13 +69,17 @@
 }
 
 .user-select-panel .textbox .textbox-text {
-    height: 32px !important;
-    line-height: 32px !important;
-    font-size: 20px;
+    height: 38px !important;
+    line-height: 38px !important;
+    font-size: 22px;
+}
+
+.user-select-panel .textbox {
+    border-radius: 6px;
 }
 
 .user-select-panel .l-btn {
-    min-width: 92px;
+    min-width: 110px;
     border-radius: 6px;
 }
 
@@ -84,30 +88,30 @@
     font-weight: 700;
 }
 
-.profile-panel {
-    width: 500px;
+.user-manage-panel {
+    width: 560px;
 }
 
-.profile-main {
+.user-manage-main {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 18px;
     padding: 6px 0 12px;
 }
 
-.profile-avatar {
-    width: 104px;
-    height: 104px;
+.user-manage-avatar {
+    width: 116px;
+    height: 116px;
     border: 2px solid rgba(177, 255, 155, 0.85);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.12);
 }
 
-.profile-info {
+.user-manage-info {
     flex: 1;
 }
 
-.profile-name {
+.user-manage-name {
     font-size: 33px;
     color: #ffe371;
     font-weight: 700;
@@ -115,15 +119,26 @@
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.45);
 }
 
-.profile-row {
+.user-manage-row {
     font-size: 24px;
     line-height: 1.45;
     color: #dbffe1;
 }
 
-.profile-row span {
+.user-manage-row span {
     color: #fff3ab;
     font-weight: 700;
+}
+
+.user-manage-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.user-manage-actions .l-btn {
+    min-width: 120px;
 }
 
 .seed-admin-panel {

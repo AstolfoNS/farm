@@ -51,9 +51,9 @@
             </div>
         </div>
         <nav class="topbar-nav">
-            <a href="javascript:void(0)" class="topbar-nav-item" data-module="profile" title="个人信息">
-                <img src="/resources/imgs/ui/menu/menu-user-manage.png" alt="个人信息">
-                <span class="topbar-nav-text">个人信息</span>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="user-manage" title="用户管理">
+                <img src="/resources/imgs/ui/menu/menu-user-manage.png" alt="用户管理">
+                <span class="topbar-nav-text">用户管理</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="user-select" title="用户选择">
                 <img src="/resources/imgs/ui/menu/menu-user-select.png" alt="用户选择">
@@ -105,6 +105,25 @@
                     </label>
                 </div>
             </div>
+            <div id="farmToolBar" class="farm-tool-bar">
+                <a href="javascript:void(0)" class="farm-tool-btn is-active" data-tool="inspect">
+                    <img src="/resources/imgs/domain/farm/actions/action-wait.png" alt="查看">
+                    <span>查看</span>
+                </a>
+                <a href="javascript:void(0)" class="farm-tool-btn" data-tool="plant">
+                    <img src="/resources/imgs/domain/farm/actions/action-plant.png" alt="播种">
+                    <span>播种</span>
+                </a>
+                <a href="javascript:void(0)" class="farm-tool-btn" data-tool="clean">
+                    <img src="/resources/imgs/domain/farm/actions/action-clean-land.png" alt="铲除">
+                    <span>铲除</span>
+                </a>
+                <a href="javascript:void(0)" class="farm-tool-btn" data-tool="care">
+                    <img src="/resources/imgs/domain/farm/actions/action-clean-bug.png" alt="杀虫">
+                    <span>杀虫</span>
+                </a>
+                <div id="farmToolHint" class="farm-tool-hint">当前工具：查看（点击地块打开操作窗）</div>
+            </div>
             <div id="farmIsoContainer" class="farm-iso-container"></div>
         </section>
 
@@ -142,19 +161,23 @@
             </div>
         </section>
 
-        <section id="profilePanel" class="home-panel profile-panel">
-            <div class="home-panel-title">个人用户</div>
+        <section id="userManagePanel" class="home-panel user-manage-panel">
+            <div class="home-panel-title">用户管理</div>
             <div class="home-panel-body">
-                <div class="profile-main">
-                    <img id="profileAvatar" class="profile-avatar" src="/resources/imgs/ui/user/default-avatar.png" alt="avatar">
-                    <div class="profile-info">
-                        <div class="profile-name" id="profileUserName">未知用户</div>
-                        <div class="profile-row">经验值：<span id="profileUserExp">0</span></div>
-                        <div class="profile-row">金币：<span id="profileUserCoin">0</span></div>
-                        <div class="profile-row">积分：<span id="profileUserScore">0</span></div>
+                <div class="user-manage-main">
+                    <img id="userManageAvatar" class="user-manage-avatar" src="/resources/imgs/ui/user/default-avatar.png" alt="avatar">
+                    <div class="user-manage-info">
+                        <div class="user-manage-name" id="userManageName">未知用户</div>
+                        <div class="user-manage-row">经验值：<span id="userManageExp">0</span></div>
+                        <div class="user-manage-row">金币：<span id="userManageCoin">0</span></div>
+                        <div class="user-manage-row">积分：<span id="userManageScore">0</span></div>
                     </div>
                 </div>
-                <div class="home-form-tip">这里是个人信息总览，点击顶部“用户选择”可以切换当前用户。</div>
+                <div class="user-manage-actions">
+                    <a id="openUserListBtn" href="/html/user_list.html" target="_blank" class="easyui-linkbutton">打开用户管理页</a>
+                    <a id="refreshUserInfoBtn" href="javascript:void(0)" class="easyui-linkbutton c1">刷新用户信息</a>
+                </div>
+                <div class="home-form-tip">顶部用户条和本面板保持同步。若需维护用户资料、头像，请进入“用户管理页”。</div>
             </div>
         </section>
 

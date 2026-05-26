@@ -17,7 +17,14 @@
         lastDisconnectNoticeAt: 0,
         soilOptions: null,
         seedCoverById: {},
-        seedVisualLoaded: false
+        seedVisualLoaded: false,
+        selectedTool: "inspect"
+    };
+    var toolTitleMap = {
+        inspect: "查看",
+        plant: "播种",
+        clean: "铲除",
+        care: "杀虫"
     };
 
     function motion() {
@@ -61,6 +68,26 @@
         }
         var user = window.FarmAppState.currentUser || {};
         return asNumber(user.id, 0);
+    }
+
+    function toolLabel(toolName) {
+        var key = String(toolName || "").toLowerCase();
+        return toolTitleMap[key] || "查看";
+    }
+
+    function switchTool(toolName) {
+        var next = String(toolName || "inspect").toLowerCase();
+        if (next !== "inspect" && next !== "plant" && next !== "clean" && next !== "care") {
+            next = "inspect";
+        }
+        state.selectedTool = next;
+        $(".farm-tool-btn").removeClass("is-active");
+        $(".farm-tool-btn[data-tool='" + next + "']").addClass("is-active");
+        if (next === "inspect") {
+            $("#farmToolHint").text("当前工具：查看（点击地块打开操作窗）");
+            return;
+        }
+        $("#farmToolHint").text("当前工具：" + toolLabel(next) + "（点击地块直接执行）");
     }
 
     function fallbackEnabled() {
@@ -781,6 +808,61 @@
         $("#farmActionDialog").dialog("open");
     }
 
+    function applyToolOnPlot(plotId) {
+        var plot = findPlot(plotId);
+        if (!plot) {
+            return;
+        }
+        var mode = state.selectedTool || "inspect";
+        if (mode === "inspect") {
+            openPlotActionDialog(plotId);
+            return;
+        }
+        if (mode === "plant") {
+            if (plot.locked) {
+                $.messager.alert("提示", "该地块尚未解锁，请先在查看模式中解锁");
+                playSound("error");
+                return;
+            }
+            if (plot.hasCrop) {
+                $.messager.alert("提示", "该地块已有作物，无法播种");
+                playSound("error");
+                return;
+            }
+            openSeedDialog(plot);
+            return;
+        }
+        if (mode === "care") {
+            if (plot.locked || !plot.hasCrop) {
+                $.messager.alert("提示", "该地块暂无可杀虫作物");
+                playSound("error");
+                return;
+            }
+            if (!(plot.crop && plot.crop.canCare)) {
+                $.messager.alert("提示", "当前作物没有虫害，不需要杀虫");
+                playSound("error");
+                return;
+            }
+            executeCare(plot);
+            return;
+        }
+        if (mode === "clean") {
+            if (plot.locked || !plot.hasCrop) {
+                $.messager.alert("提示", "该地块暂无可铲除作物");
+                playSound("error");
+                return;
+            }
+            if (plot.crop && plot.crop.harvestable) {
+                executeHarvest(plot);
+                return;
+            }
+            $.messager.alert("提示", "当前后端未开放未成熟作物铲除接口，请先养护或等待收获");
+            playSound("error");
+            return;
+        }
+        openPlotActionDialog(plotId);
+    }
+
     function setActive(flag) {
         state.active = !!flag;
         if (state.active) {
@@ -789,6 +871,7 @@
                 $("#farmPanel").removeClass("is-module-enter");
             }, motion().moduleEnterMs);
             ensureSeedVisuals();
+            switchTool(state.selectedTool || "inspect");
             loadOverviewByUser(currentUserId(), false);
             if (window.FarmWsBridge && window.FarmWsBridge.isConnected()) {
                 onRealtimeStatus("connected");
@@ -829,9 +912,14 @@
             }
         });
 
+        $("#farmToolBar").on("click", ".farm-tool-btn", function () {
+            switchTool($(this).attr("data-tool"));
+            playSound("click");
+        });
+
         $("#farmIsoContainer").on("click", ".farm-plot", function () {
             var plotId = $(this).attr("data-plot-id");
-            openPlotActionDialog(plotId);
+            applyToolOnPlot(plotId);
         });
     }
 

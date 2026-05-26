@@ -30,11 +30,11 @@
         $("#topUserCoin").text(coin);
         $("#topUserScore").text(score);
 
-        $("#profileAvatar").attr("src", head);
-        $("#profileUserName").text(nickname);
-        $("#profileUserExp").text(exp);
-        $("#profileUserCoin").text(coin);
-        $("#profileUserScore").text(score);
+        $("#userManageAvatar").attr("src", head);
+        $("#userManageName").text(nickname);
+        $("#userManageExp").text(exp);
+        $("#userManageCoin").text(coin);
+        $("#userManageScore").text(score);
     }
 
     function currentUserId() {
@@ -107,7 +107,7 @@
     }
 
     function hideBasicPanels() {
-        hidePanel($("#profilePanel"));
+        hidePanel($("#userManagePanel"));
         hidePanel($("#homePanel"));
         hidePanel($("#plotAdminPanel"));
         hidePanel($("#seedAdminPanel"));
@@ -149,8 +149,8 @@
             return;
         }
 
-        if (moduleName === "profile") {
-            showPanel($("#profilePanel"));
+        if (moduleName === "user-manage") {
+            showPanel($("#userManagePanel"));
             return;
         }
 
@@ -243,6 +243,17 @@
                 $.messager.alert("提示", "切换失败，请稍后重试");
             });
         });
+
+        $("#refreshUserInfoBtn").on("click", function () {
+            refreshCurUser(function () {
+                $.messager.show({
+                    title: "提示",
+                    msg: "用户信息已刷新",
+                    timeout: motion().actionFeedbackMs,
+                    showType: "slide"
+                });
+            });
+        });
     }
 
     function resolveInitialModule() {
@@ -253,7 +264,10 @@
             if (mod === "home") {
                 moduleName = "home";
             }
-            if (mod === "profile" || mod === "user-select" || mod === "farm" || mod === "plot-admin" || mod === "shop" || mod === "store" || mod === "seed-admin" || mod === "settings" || mod === "home") {
+            if (mod === "profile") {
+                mod = "user-manage";
+            }
+            if (mod === "user-manage" || mod === "user-select" || mod === "farm" || mod === "plot-admin" || mod === "shop" || mod === "store" || mod === "seed-admin" || mod === "settings" || mod === "home") {
                 moduleName = mod;
             }
         } catch (e) {

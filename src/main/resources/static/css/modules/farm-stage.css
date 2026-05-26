@@ -24,7 +24,7 @@
     flex-wrap: wrap;
     gap: 16px;
     min-height: 38px;
-    margin: 0 10px;
+    margin: 0 10px 6px;
     padding: 6px 12px;
     background: rgba(0, 84, 24, 0.6);
     border: 1px solid rgba(128, 214, 109, 0.6);
@@ -32,6 +32,59 @@
     font-size: 16px;
     color: #eaffd1;
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.35);
+}
+
+.farm-tool-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 10px;
+    padding: 6px 10px;
+    background: rgba(0, 88, 24, 0.64);
+    border: 1px solid rgba(128, 214, 109, 0.6);
+    border-radius: 5px;
+}
+
+.farm-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 34px;
+    padding: 0 10px 0 8px;
+    border: 1px solid rgba(128, 214, 109, 0.7);
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(45, 145, 52, 0.9), rgba(25, 105, 33, 0.92));
+    color: #ecffdb;
+    text-decoration: none;
+    transition: filter var(--farm-motion-page-ms, 220ms) ease, transform var(--farm-motion-page-ms, 220ms) ease;
+}
+
+.farm-tool-btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.farm-tool-btn.is-active {
+    box-shadow: 0 0 0 1px rgba(196, 255, 166, 0.74) inset, 0 0 10px rgba(153, 255, 126, 0.44);
+    border-color: rgba(196, 255, 166, 0.84);
+}
+
+.farm-tool-btn img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.farm-tool-btn span {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.farm-tool-hint {
+    margin-left: auto;
+    font-size: 14px;
+    color: #ddffcf;
 }
 
 .farm-meta-item span {
@@ -95,7 +148,7 @@
     position: absolute;
     left: 10px;
     right: 10px;
-    top: 52px;
+    top: 96px;
     bottom: 8px;
     overflow: auto;
     padding: 16px 20px;
@@ -112,8 +165,8 @@
 
 .farm-plot {
     position: absolute;
-    width: 201px;
-    height: 102px;
+    width: 210px;
+    height: 106px;
     background-repeat: no-repeat;
     background-size: 100% 100%;
     background-image: url("/resources/imgs/domain/farm/components/soil-land.png");
@@ -146,17 +199,17 @@
 }
 
 .farm-plot.is-locked::before {
-    content: "锁";
+    content: "锁定";
     position: absolute;
     left: 50%;
     top: 32%;
     transform: translate(-50%, -50%);
-    width: 52px;
+    width: 64px;
     height: 32px;
     line-height: 32px;
     text-align: center;
     border-radius: 16px;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
     color: #ffe9af;
     background: rgba(72, 72, 72, 0.8);
