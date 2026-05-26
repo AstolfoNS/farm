@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="/css/modules/farm-stage.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/shop-panel.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/store-panel.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/plot-admin.css">
     <script src="/js/easyui/jquery.min.js"></script>
     <script src="/js/easyui/jquery.easyui.min.js"></script>
     <script src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
@@ -23,6 +24,7 @@
     <script src="/js/app/modules/farm.js"></script>
     <script src="/js/app/modules/shop.js"></script>
     <script src="/js/app/modules/store.js"></script>
+    <script src="/js/app/modules/plot-admin.js"></script>
     <script src="/js/app/modules/home.js"></script>
 </head>
 <body class="farm-body">
@@ -49,9 +51,9 @@
             </div>
         </div>
         <nav class="topbar-nav">
-            <a href="javascript:void(0)" class="topbar-nav-item" data-module="profile" title="个人用户">
-                <img src="/resources/imgs/ui/menu/menu-self.png" alt="个人用户">
-                <span class="topbar-nav-text">个人用户</span>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="profile" title="个人信息">
+                <img src="/resources/imgs/ui/menu/menu-user-manage.png" alt="个人信息">
+                <span class="topbar-nav-text">个人信息</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="user-select" title="用户选择">
                 <img src="/resources/imgs/ui/menu/menu-user-select.png" alt="用户选择">
@@ -61,9 +63,13 @@
                 <img src="/resources/imgs/ui/menu/menu-farm.png" alt="农场">
                 <span class="topbar-nav-text">农场</span>
             </a>
-            <a href="javascript:void(0)" class="topbar-nav-item" data-module="shop" title="商店">
-                <img src="/resources/imgs/ui/menu/menu-shop.png" alt="商店">
-                <span class="topbar-nav-text">商店</span>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="plot-admin" title="地块管理">
+                <img src="/resources/imgs/ui/menu/land-manage.png" alt="地块管理">
+                <span class="topbar-nav-text">地块管理</span>
+            </a>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="shop" title="种子商店">
+                <img src="/resources/imgs/ui/menu/menu-shop.png" alt="种子商店">
+                <span class="topbar-nav-text">种子商店</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="store" title="仓库">
                 <img src="/resources/imgs/ui/menu/menu-store.png" alt="仓库">
@@ -73,9 +79,9 @@
                 <img src="/resources/imgs/ui/menu/menu-seed-admin.png" alt="种子管理">
                 <span class="topbar-nav-text">种子管理</span>
             </a>
-            <a href="javascript:void(0)" class="topbar-nav-item topbar-nav-item-setting" data-module="settings" title="设置">
-                <img src="/resources/imgs/ui/menu/menu-system.png" alt="设置">
-                <span class="topbar-nav-text">设置</span>
+            <a href="javascript:void(0)" class="topbar-nav-item" data-module="settings" title="系统设置">
+                <img src="/resources/imgs/ui/menu/menu-system.png" alt="系统设置">
+                <span class="topbar-nav-text">系统设置</span>
             </a>
         </nav>
     </header>
@@ -187,6 +193,13 @@
             </div>
         </section>
 
+        <section id="plotAdminPanel" class="home-panel plot-admin-panel">
+            <div class="home-panel-title">地块管理</div>
+            <div class="home-panel-body">
+                <div class="plot-admin-tip">地块管理模块将在下一阶段接入：地块类型、默认分配策略、用户地块分配与批量应用。</div>
+            </div>
+        </section>
+
         <section id="seedAdminPanel" class="home-panel seed-admin-panel">
             <div class="home-panel-title">种子管理</div>
             <div class="home-panel-body">
@@ -229,4 +242,3 @@
 </div>
 </body>
 </html>
-

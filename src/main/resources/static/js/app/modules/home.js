@@ -109,6 +109,7 @@
     function hideBasicPanels() {
         hidePanel($("#profilePanel"));
         hidePanel($("#homePanel"));
+        hidePanel($("#plotAdminPanel"));
         hidePanel($("#seedAdminPanel"));
         hidePanel($("#settingsPanel"));
     }
@@ -139,6 +140,9 @@
         if (window.FarmStoreModule) {
             window.FarmStoreModule.setActive(false);
         }
+        if (window.FarmPlotAdminModule) {
+            window.FarmPlotAdminModule.setActive(false);
+        }
 
         if (moduleName === "home") {
             showPanel($("#homePanel"));
@@ -158,6 +162,15 @@
         if (moduleName === "farm") {
             if (window.FarmModule) {
                 window.FarmModule.setActive(true);
+            }
+            return;
+        }
+
+        if (moduleName === "plot-admin") {
+            if (window.FarmPlotAdminModule) {
+                window.FarmPlotAdminModule.setActive(true);
+            } else {
+                showPanel($("#plotAdminPanel"));
             }
             return;
         }
@@ -240,7 +253,7 @@
             if (mod === "home") {
                 moduleName = "home";
             }
-            if (mod === "profile" || mod === "user-select" || mod === "farm" || mod === "shop" || mod === "store" || mod === "seed-admin" || mod === "settings" || mod === "home") {
+            if (mod === "profile" || mod === "user-select" || mod === "farm" || mod === "plot-admin" || mod === "shop" || mod === "store" || mod === "seed-admin" || mod === "settings" || mod === "home") {
                 moduleName = mod;
             }
         } catch (e) {

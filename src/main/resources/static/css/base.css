@@ -7,11 +7,23 @@ body {
 }
 
 :root {
-    --farm-topbar-height: 62px;
+    --farm-topbar-height: 60px;
     --farm-bottombar-height: 44px;
-    --farm-menu-icon-box-width: 62px;
+    --farm-menu-icon-box-width: 58px;
     --farm-menu-icon-box-height: 58px;
-    --farm-menu-icon-size: 54px;
+    --farm-menu-icon-size: 52px;
+    --farm-menu-gap: 2px;
+    --farm-stage-max-width: 1242px;
+    --farm-stage-min-height: 620px;
+    --farm-color-green-900: #005b00;
+    --farm-color-green-800: #007700;
+    --farm-color-green-700: #00a700;
+    --farm-color-green-600: #00c300;
+    --farm-color-green-500: #00df0d;
+    --farm-color-text-main: #f4ffd8;
+    --farm-color-border-strong: #00df0d;
+    --farm-color-border-soft: rgba(122, 224, 96, 0.75);
+    --farm-panel-shadow: 0 0 0 2px rgba(0, 60, 0, 0.62) inset, 0 9px 18px rgba(0, 0, 0, 0.45);
     --farm-shell-bg-home: url("/resources/imgs/ui/home/watermark.png");
     --farm-shell-bg-subpage: url("/resources/imgs/ui/home/background.png");
 }

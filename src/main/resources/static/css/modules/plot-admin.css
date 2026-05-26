@@ -1,0 +1,14 @@
+.plot-admin-panel {
+    width: 700px;
+}
+
+.plot-admin-tip {
+    min-height: 110px;
+    padding: 14px;
+    font-size: 20px;
+    line-height: 1.7;
+    color: #e9ffd7;
+    border: 1px dashed rgba(188, 255, 162, 0.8);
+    background: rgba(0, 86, 0, 0.56);
+    border-radius: 6px;
+}
