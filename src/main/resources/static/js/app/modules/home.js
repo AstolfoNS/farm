@@ -89,20 +89,22 @@
             textField: "nickname",
             panelHeight: 180,
             editable: false,
-            method: "get",
-            url: "/user/loginOptions",
             formatter: function (row) {
                 var head = row.head || farmResolveImg("ui/user/default-avatar.png");
                 return "<div style='display:flex;align-items:center;'>" +
                     "<img src='" + head + "' style='width:24px;height:24px;border-radius:4px;margin-right:6px;' alt=''>" +
                     "<span>" + (row.nickname || "") + "</span>" +
                     "</div>";
-            },
-            onLoadSuccess: function (rows) {
-                if (rows && rows.length > 0) {
-                    $("#homeUserSelect").combobox("setValue", rows[0].id);
-                }
             }
+        });
+        FarmApi.loginOptions(function (res) {
+            var rows = (FarmApi.isOk(res) && $.isArray(res.data)) ? res.data : [];
+            $("#homeUserSelect").combobox("loadData", rows);
+            if (rows.length > 0) {
+                $("#homeUserSelect").combobox("setValue", rows[0].id);
+            }
+        }, function () {
+            $("#homeUserSelect").combobox("loadData", []);
         });
     }
 

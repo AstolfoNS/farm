@@ -5,8 +5,9 @@
 
     function toastStyle() {
         return {
-            right: "14px",
-            bottom: "52px"
+            right: "12px",
+            bottom: "50px",
+            top: ""
         };
     }
 
