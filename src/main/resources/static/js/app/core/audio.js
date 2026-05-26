@@ -11,15 +11,15 @@
     };
     var STORAGE_KEY = "farm_audio_settings_v1";
     var keyToPath = {
-        click: "sfx/farm/ui_seed_selector_open.wav",
-        open: "sfx/farm/ui_seed_selector_open.wav",
-        plant: "sfx/farm/seed_place_ground.wav",
-        harvest: "sfx/farm/crop_harvest.wav",
-        care: "sfx/farm/crop_bug_remove.wav",
-        clean: "sfx/farm/crop_clean_dead_leaf.wav",
-        error: "sfx/farm/error_taunt.wav",
-        buy: "sfx/farm/seed_place_ground.wav",
-        sell: "sfx/farm/crop_harvest.wav"
+        click: "sfx/farm/ui-seed-selector-open.wav",
+        open: "sfx/farm/ui-seed-selector-open.wav",
+        plant: "sfx/farm/seed-place-ground.wav",
+        harvest: "sfx/farm/crop-harvest.wav",
+        care: "sfx/farm/crop-bug-remove.wav",
+        clean: "sfx/farm/crop-clean-dead-leaf.wav",
+        error: "sfx/farm/error-taunt.wav",
+        buy: "sfx/farm/seed-place-ground.wav",
+        sell: "sfx/farm/crop-harvest.wav"
     };
 
     function resolveUrl(key) {

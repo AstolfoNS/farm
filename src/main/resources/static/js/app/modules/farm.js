@@ -201,7 +201,7 @@
         if (cover && String(cover).trim().length > 0) {
             return cover;
         }
-        return farmResolveImg("domain/farm/actions/actionPlant.png");
+        return farmResolveImg("domain/farm/actions/action-plant.png");
     }
 
     function resolveCropStyle(crop) {
