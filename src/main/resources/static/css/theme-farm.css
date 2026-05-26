@@ -28,9 +28,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1px 8px;
+    padding: 2px clamp(6px, 1vw, 14px);
     border-bottom: 1px solid #005d10;
     position: relative;
+    gap: clamp(6px, 1.1vw, 12px);
 }
 
 .farm-topbar::after {
@@ -49,8 +50,9 @@
 .topbar-user {
     display: flex;
     align-items: center;
-    min-width: 300px;
-    max-width: 460px;
+    min-width: 260px;
+    max-width: min(440px, 36vw);
+    flex: 0 1 auto;
     background: rgba(40, 141, 198, 0.8);
     border: 1px solid #63cbff;
     border-radius: 4px;
@@ -58,8 +60,8 @@
 }
 
 .topbar-user-avatar {
-    width: 44px;
-    height: 44px;
+    width: clamp(40px, 3vw, 52px);
+    height: clamp(40px, 3vw, 52px);
     border-radius: 8px;
     border: 1px solid rgba(7, 56, 87, 0.9);
     background: #fff;
@@ -72,7 +74,7 @@
 }
 
 .topbar-user-name {
-    font-size: 34px;
+    font-size: clamp(26px, 2.2vw, 40px);
     line-height: 0.92;
     color: #ffcc38;
     text-shadow: 1px 1px 1px #2b2b2b;
@@ -87,7 +89,7 @@
     margin-top: 1px;
     min-height: 18px;
     padding: 0 10px;
-    font-size: 10px;
+    font-size: clamp(10px, 0.88vw, 12px);
     color: #f4fffb;
     background: linear-gradient(180deg, #2d93d5, #2774bf);
     border: 1px solid #68cdfd;
@@ -95,7 +97,7 @@
     text-shadow: 1px 1px 1px rgba(17, 62, 95, 0.88);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: clamp(8px, 0.8vw, 12px);
 }
 
 .topbar-stat-item {
@@ -134,12 +136,15 @@
     display: flex;
     gap: var(--farm-menu-gap);
     align-items: center;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    min-width: 0;
 }
 
 .topbar-nav-item {
     width: var(--farm-menu-icon-box-width);
     height: var(--farm-menu-icon-box-height);
-    padding: 3px;
+    padding: clamp(2px, 0.3vw, 4px);
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -164,7 +169,7 @@
 
 .topbar-nav-item.is-active {
     filter: drop-shadow(0 0 6px rgba(155, 255, 126, 0.85));
-    transform: translateY(-1px);
+    transform: translateY(-1px) scale(1.02);
 }
 
 .topbar-nav-item:hover {
@@ -225,5 +230,21 @@
     background-repeat: repeat-x;
     background-size: auto var(--farm-bottombar-height);
     border-top: 1px solid #3e9a35;
+}
+
+@media (max-width: 1366px) {
+    .topbar-user {
+        max-width: min(360px, 34vw);
+        padding-right: 6px;
+    }
+
+    .topbar-user-name {
+        font-size: clamp(22px, 1.9vw, 30px);
+    }
+
+    .topbar-user-stats {
+        gap: 8px;
+        padding: 0 7px;
+    }
 }
 

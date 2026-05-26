@@ -45,7 +45,10 @@
 }
 
 .home-form-actions {
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
     margin-top: 8px;
     margin-bottom: 10px;
 }
@@ -86,6 +89,22 @@
 .user-select-panel .l-btn-text {
     font-size: 22px;
     font-weight: 700;
+}
+
+#homeConfirmUserBtn {
+    min-width: 104px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid rgba(174, 255, 147, 0.82);
+    background: linear-gradient(180deg, #6ccf65, #3d9d38);
+    box-shadow: 0 0 0 1px rgba(37, 111, 33, 0.6) inset;
+}
+
+#homeConfirmUserBtn .l-btn-text {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .user-manage-panel {

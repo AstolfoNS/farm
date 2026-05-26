@@ -1,9 +1,14 @@
 /* Unified EasyUI popup/dialog theme for farm pages */
-.window,
-.window-shadow {
+.window {
     border: 1px solid #19d022 !important;
     border-radius: 6px;
     box-shadow: 0 0 0 1px rgba(0, 82, 0, 0.66) inset, 0 10px 18px rgba(0, 0, 0, 0.42) !important;
+}
+
+.window-shadow {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 .window .panel-header,
@@ -13,6 +18,12 @@
     border-top: 0 !important;
     border-left: 0 !important;
     border-right: 0 !important;
+}
+
+.messager-window {
+    border: 2px solid #57ea50 !important;
+    border-radius: 5px !important;
+    box-shadow: 0 0 0 1px rgba(0, 79, 0, 0.8) inset !important;
 }
 
 .window .panel-title,

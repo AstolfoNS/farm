@@ -120,6 +120,7 @@
         var isHome = moduleName === "home";
         $("#appShell").toggleClass("is-homepage", isHome);
         $("#appShell").toggleClass("is-subpage", !isHome);
+        $(".farm-stage-watermark").css("display", isHome ? "block" : "none");
     }
 
     function switchModule(moduleName) {
@@ -147,7 +148,6 @@
         }
 
         if (moduleName === "home") {
-            showPanel($("#homePanel"));
             return;
         }
 
