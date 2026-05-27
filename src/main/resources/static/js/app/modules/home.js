@@ -120,6 +120,39 @@
         return "[" + username + "]" + nickname;
     }
 
+    function syncUserSelectDisplayByValue() {
+        if (!$("#homeUserSelect").data("combobox")) {
+            return;
+        }
+        var userId = asNumber($("#homeUserSelect").combobox("getValue"), 0);
+        if (userId <= 0) {
+            return;
+        }
+        var rows = $("#homeUserSelect").combobox("getData");
+        var matched = null;
+        $.each(rows, function (idx, row) {
+            if (asNumber(row.id, 0) === userId) {
+                matched = row;
+                return false;
+            }
+            return true;
+        });
+        if (matched) {
+            $("#homeUserSelect").combobox("setText", matched.displayText || userInputText(matched));
+        }
+    }
+
+    function repaintUserSelect() {
+        if (!$("#homeUserSelect").data("combobox")) {
+            return;
+        }
+        var panelWidth = $("#homePanel .user-select-input-row").width();
+        if (panelWidth > 0) {
+            $("#homeUserSelect").combobox("resize", panelWidth);
+        }
+        syncUserSelectDisplayByValue();
+    }
+
     function normalizeUserOptions(rawRows) {
         var rows = $.isArray(rawRows) ? rawRows : [];
         var mapped = [];
@@ -146,6 +179,7 @@
                 $("#homeUserSelect").combobox("setValue", rows[0].id);
                 $("#homeUserSelect").combobox("setText", rows[0].displayText || userInputText(rows[0]));
             }
+            repaintUserSelect();
         }, function () {
             $("#homeUserSelect").combobox("loadData", []);
         });
@@ -224,6 +258,9 @@
         if (moduleName === "user-select") {
             loadUserOptions();
             showPanel($("#homePanel"));
+            window.setTimeout(function () {
+                repaintUserSelect();
+            }, motion().moduleEnterMs + 20);
             return;
         }
         if (moduleName === "farm") {
@@ -340,6 +377,12 @@
                 $.messager.alert("提示", "切换失败，请稍后重试");
                 finishSwitch();
             });
+        });
+
+        $(window).on("resize", function () {
+            if (window.FarmAppState.currentModule === "user-select") {
+                repaintUserSelect();
+            }
         });
     }
 
