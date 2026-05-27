@@ -99,6 +99,66 @@
         });
     };
 
+    FarmApi.userAdminPage = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/user/gridDataFilterSortPage",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.userAdminSave = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/user/addOrUpdate",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.userAdminDelete = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/user/delete",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
     FarmApi.myFarmOverview = function (userId, onSuccess, onError) {
         $.ajax({
             url: "/gameplay/myFarmOverview",

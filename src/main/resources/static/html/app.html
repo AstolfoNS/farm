@@ -14,6 +14,7 @@
     <link rel="stylesheet" type="text/css" href="/css/modules/shop-panel.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/store-panel.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/plot-admin.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/user-admin.css">
     <script src="/js/easyui/jquery.min.js"></script>
     <script src="/js/easyui/jquery.easyui.min.js"></script>
     <script src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
@@ -27,6 +28,7 @@
     <script src="/js/app/modules/shop.js"></script>
     <script src="/js/app/modules/store.js"></script>
     <script src="/js/app/modules/plot-admin.js"></script>
+    <script src="/js/app/modules/user-admin.js"></script>
     <script src="/js/app/modules/home.js"></script>
 </head>
 <body class="farm-body">
@@ -38,15 +40,15 @@
                 <div id="topUserName" class="topbar-user-name">未知用户</div>
                 <div class="topbar-user-stats">
                     <span class="topbar-stat-item">
-                        <b class="topbar-stat-label exp">经验：</b>
+                        <b class="topbar-stat-label exp">经验:</b>
                         <em id="topUserExp">0</em>
                     </span>
                     <span class="topbar-stat-item">
-                        <b class="topbar-stat-label coin">金币：</b>
+                        <b class="topbar-stat-label coin">金币:</b>
                         <em id="topUserCoin">0</em>
                     </span>
                     <span class="topbar-stat-item">
-                        <b class="topbar-stat-label score">积分：</b>
+                        <b class="topbar-stat-label score">积分:</b>
                         <em id="topUserScore">0</em>
                     </span>
                 </div>
@@ -89,11 +91,6 @@
     </header>
 
     <main id="farmStage" class="farm-stage">
-        <div class="farm-stage-watermark">
-            <div class="farm-stage-watermark-main">我 的 农 场</div>
-            <div class="farm-stage-watermark-sub">www.myfarm.com</div>
-        </div>
-
         <section id="farmPanel" class="farm-panel">
             <div id="farmMetaBar" class="farm-meta-bar">
                 <div class="farm-meta-item">地块: <span data-key="unlocked">0</span>/<span data-key="total">0</span></div>
@@ -163,37 +160,54 @@
             </div>
         </section>
 
-        <section id="userManagePanel" class="home-panel user-manage-panel">
+        <section id="userManagePanel" class="home-panel user-admin-panel">
             <div class="home-panel-title">用户管理</div>
-            <div class="home-panel-body">
-                <div class="user-manage-main">
-                    <img id="userManageAvatar" class="user-manage-avatar" src="/resources/imgs/ui/user/default-avatar.png" alt="avatar">
-                    <div class="user-manage-info">
-                        <div class="user-manage-name" id="userManageName">未知用户</div>
-                        <div class="user-manage-row">经验值：<span id="userManageExp">0</span></div>
-                        <div class="user-manage-row">金币：<span id="userManageCoin">0</span></div>
-                        <div class="user-manage-row">积分：<span id="userManageScore">0</span></div>
-                    </div>
+            <div class="home-panel-body user-admin-body">
+                <div id="userAdminToolbar" class="user-admin-toolbar">
+                    <label class="user-admin-toolbar-label" for="userAdminName">用户名:</label>
+                    <input id="userAdminName" class="easyui-textbox" style="width:180px">
+                    <a id="userAdminSearchBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
+                    <a id="userAdminAddBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">添加</a>
+                    <a id="userAdminCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c3" data-options="iconCls:'icon-undo'">取消</a>
+                    <a id="userAdminDeleteBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除</a>
                 </div>
-                <div class="user-manage-actions">
-                    <a id="openUserListBtn" href="/html/user_list.html" target="_blank" class="easyui-linkbutton">打开用户管理页</a>
-                    <a id="refreshUserInfoBtn" href="javascript:void(0)" class="easyui-linkbutton c1">刷新用户信息</a>
+                <div class="user-admin-grid-title">用户清单</div>
+                <div class="user-admin-grid-panel">
+                    <table id="userAdminGrid"></table>
                 </div>
-                <div class="home-form-tip">顶部用户条和本面板保持同步。若需维护用户资料、头像，请进入“用户管理页”。</div>
+                <div class="user-admin-footer">
+                    <a id="userAdminCloseBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">关闭窗口</a>
+                </div>
             </div>
         </section>
+
+        <div id="userAvatarUploadDialog" class="easyui-dialog user-avatar-dialog" title="头像上传"
+             style="width:430px;height:182px;padding:0 10px" closed="true" modal="true" resizable="false">
+            <div class="user-avatar-upload-body">
+                <form id="userAvatarUploadForm" method="post" action="/file/saveHeadImg" enctype="multipart/form-data">
+                    <label for="userAvatarFile">头像文件:</label>
+                    <input id="userAvatarFile" name="file" type="file" accept="image/*" style="width:272px">
+                </form>
+                <div class="user-avatar-upload-actions">
+                    <a id="userAvatarUploadBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">开始上传</a>
+                    <a id="userAvatarCloseBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">关闭窗口</a>
+                </div>
+            </div>
+        </div>
 
         <section id="homePanel" class="home-panel user-select-panel">
             <div class="home-panel-title">用户选择</div>
             <div class="home-panel-body">
                 <div class="home-form-row">
-                    <label class="home-form-label">当前用户</label>
-                    <input id="homeUserSelect" style="width:100%">
+                    <label class="home-form-label">当前用户:</label>
+                    <div class="user-select-input-row">
+                        <input id="homeUserSelect" style="width:100%">
+                        <a id="homeConfirmUserBtn" href="javascript:void(0)" class="easyui-linkbutton c1">确认</a>
+                    </div>
                 </div>
-                <div class="home-form-actions">
-                    <a id="homeConfirmUserBtn" href="javascript:void(0)" class="easyui-linkbutton c1">确认切换</a>
+                <div class="home-form-tip">
+                    请在下拉框中选择用户昵称，并点击“确认”按钮设定当前用户信息。
                 </div>
-                <div class="home-form-tip">请选择用户后再进入农场、商店、仓库模块操作。</div>
             </div>
         </section>
 

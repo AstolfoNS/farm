@@ -7,12 +7,12 @@ body {
 }
 
 :root {
-    --farm-topbar-height: clamp(64px, 8.6vh, 84px);
+    --farm-topbar-height: clamp(74px, 10vh, 98px);
     --farm-bottombar-height: clamp(40px, 5vh, 46px);
-    --farm-menu-icon-box-width: clamp(52px, 3.9vw, 64px);
-    --farm-menu-icon-box-height: clamp(52px, 3.9vw, 64px);
-    --farm-menu-icon-size: clamp(46px, 3.4vw, 58px);
-    --farm-menu-gap: clamp(1px, 0.2vw, 4px);
+    --farm-menu-icon-box-width: clamp(56px, 4.3vw, 72px);
+    --farm-menu-icon-box-height: clamp(56px, 4.3vw, 72px);
+    --farm-menu-icon-size: clamp(50px, 3.9vw, 64px);
+    --farm-menu-gap: clamp(1px, 0.3vw, 6px);
     --farm-stage-max-width: 1242px;
     --farm-stage-min-height: 620px;
     --farm-color-green-900: #005b00;

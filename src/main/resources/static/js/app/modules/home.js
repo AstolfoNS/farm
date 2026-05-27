@@ -7,47 +7,55 @@
     }
 
     function showPanel($el) {
-        var ms = motion().moduleEnterMs;
-        $el.stop(true, true).css("display", "none").fadeIn(ms);
+        $el.stop(true, true).css("display", "none").fadeIn(motion().moduleEnterMs);
     }
 
     function hidePanel($el) {
-        var ms = motion().moduleEnterMs;
-        $el.stop(true, true).fadeOut(ms);
+        $el.stop(true, true).fadeOut(motion().moduleEnterMs);
+    }
+
+    function asNumber(value, def) {
+        var n = Number(value);
+        return isNaN(n) ? (def || 0) : n;
+    }
+
+    function escapeHtml(value) {
+        return $("<div/>").text(value == null ? "" : String(value)).html();
+    }
+
+    function resolveHead(user) {
+        var head = user && user.head ? String(user.head).trim() : "";
+        return head.length > 0 ? head : farmResolveImg("ui/user/default-avatar.png");
     }
 
     function renderTopUser(user) {
         var data = user || {};
-        var head = data.head || farmResolveImg("ui/user/default-avatar.png");
-        var nickname = data.nickname || "未知用户";
-        var exp = Number(data.experience || 0);
-        var coin = Number(data.coin || 0);
-        var score = Number(data.score || 0);
-
-        $("#topUserAvatar").attr("src", head);
-        $("#topUserName").text(nickname);
-        $("#topUserExp").text(exp);
-        $("#topUserCoin").text(coin);
-        $("#topUserScore").text(score);
-
-        $("#userManageAvatar").attr("src", head);
-        $("#userManageName").text(nickname);
-        $("#userManageExp").text(exp);
-        $("#userManageCoin").text(coin);
-        $("#userManageScore").text(score);
+        $("#topUserAvatar").attr("src", resolveHead(data));
+        $("#topUserName").text(data.nickname || "未知用户");
+        $("#topUserExp").text(asNumber(data.experience, 0));
+        $("#topUserCoin").text(asNumber(data.coin, 0));
+        $("#topUserScore").text(asNumber(data.score, 0));
     }
 
     function currentUserId() {
         var user = window.FarmAppState.currentUser || {};
-        var uid = Number(user.id || 0);
-        return isNaN(uid) ? 0 : uid;
+        return asNumber(user.id, 0);
     }
 
     function syncRealtime() {
-        if (!window.FarmWsBridge) {
+        if (window.FarmWsBridge && $.isFunction(window.FarmWsBridge.syncUser)) {
+            window.FarmWsBridge.syncUser(currentUserId());
+        }
+    }
+
+    function syncUserSelectValue(user) {
+        if (!$("#homeUserSelect").data("combobox")) {
             return;
         }
-        window.FarmWsBridge.syncUser(currentUserId());
+        if (!user || !user.id) {
+            return;
+        }
+        $("#homeUserSelect").combobox("setValue", user.id);
     }
 
     function refreshCurUser(onDone) {
@@ -60,6 +68,7 @@
             }
             window.FarmAppState.currentUser = res.data;
             renderTopUser(res.data);
+            syncUserSelectValue(res.data);
             syncRealtime();
             if (window.FarmAudio && $.isFunction(window.FarmAudio.reloadSettings)) {
                 window.FarmAudio.reloadSettings();
@@ -83,29 +92,55 @@
         });
     }
 
-    function initUserSelect() {
-        $("#homeUserSelect").combobox({
-            valueField: "id",
-            textField: "nickname",
-            panelHeight: 180,
-            editable: false,
-            formatter: function (row) {
-                var head = row.head || farmResolveImg("ui/user/default-avatar.png");
-                return "<div style='display:flex;align-items:center;'>" +
-                    "<img src='" + head + "' style='width:24px;height:24px;border-radius:4px;margin-right:6px;' alt=''>" +
-                    "<span>" + (row.nickname || "") + "</span>" +
-                    "</div>";
-            }
-        });
+    function userRowFormatter(row) {
+        var nickname = row && row.nickname ? row.nickname : "";
+        var username = row && row.username ? row.username : "";
+        var exp = asNumber(row && row.experience, 0);
+        var coin = asNumber(row && row.coin, 0);
+        var score = asNumber(row && row.score, 0);
+        var expIcon = farmResolveImg("ui/user/stat-exp.png");
+        var coinIcon = farmResolveImg("ui/user/stat-gold.png");
+        var scoreIcon = farmResolveImg("ui/user/stat-score.png");
+        return "<div class='user-select-option'>" +
+            "<img class='user-select-option-avatar' src='" + escapeHtml(resolveHead(row)) + "' alt=''>" +
+            "<span class='user-select-option-text'>" +
+            escapeHtml(nickname) + " [" + escapeHtml(username) + "]" +
+            "<span class='user-select-stat'><img class='user-select-stat-icon' src='" + escapeHtml(expIcon) + "' alt='exp'>经验: " + exp + "</span>" +
+            "<span class='user-select-stat'><img class='user-select-stat-icon' src='" + escapeHtml(coinIcon) + "' alt='coin'>金币: " + coin + "</span>" +
+            "<span class='user-select-stat'><img class='user-select-stat-icon' src='" + escapeHtml(scoreIcon) + "' alt='score'>积分: " + score + "</span>" +
+            "</span>" +
+            "</div>";
+    }
+
+    function loadUserOptions() {
         FarmApi.loginOptions(function (res) {
             var rows = (FarmApi.isOk(res) && $.isArray(res.data)) ? res.data : [];
             $("#homeUserSelect").combobox("loadData", rows);
+            var curUser = window.FarmAppState.currentUser || {};
+            var curId = asNumber(curUser.id, 0);
+            if (curId > 0) {
+                $("#homeUserSelect").combobox("setValue", curId);
+                return;
+            }
             if (rows.length > 0) {
                 $("#homeUserSelect").combobox("setValue", rows[0].id);
             }
         }, function () {
             $("#homeUserSelect").combobox("loadData", []);
         });
+    }
+
+    function initUserSelect() {
+        $("#homeUserSelect").combobox({
+            valueField: "id",
+            textField: "nickname",
+            panelHeight: 202,
+            editable: false,
+            formatter: function (row) {
+                return userRowFormatter(row);
+            }
+        });
+        loadUserOptions();
     }
 
     function hideBasicPanels() {
@@ -122,17 +157,7 @@
         $("#appShell").toggleClass("is-subpage", !isHome);
     }
 
-    function switchModule(moduleName) {
-        var feedbackMs = motion().actionFeedbackMs;
-        window.FarmAppState.currentModule = moduleName;
-        applyShellBackground(moduleName);
-        $(".topbar-nav-item").removeClass("is-active");
-        if (moduleName !== "home") {
-            $(".topbar-nav-item[data-module='" + moduleName + "']").addClass("is-active");
-        }
-
-        hideBasicPanels();
-
+    function setModulesInactive() {
         if (window.FarmModule) {
             window.FarmModule.setActive(false);
         }
@@ -145,28 +170,44 @@
         if (window.FarmPlotAdminModule) {
             window.FarmPlotAdminModule.setActive(false);
         }
+        if (window.FarmUserAdminModule) {
+            window.FarmUserAdminModule.setActive(false);
+        }
+    }
+
+    function switchModule(moduleName) {
+        window.FarmAppState.currentModule = moduleName;
+        applyShellBackground(moduleName);
+        $(".topbar-nav-item").removeClass("is-active");
+        if (moduleName !== "home") {
+            $(".topbar-nav-item[data-module='" + moduleName + "']").addClass("is-active");
+        }
+
+        hideBasicPanels();
+        setModulesInactive();
 
         if (moduleName === "home") {
             return;
         }
-
         if (moduleName === "user-manage") {
-            showPanel($("#userManagePanel"));
+            if (window.FarmUserAdminModule) {
+                window.FarmUserAdminModule.setActive(true);
+            } else {
+                showPanel($("#userManagePanel"));
+            }
             return;
         }
-
         if (moduleName === "user-select") {
+            loadUserOptions();
             showPanel($("#homePanel"));
             return;
         }
-
         if (moduleName === "farm") {
             if (window.FarmModule) {
                 window.FarmModule.setActive(true);
             }
             return;
         }
-
         if (moduleName === "plot-admin") {
             if (window.FarmPlotAdminModule) {
                 window.FarmPlotAdminModule.setActive(true);
@@ -175,26 +216,22 @@
             }
             return;
         }
-
         if (moduleName === "shop") {
             if (window.FarmShopModule) {
                 window.FarmShopModule.setActive(true);
             }
             return;
         }
-
         if (moduleName === "store") {
             if (window.FarmStoreModule) {
                 window.FarmStoreModule.setActive(true);
             }
             return;
         }
-
         if (moduleName === "seed-admin") {
             showPanel($("#seedAdminPanel"));
             return;
         }
-
         if (moduleName === "settings") {
             showPanel($("#settingsPanel"));
             if (window.FarmAudio && $.isFunction(window.FarmAudio.renderSettings)) {
@@ -205,9 +242,26 @@
         $.messager.show({
             title: "提示",
             msg: "模块 " + moduleName + " 正在重构中。",
-            timeout: feedbackMs,
+            timeout: motion().actionFeedbackMs,
             showType: "slide"
         });
+    }
+
+    function selectedUserForSwitch() {
+        var userId = asNumber($("#homeUserSelect").combobox("getValue"), 0);
+        if (userId <= 0) {
+            return null;
+        }
+        var rows = $("#homeUserSelect").combobox("getData");
+        var target = null;
+        $.each(rows, function (idx, row) {
+            if (asNumber(row.id, 0) === userId) {
+                target = row;
+                return false;
+            }
+            return true;
+        });
+        return target || {id: userId};
     }
 
     function bindEvents() {
@@ -219,8 +273,8 @@
         });
 
         $("#homeConfirmUserBtn").on("click", function () {
-            var userId = Number($("#homeUserSelect").combobox("getValue") || 0);
-            if (!userId) {
+            var row = selectedUserForSwitch();
+            if (!row || !row.id) {
                 $.messager.show({
                     title: "消息",
                     msg: "请先选择用户",
@@ -229,35 +283,26 @@
                 });
                 return;
             }
-            FarmApi.setCurUser(userId, function (res) {
-                if (FarmApi.isOk(res)) {
-                    refreshCurUser(function () {
-                        $.messager.show({
-                            title: "提示",
-                            msg: "当前用户已切换",
-                            timeout: motion().actionFeedbackMs,
-                            showType: "slide"
-                        });
-                        if (window.FarmAudio && $.isFunction(window.FarmAudio.play)) {
-                            window.FarmAudio.play("click");
-                        }
-                    });
+            FarmApi.setCurUser(row.id, function (res) {
+                if (!FarmApi.isOk(res)) {
+                    $.messager.alert("提示", (res && res.msg) ? res.msg : "切换失败");
                     return;
                 }
-                $.messager.alert("提示", (res && res.msg) ? res.msg : "切换失败");
+                refreshCurUser(function (curUser) {
+                    var nickname = (curUser && curUser.nickname) ? curUser.nickname : (row.nickname || "");
+                    var username = (curUser && curUser.username) ? curUser.username : (row.username || "");
+                    $.messager.show({
+                        title: "消息",
+                        msg: "当前用户已经设定为：" + nickname + "[" + username + "]",
+                        timeout: motion().actionFeedbackMs,
+                        showType: "slide"
+                    });
+                    if (window.FarmAudio && $.isFunction(window.FarmAudio.play)) {
+                        window.FarmAudio.play("click");
+                    }
+                });
             }, function () {
                 $.messager.alert("提示", "切换失败，请稍后重试");
-            });
-        });
-
-        $("#refreshUserInfoBtn").on("click", function () {
-            refreshCurUser(function () {
-                $.messager.show({
-                    title: "提示",
-                    msg: "用户信息已刷新",
-                    timeout: motion().actionFeedbackMs,
-                    showType: "slide"
-                });
             });
         });
     }
@@ -267,13 +312,11 @@
         try {
             var query = new URLSearchParams(window.location.search || "");
             var mod = String(query.get("module") || "").toLowerCase();
-            if (mod === "home") {
-                moduleName = "home";
-            }
             if (mod === "profile") {
                 mod = "user-manage";
             }
-            if (mod === "user-manage" || mod === "user-select" || mod === "farm" || mod === "plot-admin" || mod === "shop" || mod === "store" || mod === "seed-admin" || mod === "settings" || mod === "home") {
+            if (mod === "home" || mod === "user-manage" || mod === "user-select" || mod === "farm" ||
+                mod === "plot-admin" || mod === "shop" || mod === "store" || mod === "seed-admin" || mod === "settings") {
                 moduleName = mod;
             }
         } catch (e) {
@@ -294,4 +337,3 @@
         switchModule: switchModule
     };
 })(window, window.jQuery);
-

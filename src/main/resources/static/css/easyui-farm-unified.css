@@ -26,6 +26,53 @@
     box-shadow: 0 0 0 1px rgba(0, 79, 0, 0.8) inset !important;
 }
 
+body > div.messager-window.window {
+    border: 2px solid #4ae54e !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 1px rgba(0, 73, 0, 0.9) inset, 0 8px 16px rgba(0, 0, 0, 0.36) !important;
+}
+
+body > div.farm-toast-window.window {
+    border: 2px solid #4ae54e !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+}
+
+body > div.messager-window + div.window-shadow {
+    display: none !important;
+}
+
+body > div.messager-window .panel-header {
+    border-radius: 0 !important;
+    background: linear-gradient(180deg, #12b80e, #0b8f08) !important;
+}
+
+body > div.messager-window .panel-body {
+    border: 0 !important;
+    background: linear-gradient(180deg, rgba(0, 123, 0, 0.97), rgba(0, 94, 0, 0.97)) !important;
+}
+
+.messager-window.window,
+.messager-window .window-body,
+.messager-window .panel-body {
+    border-color: #4ae54e !important;
+}
+
+body > div.messager-window .messager-body {
+    border: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+}
+
+body > div.farm-toast-window .panel-header,
+body > div.farm-toast-window .panel-body,
+body > div.farm-toast-window .messager-body {
+    background-color: transparent !important;
+    border-color: #4ae54e !important;
+}
+
 .window .panel-title,
 .messager-window .panel-title {
     color: #f3ffd8 !important;
@@ -52,6 +99,7 @@
 .messager-window .messager-body {
     line-height: 1.7;
     font-size: 14px;
+    color: #f2ffda;
 }
 
 .messager-window .messager-icon {
@@ -69,7 +117,7 @@
 .combobox-item {
     color: #efffdf !important;
     font-size: 14px;
-    line-height: 30px;
+    line-height: 32px;
     border-bottom: 1px dashed rgba(166, 245, 150, 0.25);
 }
 

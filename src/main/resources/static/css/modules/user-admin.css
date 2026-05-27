@@ -1,0 +1,140 @@
+.user-admin-panel {
+    width: min(1180px, 94vw);
+}
+
+.user-admin-body {
+    padding: 10px 10px 8px;
+}
+
+.user-admin-toolbar {
+    background: rgba(0, 130, 0, 0.95);
+    border: 1px solid rgba(96, 227, 82, 0.88);
+    border-radius: 4px 4px 0 0;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-admin-toolbar-label {
+    color: #fff7c9;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.user-admin-grid-title {
+    color: #f6ffdb;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    padding: 8px 8px 7px;
+    border: 1px solid rgba(76, 220, 64, 0.9);
+    border-top: 0;
+    border-bottom: 0;
+    background: linear-gradient(180deg, rgba(0, 182, 0, 0.95), rgba(0, 147, 0, 0.93));
+}
+
+.user-admin-grid-panel {
+    min-height: 390px;
+    border: 1px solid rgba(76, 220, 64, 0.9);
+    background: rgba(0, 94, 0, 0.9);
+}
+
+.user-admin-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 8px;
+}
+
+.user-admin-avatar {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid rgba(107, 236, 102, 0.8);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.user-admin-stat-cell {
+    display: inline-flex;
+    align-items: center;
+    color: #fffbe4;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.user-admin-stat-cell img {
+    width: 28px;
+    height: 28px;
+    margin-right: 4px;
+}
+
+.user-admin-op {
+    display: inline-block;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(219, 254, 200, 0.92);
+    background: linear-gradient(180deg, rgba(236, 255, 237, 0.98), rgba(210, 247, 212, 0.98));
+    color: #164716;
+    font-size: 22px;
+    margin-right: 4px;
+}
+
+.user-admin-op:hover {
+    background: linear-gradient(180deg, #fbfff9, #ebffec);
+}
+
+.user-avatar-dialog .panel-body {
+    padding: 10px 8px !important;
+}
+
+.user-avatar-upload-body {
+    font-size: 24px;
+    color: #f7ffe1;
+}
+
+.user-avatar-upload-body form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 6px;
+}
+
+.user-avatar-upload-actions {
+    padding-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+#userManagePanel .datagrid-header td {
+    background: rgba(0, 82, 0, 0.96) !important;
+    border-color: rgba(0, 101, 0, 0.95) !important;
+}
+
+#userManagePanel .datagrid-header .datagrid-cell,
+#userManagePanel .datagrid-header .datagrid-cell span {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+#userManagePanel .datagrid-row {
+    background: rgba(0, 111, 0, 0.94);
+    color: #f8ffe9;
+}
+
+#userManagePanel .datagrid-row-alt {
+    background: rgba(0, 95, 0, 0.94) !important;
+}
+
+#userManagePanel .datagrid-row-selected {
+    background: rgba(0, 126, 0, 0.98) !important;
+}
+
+#userManagePanel .datagrid-pager {
+    background: rgba(0, 104, 0, 0.95) !important;
+    border-top: 1px solid rgba(95, 225, 84, 0.86) !important;
+    color: #ecffd8;
+}
