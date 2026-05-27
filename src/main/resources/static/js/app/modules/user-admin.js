@@ -43,8 +43,8 @@
     }
 
     function renderOps(index) {
-        return "<a href='javascript:void(0)' class='user-admin-op' data-action='upload' data-index='" + index + "'>上传头像</a>" +
-            "<a href='javascript:void(0)' class='user-admin-op' data-action='save' data-index='" + index + "'>保存数据</a>";
+        return "<a href='javascript:void(0)' class='user-admin-op upload' data-action='upload' data-index='" + index + "'>上传头像</a>" +
+            "<a href='javascript:void(0)' class='user-admin-op save' data-action='save' data-index='" + index + "'>保存数据</a>";
     }
 
     function pagePayload(param) {
@@ -316,7 +316,7 @@
         $("#userAdminGrid").datagrid({
             fit: false,
             width: "100%",
-            height: 390,
+            height: 422,
             fitColumns: true,
             striped: true,
             rownumbers: true,

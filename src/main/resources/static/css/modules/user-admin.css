@@ -1,34 +1,51 @@
 .user-admin-panel {
-    width: min(1180px, 94vw);
+    width: min(980px, 90vw);
 }
 
 .user-admin-body {
-    padding: 10px 10px 8px;
+    padding: 8px 10px 8px;
 }
 
 .user-admin-toolbar {
-    background: rgba(0, 130, 0, 0.95);
-    border: 1px solid rgba(96, 227, 82, 0.88);
+    background: rgba(0, 130, 0, 0.92);
+    border: 1px solid rgba(82, 214, 71, 0.92);
     border-radius: 4px 4px 0 0;
-    padding: 8px 10px;
+    padding: 8px 10px 9px;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .user-admin-toolbar-label {
-    color: #fff7c9;
+    color: #fff8c7;
     font-weight: 700;
-    font-size: 24px;
+    font-size: 18px;
     line-height: 1;
+}
+
+#userAdminToolbar .textbox .textbox-text {
+    height: 28px !important;
+    line-height: 28px !important;
+    font-size: 16px;
+}
+
+#userAdminToolbar .l-btn {
+    min-width: 60px;
+    height: 32px;
+    border-radius: 5px;
+}
+
+#userAdminToolbar .l-btn-text {
+    font-size: 16px;
+    font-weight: 700;
 }
 
 .user-admin-grid-title {
     color: #f6ffdb;
-    font-size: 28px;
+    font-size: 20px;
     font-weight: 700;
-    line-height: 1.1;
-    padding: 8px 8px 7px;
+    line-height: 1.2;
+    padding: 7px 8px 7px;
     border: 1px solid rgba(76, 220, 64, 0.9);
     border-top: 0;
     border-bottom: 0;
@@ -36,23 +53,23 @@
 }
 
 .user-admin-grid-panel {
-    min-height: 390px;
+    min-height: 422px;
     border: 1px solid rgba(76, 220, 64, 0.9);
-    background: rgba(0, 94, 0, 0.9);
+    background: rgba(0, 96, 0, 0.92);
 }
 
 .user-admin-footer {
     display: flex;
     justify-content: flex-end;
-    padding-top: 8px;
+    padding-top: 10px;
 }
 
 .user-admin-avatar {
-    width: 52px;
-    height: 52px;
+    width: 58px;
+    height: 58px;
     object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid rgba(107, 236, 102, 0.8);
+    border-radius: 2px;
+    border: 1px solid rgba(115, 240, 108, 0.9);
     background: rgba(255, 255, 255, 0.95);
 }
 
@@ -60,30 +77,44 @@
     display: inline-flex;
     align-items: center;
     color: #fffbe4;
-    font-size: 32px;
+    font-size: 24px;
     font-weight: 700;
+    line-height: 1;
 }
 
 .user-admin-stat-cell img {
-    width: 28px;
-    height: 28px;
-    margin-right: 4px;
+    width: 26px;
+    height: 26px;
+    margin-right: 3px;
 }
 
 .user-admin-op {
     display: inline-block;
     line-height: 1;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 4px 8px 5px;
+    border-radius: 5px;
     border: 1px solid rgba(219, 254, 200, 0.92);
     background: linear-gradient(180deg, rgba(236, 255, 237, 0.98), rgba(210, 247, 212, 0.98));
     color: #164716;
-    font-size: 22px;
+    font-size: 15px;
     margin-right: 4px;
+    white-space: nowrap;
 }
 
 .user-admin-op:hover {
     background: linear-gradient(180deg, #fbfff9, #ebffec);
+}
+
+.user-admin-op.upload {
+    border-color: #b4eec2;
+    background: linear-gradient(180deg, #eaf9eb, #d7eed8);
+    color: #1d4f1d;
+}
+
+.user-admin-op.save {
+    border-color: #f0bfca;
+    background: linear-gradient(180deg, #ffeef3, #ffdce7);
+    color: #7d2c47;
 }
 
 .user-avatar-dialog .panel-body {
@@ -118,11 +149,13 @@
 #userManagePanel .datagrid-header .datagrid-cell span {
     color: #ffffff !important;
     font-weight: 700;
+    font-size: 14px;
 }
 
 #userManagePanel .datagrid-row {
     background: rgba(0, 111, 0, 0.94);
     color: #f8ffe9;
+    height: 60px;
 }
 
 #userManagePanel .datagrid-row-alt {
@@ -133,8 +166,38 @@
     background: rgba(0, 126, 0, 0.98) !important;
 }
 
+#userManagePanel .datagrid-row td.datagrid-td-rownumber {
+    background: #ececec !important;
+    border-right-color: rgba(0, 101, 0, 0.95) !important;
+}
+
+#userManagePanel .datagrid-row-selected td.datagrid-td-rownumber {
+    background: #dfdfdf !important;
+}
+
+#userManagePanel .datagrid-cell {
+    font-size: 15px;
+    color: #f5ffe7;
+    line-height: 30px;
+}
+
+#userManagePanel .datagrid-pager .pagination-page-list,
+#userManagePanel .datagrid-pager .pagination-num {
+    height: 26px;
+    line-height: 26px;
+}
+
 #userManagePanel .datagrid-pager {
     background: rgba(0, 104, 0, 0.95) !important;
     border-top: 1px solid rgba(95, 225, 84, 0.86) !important;
     color: #ecffd8;
+}
+
+#userAdminCloseBtn.l-btn {
+    min-width: 96px;
+}
+
+#userAdminCloseBtn .l-btn-text {
+    font-size: 18px;
+    font-weight: 700;
 }
