@@ -272,6 +272,10 @@
     }
 
     function bindEvents() {
+        $("#userAvatarUploadDialog").dialog({
+            cls: "farm-upload-window"
+        });
+
         $("#userAdminSearchBtn").on("click", function () {
             endCurrentEdit();
             $("#userAdminGrid").datagrid("load", {page: 1});
@@ -359,18 +363,21 @@
                     field: "username",
                     title: "用户名",
                     width: 76,
+                    sortable: true,
                     editor: {type: "textbox", options: {required: true}}
                 },
                 {
                     field: "nickname",
                     title: "昵称",
                     width: 68,
+                    sortable: true,
                     editor: {type: "textbox", options: {required: true}}
                 },
                 {
                     field: "experience",
                     title: "经验值",
                     width: 92,
+                    sortable: true,
                     editor: {type: "numberbox", options: {min: 0, precision: 0}},
                     formatter: function (value) {
                         return statCell(farmResolveImg("ui/user/stat-exp.png"), value);
@@ -380,6 +387,7 @@
                     field: "score",
                     title: "积分",
                     width: 76,
+                    sortable: true,
                     editor: {type: "numberbox", options: {min: 0, precision: 0}},
                     formatter: function (value) {
                         return statCell(farmResolveImg("ui/user/stat-score.png"), value);
@@ -389,6 +397,7 @@
                     field: "coin",
                     title: "金币",
                     width: 84,
+                    sortable: true,
                     editor: {type: "numberbox", options: {min: 0, precision: 0}},
                     formatter: function (value) {
                         return statCell(farmResolveImg("ui/user/stat-gold.png"), value);
@@ -411,6 +420,15 @@
                 }
             ]],
             onClickRow: function (index) {
+                if (state.editIndex >= 0 && state.editIndex !== index) {
+                    if (endCurrentEdit()) {
+                        $("#userAdminGrid").datagrid("selectRow", index);
+                    } else {
+                        $("#userAdminGrid").datagrid("selectRow", state.editIndex);
+                    }
+                }
+            },
+            onDblClickRow: function (index) {
                 beginRowEdit(index);
             },
             onLoadSuccess: function () {
