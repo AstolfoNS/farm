@@ -14,7 +14,6 @@
         plotSignatures: {},
         wsStatus: "idle",
         pollTimer: null,
-        lastDisconnectNoticeAt: 0,
         soilOptions: null,
         seedCoverById: {},
         seedVisualLoaded: false,
@@ -380,20 +379,6 @@
         }, pollIntervalMs());
     }
 
-    function showDisconnectNotice() {
-        var now = new Date().getTime();
-        if (now - state.lastDisconnectNoticeAt < 5000) {
-            return;
-        }
-        state.lastDisconnectNoticeAt = now;
-        $.messager.show({
-            title: "提示",
-            msg: "WebSocket 已断开，已切换为轮询刷新。",
-            timeout: motion().actionFeedbackMs,
-            showType: "slide"
-        });
-    }
-
     function setWsStatusUI(statusText, cssName) {
         var $el = $("#farmWsStatus");
         $el.removeClass("is-connected is-connecting is-disconnected is-idle").addClass(cssName);
@@ -416,7 +401,6 @@
         }
         if (state.wsStatus === "closed" || state.wsStatus === "error") {
             setWsStatusUI("WS: OFFLINE", "is-disconnected");
-            showDisconnectNotice();
             startPolling();
             return;
         }
