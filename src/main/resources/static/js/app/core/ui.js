@@ -47,9 +47,37 @@
     }
 
     var rawShow = $.messager.show;
+    var rawClose = $.messager.close;
+
+    function isWsTip(text) {
+        var raw = String(text || "");
+        return raw.indexOf("WebSocket") >= 0 || raw.indexOf("WS:") >= 0 || raw.indexOf("轮询刷新") >= 0;
+    }
+
+    function closeAllTips() {
+        if ($.isFunction(rawClose)) {
+            $("body > .messager-tip").each(function () {
+                try {
+                    rawClose.call($.messager, this);
+                } catch (e) {
+                }
+            });
+            return;
+        }
+        $("body > .messager-tip").each(function () {
+            try {
+                $(this).window("close");
+            } catch (e) {
+            }
+        });
+    }
+
     if ($.isFunction(rawShow)) {
         $.messager.show = function (options) {
             var opts = $.extend(true, {}, popupDefaults(), options || {});
+            if (isWsTip(opts.msg) || isWsTip(opts.title)) {
+                return null;
+            }
             var now = new Date().getTime();
             var toastKey = String(opts.title || "") + "|" + String(opts.msg || "");
             if (toastKey === lastToastKey && (now - lastToastAt) < 900) {
@@ -57,6 +85,7 @@
             }
             lastToastKey = toastKey;
             lastToastAt = now;
+            closeAllTips();
             opts.style = toastStyle();
             var userOnOpen = opts.onOpen;
             opts.onOpen = function () {

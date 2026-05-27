@@ -34,6 +34,13 @@ body > div.messager-window.window {
     box-shadow: 0 0 0 1px rgba(0, 73, 0, 0.9) inset, 0 8px 16px rgba(0, 0, 0, 0.36) !important;
 }
 
+body > div.messager-tip.window {
+    border: 2px solid #4ae54e !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    box-shadow: 0 0 0 1px rgba(0, 73, 0, 0.9) inset, 0 8px 16px rgba(0, 0, 0, 0.36) !important;
+}
+
 body > div.farm-toast-window.window {
     border: 2px solid #4ae54e !important;
     border-radius: 4px !important;
@@ -71,6 +78,13 @@ body > div.farm-toast-window .panel-body,
 body > div.farm-toast-window .messager-body {
     background-color: transparent !important;
     border-color: #4ae54e !important;
+}
+
+body > div.messager-tip .panel-body,
+body > div.messager-tip .messager-body {
+    background: linear-gradient(180deg, rgba(0, 123, 0, 0.97), rgba(0, 94, 0, 0.97)) !important;
+    border: 0 !important;
+    color: #f2ffda !important;
 }
 
 .window .panel-title,
