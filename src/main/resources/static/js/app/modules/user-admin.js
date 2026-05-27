@@ -237,11 +237,11 @@
 
     function uploadAvatar() {
         if (state.uploadRowIndex < 0) {
-            $.messager.alert("提示", "请先选择要上传头像的用户");
+            $.messager.show({title: "提示", msg: "请先选择要上传头像的用户", timeout: motion().actionFeedbackMs, showType: "slide"});
             return;
         }
         if (!$("#userAvatarFile").val()) {
-            $.messager.alert("提示", "请选择需要上传的头像文件");
+            $.messager.show({title: "提示", msg: "请选择需要上传的头像文件", timeout: motion().actionFeedbackMs, showType: "slide"});
             return;
         }
         var formData = new FormData($("#userAvatarUploadForm")[0]);
@@ -263,7 +263,7 @@
                 $("#userAvatarUploadDialog").dialog("close");
             },
             error: function () {
-                $.messager.alert("错误", "上传失败，请稍后重试");
+                $.messager.show({title: "错误", msg: "上传失败，请稍后重试", timeout: motion().actionFeedbackMs, showType: "slide"});
             },
             complete: function () {
                 $("#userAvatarFile").val("");

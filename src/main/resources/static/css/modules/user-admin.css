@@ -181,6 +181,14 @@
     line-height: 30px;
 }
 
+#userManagePanel .datagrid-view,
+#userManagePanel .datagrid-view1,
+#userManagePanel .datagrid-view2,
+#userManagePanel .datagrid-view2 .datagrid-body,
+#userManagePanel .datagrid-body-inner {
+    background: rgba(0, 108, 0, 0.94) !important;
+}
+
 #userManagePanel .datagrid-pager .pagination-page-list,
 #userManagePanel .datagrid-pager .pagination-num {
     height: 26px;

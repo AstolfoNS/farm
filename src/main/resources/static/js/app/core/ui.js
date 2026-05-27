@@ -94,7 +94,23 @@
             if (isWsTip(title) || isWsTip(msg)) {
                 return null;
             }
-            return rawAlert.call($.messager, title, msg, icon, fn);
+            var callback = null;
+            if ($.isFunction(icon)) {
+                callback = icon;
+            } else if ($.isFunction(fn)) {
+                callback = fn;
+            }
+            showToast({
+                title: title || "提示",
+                msg: msg || "",
+                timeout: 1800
+            });
+            if ($.isFunction(callback)) {
+                window.setTimeout(function () {
+                    callback();
+                }, 0);
+            }
+            return null;
         };
     }
 })(window, window.jQuery);
