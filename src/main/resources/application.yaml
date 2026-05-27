@@ -5,6 +5,7 @@ spring:
   application:
     name: farm
 
+  # 建议在生产环境改为 never，或使用 Flyway/Liquibase 管理数据库版本
   sql:
     init:
       mode: always
@@ -16,12 +17,13 @@ spring:
       max-request-size: 20MB
 
   datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: org.postgresql.Driver
-    # 移除了无效的 MySQL 字符集和时区参数，保持 PG 连接纯粹
+    # 移除了无效的 MySQL 专属参数
     url: jdbc:postgresql://${DB_HOST:8.154.36.28}:5432/misdb
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:1234567890}
-    # 启用并优化内置的 HikariCP 连接池
+    # 补充 Druid 核心连接池配置 (需引入 druid-spring-boot-starter)
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
@@ -30,11 +32,12 @@ spring:
       max-lifetime: 1200000
 
   jpa:
+    # 建议生产环境关闭，通过 application-dev.yml 开启
     show-sql: true
     properties:
       naming:
         physical-strategy: cn.jxufe.farm.database.PostgreSQLServerNamingStrategy
-    # 强烈建议关闭，配合 HikariCP 防止连接泄露
+    # 强烈建议关闭，防止连接池耗尽
     open-in-view: false
 
 springdoc:
