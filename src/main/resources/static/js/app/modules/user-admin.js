@@ -8,6 +8,9 @@
     };
 
     function motion() {
+        if (window.FarmUi && $.isFunction(window.FarmUi.motion)) {
+            return window.FarmUi.motion();
+        }
         if ($.isFunction(window.farmMotion)) {
             return window.farmMotion();
         }
@@ -15,6 +18,9 @@
     }
 
     function asNumber(value, def) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.asNumber)) {
+            return window.FarmUi.asNumber(value, def);
+        }
         var n = Number(value);
         return isNaN(n) ? (def || 0) : n;
     }
@@ -443,16 +449,25 @@
         if (state.active) {
             initGrid();
             bindEventsOnce();
-            $("#userManagePanel").stop(true, true).css("display", "none").fadeIn(motion().moduleEnterMs, function () {
+            if (window.FarmUi && $.isFunction(window.FarmUi.showPanel)) {
+                window.FarmUi.showPanel($("#userManagePanel"));
+            } else {
+                $("#userManagePanel").stop(true, true).css("display", "none").fadeIn(motion().moduleEnterMs);
+            }
+            window.setTimeout(function () {
                 $("#userAdminGrid").datagrid("resize", {
                     width: $(".user-admin-grid-panel").width(),
                     height: $(".user-admin-grid-panel").height()
                 });
                 reload();
-            });
+            }, motion().moduleEnterMs + 20);
             return;
         }
-        $("#userManagePanel").stop(true, true).fadeOut(motion().moduleEnterMs);
+        if (window.FarmUi && $.isFunction(window.FarmUi.hidePanel)) {
+            window.FarmUi.hidePanel($("#userManagePanel"));
+        } else {
+            $("#userManagePanel").stop(true, true).fadeOut(motion().moduleEnterMs);
+        }
         $("#userAvatarUploadDialog").dialog("close");
     }
 

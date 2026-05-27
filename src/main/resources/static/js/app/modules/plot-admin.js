@@ -7,10 +7,18 @@
     function setActive(flag) {
         state.active = !!flag;
         if (state.active) {
-            $("#plotAdminPanel").stop(true, true).css("display", "none").fadeIn(window.farmMotion().moduleEnterMs);
+            if (window.FarmUi && $.isFunction(window.FarmUi.showPanel)) {
+                window.FarmUi.showPanel($("#plotAdminPanel"));
+            } else {
+                $("#plotAdminPanel").stop(true, true).css("display", "none").fadeIn(window.farmMotion().moduleEnterMs);
+            }
             return;
         }
-        $("#plotAdminPanel").stop(true, true).fadeOut(window.farmMotion().moduleEnterMs);
+        if (window.FarmUi && $.isFunction(window.FarmUi.hidePanel)) {
+            window.FarmUi.hidePanel($("#plotAdminPanel"));
+        } else {
+            $("#plotAdminPanel").stop(true, true).fadeOut(window.farmMotion().moduleEnterMs);
+        }
     }
 
     FarmPlotAdminModule.setActive = setActive;

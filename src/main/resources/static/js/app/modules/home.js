@@ -1,7 +1,21 @@
 (function (window, $) {
     var switchingUser = false;
+    var supportedModules = {
+        home: true,
+        "user-manage": true,
+        "user-select": true,
+        farm: true,
+        "plot-admin": true,
+        shop: true,
+        store: true,
+        "seed-admin": true,
+        settings: true
+    };
 
     function motion() {
+        if (window.FarmUi && $.isFunction(window.FarmUi.motion)) {
+            return window.FarmUi.motion();
+        }
         if ($.isFunction(window.farmMotion)) {
             return window.farmMotion();
         }
@@ -9,14 +23,25 @@
     }
 
     function showPanel($el) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.showPanel)) {
+            window.FarmUi.showPanel($el);
+            return;
+        }
         $el.stop(true, true).css("display", "none").fadeIn(motion().moduleEnterMs);
     }
 
     function hidePanel($el) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.hidePanel)) {
+            window.FarmUi.hidePanel($el);
+            return;
+        }
         $el.stop(true, true).fadeOut(motion().moduleEnterMs);
     }
 
     function asNumber(value, def) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.asNumber)) {
+            return window.FarmUi.asNumber(value, def);
+        }
         var n = Number(value);
         return isNaN(n) ? (def || 0) : n;
     }
@@ -202,61 +227,63 @@
         loadUserOptions();
     }
 
-    function hideBasicPanels() {
-        hidePanel($("#userManagePanel"));
-        hidePanel($("#homePanel"));
-        hidePanel($("#plotAdminPanel"));
-        hidePanel($("#seedAdminPanel"));
-        hidePanel($("#settingsPanel"));
-    }
-
     function applyShellBackground(moduleName) {
         var isHome = moduleName === "home";
         $("#appShell").toggleClass("is-homepage", isHome);
         $("#appShell").toggleClass("is-subpage", !isHome);
     }
 
-    function setModulesInactive() {
-        if (window.FarmModule) {
-            window.FarmModule.setActive(false);
-        }
-        if (window.FarmShopModule) {
-            window.FarmShopModule.setActive(false);
-        }
-        if (window.FarmStoreModule) {
-            window.FarmStoreModule.setActive(false);
-        }
-        if (window.FarmPlotAdminModule) {
-            window.FarmPlotAdminModule.setActive(false);
-        }
-        if (window.FarmUserAdminModule) {
-            window.FarmUserAdminModule.setActive(false);
-        }
-    }
-
-    function switchModule(moduleName) {
-        window.FarmAppState.currentModule = moduleName;
-        applyShellBackground(moduleName);
+    function setTopNav(moduleName) {
         $(".topbar-nav-item").removeClass("is-active");
         if (moduleName !== "home") {
             $(".topbar-nav-item[data-module='" + moduleName + "']").addClass("is-active");
         }
+    }
 
-        hideBasicPanels();
-        setModulesInactive();
+    function setFarmModuleActive(flag) {
+        if (window.FarmModule && $.isFunction(window.FarmModule.setActive)) {
+            window.FarmModule.setActive(flag);
+        }
+    }
 
-        if (moduleName === "home") {
+    function setShopModuleActive(flag) {
+        if (window.FarmShopModule && $.isFunction(window.FarmShopModule.setActive)) {
+            window.FarmShopModule.setActive(flag);
+        }
+    }
+
+    function setStoreModuleActive(flag) {
+        if (window.FarmStoreModule && $.isFunction(window.FarmStoreModule.setActive)) {
+            window.FarmStoreModule.setActive(flag);
+        }
+    }
+
+    function setPlotAdminActive(flag) {
+        if (window.FarmPlotAdminModule && $.isFunction(window.FarmPlotAdminModule.setActive)) {
+            window.FarmPlotAdminModule.setActive(flag);
             return;
         }
-        if (moduleName === "user-manage") {
-            if (window.FarmUserAdminModule) {
-                window.FarmUserAdminModule.setActive(true);
-            } else {
-                showPanel($("#userManagePanel"));
-            }
+        if (flag) {
+            showPanel($("#plotAdminPanel"));
             return;
         }
-        if (moduleName === "user-select") {
+        hidePanel($("#plotAdminPanel"));
+    }
+
+    function setUserManageActive(flag) {
+        if (window.FarmUserAdminModule && $.isFunction(window.FarmUserAdminModule.setActive)) {
+            window.FarmUserAdminModule.setActive(flag);
+            return;
+        }
+        if (flag) {
+            showPanel($("#userManagePanel"));
+            return;
+        }
+        hidePanel($("#userManagePanel"));
+    }
+
+    function setUserSelectActive(flag) {
+        if (flag) {
             loadUserOptions();
             showPanel($("#homePanel"));
             window.setTimeout(function () {
@@ -264,41 +291,62 @@
             }, motion().moduleEnterMs + 20);
             return;
         }
-        if (moduleName === "farm") {
-            if (window.FarmModule) {
-                window.FarmModule.setActive(true);
-            }
-            return;
-        }
-        if (moduleName === "plot-admin") {
-            if (window.FarmPlotAdminModule) {
-                window.FarmPlotAdminModule.setActive(true);
-            } else {
-                showPanel($("#plotAdminPanel"));
-            }
-            return;
-        }
-        if (moduleName === "shop") {
-            if (window.FarmShopModule) {
-                window.FarmShopModule.setActive(true);
-            }
-            return;
-        }
-        if (moduleName === "store") {
-            if (window.FarmStoreModule) {
-                window.FarmStoreModule.setActive(true);
-            }
-            return;
-        }
-        if (moduleName === "seed-admin") {
+        hidePanel($("#homePanel"));
+    }
+
+    function setSeedAdminActive(flag) {
+        if (flag) {
             showPanel($("#seedAdminPanel"));
             return;
         }
-        if (moduleName === "settings") {
+        hidePanel($("#seedAdminPanel"));
+    }
+
+    function setSettingsActive(flag) {
+        if (flag) {
             showPanel($("#settingsPanel"));
             if (window.FarmAudio && $.isFunction(window.FarmAudio.renderSettings)) {
                 window.FarmAudio.renderSettings();
             }
+            return;
+        }
+        hidePanel($("#settingsPanel"));
+    }
+
+    function activateModule(moduleName) {
+        if (moduleName === "home") {
+            return;
+        }
+        if (moduleName === "user-manage") {
+            setUserManageActive(true);
+            return;
+        }
+        if (moduleName === "user-select") {
+            setUserSelectActive(true);
+            return;
+        }
+        if (moduleName === "farm") {
+            setFarmModuleActive(true);
+            return;
+        }
+        if (moduleName === "plot-admin") {
+            setPlotAdminActive(true);
+            return;
+        }
+        if (moduleName === "shop") {
+            setShopModuleActive(true);
+            return;
+        }
+        if (moduleName === "store") {
+            setStoreModuleActive(true);
+            return;
+        }
+        if (moduleName === "seed-admin") {
+            setSeedAdminActive(true);
+            return;
+        }
+        if (moduleName === "settings") {
+            setSettingsActive(true);
             return;
         }
         $.messager.show({
@@ -307,6 +355,57 @@
             timeout: motion().actionFeedbackMs,
             showType: "slide"
         });
+    }
+
+    function deactivateModule(moduleName) {
+        if (moduleName === "home") {
+            return;
+        }
+        if (moduleName === "user-manage") {
+            setUserManageActive(false);
+            return;
+        }
+        if (moduleName === "user-select") {
+            setUserSelectActive(false);
+            return;
+        }
+        if (moduleName === "farm") {
+            setFarmModuleActive(false);
+            return;
+        }
+        if (moduleName === "plot-admin") {
+            setPlotAdminActive(false);
+            return;
+        }
+        if (moduleName === "shop") {
+            setShopModuleActive(false);
+            return;
+        }
+        if (moduleName === "store") {
+            setStoreModuleActive(false);
+            return;
+        }
+        if (moduleName === "seed-admin") {
+            setSeedAdminActive(false);
+            return;
+        }
+        if (moduleName === "settings") {
+            setSettingsActive(false);
+        }
+    }
+
+    function switchModule(moduleName, options) {
+        var opts = options || {};
+        var nextModule = supportedModules[moduleName] ? moduleName : "home";
+        var prevModule = window.FarmAppState.currentModule || "home";
+        if (nextModule === prevModule && opts.force !== true) {
+            return;
+        }
+        window.FarmAppState.currentModule = nextModule;
+        applyShellBackground(nextModule);
+        setTopNav(nextModule);
+        deactivateModule(prevModule);
+        activateModule(nextModule);
     }
 
     function selectedUserForSwitch() {
@@ -395,8 +494,7 @@
             if (mod === "profile") {
                 mod = "user-manage";
             }
-            if (mod === "home" || mod === "user-manage" || mod === "user-select" || mod === "farm" ||
-                mod === "plot-admin" || mod === "shop" || mod === "store" || mod === "seed-admin" || mod === "settings") {
+            if (supportedModules[mod]) {
                 moduleName = mod;
             }
         } catch (e) {
