@@ -1,4 +1,6 @@
 (function (window, $) {
+    var switchingUser = false;
+
     function motion() {
         if ($.isFunction(window.farmMotion)) {
             return window.farmMotion();
@@ -273,6 +275,9 @@
         });
 
         $("#homeConfirmUserBtn").on("click", function () {
+            if (switchingUser) {
+                return;
+            }
             var row = selectedUserForSwitch();
             if (!row || !row.id) {
                 $.messager.show({
@@ -283,9 +288,16 @@
                 });
                 return;
             }
+            switchingUser = true;
+            $("#homeConfirmUserBtn").linkbutton("disable");
+            function finishSwitch() {
+                switchingUser = false;
+                $("#homeConfirmUserBtn").linkbutton("enable");
+            }
             FarmApi.setCurUser(row.id, function (res) {
                 if (!FarmApi.isOk(res)) {
                     $.messager.alert("提示", (res && res.msg) ? res.msg : "切换失败");
+                    finishSwitch();
                     return;
                 }
                 refreshCurUser(function (curUser) {
@@ -300,9 +312,11 @@
                     if (window.FarmAudio && $.isFunction(window.FarmAudio.play)) {
                         window.FarmAudio.play("click");
                     }
+                    finishSwitch();
                 });
             }, function () {
                 $.messager.alert("提示", "切换失败，请稍后重试");
+                finishSwitch();
             });
         });
     }

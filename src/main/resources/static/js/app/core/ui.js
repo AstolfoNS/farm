@@ -2,6 +2,8 @@
     if (!$ || !$.messager) {
         return;
     }
+    var lastToastKey = "";
+    var lastToastAt = 0;
 
     function toastOffsetBottom() {
         var bottombarHeight = $(".farm-bottombar:visible").outerHeight();
@@ -48,6 +50,13 @@
     if ($.isFunction(rawShow)) {
         $.messager.show = function (options) {
             var opts = $.extend(true, {}, popupDefaults(), options || {});
+            var now = new Date().getTime();
+            var toastKey = String(opts.title || "") + "|" + String(opts.msg || "");
+            if (toastKey === lastToastKey && (now - lastToastAt) < 900) {
+                return null;
+            }
+            lastToastKey = toastKey;
+            lastToastAt = now;
             opts.style = toastStyle();
             var userOnOpen = opts.onOpen;
             opts.onOpen = function () {
