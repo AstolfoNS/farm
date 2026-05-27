@@ -106,7 +106,7 @@
         return "<div class='user-select-option'>" +
             "<img class='user-select-option-avatar' src='" + escapeHtml(resolveHead(row)) + "' alt=''>" +
             "<span class='user-select-option-text'>" +
-            escapeHtml(nickname) + " [" + escapeHtml(username) + "]" +
+            "[" + escapeHtml(username) + "]" + escapeHtml(nickname) +
             "<span class='user-select-stat'><img class='user-select-stat-icon' src='" + escapeHtml(expIcon) + "' alt='exp'>经验: " + exp + "</span>" +
             "<span class='user-select-stat'><img class='user-select-stat-icon' src='" + escapeHtml(coinIcon) + "' alt='coin'>金币: " + coin + "</span>" +
             "<span class='user-select-stat'><img class='user-select-stat-icon' src='" + escapeHtml(scoreIcon) + "' alt='score'>积分: " + score + "</span>" +
@@ -189,6 +189,7 @@
         $("#homeUserSelect").combobox({
             valueField: "id",
             textField: "displayText",
+            panelCls: "user-select-combo-panel",
             panelHeight: 202,
             editable: false,
             formatter: function (row) {

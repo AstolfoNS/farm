@@ -211,6 +211,7 @@
     min-height: 42px;
     padding: 3px 4px;
     gap: 6px;
+    min-width: max-content;
 }
 
 .user-select-option-avatar {
@@ -231,9 +232,9 @@
     align-items: center;
     flex-wrap: nowrap;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
     gap: 4px;
+    min-width: max-content;
 }
 
 .user-select-stat {
@@ -242,6 +243,16 @@
     flex: 0 0 auto;
     white-space: nowrap;
     gap: 0;
+}
+
+.user-select-combo-panel .panel-body {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+}
+
+.user-select-combo-panel .combobox-item {
+    white-space: nowrap;
+    overflow: visible !important;
 }
 
 .user-select-stat-icon {
