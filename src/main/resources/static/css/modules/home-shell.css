@@ -54,7 +54,19 @@
 }
 
 .user-select-panel {
-    width: min(620px, 86vw);
+    width: min(600px, 84vw);
+}
+
+.user-select-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.user-select-title-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
 }
 
 .user-select-input-row {
@@ -75,19 +87,56 @@
 }
 
 .user-select-panel .textbox .textbox-text {
-    height: 40px !important;
-    line-height: 40px !important;
-    font-size: 30px;
+    height: 34px !important;
+    line-height: 34px !important;
+    font-size: 18px;
+    font-weight: 400;
+    color: #1b2a1a !important;
+}
+
+.user-select-panel .combo-arrow {
+    width: 30px !important;
+    background-image: none !important;
+    background-color: #6f966a !important;
+    border-left: 1px solid #557451;
+    position: relative;
+    opacity: 1 !important;
+}
+
+.user-select-panel .combo-arrow::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -4px;
+    margin-top: -2px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid #e8f2e4;
+}
+
+.user-select-panel .combo-arrow:hover {
+    background-color: #62875d !important;
+}
+
+.user-select-panel .textbox-addon-right {
+    background: transparent !important;
+}
+
+#homeUserSelect + span .textbox-text {
+    color: #1b2a1a !important;
 }
 
 #homeConfirmUserBtn {
-    width: 66px;
-    min-width: 66px;
-    height: 40px;
-    border: 1px solid #6fdba8;
+    width: 60px;
+    min-width: 60px;
+    height: 38px;
+    border: 1px solid #7eb6a8;
     border-radius: 6px;
-    background: linear-gradient(180deg, #53c7a0, #2f9f80);
-    box-shadow: 0 0 0 1px rgba(41, 109, 91, 0.58) inset;
+    background: linear-gradient(180deg, #62c9b0, #4ea995);
+    box-shadow: 0 0 0 1px rgba(69, 126, 113, 0.62) inset;
 }
 
 #homeConfirmUserBtn,
@@ -95,8 +144,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-color: #6fdba8 !important;
-    background: linear-gradient(180deg, #53c7a0, #2f9f80) !important;
+    border-color: #7eb6a8 !important;
+    background: linear-gradient(180deg, #62c9b0, #4ea995) !important;
 }
 
 #homeConfirmUserBtn .l-btn-left {
@@ -105,10 +154,55 @@
 }
 
 #homeConfirmUserBtn .l-btn-text {
-    font-size: 24px;
+    font-size: 20px;
     line-height: 1;
     font-weight: 700;
     color: #ffffff;
+}
+
+.user-select-tip-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.home-form-tip-text {
+    display: block;
+    flex: 1 1 auto;
+}
+
+.user-select-panel .home-panel-title {
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+}
+
+.user-select-panel .home-panel-body {
+    padding: 10px 12px 12px;
+}
+
+.user-select-panel .home-form-row {
+    margin-bottom: 8px;
+}
+
+.user-select-panel .home-form-label {
+    margin-bottom: 6px;
+    font-size: 18px;
+    line-height: 1.1;
+}
+
+.user-select-panel .home-form-tip {
+    margin-top: 8px;
+    padding-top: 8px;
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 700;
+}
+
+.user-select-tip-row #homeConfirmUserBtn {
+    align-self: flex-start;
+    margin-top: 2px;
 }
 
 .user-select-option {

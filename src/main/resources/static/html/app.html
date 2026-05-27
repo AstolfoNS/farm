@@ -196,17 +196,20 @@
         </div>
 
         <section id="homePanel" class="home-panel user-select-panel">
-            <div class="home-panel-title">用户选择</div>
+            <div class="home-panel-title user-select-title">
+                <img class="user-select-title-icon" src="/resources/imgs/domain/user/icons/user.png" alt="user-select">
+                <span>用户选择</span>
+            </div>
             <div class="home-panel-body">
                 <div class="home-form-row">
                     <label class="home-form-label">当前用户:</label>
                     <div class="user-select-input-row">
                         <input id="homeUserSelect" style="width:100%">
-                        <a id="homeConfirmUserBtn" href="javascript:void(0)" class="easyui-linkbutton c1">确认</a>
                     </div>
                 </div>
-                <div class="home-form-tip">
-                    请在下拉框中选择用户昵称，并点击“确认”按钮设定当前用户信息。
+                <div class="home-form-tip user-select-tip-row">
+                    <span class="home-form-tip-text">请在下拉框中选择用户昵称，并点击“确认”按钮设定当前用户信息。</span>
+                    <a id="homeConfirmUserBtn" href="javascript:void(0)" class="easyui-linkbutton c1">确认</a>
                 </div>
             </div>
         </section>

@@ -114,18 +114,37 @@
             "</div>";
     }
 
+    function userInputText(row) {
+        var nickname = row && row.nickname ? row.nickname : "";
+        var username = row && row.username ? row.username : "";
+        return "[" + username + "]" + nickname;
+    }
+
+    function normalizeUserOptions(rawRows) {
+        var rows = $.isArray(rawRows) ? rawRows : [];
+        var mapped = [];
+        $.each(rows, function (idx, row) {
+            var item = $.extend({}, row);
+            item.displayText = userInputText(row);
+            mapped.push(item);
+        });
+        return mapped;
+    }
+
     function loadUserOptions() {
         FarmApi.loginOptions(function (res) {
-            var rows = (FarmApi.isOk(res) && $.isArray(res.data)) ? res.data : [];
+            var rows = (FarmApi.isOk(res) && $.isArray(res.data)) ? normalizeUserOptions(res.data) : [];
             $("#homeUserSelect").combobox("loadData", rows);
             var curUser = window.FarmAppState.currentUser || {};
             var curId = asNumber(curUser.id, 0);
             if (curId > 0) {
                 $("#homeUserSelect").combobox("setValue", curId);
+                $("#homeUserSelect").combobox("setText", userInputText(curUser));
                 return;
             }
             if (rows.length > 0) {
                 $("#homeUserSelect").combobox("setValue", rows[0].id);
+                $("#homeUserSelect").combobox("setText", rows[0].displayText || userInputText(rows[0]));
             }
         }, function () {
             $("#homeUserSelect").combobox("loadData", []);
@@ -135,11 +154,14 @@
     function initUserSelect() {
         $("#homeUserSelect").combobox({
             valueField: "id",
-            textField: "nickname",
+            textField: "displayText",
             panelHeight: 202,
             editable: false,
             formatter: function (row) {
                 return userRowFormatter(row);
+            },
+            onSelect: function (row) {
+                $("#homeUserSelect").combobox("setText", row.displayText || userInputText(row));
             }
         });
         loadUserOptions();
