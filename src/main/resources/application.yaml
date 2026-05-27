@@ -17,7 +17,6 @@ spring:
       max-request-size: 20MB
 
   datasource:
-    type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: org.postgresql.Driver
     # 移除了无效的 MySQL 专属参数
     url: jdbc:postgresql://${DB_HOST:8.154.36.28}:5432/misdb
