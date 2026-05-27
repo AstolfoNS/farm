@@ -167,12 +167,12 @@
 }
 
 #userManagePanel .datagrid-row td.datagrid-td-rownumber {
-    background: #ececec !important;
+    background: rgba(0, 108, 0, 0.94) !important;
     border-right-color: rgba(0, 101, 0, 0.95) !important;
 }
 
 #userManagePanel .datagrid-row-selected td.datagrid-td-rownumber {
-    background: #dfdfdf !important;
+    background: rgba(0, 126, 0, 0.98) !important;
 }
 
 #userManagePanel .datagrid-cell {
@@ -185,7 +185,20 @@
 #userManagePanel .datagrid-view1,
 #userManagePanel .datagrid-view2,
 #userManagePanel .datagrid-view2 .datagrid-body,
-#userManagePanel .datagrid-body-inner {
+#userManagePanel .datagrid-body-inner,
+#userManagePanel .datagrid-header,
+#userManagePanel .datagrid-header-inner,
+#userManagePanel .datagrid-header-row {
+    background: rgba(0, 108, 0, 0.94) !important;
+}
+
+#userManagePanel .datagrid-header td.datagrid-header-rownumber,
+#userManagePanel .datagrid-td-rownumber,
+#userManagePanel .datagrid-header-row td:last-child {
+    background: rgba(0, 108, 0, 0.94) !important;
+}
+
+#userManagePanel .datagrid-view1 .datagrid-body-inner {
     background: rgba(0, 108, 0, 0.94) !important;
 }
 
@@ -196,13 +209,19 @@
 }
 
 #userManagePanel .datagrid-pager .l-btn {
-    background: rgba(0, 126, 0, 0.95) !important;
-    border: 1px solid rgba(89, 223, 80, 0.92) !important;
+    background: rgba(0, 150, 0, 0.98) !important;
+    border: 1px solid rgba(190, 255, 170, 0.95) !important;
     border-radius: 2px !important;
 }
 
 #userManagePanel .datagrid-pager .l-btn:hover {
-    background: rgba(0, 146, 0, 0.98) !important;
+    background: rgba(8, 174, 16, 1) !important;
+    border-color: rgba(224, 255, 211, 1) !important;
+}
+
+#userManagePanel .datagrid-pager .l-btn-icon {
+    opacity: 1 !important;
+    filter: brightness(2.1) saturate(1.4);
 }
 
 #userManagePanel .datagrid-pager .pagination-page-list,
