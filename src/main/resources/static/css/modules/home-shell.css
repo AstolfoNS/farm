@@ -211,7 +211,9 @@
     min-height: 42px;
     padding: 3px 4px;
     gap: 6px;
-    min-width: max-content;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .user-select-option-avatar {
@@ -246,13 +248,15 @@
 }
 
 .user-select-combo-panel .panel-body {
-    overflow-x: auto !important;
+    overflow-x: hidden !important;
     overflow-y: auto !important;
 }
 
 .user-select-combo-panel .combobox-item {
+    display: block;
+    width: 100% !important;
     white-space: nowrap;
-    overflow: visible !important;
+    overflow: hidden !important;
 }
 
 .user-select-stat-icon {
