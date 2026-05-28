@@ -129,12 +129,20 @@
         var coinIcon = farmResolveImg("ui/user/stat-gold.png");
         var scoreIcon = farmResolveImg("ui/user/stat-score.png");
         return "<div class='user-select-option'>" +
-            "<img class='user-select-option-avatar' src='" + escapeHtml(resolveHead(row)) + "' alt=''>" +
-            "<span class='user-select-option-text'>" +
-            "[" + escapeHtml(username) + "]" + escapeHtml(nickname) +
-            "<span class='user-select-stat'><img class='user-select-stat-icon' src='" + escapeHtml(expIcon) + "' alt='exp'>经验: " + exp + "</span>" +
-            "<span class='user-select-stat'><img class='user-select-stat-icon' src='" + escapeHtml(coinIcon) + "' alt='coin'>金币: " + coin + "</span>" +
-            "<span class='user-select-stat'><img class='user-select-stat-icon' src='" + escapeHtml(scoreIcon) + "' alt='score'>积分: " + score + "</span>" +
+            "<span class='user-select-col user-select-col-avatar'><img class='user-select-option-avatar' src='" + escapeHtml(resolveHead(row)) + "' alt=''></span>" +
+            "<span class='user-select-col user-select-col-username'>[" + escapeHtml(username) + "]</span>" +
+            "<span class='user-select-col user-select-col-nickname'>" + escapeHtml(nickname) + "</span>" +
+            "<span class='user-select-col user-select-col-stat'>" +
+            "<img class='user-select-stat-icon' src='" + escapeHtml(expIcon) + "' alt='exp'>" +
+            "<span class='user-select-stat-label'>经验:</span><em class='user-select-stat-value'>" + exp + "</em>" +
+            "</span>" +
+            "<span class='user-select-col user-select-col-stat'>" +
+            "<img class='user-select-stat-icon' src='" + escapeHtml(coinIcon) + "' alt='coin'>" +
+            "<span class='user-select-stat-label'>金币:</span><em class='user-select-stat-value'>" + coin + "</em>" +
+            "</span>" +
+            "<span class='user-select-col user-select-col-stat'>" +
+            "<img class='user-select-stat-icon' src='" + escapeHtml(scoreIcon) + "' alt='score'>" +
+            "<span class='user-select-stat-label'>积分:</span><em class='user-select-stat-value'>" + score + "</em>" +
             "</span>" +
             "</div>";
     }

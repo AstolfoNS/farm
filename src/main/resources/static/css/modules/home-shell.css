@@ -216,14 +216,56 @@
 }
 
 .user-select-option {
-    display: flex;
+    display: grid;
+    grid-template-columns: 44px 170px 140px 176px 176px 176px;
     align-items: center;
     min-height: 42px;
-    padding: 3px 4px;
-    gap: 6px;
-    width: 100%;
+    padding: 3px 8px;
+    column-gap: 10px;
+    width: max-content;
+    min-width: 100%;
     overflow: visible;
     box-sizing: border-box;
+}
+
+.user-select-col {
+    font-size: 24px;
+    line-height: 1.1;
+    color: #efffe5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-select-col-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-select-col-username,
+.user-select-col-nickname {
+    font-weight: 700;
+}
+
+.user-select-col-stat {
+    display: inline-flex;
+    align-items: center;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.user-select-stat-label {
+    display: inline-block;
+    min-width: 48px;
+}
+
+.user-select-stat-value {
+    display: inline-block;
+    min-width: 68px;
+    text-align: right;
+    font-style: normal;
+    font-weight: 700;
 }
 
 .user-select-option-avatar {
@@ -231,30 +273,8 @@
     height: 34px;
     border-radius: 3px;
     border: 1px solid rgba(129, 244, 131, 0.88);
-    margin-right: 8px;
     object-fit: cover;
     background: rgba(255, 255, 255, 0.94);
-}
-
-.user-select-option-text {
-    font-size: 24px;
-    line-height: 1.1;
-    color: #efffe5;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    white-space: nowrap;
-    overflow: visible;
-    gap: 4px;
-    min-width: max-content;
-}
-
-.user-select-stat {
-    display: inline-flex;
-    align-items: center;
-    flex: 0 0 auto;
-    white-space: nowrap;
-    gap: 0;
 }
 
 .user-select-combo-panel .panel-body {
@@ -295,6 +315,7 @@
     width: 18px;
     height: 18px;
     object-fit: contain;
+    margin-right: 2px;
 }
 
 .seed-admin-panel {
@@ -370,7 +391,7 @@
 
     .user-select-panel .textbox .textbox-text,
     #homeConfirmUserBtn .l-btn-text,
-    .user-select-option-text {
+    .user-select-col {
         font-size: 24px;
     }
 
