@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="/css/modules/store-panel.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/plot-admin.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/user-admin.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/seed-admin.css">
     <script src="/js/easyui/jquery.min.js"></script>
     <script src="/js/easyui/jquery.easyui.min.js"></script>
     <script src="/js/easyui/locale/easyui-lang-zh_CN.js"></script>
@@ -30,6 +31,7 @@
     <script src="/js/app/modules/store.js"></script>
     <script src="/js/app/modules/plot-admin.js"></script>
     <script src="/js/app/modules/user-admin.js"></script>
+    <script src="/js/app/modules/seed-admin.js"></script>
     <script src="/js/app/modules/home.js"></script>
 </head>
 <body class="farm-body">
@@ -249,10 +251,163 @@
 
         <section id="seedAdminPanel" class="home-panel seed-admin-panel">
             <div class="home-panel-title">种子管理</div>
-            <div class="home-panel-body">
-                <div class="seed-admin-tip">种子管理模块将保持参考页面风格，并与现有后端 CRUD 接口对接。</div>
+            <div class="home-panel-body seed-admin-body">
+                <div id="seedAdminToolbar" class="seed-admin-toolbar">
+                    <label class="seed-admin-toolbar-label" for="seedAdminName">种子名称:</label>
+                    <input id="seedAdminName" class="easyui-textbox" style="width:180px">
+                    <a id="seedAdminSearchBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
+                    <a id="seedAdminResetBtn" href="javascript:void(0)" class="easyui-linkbutton">重置</a>
+                    <a id="seedAdminAddBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">新增种子</a>
+                    <a id="seedAdminEditBtn" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑种子</a>
+                    <a id="seedAdminDeleteBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除种子</a>
+                </div>
+                <div class="seed-admin-grid-title">种子类型清单</div>
+                <div class="seed-admin-grid-panel seed-admin-grid-panel-top">
+                    <table id="seedAdminTypeGrid"></table>
+                </div>
+                <div class="seed-admin-grid-title">成长阶段清单</div>
+                <div class="seed-admin-grid-panel seed-admin-grid-panel-bottom">
+                    <div id="seedAdminStageToolbar" class="seed-admin-stage-toolbar">
+                        <span id="seedAdminStageHint" class="seed-admin-stage-hint">请先在上方选择一个种子，再进行阶段管理。</span>
+                        <a id="seedAdminStageAddBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">新增阶段</a>
+                        <a id="seedAdminStageEditBtn" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑阶段</a>
+                        <a id="seedAdminStageDeleteBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除阶段</a>
+                    </div>
+                    <table id="seedAdminStageGrid"></table>
+                </div>
             </div>
         </section>
+
+        <div id="seedTypeEditorDialog" class="easyui-dialog seed-admin-dialog" title="种子类型编辑"
+             style="width:860px;height:518px;padding:8px" closed="true" modal="true" resizable="false">
+            <form id="seedTypeEditorForm" method="post">
+                <input type="hidden" name="id" value="0">
+                <table class="seed-admin-form-table">
+                    <tr>
+                        <td>种子名称</td>
+                        <td><input name="name" class="easyui-textbox" style="width:220px" required="true"></td>
+                        <td>种子品质</td>
+                        <td><input id="seedTypeQualityId" name="seedQualityId" class="easyui-combobox" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>可种土壤</td>
+                        <td colspan="3"><input id="seedTypeSoilIds" name="soilTypeIds" class="easyui-combobox" style="width:680px"></td>
+                    </tr>
+                    <tr>
+                        <td>等级</td>
+                        <td><input name="level" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                        <td>再生阶段</td>
+                        <td><input name="regrowStageIndex" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>种子价格</td>
+                        <td><input name="price" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td>果实单价</td>
+                        <td><input name="fruitPrice" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>收获经验</td>
+                        <td><input name="harvestExperience" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td>收获积分</td>
+                        <td><input name="harvestScore" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>果实数量</td>
+                        <td><input name="harvestFruitNumber" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td>虫害损失</td>
+                        <td><input name="fruitLossPerBug" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>虫子上限</td>
+                        <td><input name="maxBugLimit" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td>最大收获次数</td>
+                        <td><input name="maxHarvestCount" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>封面图</td>
+                        <td colspan="3">
+                            <input id="seedTypeCoverImageUrl" name="coverImageUrl" class="easyui-textbox" style="width:540px">
+                            <a id="seedTypeUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>描述</td>
+                        <td colspan="3"><input name="description" class="easyui-textbox" style="width:680px;height:72px" data-options="multiline:true"></td>
+                    </tr>
+                </table>
+                <input id="seedTypeCoverFile" type="file" accept="image/*" style="display:none">
+            </form>
+            <div class="seed-admin-dialog-actions">
+                <a id="seedTypeSaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存</a>
+                <a id="seedTypeCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
+            </div>
+        </div>
+
+        <div id="seedStageEditorDialog" class="easyui-dialog seed-admin-dialog" title="成长阶段编辑"
+             style="width:860px;height:530px;padding:8px" closed="true" modal="true" resizable="false">
+            <form id="seedStageEditorForm" method="post">
+                <input type="hidden" name="id" value="0">
+                <input type="hidden" name="seedTypeId" value="0">
+                <table class="seed-admin-form-table">
+                    <tr>
+                        <td>阶段序号</td>
+                        <td><input name="stageIndex" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px" required="true"></td>
+                        <td>阶段标题</td>
+                        <td><input id="seedStageGrowthStageId" name="growthStageId" class="easyui-combobox" style="width:220px" required="true"></td>
+                    </tr>
+                    <tr>
+                        <td>成长时长(秒)</td>
+                        <td><input name="durationSeconds" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td>虫害概率(0~1)</td>
+                        <td><input name="bugProbability" class="easyui-numberbox" data-options="min:0,max:1,precision:4" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>宽度</td>
+                        <td><input name="width" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                        <td>高度</td>
+                        <td><input name="height" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>offsetX</td>
+                        <td><input name="offsetX" class="easyui-numberbox" data-options="precision:0" style="width:220px"></td>
+                        <td>offsetY</td>
+                        <td><input name="offsetY" class="easyui-numberbox" data-options="precision:0" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>资源URL</td>
+                        <td colspan="3">
+                            <input id="seedStageAssetUrl" name="assetUrl" class="easyui-textbox" style="width:540px">
+                            <a id="seedStageUploadImageBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>预览</td>
+                        <td colspan="3">
+                            <div id="seedStagePreviewBox" class="seed-stage-preview-box">
+                                <img id="seedStagePreviewImage" class="seed-stage-preview-image" src="" alt="">
+                            </div>
+                            <a id="seedStagePositionEditorBtn" href="javascript:void(0)" class="easyui-linkbutton c1">定位编辑器</a>
+                        </td>
+                    </tr>
+                </table>
+                <input id="seedStageImageFile" type="file" accept="image/*" style="display:none">
+            </form>
+            <div class="seed-admin-dialog-actions">
+                <a id="seedStageSaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存</a>
+                <a id="seedStageCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
+            </div>
+        </div>
+
+        <div id="seedStagePositionDialog" class="easyui-dialog seed-admin-dialog" title="定位编辑器"
+             style="width:360px;height:520px;padding:8px" closed="true" modal="true" resizable="false">
+            <div id="seedStagePositionCanvas" class="seed-stage-position-canvas">
+                <img id="seedStagePositionImage" src="" alt="">
+            </div>
+            <div class="seed-admin-dialog-actions">
+                <a id="seedStagePositionApplyBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">应用坐标</a>
+                <a id="seedStagePositionCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
+            </div>
+        </div>
 
         <section id="settingsPanel" class="home-panel settings-panel">
             <div class="home-panel-title">系统设置</div>

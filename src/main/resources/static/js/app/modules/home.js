@@ -349,6 +349,10 @@
     }
 
     function setSeedAdminActive(flag) {
+        if (window.FarmSeedAdminModule && $.isFunction(window.FarmSeedAdminModule.setActive)) {
+            window.FarmSeedAdminModule.setActive(flag);
+            return;
+        }
         if (flag) {
             showPanel($("#seedAdminPanel"));
             return;
