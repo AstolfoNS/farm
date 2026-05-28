@@ -221,9 +221,11 @@
     min-height: 42px;
     padding: 3px 4px;
     gap: 6px;
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     overflow: visible;
     box-sizing: border-box;
+    background: #0e9714;
 }
 
 .user-select-option-avatar {
@@ -264,9 +266,20 @@
 
 .user-select-combo-panel .combobox-item {
     display: block;
-    width: 100% !important;
+    width: auto !important;
+    min-width: 100% !important;
+    padding: 0 !important;
     white-space: nowrap;
     overflow: visible !important;
+    background: transparent !important;
+}
+
+.user-select-combo-panel .combobox-item-hover .user-select-option {
+    background: #17a921 !important;
+}
+
+.user-select-combo-panel .combobox-item-selected .user-select-option {
+    background: #25bf2f !important;
 }
 
 .user-select-stat-icon {
