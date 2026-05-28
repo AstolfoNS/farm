@@ -212,6 +212,7 @@
         }
         userSelectState.panelOpen = true;
         repaintUserSelect();
+        $panel.scrollLeft(0);
         $panel.stop(true, true).fadeIn(120);
     }
 
