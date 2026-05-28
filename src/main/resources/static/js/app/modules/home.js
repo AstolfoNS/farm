@@ -136,15 +136,15 @@
             "<span class='user-select-col user-select-col-avatar'><img class='user-select-option-avatar' src='" + escapeHtml(resolveHead(row)) + "' alt=''></span>" +
             "<span class='user-select-col user-select-col-username'>" + escapeHtml(username) + "</span>" +
             "<span class='user-select-col user-select-col-nickname'>" + escapeHtml(nickname) + "</span>" +
-            "<span class='user-select-col user-select-col-stat'>" +
+            "<span class='user-select-col user-select-col-stat user-select-col-exp'>" +
             "<img class='user-select-stat-icon' src='" + escapeHtml(expIcon) + "' alt='exp'>" +
             "<span class='user-select-stat-label'>经验:</span><em class='user-select-stat-value'>" + exp + "</em>" +
             "</span>" +
-            "<span class='user-select-col user-select-col-stat'>" +
+            "<span class='user-select-col user-select-col-stat user-select-col-coin'>" +
             "<img class='user-select-stat-icon' src='" + escapeHtml(coinIcon) + "' alt='coin'>" +
             "<span class='user-select-stat-label'>金币:</span><em class='user-select-stat-value'>" + coin + "</em>" +
             "</span>" +
-            "<span class='user-select-col user-select-col-stat'>" +
+            "<span class='user-select-col user-select-col-stat user-select-col-score'>" +
             "<img class='user-select-stat-icon' src='" + escapeHtml(scoreIcon) + "' alt='score'>" +
             "<span class='user-select-stat-label'>积分:</span><em class='user-select-stat-value'>" + score + "</em>" +
             "</span>" +
@@ -172,7 +172,7 @@
 
     function renderUserSelectDisplay() {
         var row = userRowById(userSelectState.selectedId);
-        var text = row ? (row.displayText || userInputText(row)) : "璇烽€夋嫨鐢ㄦ埛";
+        var text = row ? (row.displayText || userInputText(row)) : "请选择用户";
         $("#homeUserSelectText").text(text);
     }
 
@@ -196,7 +196,7 @@
             );
         });
         if (html.length <= 0) {
-            html.push("<div class='user-select-native-row'><div class='user-select-option'><span class='user-select-col'>鏆傛棤鐢ㄦ埛鏁版嵁</span></div></div>");
+            html.push("<div class='user-select-native-row'><div class='user-select-option'><span class='user-select-col'>暂无用户数据</span></div></div>");
         }
         $("#homeUserSelectPanel").html(html.join(""));
         markCurrentUserSelectRow();
@@ -472,14 +472,17 @@
     }
 
     function bindEvents() {
-        $(".topbar-nav-item").on("click", function () {
+        $(".topbar-nav-item").off("click").on("click", function (event) {
+            event.preventDefault();
             if (window.FarmAudio && $.isFunction(window.FarmAudio.play)) {
                 window.FarmAudio.play("click");
             }
             switchModule($(this).data("module"));
         });
 
-        $("#homeConfirmUserBtn").on("click", function () {
+        $("#homeConfirmUserBtn").off("click").on("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
             if (switchingUser) {
                 return;
             }
@@ -525,7 +528,7 @@
             });
         });
 
-        $(window).on("resize", function () {
+        $(window).off("resize.homeUserSelect").on("resize.homeUserSelect", function () {
             if (window.FarmAppState.currentModule === "user-select") {
                 repaintUserSelect();
             }

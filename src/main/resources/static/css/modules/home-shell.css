@@ -301,7 +301,7 @@
 }
 
 .user-select-native-row + .user-select-native-row {
-    border-top: 1px solid rgba(166, 245, 150, 0.28);
+    border-top: 0;
 }
 
 .user-select-native-row:hover {
@@ -314,6 +314,10 @@
 
 .user-select-native-row .user-select-option {
     box-shadow: none;
+}
+
+.user-select-native-row + .user-select-native-row .user-select-option {
+    border-top: 1px solid rgba(166, 245, 150, 0.28);
 }
 
 .user-select-native-row.is-selected .user-select-option {
@@ -331,6 +335,18 @@
 
 .user-select-native-row.is-selected .user-select-col-username::before {
     content: "▶ ";
+    color: #fff7a8;
+    font-weight: 700;
+}
+
+.user-select-native-row.is-selected .user-select-col-score .user-select-stat-label,
+.user-select-native-row.is-selected .user-select-col-score .user-select-stat-value {
+    color: #fff9c8;
+    font-weight: 700;
+}
+
+.user-select-native-row.is-selected .user-select-col-score::after {
+    content: " ◀";
     color: #fff7a8;
     font-weight: 700;
 }
