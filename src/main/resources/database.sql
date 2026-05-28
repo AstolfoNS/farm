@@ -23,6 +23,7 @@ CREATE TABLE farm.users
     experience                  BIGINT              NOT NULL DEFAULT 0,
     score                       BIGINT              NOT NULL DEFAULT 0,
     coin                        BIGINT              NOT NULL DEFAULT 0,
+    preferences_json            JSONB               NOT NULL DEFAULT '{}'::jsonb,
 
     created_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -101,7 +102,109 @@ CREATE UNIQUE INDEX uk_soil_types_name_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 4. 生长阶段类型字典表
+-- 4. 地块类型表
+-- ==========================================
+CREATE TABLE farm.plot_types
+(
+    id                                  BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    name                                VARCHAR(128)    NOT NULL,
+    icon_url                            VARCHAR(1024)   NOT NULL DEFAULT '',
+    soil_type_id                        BIGINT          NOT NULL,
+    unlock_required                     BOOLEAN         NOT NULL DEFAULT true,
+    default_usable                      BOOLEAN         NOT NULL DEFAULT true,
+    default_unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
+    sort_order                          INT             NOT NULL DEFAULT 0,
+    description                         TEXT                NULL,
+
+    created_at                          TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                          TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                          BIGINT              NULL,
+    updated_by                          BIGINT              NULL,
+    remark                              TEXT                NULL,
+
+    status                              SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                          BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version                    INT             NOT NULL DEFAULT 0
+);
+COMMENT ON TABLE farm.plot_types IS '地块类型表';
+CREATE UNIQUE INDEX uk_plot_types_name_active
+    ON farm.plot_types(name)
+    WHERE is_deleted = false;
+CREATE INDEX idx_plot_types_soil_type_active
+    ON farm.plot_types(soil_type_id)
+    WHERE is_deleted = false;
+
+-- ==========================================
+-- 5. 地块全局策略表
+-- ==========================================
+CREATE TABLE farm.plot_policies
+(
+    id                              BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    policy_name                     VARCHAR(128)    NOT NULL,
+    active                          BOOLEAN         NOT NULL DEFAULT true,
+    default_total_plot_count        SMALLINT        NOT NULL,
+    default_unlocked_plot_count     SMALLINT        NOT NULL,
+    default_locked_plot_count       SMALLINT        NOT NULL,
+    default_plot_type_id            BIGINT              NULL,
+    default_lock_rule_code          VARCHAR(64)     NOT NULL DEFAULT 'DEFAULT_LOCKED',
+    default_lock_reason             VARCHAR(255)    NOT NULL DEFAULT '待解锁',
+    allocation_rule_json            JSONB           NOT NULL DEFAULT '{}'::jsonb,
+
+    created_at                      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                      BIGINT              NULL,
+    updated_by                      BIGINT              NULL,
+    remark                          TEXT                NULL,
+
+    status                          SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                      BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version                INT             NOT NULL DEFAULT 0
+);
+COMMENT ON TABLE farm.plot_policies IS '地块全局策略表';
+CREATE INDEX idx_plot_policies_active
+    ON farm.plot_policies(active)
+    WHERE is_deleted = false;
+
+-- ==========================================
+-- 6. 用户地块分配策略表
+-- ==========================================
+CREATE TABLE farm.user_plot_allocations
+(
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id                     BIGINT          NOT NULL,
+    active                      BOOLEAN         NOT NULL DEFAULT true,
+    total_plot_count            SMALLINT        NOT NULL,
+    unlocked_plot_count         SMALLINT        NOT NULL,
+    locked_plot_count           SMALLINT        NOT NULL,
+    default_plot_type_id        BIGINT              NULL,
+    lock_rule_code              VARCHAR(64)     NOT NULL DEFAULT 'DEFAULT_LOCKED',
+    lock_reason                 VARCHAR(255)    NOT NULL DEFAULT '待解锁',
+    allocation_rule_json        JSONB           NOT NULL DEFAULT '{}'::jsonb,
+    applied_at                  TIMESTAMPTZ         NULL,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
+);
+COMMENT ON TABLE farm.user_plot_allocations IS '用户地块分配策略表';
+CREATE UNIQUE INDEX uk_user_plot_allocations_user_active
+    ON farm.user_plot_allocations(user_id)
+    WHERE is_deleted = false;
+CREATE INDEX idx_user_plot_allocations_active
+    ON farm.user_plot_allocations(active)
+    WHERE is_deleted = false;
+
+-- ==========================================
+-- 7. 生长阶段类型字典表
 -- ==========================================
 CREATE TABLE farm.growth_stages
 (
@@ -126,7 +229,7 @@ CREATE UNIQUE INDEX uk_growth_stages_name_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 5. 种子类型配置表
+-- 8. 种子类型配置表
 -- ==========================================
 CREATE TABLE farm.seed_types
 (
@@ -171,7 +274,7 @@ CREATE UNIQUE INDEX uk_seed_types_name_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 6. 种子生长过程配置表
+-- 9. 种子生长过程配置表
 -- ==========================================
 CREATE TABLE farm.seed_growth_stages
 (
@@ -206,7 +309,7 @@ CREATE UNIQUE INDEX uk_seed_growth_stage_index
     WHERE is_deleted = false;
 
 -- ==========================================
--- 7. 用户种子背包表
+-- 10. 用户种子背包表
 -- ==========================================
 CREATE TABLE farm.user_seeds
 (
@@ -233,7 +336,7 @@ CREATE UNIQUE INDEX uk_user_seeds_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 8. 用户地块表
+-- 11. 用户地块表
 -- ==========================================
 CREATE TABLE farm.user_plots
 (
@@ -263,7 +366,7 @@ CREATE UNIQUE INDEX uk_user_plot_index
     WHERE is_deleted = false;
 
 -- ==========================================
--- 9. 用户种植作物表
+-- 12. 用户种植作物表
 -- ==========================================
 CREATE TABLE farm.user_crops
 (
@@ -303,7 +406,7 @@ CREATE UNIQUE INDEX uk_plot_active_crop
     WHERE is_deleted = false;
 
 -- ==========================================
--- 10. 用户果实仓库表
+-- 13. 用户果实仓库表
 -- ==========================================
 CREATE TABLE farm.user_fruits
 (
@@ -330,7 +433,7 @@ CREATE UNIQUE INDEX uk_user_fruits_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 11. 用户资产流水表
+-- 14. 用户资产流水表
 -- ==========================================
 CREATE TABLE farm.user_asset_flows
 (
@@ -360,7 +463,7 @@ CREATE TABLE farm.user_asset_flows
 COMMENT ON TABLE farm.user_asset_flows IS '用户资产流水表';
 
 -- ==========================================
--- 12. 用户库存流水表
+-- 15. 用户库存流水表
 -- ==========================================
 CREATE TABLE farm.user_inventory_flows
 (
@@ -393,7 +496,7 @@ CREATE TABLE farm.user_inventory_flows
 COMMENT ON TABLE farm.user_inventory_flows IS '用户库存流水表';
 
 -- ==========================================
--- 13. 作物行为日志表
+-- 16. 作物行为日志表
 -- ==========================================
 CREATE TABLE farm.user_crop_action_logs
 (
@@ -421,7 +524,7 @@ CREATE TABLE farm.user_crop_action_logs
 COMMENT ON TABLE farm.user_crop_action_logs IS '作物行为日志表';
 
 -- ==========================================
--- 14. 请求幂等记录表
+-- 17. 请求幂等记录表
 -- ==========================================
 CREATE TABLE farm.request_idempotencies
 (
