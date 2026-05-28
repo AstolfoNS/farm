@@ -2,6 +2,7 @@ package cn.jxufe.farm.service.imp;
 
 import cn.jxufe.farm.bean.dto.*;
 import cn.jxufe.farm.bean.vo.*;
+import cn.jxufe.farm.common.constants.PlotRuleConstants;
 import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.enums.CropStatus;
 import cn.jxufe.farm.common.exception.ServiceException;
@@ -42,6 +43,12 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
 
     private final SoilTypeDao soilTypeDao;
 
+    private final PlotTypeDao plotTypeDao;
+
+    private final PlotPolicyDao plotPolicyDao;
+
+    private final UserPlotAllocationDao userPlotAllocationDao;
+
     private final SeedGrowthStageDao seedGrowthStageDao;
 
     private final UserInventoryFlowDao userInventoryFlowDao;
@@ -64,6 +71,9 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
             UserFruitDao userFruitDao,
             SeedTypeDao seedTypeDao,
             SoilTypeDao soilTypeDao,
+            PlotTypeDao plotTypeDao,
+            PlotPolicyDao plotPolicyDao,
+            UserPlotAllocationDao userPlotAllocationDao,
             SeedGrowthStageDao seedGrowthStageDao,
             UserInventoryFlowDao userInventoryFlowDao,
             UserAssetFlowDao userAssetFlowDao,
@@ -79,6 +89,9 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
         this.userFruitDao = userFruitDao;
         this.seedTypeDao = seedTypeDao;
         this.soilTypeDao = soilTypeDao;
+        this.plotTypeDao = plotTypeDao;
+        this.plotPolicyDao = plotPolicyDao;
+        this.userPlotAllocationDao = userPlotAllocationDao;
         this.seedGrowthStageDao = seedGrowthStageDao;
         this.userInventoryFlowDao = userInventoryFlowDao;
         this.userAssetFlowDao = userAssetFlowDao;
@@ -489,6 +502,10 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
         UserPlot nextUnlockPlot = ctx.plots.stream().filter(this::isLocked).findFirst().orElse(null);
         Map<Long, SoilType> soilTypeMap = getSoilTypeMap();
         Map<Long, SeedType> seedTypeMap = getSeedTypeMap();
+        Map<Long, PlotType> plotTypeBySoilType = plotTypeDao.findByIsDeletedFalseOrderBySortOrderAscIdAsc().stream()
+                .collect(Collectors.toMap(PlotType::getSoilTypeId, Function.identity(), (a, b) -> a));
+        String lockSource = resolvePlotLockSource(ctx.userId);
+        String lockRuleCode = resolvePlotLockRuleCode(ctx.userId, lockSource);
 
         List<PlotOverviewVO> plotVOs = new ArrayList<>();
         int unlockedPlots = 0, lockedPlots = 0, occupiedPlots = 0, harvestableCount = 0;
@@ -500,11 +517,16 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
             plotVO.setPlotIndex(plot.getPlotIndex());
             plotVO.setLocked(isLocked(plot));
             plotVO.setLockReason(gameplayCoreService.safeString(plot.getLockReason()));
+            plotVO.setLockSource(lockSource);
+            plotVO.setLockRuleCode(lockRuleCode);
             plotVO.setSoilTypeId(plot.getSoilTypeId());
 
             SoilType soilType = soilTypeMap.get(plot.getSoilTypeId());
             plotVO.setSoilBitCode(soilType == null ? null : soilType.getBitCode());
             plotVO.setSoilName(soilType == null ? "" : gameplayCoreService.safeString(soilType.getName()));
+            PlotType plotType = plotTypeBySoilType.get(plot.getSoilTypeId());
+            plotVO.setPlotTypeId(plotType == null ? null : plotType.getId());
+            plotVO.setPlotTypeName(plotType == null ? "" : gameplayCoreService.safeString(plotType.getName()));
             plotVO.setUnlockCostCoin(plotCostService.calculateUnlockCostCoin(plot.getPlotIndex()));
             long unlockRequiredExperience = safeLong(plot.getUnlockExperienceRequired());
             boolean unlockableByExperience = ctx.currentExperience >= unlockRequiredExperience;
@@ -767,6 +789,36 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
     private boolean isLocked(UserPlot plot) { return Boolean.TRUE.equals(plot.getIsLocked()); }
     private boolean isUnlocked(UserPlot plot) { return !isLocked(plot); }
     private boolean isDeleted(UserCrop crop) { return Boolean.TRUE.equals(crop.getIsDeleted()); }
+
+    private String resolvePlotLockSource(Long userId) {
+        if (userId == null || userId <= 0) {
+            return PlotRuleConstants.LOCK_SOURCE_SYSTEM;
+        }
+        if (userPlotAllocationDao.findByUserIdAndActiveTrueAndIsDeletedFalse(userId).isPresent()) {
+            return PlotRuleConstants.LOCK_SOURCE_USER_ALLOCATION;
+        }
+        if (plotPolicyDao.findFirstByActiveTrueAndIsDeletedFalseOrderByIdAsc().isPresent()) {
+            return PlotRuleConstants.LOCK_SOURCE_GLOBAL_POLICY;
+        }
+        return PlotRuleConstants.LOCK_SOURCE_SYSTEM;
+    }
+
+    private String resolvePlotLockRuleCode(Long userId, String lockSource) {
+        if (PlotRuleConstants.LOCK_SOURCE_USER_ALLOCATION.equals(lockSource) && userId != null && userId > 0) {
+            return userPlotAllocationDao.findByUserIdAndActiveTrueAndIsDeletedFalse(userId)
+                    .map(item -> gameplayCoreService.safeString(item.getLockRuleCode()))
+                    .filter(text -> !text.isEmpty())
+                    .orElse(PlotRuleConstants.LOCK_RULE_DEFAULT_LOCKED);
+        }
+        if (PlotRuleConstants.LOCK_SOURCE_GLOBAL_POLICY.equals(lockSource)) {
+            return plotPolicyDao.findFirstByActiveTrueAndIsDeletedFalseOrderByIdAsc()
+                    .map(item -> gameplayCoreService.safeString(item.getDefaultLockRuleCode()))
+                    .filter(text -> !text.isEmpty())
+                    .orElse(PlotRuleConstants.LOCK_RULE_DEFAULT_LOCKED);
+        }
+        return PlotRuleConstants.LOCK_RULE_SYSTEM_COMPAT;
+    }
+
     private long calcRemainSeconds(OffsetDateTime now, OffsetDateTime target) {
         return target == null ? 0L : Math.max(Duration.between(now, target).getSeconds(), 0L);
     }

@@ -1,0 +1,36 @@
+package cn.jxufe.farm.bean.dto;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+public class PlotPolicySaveDTO implements Serializable {
+
+    private Long id;
+
+    @NotBlank(message = "策略名称不能为空")
+    private String policyName;
+
+    private Boolean active;
+
+    @Min(value = 1, message = "defaultTotalPlotCount必须大于0")
+    private Integer defaultTotalPlotCount;
+
+    @Min(value = 0, message = "defaultUnlockedPlotCount不能小于0")
+    private Integer defaultUnlockedPlotCount;
+
+    @Min(value = 0, message = "defaultLockedPlotCount不能小于0")
+    private Integer defaultLockedPlotCount;
+
+    private Long defaultPlotTypeId;
+
+    private String defaultLockRuleCode;
+
+    private String defaultLockReason;
+
+    private String allocationRuleJson;
+}
+
