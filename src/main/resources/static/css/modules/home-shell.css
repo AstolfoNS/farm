@@ -309,29 +309,7 @@
 }
 
 .user-select-native-row.is-selected {
-    background: #1ec82d;
-}
-
-.user-select-native-row.is-selected::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 5px;
-    background: #fff7a8;
-}
-
-.user-select-native-row.is-selected::after {
-    content: "✓";
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #fffce0;
-    font-weight: 700;
-    font-size: 18px;
-    line-height: 1;
+    background: #0e9714;
 }
 
 .user-select-native-row .user-select-option {
@@ -339,11 +317,27 @@
 }
 
 .user-select-native-row.is-selected .user-select-option {
-    box-shadow: inset 0 0 0 2px rgba(255, 247, 168, 0.52);
+    box-shadow: none;
 }
 
 .user-select-native-row.is-selected .user-select-col {
+    font-weight: 400;
+}
+
+.user-select-native-row.is-selected .user-select-col-username {
+    color: #fff9c8;
     font-weight: 700;
+}
+
+.user-select-native-row.is-selected .user-select-col-username::before {
+    content: "▶ ";
+    color: #fff7a8;
+    font-weight: 700;
+}
+
+.user-select-native-row.is-selected .user-select-option-avatar {
+    border-color: #fff7a8;
+    box-shadow: 0 0 0 1px rgba(255, 247, 168, 0.7);
 }
 
 .user-select-stat-icon {
@@ -445,3 +439,4 @@
         transform: translate(-50%, -50%);
     }
 }
+

@@ -134,7 +134,7 @@
         var scoreIcon = farmResolveImg("ui/user/stat-score.png");
         return "<div class='user-select-option'>" +
             "<span class='user-select-col user-select-col-avatar'><img class='user-select-option-avatar' src='" + escapeHtml(resolveHead(row)) + "' alt=''></span>" +
-            "<span class='user-select-col user-select-col-username'>[" + escapeHtml(username) + "]</span>" +
+            "<span class='user-select-col user-select-col-username'>" + escapeHtml(username) + "</span>" +
             "<span class='user-select-col user-select-col-nickname'>" + escapeHtml(nickname) + "</span>" +
             "<span class='user-select-col user-select-col-stat'>" +
             "<img class='user-select-stat-icon' src='" + escapeHtml(expIcon) + "' alt='exp'>" +
