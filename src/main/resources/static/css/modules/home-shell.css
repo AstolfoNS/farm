@@ -282,7 +282,7 @@
     overflow-y: auto !important;
 }
 
-.user-select-combo-panel .combobox-item {
+.user-select-combo-panel .panel-body > .combobox-item {
     display: block;
     width: 100% !important;
     min-width: 100% !important;
@@ -295,11 +295,11 @@
     border-bottom: 1px dashed rgba(166, 245, 150, 0.25);
 }
 
-.user-select-combo-panel .combobox-item-hover {
+.user-select-combo-panel .panel-body > .combobox-item.combobox-item-hover {
     background: #17a921 !important;
 }
 
-.user-select-combo-panel .combobox-item-selected {
+.user-select-combo-panel .panel-body > .combobox-item.combobox-item-selected {
     background: #25bf2f !important;
 }
 
@@ -308,6 +308,13 @@
 .user-select-combo-panel .combobox-item-selected .user-select-option,
 .user-select-combo-panel .combobox-item .user-select-option.combobox-item-hover,
 .user-select-combo-panel .combobox-item .user-select-option.combobox-item-selected {
+    background: transparent !important;
+}
+
+.user-select-combo-panel .user-select-option.combobox-item-hover,
+.user-select-combo-panel .user-select-option.combobox-item-selected,
+.user-select-combo-panel .user-select-col.combobox-item-hover,
+.user-select-combo-panel .user-select-col.combobox-item-selected {
     background: transparent !important;
 }
 

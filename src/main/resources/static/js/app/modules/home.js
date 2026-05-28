@@ -183,25 +183,12 @@
         if (!$panel || $panel.length <= 0) {
             return;
         }
-        var $items = $panel.find(".combobox-item");
+        var $items = $panel.find(".panel-body > .combobox-item");
         if ($items.length <= 0) {
             return;
         }
-        var $body = $panel.find(".panel-body");
-        var maxWidth = Math.floor($body.innerWidth());
-        if (maxWidth <= 0) {
-            maxWidth = 0;
-        }
-        $items.css("width", "auto");
-        $items.each(function () {
-            var w = Math.ceil($(this).outerWidth(true));
-            if (w > maxWidth) {
-                maxWidth = w;
-            }
-        });
-        if (maxWidth > 0) {
-            $items.css("width", maxWidth + "px");
-        }
+        // Clear previous inline width to keep row highlight full-width.
+        $items.css("width", "");
     }
 
     function scheduleNormalizeUserSelectRows() {
