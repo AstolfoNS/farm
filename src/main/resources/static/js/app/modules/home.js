@@ -196,6 +196,18 @@
         }
     }
 
+    function scheduleNormalizeUserSelectRows() {
+        window.setTimeout(function () {
+            normalizeUserSelectRows();
+        }, 0);
+        window.setTimeout(function () {
+            normalizeUserSelectRows();
+        }, 32);
+        window.setTimeout(function () {
+            normalizeUserSelectRows();
+        }, 120);
+    }
+
     function repaintUserSelect() {
         if (!$("#homeUserSelect").data("combobox")) {
             return;
@@ -205,9 +217,7 @@
             $("#homeUserSelect").combobox("resize", panelWidth);
         }
         syncUserSelectDisplayByValue();
-        window.setTimeout(function () {
-            normalizeUserSelectRows();
-        }, 20);
+        scheduleNormalizeUserSelectRows();
     }
 
     function normalizeUserOptions(rawRows) {
@@ -237,9 +247,7 @@
                 $("#homeUserSelect").combobox("setText", rows[0].displayText || userInputText(rows[0]));
             }
             repaintUserSelect();
-            window.setTimeout(function () {
-                normalizeUserSelectRows();
-            }, 20);
+            scheduleNormalizeUserSelectRows();
         }, function () {
             $("#homeUserSelect").combobox("loadData", []);
         });
@@ -259,7 +267,7 @@
                 $("#homeUserSelect").combobox("setText", row.displayText || userInputText(row));
             },
             onShowPanel: function () {
-                normalizeUserSelectRows();
+                scheduleNormalizeUserSelectRows();
             }
         });
         loadUserOptions();

@@ -283,6 +283,14 @@
     background: #25bf2f !important;
 }
 
+.user-select-combo-panel .combobox-item .user-select-option,
+.user-select-combo-panel .combobox-item-hover .user-select-option,
+.user-select-combo-panel .combobox-item-selected .user-select-option,
+.user-select-combo-panel .combobox-item .user-select-option.combobox-item-hover,
+.user-select-combo-panel .combobox-item .user-select-option.combobox-item-selected {
+    background: transparent !important;
+}
+
 .user-select-stat-icon {
     width: 18px;
     height: 18px;
