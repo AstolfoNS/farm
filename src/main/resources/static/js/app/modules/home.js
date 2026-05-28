@@ -1,5 +1,10 @@
 (function (window, $) {
     var switchingUser = false;
+    var userSelectState = {
+        rows: [],
+        selectedId: 0,
+        panelOpen: false
+    };
     var supportedModules = {
         home: true,
         "user-manage": true,
@@ -76,13 +81,12 @@
     }
 
     function syncUserSelectValue(user) {
-        if (!$("#homeUserSelect").data("combobox")) {
-            return;
-        }
         if (!user || !user.id) {
             return;
         }
-        $("#homeUserSelect").combobox("setValue", user.id);
+        userSelectState.selectedId = asNumber(user.id, 0);
+        renderUserSelectDisplay();
+        markCurrentUserSelectRow();
     }
 
     function refreshCurUser(onDone) {
@@ -153,92 +157,71 @@
         return "[" + username + "]" + nickname;
     }
 
-    function syncUserSelectDisplayByValue() {
-        if (!$("#homeUserSelect").data("combobox")) {
-            return;
-        }
-        var userId = asNumber($("#homeUserSelect").combobox("getValue"), 0);
-        if (userId <= 0) {
-            return;
-        }
-        var rows = $("#homeUserSelect").combobox("getData");
+    function userRowById(userId) {
+        var targetId = asNumber(userId, 0);
         var matched = null;
-        $.each(rows, function (idx, row) {
-            if (asNumber(row.id, 0) === userId) {
+        $.each(userSelectState.rows, function (_, row) {
+            if (asNumber(row.id, 0) === targetId) {
                 matched = row;
                 return false;
             }
             return true;
         });
-        if (matched) {
-            $("#homeUserSelect").combobox("setText", matched.displayText || userInputText(matched));
-        }
+        return matched;
     }
 
-    function normalizeUserSelectRows() {
-        if (!$("#homeUserSelect").data("combobox")) {
-            return;
-        }
-        var $panel = $("#homeUserSelect").combobox("panel");
-        if (!$panel || $panel.length <= 0) {
-            return;
-        }
-        var $items = $panel.find(".panel-body > .combobox-item");
-        if ($items.length <= 0) {
-            return;
-        }
-        // Clear previous inline width to keep row highlight full-width.
-        $items.css("width", "");
+    function renderUserSelectDisplay() {
+        var row = userRowById(userSelectState.selectedId);
+        var text = row ? (row.displayText || userInputText(row)) : "璇烽€夋嫨鐢ㄦ埛";
+        $("#homeUserSelectText").text(text);
     }
 
     function markCurrentUserSelectRow() {
-        if (!$("#homeUserSelect").data("combobox")) {
-            return;
-        }
-        var userId = asNumber($("#homeUserSelect").combobox("getValue"), 0);
-        var $panel = $("#homeUserSelect").combobox("panel");
-        if (!$panel || $panel.length <= 0) {
-            return;
-        }
-        var $items = $panel.find(".panel-body > .combobox-item");
-        $items.removeClass("is-current-user-row");
-        $items.find(".user-select-option").removeClass("is-current-user-option");
+        var userId = asNumber(userSelectState.selectedId, 0);
+        var $rows = $("#homeUserSelectPanel .user-select-native-row");
+        $rows.removeClass("is-selected");
         if (userId <= 0) {
             return;
         }
-        var $cur = $items.filter("[value='" + userId + "']");
-        if ($cur.length <= 0) {
-            return;
-        }
-        $cur.addClass("is-current-user-row");
-        $cur.find(".user-select-option").addClass("is-current-user-option");
+        $rows.filter("[data-user-id='" + userId + "']").addClass("is-selected");
     }
 
-    function scheduleNormalizeUserSelectRows() {
-        window.setTimeout(function () {
-            normalizeUserSelectRows();
-            markCurrentUserSelectRow();
-        }, 0);
-        window.setTimeout(function () {
-            normalizeUserSelectRows();
-            markCurrentUserSelectRow();
-        }, 32);
-        window.setTimeout(function () {
-            normalizeUserSelectRows();
-            markCurrentUserSelectRow();
-        }, 120);
+    function renderUserSelectPanel() {
+        var html = [];
+        $.each(userSelectState.rows, function (_, row) {
+            html.push(
+                "<div class='user-select-native-row' data-user-id='" + asNumber(row.id, 0) + "'>" +
+                userRowFormatter(row) +
+                "</div>"
+            );
+        });
+        if (html.length <= 0) {
+            html.push("<div class='user-select-native-row'><div class='user-select-option'><span class='user-select-col'>鏆傛棤鐢ㄦ埛鏁版嵁</span></div></div>");
+        }
+        $("#homeUserSelectPanel").html(html.join(""));
+        markCurrentUserSelectRow();
+    }
+
+    function toggleUserSelectPanel(openFlag) {
+        var shouldOpen = openFlag === true;
+        var $panel = $("#homeUserSelectPanel");
+        if (!shouldOpen) {
+            userSelectState.panelOpen = false;
+            $panel.stop(true, true).fadeOut(120);
+            return;
+        }
+        userSelectState.panelOpen = true;
+        repaintUserSelect();
+        $panel.stop(true, true).fadeIn(120);
     }
 
     function repaintUserSelect() {
-        if (!$("#homeUserSelect").data("combobox")) {
-            return;
+        var width = $("#homePanel .user-select-input-row").innerWidth();
+        if (width > 0) {
+            $("#homeUserSelectPanel").css("width", width + "px");
         }
-        var panelWidth = $("#homePanel .user-select-input-row").width();
-        if (panelWidth > 0) {
-            $("#homeUserSelect").combobox("resize", panelWidth);
-        }
-        syncUserSelectDisplayByValue();
-        scheduleNormalizeUserSelectRows();
+        renderUserSelectDisplay();
+        markCurrentUserSelectRow();
     }
 
     function normalizeUserOptions(rawRows) {
@@ -255,42 +238,44 @@
     function loadUserOptions() {
         FarmApi.loginOptions(function (res) {
             var rows = (FarmApi.isOk(res) && $.isArray(res.data)) ? normalizeUserOptions(res.data) : [];
-            $("#homeUserSelect").combobox("loadData", rows);
+            userSelectState.rows = rows;
             var curUser = window.FarmAppState.currentUser || {};
             var curId = asNumber(curUser.id, 0);
             if (curId > 0) {
-                $("#homeUserSelect").combobox("setValue", curId);
-                $("#homeUserSelect").combobox("setText", userInputText(curUser));
-                return;
+                userSelectState.selectedId = curId;
+            } else if (rows.length > 0) {
+                userSelectState.selectedId = asNumber(rows[0].id, 0);
+            } else {
+                userSelectState.selectedId = 0;
             }
-            if (rows.length > 0) {
-                $("#homeUserSelect").combobox("setValue", rows[0].id);
-                $("#homeUserSelect").combobox("setText", rows[0].displayText || userInputText(rows[0]));
-            }
+            renderUserSelectPanel();
             repaintUserSelect();
-            scheduleNormalizeUserSelectRows();
         }, function () {
-            $("#homeUserSelect").combobox("loadData", []);
+            userSelectState.rows = [];
+            userSelectState.selectedId = 0;
+            renderUserSelectPanel();
+            repaintUserSelect();
         });
     }
 
     function initUserSelect() {
-        $("#homeUserSelect").combobox({
-            valueField: "id",
-            textField: "displayText",
-            panelCls: "user-select-combo-panel",
-            panelHeight: 202,
-            editable: false,
-            formatter: function (row) {
-                return userRowFormatter(row);
-            },
-            onSelect: function (row) {
-                $("#homeUserSelect").combobox("setText", row.displayText || userInputText(row));
-                markCurrentUserSelectRow();
-            },
-            onShowPanel: function () {
-                scheduleNormalizeUserSelectRows();
+        $("#homeUserSelect").on("click", function (event) {
+            event.stopPropagation();
+            toggleUserSelectPanel(!userSelectState.panelOpen);
+        });
+        $("#homeUserSelectPanel").on("click", ".user-select-native-row", function (event) {
+            event.stopPropagation();
+            var userId = asNumber($(this).attr("data-user-id"), 0);
+            if (userId <= 0) {
+                return;
             }
+            userSelectState.selectedId = userId;
+            renderUserSelectDisplay();
+            markCurrentUserSelectRow();
+            toggleUserSelectPanel(false);
+        });
+        $(document).on("click", function () {
+            toggleUserSelectPanel(false);
         });
         loadUserOptions();
     }
@@ -359,6 +344,7 @@
             }, motion().moduleEnterMs + 20);
             return;
         }
+        toggleUserSelectPanel(false);
         hidePanel($("#homePanel"));
     }
 
@@ -477,19 +463,11 @@
     }
 
     function selectedUserForSwitch() {
-        var userId = asNumber($("#homeUserSelect").combobox("getValue"), 0);
+        var userId = asNumber(userSelectState.selectedId, 0);
         if (userId <= 0) {
             return null;
         }
-        var rows = $("#homeUserSelect").combobox("getData");
-        var target = null;
-        $.each(rows, function (idx, row) {
-            if (asNumber(row.id, 0) === userId) {
-                target = row;
-                return false;
-            }
-            return true;
-        });
+        var target = userRowById(userId);
         return target || {id: userId};
     }
 
@@ -580,6 +558,7 @@
     window.FarmHomeBridge = {
         refreshCurUser: refreshCurUser,
         currentUserId: currentUserId,
-        switchModule: switchModule
+        switchModule: switchModule,
+        reloadUserOptions: loadUserOptions
     };
 })(window, window.jQuery);

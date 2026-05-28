@@ -205,11 +205,9 @@
             if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.refreshCurUser)) {
                 window.FarmHomeBridge.refreshCurUser();
             }
-            FarmApi.loginOptions(function (optRes) {
-                if (FarmApi.isOk(optRes) && $.isArray(optRes.data)) {
-                    $("#homeUserSelect").combobox("loadData", optRes.data);
-                }
-            });
+            if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.reloadUserOptions)) {
+                window.FarmHomeBridge.reloadUserOptions();
+            }
         }, function () {
             $.messager.alert("错误", "保存失败，请稍后重试");
         });
