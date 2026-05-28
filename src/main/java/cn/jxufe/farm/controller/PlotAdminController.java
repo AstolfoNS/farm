@@ -7,6 +7,7 @@ import cn.jxufe.farm.bean.dto.PlotTypeSaveDTO;
 import cn.jxufe.farm.bean.dto.UserPlotAllocationApplyDTO;
 import cn.jxufe.farm.bean.dto.UserPlotAllocationQueryDTO;
 import cn.jxufe.farm.bean.dto.UserPlotAllocationSaveDTO;
+import cn.jxufe.farm.bean.vo.OptionVO;
 import cn.jxufe.farm.bean.vo.PlotPolicyVO;
 import cn.jxufe.farm.bean.vo.PlotTypeVO;
 import cn.jxufe.farm.bean.vo.UserPlotAllocationApplyResultVO;
@@ -23,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @Validated
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -32,6 +35,16 @@ public class PlotAdminController {
 
     public PlotAdminController(PlotAdminService plotAdminService) {
         this.plotAdminService = plotAdminService;
+    }
+
+    @GetMapping("/plot-type/options")
+    public R<List<OptionVO>> listPlotTypeOptions() {
+        return R.ok(plotAdminService.listPlotTypeOptions());
+    }
+
+    @GetMapping("/user/options")
+    public R<List<OptionVO>> listUserOptions() {
+        return R.ok(plotAdminService.listUserOptions());
     }
 
     @PostMapping(value = "/plot-type/page", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -75,4 +88,3 @@ public class PlotAdminController {
         return R.ok(plotAdminService.applyUserPlotAllocation(params));
     }
 }
-

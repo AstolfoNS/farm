@@ -9,6 +9,7 @@ import cn.jxufe.farm.bean.dto.PlotTypeSaveDTO;
 import cn.jxufe.farm.bean.dto.UserPlotAllocationApplyDTO;
 import cn.jxufe.farm.bean.dto.UserPlotAllocationQueryDTO;
 import cn.jxufe.farm.bean.dto.UserPlotAllocationSaveDTO;
+import cn.jxufe.farm.bean.vo.OptionVO;
 import cn.jxufe.farm.bean.vo.PlotPolicyVO;
 import cn.jxufe.farm.bean.vo.PlotTypeVO;
 import cn.jxufe.farm.bean.vo.UserPlotAllocationApplyResultVO;
@@ -43,11 +44,13 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,6 +83,20 @@ public class PlotAdminServiceImp implements PlotAdminService {
         this.userPlotDao = userPlotDao;
         this.gameplayPolicyProperties = gameplayPolicyProperties;
         this.objectMapper = objectMapper;
+    }
+
+    @Override
+    public List<OptionVO> listPlotTypeOptions() {
+        return plotTypeDao.findByIsDeletedFalseOrderBySortOrderAscIdAsc().stream()
+                .map(item -> buildOption(item.getId(), safeString(item.getName())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OptionVO> listUserOptions() {
+        return userDao.findByIsDeletedFalseOrderByIdAsc().stream()
+                .map(user -> buildOption(user.getId(), "[" + safeString(user.getUsername()) + "]" + safeString(user.getNickname())))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -207,7 +224,11 @@ public class PlotAdminServiceImp implements PlotAdminService {
         entity.setDefaultPlotTypeId(params.getDefaultPlotTypeId());
         entity.setDefaultLockRuleCode(defaultString(params.getDefaultLockRuleCode(), PlotRuleConstants.LOCK_RULE_DEFAULT_LOCKED));
         entity.setDefaultLockReason(defaultString(params.getDefaultLockReason(), "待解锁"));
-        entity.setAllocationRuleJson(defaultAllocationJson(params.getAllocationRuleJson(), BizErrorCode.PLOT_POLICY_INVALID));
+        entity.setAllocationRuleJson(validateAndNormalizeAllocationRuleJson(
+                params.getAllocationRuleJson(),
+                total,
+                BizErrorCode.PLOT_POLICY_INVALID
+        ));
         touchForUpdate(entity);
         PlotPolicy saved = plotPolicyDao.save(entity);
 
@@ -287,7 +308,11 @@ public class PlotAdminServiceImp implements PlotAdminService {
         entity.setDefaultPlotTypeId(params.getDefaultPlotTypeId());
         entity.setLockRuleCode(defaultString(params.getLockRuleCode(), PlotRuleConstants.LOCK_RULE_DEFAULT_LOCKED));
         entity.setLockReason(defaultString(params.getLockReason(), "待解锁"));
-        entity.setAllocationRuleJson(defaultAllocationJson(params.getAllocationRuleJson(), BizErrorCode.PLOT_ALLOCATION_INVALID));
+        entity.setAllocationRuleJson(validateAndNormalizeAllocationRuleJson(
+                params.getAllocationRuleJson(),
+                total,
+                BizErrorCode.PLOT_ALLOCATION_INVALID
+        ));
         touchForUpdate(entity);
         return userPlotAllocationDao.save(entity).getId();
     }
@@ -582,6 +607,70 @@ public class PlotAdminServiceImp implements PlotAdminService {
                 touchForUpdate(item);
                 plotPolicyDao.save(item);
             }
+        }
+    }
+
+    private OptionVO buildOption(Long id, String text) {
+        OptionVO vo = new OptionVO();
+        vo.setId(id);
+        vo.setText(safeString(text));
+        return vo;
+    }
+
+    private String validateAndNormalizeAllocationRuleJson(String raw, short totalPlotCount, BizErrorCode invalidCode) {
+        String normalized = defaultAllocationJson(raw, invalidCode);
+        if ("{}".equals(normalized)) {
+            return normalized;
+        }
+        try {
+            JsonNode root = objectMapper.readTree(normalized);
+            if (root == null || !root.isObject()) {
+                throw new ServiceException(invalidCode, "allocationRuleJson必须是JSON对象");
+            }
+
+            Set<Long> validPlotTypeIds = new HashSet<>(plotTypeDao.findByIsDeletedFalseOrderBySortOrderAscIdAsc().stream()
+                    .map(PlotType::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet()));
+
+            int configuredTotal = 0;
+            var fields = root.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fields.next();
+                String key = safeString(entry.getKey()).trim();
+                JsonNode node = entry.getValue();
+                if (node == null || !node.isObject()) {
+                    throw new ServiceException(invalidCode, "allocationRuleJson每个配置项都必须是对象");
+                }
+                if (!"default".equalsIgnoreCase(key)) {
+                    Long typeId = parseLong(key, 0L);
+                    if (typeId == null || typeId <= 0 || !validPlotTypeIds.contains(typeId)) {
+                        throw new ServiceException(invalidCode, "allocationRuleJson存在无效地块类型ID: " + key);
+                    }
+                }
+
+                int itemTotal = node.path("total").asInt(-1);
+                int itemLocked = node.path("locked").asInt(0);
+                if (itemTotal < 0) {
+                    throw new ServiceException(invalidCode, "allocationRuleJson.total不能小于0");
+                }
+                if (itemLocked < 0) {
+                    throw new ServiceException(invalidCode, "allocationRuleJson.locked不能小于0");
+                }
+                if (itemLocked > itemTotal) {
+                    throw new ServiceException(invalidCode, "allocationRuleJson.locked不能大于total");
+                }
+                configuredTotal += itemTotal;
+            }
+
+            if (configuredTotal > totalPlotCount) {
+                throw new ServiceException(invalidCode, "allocationRuleJson配置总数不能超过总地块数量");
+            }
+            return root.toString();
+        } catch (ServiceException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new ServiceException(invalidCode, "allocationRuleJson不是合法JSON");
         }
     }
 

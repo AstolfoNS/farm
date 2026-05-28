@@ -7,13 +7,20 @@ import cn.jxufe.farm.bean.dto.PlotTypeSaveDTO;
 import cn.jxufe.farm.bean.dto.UserPlotAllocationApplyDTO;
 import cn.jxufe.farm.bean.dto.UserPlotAllocationQueryDTO;
 import cn.jxufe.farm.bean.dto.UserPlotAllocationSaveDTO;
+import cn.jxufe.farm.bean.vo.OptionVO;
 import cn.jxufe.farm.bean.vo.PlotPolicyVO;
 import cn.jxufe.farm.bean.vo.PlotTypeVO;
 import cn.jxufe.farm.bean.vo.UserPlotAllocationApplyResultVO;
 import cn.jxufe.farm.bean.vo.UserPlotAllocationVO;
 import cn.jxufe.farm.common.pages.PageResult;
 
+import java.util.List;
+
 public interface PlotAdminService {
+
+    List<OptionVO> listPlotTypeOptions();
+
+    List<OptionVO> listUserOptions();
 
     PageResult<PlotTypeVO> pagePlotTypes(PlotTypeQueryDTO query);
 
@@ -31,4 +38,3 @@ public interface PlotAdminService {
 
     UserPlotAllocationApplyResultVO applyUserPlotAllocation(UserPlotAllocationApplyDTO params);
 }
-
