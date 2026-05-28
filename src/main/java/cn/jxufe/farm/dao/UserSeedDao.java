@@ -17,6 +17,8 @@ public interface UserSeedDao extends JpaRepository<UserSeed, Long> {
 
     Optional<UserSeed> findByUserIdAndSeedTypeIdAndIsDeletedFalse(Long userId, Long seedTypeId);
 
+    boolean existsBySeedTypeIdAndIsDeletedFalse(Long seedTypeId);
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
             update UserSeed s

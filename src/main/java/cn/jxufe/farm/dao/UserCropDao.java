@@ -19,4 +19,6 @@ public interface UserCropDao extends JpaRepository<UserCrop, Long> {
     Optional<UserCrop> findByUserIdAndPlotIdAndIsDeletedFalse(Long userId, Long plotId);
 
     Optional<UserCrop> findByIdAndUserIdAndIsDeletedFalse(Long id, Long userId);
+
+    boolean existsBySeedTypeIdAndIsDeletedFalse(Long seedTypeId);
 }
