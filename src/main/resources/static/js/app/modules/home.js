@@ -191,15 +191,41 @@
         $items.css("width", "");
     }
 
+    function markCurrentUserSelectRow() {
+        if (!$("#homeUserSelect").data("combobox")) {
+            return;
+        }
+        var userId = asNumber($("#homeUserSelect").combobox("getValue"), 0);
+        var $panel = $("#homeUserSelect").combobox("panel");
+        if (!$panel || $panel.length <= 0) {
+            return;
+        }
+        var $items = $panel.find(".panel-body > .combobox-item");
+        $items.removeClass("is-current-user-row");
+        $items.find(".user-select-option").removeClass("is-current-user-option");
+        if (userId <= 0) {
+            return;
+        }
+        var $cur = $items.filter("[value='" + userId + "']");
+        if ($cur.length <= 0) {
+            return;
+        }
+        $cur.addClass("is-current-user-row");
+        $cur.find(".user-select-option").addClass("is-current-user-option");
+    }
+
     function scheduleNormalizeUserSelectRows() {
         window.setTimeout(function () {
             normalizeUserSelectRows();
+            markCurrentUserSelectRow();
         }, 0);
         window.setTimeout(function () {
             normalizeUserSelectRows();
+            markCurrentUserSelectRow();
         }, 32);
         window.setTimeout(function () {
             normalizeUserSelectRows();
+            markCurrentUserSelectRow();
         }, 120);
     }
 
@@ -260,6 +286,7 @@
             },
             onSelect: function (row) {
                 $("#homeUserSelect").combobox("setText", row.displayText || userInputText(row));
+                markCurrentUserSelectRow();
             },
             onShowPanel: function () {
                 scheduleNormalizeUserSelectRows();
