@@ -437,12 +437,42 @@
         syncPreviewGeometryFromForm();
     }
 
+    function setStageNumberValue(fieldName, value) {
+        var $field = $("#seedStageEditorForm input[name='" + fieldName + "']");
+        if ($field.length <= 0) {
+            return;
+        }
+        try {
+            if (!$field.data("numberbox")) {
+                $field.numberbox();
+            }
+            $field.numberbox("setValue", value);
+            return;
+        } catch (ignoreNumberboxSetError) {}
+        $field.val(value);
+    }
+
+    function getStageNumberValue(fieldName, def) {
+        var $field = $("#seedStageEditorForm input[name='" + fieldName + "']");
+        if ($field.length <= 0) {
+            return asNumber(def, 0);
+        }
+        try {
+            if (!$field.data("numberbox")) {
+                $field.numberbox();
+            }
+            return asNumber($field.numberbox("getValue"), def);
+        } catch (ignoreNumberboxGetError) {
+            return asNumber($field.val(), def);
+        }
+    }
+
     function stageGeometryFromForm() {
         return {
-            width: asNumber($("#seedStageEditorForm input[name='width']").numberbox("getValue"), 100),
-            height: asNumber($("#seedStageEditorForm input[name='height']").numberbox("getValue"), 120),
-            left: asNumber($("#seedStageEditorForm input[name='offsetX']").numberbox("getValue"), 50),
-            top: asNumber($("#seedStageEditorForm input[name='offsetY']").numberbox("getValue"), 40)
+            width: getStageNumberValue("width", 100),
+            height: getStageNumberValue("height", 120),
+            left: getStageNumberValue("offsetX", 50),
+            top: getStageNumberValue("offsetY", 40)
         };
     }
 
@@ -618,13 +648,13 @@
         $("#seedStageEditorForm").form("clear");
         $("#seedStageEditorForm input[name='id']").val(0);
         $("#seedStageEditorForm input[name='seedTypeId']").val(state.currentSeedId);
-        $("#seedStageEditorForm input[name='width']").numberbox("setValue", 100);
-        $("#seedStageEditorForm input[name='height']").numberbox("setValue", 120);
-        $("#seedStageEditorForm input[name='offsetX']").numberbox("setValue", 50);
-        $("#seedStageEditorForm input[name='offsetY']").numberbox("setValue", 40);
-        $("#seedStageEditorForm input[name='durationSeconds']").numberbox("setValue", 30);
-        $("#seedStageEditorForm input[name='bugProbability']").numberbox("setValue", 0);
-        $("#seedStageEditorForm input[name='stageIndex']").numberbox("setValue", asNumber(state.stageRows.length, 0) + 1);
+        setStageNumberValue("width", 100);
+        setStageNumberValue("height", 120);
+        setStageNumberValue("offsetX", 50);
+        setStageNumberValue("offsetY", 40);
+        setStageNumberValue("durationSeconds", 30);
+        setStageNumberValue("bugProbability", 0);
+        setStageNumberValue("stageIndex", asNumber(state.stageRows.length, 0) + 1);
         previewImageFromUrl("");
         syncPreviewGeometryFromForm();
         if (!row) {
@@ -681,13 +711,13 @@
             id: asNumber($("#seedStageEditorForm input[name='id']").val(), 0) || null,
             seedTypeId: state.currentSeedId,
             growthStageId: asNumber($("#seedStageGrowthStageId").combobox("getValue"), 0),
-            stageIndex: asNumber($("#seedStageEditorForm input[name='stageIndex']").numberbox("getValue"), 1),
-            durationSeconds: asNumber($("#seedStageEditorForm input[name='durationSeconds']").numberbox("getValue"), 0),
-            bugProbability: Number($("#seedStageEditorForm input[name='bugProbability']").numberbox("getValue") || 0),
-            width: asNumber($("#seedStageEditorForm input[name='width']").numberbox("getValue"), 100),
-            height: asNumber($("#seedStageEditorForm input[name='height']").numberbox("getValue"), 120),
-            offsetX: asNumber($("#seedStageEditorForm input[name='offsetX']").numberbox("getValue"), 50),
-            offsetY: asNumber($("#seedStageEditorForm input[name='offsetY']").numberbox("getValue"), 40),
+            stageIndex: getStageNumberValue("stageIndex", 1),
+            durationSeconds: getStageNumberValue("durationSeconds", 0),
+            bugProbability: Number(getStageNumberValue("bugProbability", 0)),
+            width: getStageNumberValue("width", 100),
+            height: getStageNumberValue("height", 120),
+            offsetX: getStageNumberValue("offsetX", 50),
+            offsetY: getStageNumberValue("offsetY", 40),
             assetUrl: $("#seedStageAssetUrl").textbox("getValue")
         };
         FarmApi.seedStageSave(payload, function (res) {
