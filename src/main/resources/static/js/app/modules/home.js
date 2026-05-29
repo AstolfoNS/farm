@@ -422,7 +422,7 @@
         }
         $.messager.show({
             title: "提示",
-            msg: "模块 " + moduleName + " 正在重构中�?,
+            msg: "模块 " + moduleName + " 正在重构中。",
             timeout: motion().actionFeedbackMs,
             showType: "slide"
         });

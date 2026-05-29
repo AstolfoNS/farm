@@ -148,7 +148,7 @@
 
     function initFilterBar() {
         $("#shopSeedName").textbox({
-            prompt: "按名称筛�?
+            prompt: "按名称筛选"
         });
         $("#shopSeedLevel").combobox({
             valueField: "id",
@@ -228,7 +228,7 @@
     function renderSeedList(pageData) {
         var records = toArray(pageData && pageData.records);
         if (records.length === 0) {
-            $("#shopSeedList").html("<div class='shop-empty'>暂无可购买种�?/div>");
+            $("#shopSeedList").html("<div class='shop-empty'>暂无可购买种子</div>");
             $("#shopSeedPager").empty();
             return;
         }
@@ -240,10 +240,10 @@
                 "<div class='shop-seed-card'>" +
                 "<div class='shop-seed-name'>" + escapeHtml(row.name || ("种子#" + seedTypeId)) + "</div>" +
                 "<div class='shop-seed-meta'>品质: " + escapeHtml(row.seedQualityName || "-") + " | 等级: " + asNumber(row.level, 0) + "</div>" +
-                "<div class='shop-seed-meta'>土地需�? " + escapeHtml(row.enableSoilTypeNames || "-") + "</div>" +
+                "<div class='shop-seed-meta'>土地需求: " + escapeHtml(row.enableSoilTypeNames || "-") + "</div>" +
                 "<div class='shop-seed-desc'>" + escapeHtml(row.description || "暂无描述") + "</div>" +
                 "<img class='shop-seed-cover' src='" + escapeAttr(resolveCover(row.coverImageUrl)) + "' alt=''>" +
-                "<div class='shop-seed-price'>采购�? " + price + " 金币 | 预估净�? " + asNumber(row.estimatedNetValue, 0) + "</div>" +
+                "<div class='shop-seed-price'>采购价: " + price + " 金币 | 预估净值: " + asNumber(row.estimatedNetValue, 0) + "</div>" +
                 "<div class='shop-seed-actions'>" +
                 "<a href='javascript:void(0)' class='easyui-linkbutton c1 shop-buy-btn' data-seed-type-id='" + seedTypeId + "' data-price='" + price + "' data-seed-name='" + escapeAttr(row.name || "") + "'>我要购买</a>" +
                 "</div>" +
@@ -263,7 +263,7 @@
         var nextDisabled = pageNo >= pages ? "disabled" : "";
         var html = "" +
             "<button type='button' class='shop-page-btn prev shop-page-prev' " + prevDisabled + "></button>" +
-            "<span class='shop-page-label'>�?" + pageNo + " / " + pages + " �?/span>" +
+            "<span class='shop-page-label'>第 " + pageNo + " / " + pages + " 页</span>" +
             "<button type='button' class='shop-page-btn next shop-page-next' " + nextDisabled + "></button>";
         $("#shopSeedPager").html(html);
         $("#shopSeedPager .shop-page-prev").off("click").on("click", function () {
@@ -429,7 +429,7 @@
         $("#shopSellDialog").data("seedTypeId", seedTypeId);
         $("#shopSellDialog").data("unitPrice", unitPrice);
         $("#shopSellDialog").data("maxQty", available);
-        $("#shopSellSeedLabel").text("果实: " + (seedName || ("种子#" + seedTypeId)) + " (最�?" + available + ")");
+        $("#shopSellSeedLabel").text("果实: " + (seedName || ("种子#" + seedTypeId)) + " (最多 " + available + ")");
         $("#shopSellQty").numberbox("setValue", 1);
         $("#shopSellQty").numberbox({min: 1, max: available});
         $("#shopSellIncomeTip").text("预计获得: " + asNumber(unitPrice, 0) + " 金币");
