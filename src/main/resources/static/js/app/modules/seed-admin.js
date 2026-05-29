@@ -735,6 +735,14 @@
         syncPreviewGeometryFromForm();
     }
 
+    function reportInitError(stage, err) {
+        var detail = err && err.message ? err.message : err;
+        window.__seedAdminInitError = stage + ": " + detail;
+        if (window.console && $.isFunction(window.console.error)) {
+            window.console.error("[seed-admin] " + stage, err);
+        }
+    }
+
     function bindEvents() {
         $("#seedAdminSearchBtn").on("click", function () {
             refreshTypeGrid(true);
@@ -854,20 +862,34 @@
 
     function setActive(flag) {
         state.active = !!flag;
-        if (!state.bound) {
-            try {
-                bindEvents();
-            } catch (bindError) {
-                window.__seedAdminInitError = "bindEvents: " + (bindError && bindError.message ? bindError.message : bindError);
-            }
-            state.bound = true;
-        }
         if (!state.initialized) {
             try {
                 init();
             } catch (initError) {
-                window.__seedAdminInitError = "init: " + (initError && initError.message ? initError.message : initError);
+                reportInitError("init", initError);
             }
+        }
+        if (!state.bound) {
+            try {
+                bindEvents();
+                state.bound = true;
+            } catch (bindError) {
+                reportInitError("bindEvents", bindError);
+                window.setTimeout(function () {
+                    if (state.bound) {
+                        return;
+                    }
+                    try {
+                        bindEvents();
+                        state.bound = true;
+                    } catch (retryBindError) {
+                        reportInitError("bindEvents(retry)", retryBindError);
+                    }
+                }, 60);
+            }
+        }
+        if (!state.initialized) {
+            return;
         }
 
         if (state.active) {
