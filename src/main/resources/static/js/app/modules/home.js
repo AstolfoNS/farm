@@ -16,6 +16,7 @@
         "seed-admin": true,
         settings: true
     };
+    var moduleLifecycleMap = {};
 
     function motion() {
         if (window.FarmUi && $.isFunction(window.FarmUi.motion)) {
@@ -112,6 +113,12 @@
             }
             if (window.FarmAppState.currentModule === "store" && window.FarmStoreModule) {
                 window.FarmStoreModule.reload();
+            }
+            if (window.FarmCore && $.isFunction(window.FarmCore.emit)) {
+                window.FarmCore.emit("user:changed", {
+                    user: res.data || {},
+                    userId: asNumber(res.data && res.data.id, 0)
+                });
             }
             if ($.isFunction(onDone)) {
                 onDone(res.data);
@@ -371,40 +378,70 @@
         hidePanel($("#settingsPanel"));
     }
 
+    function buildModuleLifecycleMap() {
+        return {
+            "user-manage": {
+                activate: function () { setUserManageActive(true); },
+                deactivate: function () { setUserManageActive(false); }
+            },
+            "user-select": {
+                activate: function () { setUserSelectActive(true); },
+                deactivate: function () { setUserSelectActive(false); }
+            },
+            farm: {
+                activate: function () { setFarmModuleActive(true); },
+                deactivate: function () { setFarmModuleActive(false); }
+            },
+            "plot-admin": {
+                activate: function () { setPlotAdminActive(true); },
+                deactivate: function () { setPlotAdminActive(false); }
+            },
+            shop: {
+                activate: function () { setShopModuleActive(true); },
+                deactivate: function () { setShopModuleActive(false); }
+            },
+            store: {
+                activate: function () { setStoreModuleActive(true); },
+                deactivate: function () { setStoreModuleActive(false); }
+            },
+            "seed-admin": {
+                activate: function () { setSeedAdminActive(true); },
+                deactivate: function () { setSeedAdminActive(false); }
+            },
+            settings: {
+                activate: function () { setSettingsActive(true); },
+                deactivate: function () { setSettingsActive(false); }
+            }
+        };
+    }
+
+    function registerCoreModules() {
+        moduleLifecycleMap = buildModuleLifecycleMap();
+        if (!(window.FarmCore && $.isFunction(window.FarmCore.registerModule))) {
+            return;
+        }
+        $.each(moduleLifecycleMap, function (moduleName, lifecycle) {
+            window.FarmCore.registerModule(moduleName, lifecycle);
+        });
+    }
+
+    function resolveLifecycle(moduleName) {
+        if (window.FarmCore && $.isFunction(window.FarmCore.getModule)) {
+            var entry = window.FarmCore.getModule(moduleName);
+            if (entry) {
+                return entry;
+            }
+        }
+        return moduleLifecycleMap[moduleName] || null;
+    }
+
     function activateModule(moduleName) {
         if (moduleName === "home") {
             return;
         }
-        if (moduleName === "user-manage") {
-            setUserManageActive(true);
-            return;
-        }
-        if (moduleName === "user-select") {
-            setUserSelectActive(true);
-            return;
-        }
-        if (moduleName === "farm") {
-            setFarmModuleActive(true);
-            return;
-        }
-        if (moduleName === "plot-admin") {
-            setPlotAdminActive(true);
-            return;
-        }
-        if (moduleName === "shop") {
-            setShopModuleActive(true);
-            return;
-        }
-        if (moduleName === "store") {
-            setStoreModuleActive(true);
-            return;
-        }
-        if (moduleName === "seed-admin") {
-            setSeedAdminActive(true);
-            return;
-        }
-        if (moduleName === "settings") {
-            setSettingsActive(true);
+        var lifecycle = resolveLifecycle(moduleName);
+        if (lifecycle && $.isFunction(lifecycle.activate)) {
+            lifecycle.activate();
             return;
         }
         $.messager.show({
@@ -419,36 +456,9 @@
         if (moduleName === "home") {
             return;
         }
-        if (moduleName === "user-manage") {
-            setUserManageActive(false);
-            return;
-        }
-        if (moduleName === "user-select") {
-            setUserSelectActive(false);
-            return;
-        }
-        if (moduleName === "farm") {
-            setFarmModuleActive(false);
-            return;
-        }
-        if (moduleName === "plot-admin") {
-            setPlotAdminActive(false);
-            return;
-        }
-        if (moduleName === "shop") {
-            setShopModuleActive(false);
-            return;
-        }
-        if (moduleName === "store") {
-            setStoreModuleActive(false);
-            return;
-        }
-        if (moduleName === "seed-admin") {
-            setSeedAdminActive(false);
-            return;
-        }
-        if (moduleName === "settings") {
-            setSettingsActive(false);
+        var lifecycle = resolveLifecycle(moduleName);
+        if (lifecycle && $.isFunction(lifecycle.deactivate)) {
+            lifecycle.deactivate();
         }
     }
 
@@ -464,6 +474,12 @@
         setTopNav(nextModule);
         deactivateModule(prevModule);
         activateModule(nextModule);
+        if (window.FarmCore && $.isFunction(window.FarmCore.emit)) {
+            window.FarmCore.emit("module:changed", {
+                previous: prevModule,
+                current: nextModule
+            });
+        }
     }
 
     function selectedUserForSwitch() {
@@ -556,6 +572,10 @@
     }
 
     $(function () {
+        if (window.FarmCore && $.isFunction(window.FarmCore.boot)) {
+            window.FarmCore.boot();
+        }
+        registerCoreModules();
         initUserSelect();
         bindEvents();
         switchModule(resolveInitialModule());
