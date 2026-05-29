@@ -773,9 +773,9 @@
     }
 
     function initDialogs() {
-        $("#seedTypeEditorDialog").dialog({cls: "seed-admin-dialog-window"});
-        $("#seedStageEditorDialog").dialog({cls: "seed-admin-dialog-window"});
-        $("#seedStagePositionDialog").dialog({cls: "seed-admin-dialog-window"});
+        $("#seedTypeEditorDialog").dialog({cls: "farm-dialog-window seed-admin-dialog-window"});
+        $("#seedStageEditorDialog").dialog({cls: "farm-dialog-window seed-admin-dialog-window"});
+        $("#seedStagePositionDialog").dialog({cls: "farm-dialog-window seed-admin-dialog-window"});
     }
 
     function init() {

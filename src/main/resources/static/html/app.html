@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/js/easyui/themes/icon.css">
     <link rel="stylesheet" type="text/css" href="/css/easyui-farm-unified.css">
     <link rel="stylesheet" type="text/css" href="/css/base.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/farm-dialog-form.css">
     <link rel="stylesheet" type="text/css" href="/css/theme-farm.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/home-shell.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/admin-grid.css">
@@ -281,11 +282,11 @@
             </div>
         </section>
 
-        <div id="seedTypeEditorDialog" class="easyui-dialog seed-admin-dialog" title="种子类型编辑"
+        <div id="seedTypeEditorDialog" class="easyui-dialog seed-admin-dialog farm-dialog-shell" title="种子类型编辑"
              style="width:860px;height:518px;padding:8px" closed="true" modal="true" resizable="false">
             <form id="seedTypeEditorForm" method="post">
                 <input type="hidden" name="id" value="0">
-                <table class="seed-admin-form-table">
+                <table class="seed-admin-form-table farm-dialog-form">
                     <tr>
                         <td>种子名称</td>
                         <td><input name="name" class="easyui-textbox" style="width:220px" required="true"></td>
@@ -304,19 +305,19 @@
                     </tr>
                     <tr>
                         <td>种子价格</td>
-                        <td><input name="price" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td><input name="price" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">金币</span></td>
                         <td>果实单价</td>
-                        <td><input name="fruitPrice" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td><input name="fruitPrice" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">金币</span></td>
                     </tr>
                     <tr>
                         <td>收获经验</td>
                         <td><input name="harvestExperience" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
                         <td>收获积分</td>
-                        <td><input name="harvestScore" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td><input name="harvestScore" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">分</span></td>
                     </tr>
                     <tr>
                         <td>果实数量</td>
-                        <td><input name="harvestFruitNumber" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td><input name="harvestFruitNumber" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">个果实</span></td>
                         <td>虫害损失</td>
                         <td><input name="fruitLossPerBug" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
                     </tr>
@@ -340,18 +341,18 @@
                 </table>
                 <input id="seedTypeCoverFile" type="file" accept="image/*" style="display:none">
             </form>
-            <div class="seed-admin-dialog-actions">
+            <div class="seed-admin-dialog-actions farm-dialog-actions">
                 <a id="seedTypeSaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存</a>
                 <a id="seedTypeCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
             </div>
         </div>
 
-        <div id="seedStageEditorDialog" class="easyui-dialog seed-admin-dialog" title="成长阶段编辑"
+        <div id="seedStageEditorDialog" class="easyui-dialog seed-admin-dialog farm-dialog-shell" title="成长阶段编辑"
              style="width:860px;height:530px;padding:8px" closed="true" modal="true" resizable="false">
             <form id="seedStageEditorForm" method="post">
                 <input type="hidden" name="id" value="0">
                 <input type="hidden" name="seedTypeId" value="0">
-                <table class="seed-admin-form-table">
+                <table class="seed-admin-form-table farm-dialog-form">
                     <tr>
                         <td>阶段序号</td>
                         <td><input name="stageIndex" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px" required="true"></td>
@@ -360,21 +361,21 @@
                     </tr>
                     <tr>
                         <td>成长时长(秒)</td>
-                        <td><input name="durationSeconds" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td><input name="durationSeconds" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">秒</span></td>
                         <td>虫害概率(0~1)</td>
                         <td><input name="bugProbability" class="easyui-numberbox" data-options="min:0,max:1,precision:4" style="width:220px"></td>
                     </tr>
                     <tr>
                         <td>宽度</td>
-                        <td><input name="width" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                        <td><input name="width" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"><span class="farm-dialog-unit">px</span></td>
                         <td>高度</td>
-                        <td><input name="height" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                        <td><input name="height" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"><span class="farm-dialog-unit">px</span></td>
                     </tr>
                     <tr>
                         <td>offsetX</td>
-                        <td><input name="offsetX" class="easyui-numberbox" data-options="precision:0" style="width:220px"></td>
+                        <td><input name="offsetX" class="easyui-numberbox" data-options="precision:0" style="width:220px"><span class="farm-dialog-unit">px</span></td>
                         <td>offsetY</td>
-                        <td><input name="offsetY" class="easyui-numberbox" data-options="precision:0" style="width:220px"></td>
+                        <td><input name="offsetY" class="easyui-numberbox" data-options="precision:0" style="width:220px"><span class="farm-dialog-unit">px</span></td>
                     </tr>
                     <tr>
                         <td>资源URL</td>
@@ -395,18 +396,18 @@
                 </table>
                 <input id="seedStageImageFile" type="file" accept="image/*" style="display:none">
             </form>
-            <div class="seed-admin-dialog-actions">
+            <div class="seed-admin-dialog-actions farm-dialog-actions">
                 <a id="seedStageSaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存</a>
                 <a id="seedStageCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
             </div>
         </div>
 
-        <div id="seedStagePositionDialog" class="easyui-dialog seed-admin-dialog" title="定位编辑器"
+        <div id="seedStagePositionDialog" class="easyui-dialog seed-admin-dialog farm-dialog-shell" title="定位编辑器"
              style="width:360px;height:520px;padding:8px" closed="true" modal="true" resizable="false">
             <div id="seedStagePositionCanvas" class="seed-stage-position-canvas">
                 <img id="seedStagePositionImage" src="" alt="">
             </div>
-            <div class="seed-admin-dialog-actions">
+            <div class="seed-admin-dialog-actions farm-dialog-actions">
                 <a id="seedStagePositionApplyBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">应用坐标</a>
                 <a id="seedStagePositionCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
             </div>
