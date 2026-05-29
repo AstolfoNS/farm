@@ -467,6 +467,35 @@
         }
     }
 
+    function setTextboxValue($field, value) {
+        if (!$field || $field.length <= 0) {
+            return;
+        }
+        var safe = value == null ? "" : String(value);
+        try {
+            if (!$field.data("textbox")) {
+                $field.textbox();
+            }
+            $field.textbox("setValue", safe);
+            return;
+        } catch (ignoreTextboxSetError) {}
+        $field.val(safe);
+    }
+
+    function getTextboxValue($field, def) {
+        if (!$field || $field.length <= 0) {
+            return def || "";
+        }
+        try {
+            if (!$field.data("textbox")) {
+                $field.textbox();
+            }
+            return $.trim($field.textbox("getValue") || (def || ""));
+        } catch (ignoreTextboxGetError) {
+            return $.trim($field.val() || (def || ""));
+        }
+    }
+
     function stageGeometryFromForm() {
         return {
             width: getStageNumberValue("width", 100),
@@ -504,10 +533,10 @@
 
     function syncFormFromPositionImage() {
         var $image = $("#seedStagePositionImage");
-        $("#seedStageEditorForm input[name='width']").numberbox("setValue", $image.outerWidth() || 0);
-        $("#seedStageEditorForm input[name='height']").numberbox("setValue", $image.outerHeight() || 0);
-        $("#seedStageEditorForm input[name='offsetX']").numberbox("setValue", parseInt($image.css("left"), 10) || 0);
-        $("#seedStageEditorForm input[name='offsetY']").numberbox("setValue", parseInt($image.css("top"), 10) || 0);
+        setStageNumberValue("width", $image.outerWidth() || 0);
+        setStageNumberValue("height", $image.outerHeight() || 0);
+        setStageNumberValue("offsetX", parseInt($image.css("left"), 10) || 0);
+        setStageNumberValue("offsetY", parseInt($image.css("top"), 10) || 0);
     }
 
     function bindStageGeometrySyncEvents() {
@@ -718,7 +747,7 @@
             height: getStageNumberValue("height", 120),
             offsetX: getStageNumberValue("offsetX", 50),
             offsetY: getStageNumberValue("offsetY", 40),
-            assetUrl: $("#seedStageAssetUrl").textbox("getValue")
+            assetUrl: getTextboxValue($("#seedStageAssetUrl"), "")
         };
         FarmApi.seedStageSave(payload, function (res) {
             if (!boolOk(res)) {
@@ -783,6 +812,16 @@
                     return;
                 }
                 var url = $.trim(res.data.accessUrl || "");
+                if (!url) {
+                    var rel = $.trim(res.data.relativePath || "");
+                    if (rel) {
+                        url = "/oss/" + rel.replace(/^\/+/, "");
+                    }
+                }
+                if (!url) {
+                    alertMessage("上传成功但未返回访问地址，请稍后重试");
+                    return;
+                }
                 if ($.isFunction(onSuccess)) {
                     onSuccess(url, res.data);
                 }
@@ -798,7 +837,7 @@
     }
 
     function openPositionEditor() {
-        var assetUrl = $("#seedStageAssetUrl").textbox("getValue");
+        var assetUrl = getTextboxValue($("#seedStageAssetUrl"), "");
         if (!$.trim(assetUrl)) {
             alertMessage("请先上传或填写阶段资源图片URL");
             return;
@@ -906,7 +945,7 @@
         });
         $("#seedTypeCoverFile").off("change.seedAdmin").on("change.seedAdmin", function () {
             uploadFile($("#seedTypeCoverFile"), "seed-cover", function (url) {
-                $("#seedTypeCoverImageUrl").textbox("setValue", url);
+                setTextboxValue($("#seedTypeCoverImageUrl"), url);
                 previewSeedTypeCover(url);
             });
         });
@@ -917,7 +956,7 @@
         });
         $("#seedStageImageFile").off("change.seedAdmin").on("change.seedAdmin", function () {
             uploadFile($("#seedStageImageFile"), "seed-stage", function (url) {
-                $("#seedStageAssetUrl").textbox("setValue", url);
+                setTextboxValue($("#seedStageAssetUrl"), url);
                 previewImageFromUrl(url);
             });
         });
@@ -929,11 +968,11 @@
         });
 
         $("#seedStageAssetUrl").textbox("textbox").off("change.seedAdmin").on("change.seedAdmin", function () {
-            var val = $("#seedStageAssetUrl").textbox("getValue");
+            var val = getTextboxValue($("#seedStageAssetUrl"), "");
             previewImageFromUrl(val);
         });
         $("#seedTypeCoverImageUrl").textbox("textbox").off("change.seedAdmin").on("change.seedAdmin", function () {
-            previewSeedTypeCover($("#seedTypeCoverImageUrl").textbox("getValue"));
+            previewSeedTypeCover(getTextboxValue($("#seedTypeCoverImageUrl"), ""));
         });
 
         window.setTimeout(bindStageGeometrySyncEvents, 0);
