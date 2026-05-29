@@ -24,12 +24,15 @@ spring:
 
   jpa:
     # 建议生产环境关闭，通过 application-dev.yml 开启
-    show-sql: true
+    show-sql: ${JPA_SHOW_SQL:false}
     properties:
       naming:
         physical-strategy: cn.jxufe.farm.database.PostgreSQLServerNamingStrategy
     # 强烈建议关闭，防止连接池耗尽
     open-in-view: false
+
+  thymeleaf:
+    check-template: false
 
 springdoc:
   api-docs:
@@ -42,6 +45,10 @@ farm:
   file:
     storage-root: ${FILE_STORAGE_ROOT:./static/oss}
     public-prefix: ${FILE_PUBLIC_PREFIX:/oss}
+  logging:
+    websocket:
+      file-path: ${FARM_WEBSOCKET_LOG_FILE:logs/farm-realtime.log}
+      level: ${FARM_WEBSOCKET_LOG_LEVEL:DEBUG}
   gameplay:
     realtime:
       crop-status-refresh-interval-ms: ${CROP_STATUS_REFRESH_INTERVAL_MS:1000}
