@@ -1,4 +1,9 @@
 /* Unified EasyUI popup/dialog theme for farm pages */
+/* Prevent dialog/form flash before EasyUI parser takes over. */
+.farm-body .easyui-dialog {
+    display: none;
+}
+
 .window {
     border: 1px solid #19d022 !important;
     border-radius: 6px;
