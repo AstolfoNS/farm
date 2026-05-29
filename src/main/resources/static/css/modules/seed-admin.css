@@ -93,36 +93,6 @@
     flex: 1;
 }
 
-.seed-admin-panel .datagrid-header td {
-    background: #4d9052 !important;
-    border-color: #4d9052 !important;
-}
-
-.seed-admin-panel .datagrid-header .datagrid-cell,
-.seed-admin-panel .datagrid-header .datagrid-cell span {
-    color: #f8ffe7 !important;
-    font-weight: 700;
-}
-
-.seed-admin-panel .datagrid-row {
-    background: rgba(91, 178, 91, 0.92);
-    color: #f4ffe0;
-}
-
-.seed-admin-panel .datagrid-row-alt {
-    background: rgba(72, 150, 72, 0.92) !important;
-}
-
-.seed-admin-panel .datagrid-row-selected {
-    background: #d34d4d !important;
-    color: #fff !important;
-}
-
-.seed-admin-panel .datagrid-pager {
-    background: #4d9052 !important;
-    border-top: 1px solid #00d80f !important;
-}
-
 .seed-admin-dialog {
     background: #018701;
 }

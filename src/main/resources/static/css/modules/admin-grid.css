@@ -1,0 +1,92 @@
+.farm-admin-grid-theme .datagrid-view,
+.farm-admin-grid-theme .datagrid-view1,
+.farm-admin-grid-theme .datagrid-view2,
+.farm-admin-grid-theme .datagrid-view2 .datagrid-body,
+.farm-admin-grid-theme .datagrid-body-inner,
+.farm-admin-grid-theme .datagrid-header,
+.farm-admin-grid-theme .datagrid-header-inner,
+.farm-admin-grid-theme .datagrid-header-row {
+    background: rgba(0, 108, 0, 0.94) !important;
+}
+
+.farm-admin-grid-theme .datagrid-header td {
+    background: rgba(0, 82, 0, 0.96) !important;
+    border-color: rgba(0, 101, 0, 0.95) !important;
+}
+
+.farm-admin-grid-theme .datagrid-header .datagrid-cell,
+.farm-admin-grid-theme .datagrid-header .datagrid-cell span {
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.farm-admin-grid-theme .datagrid-body td,
+.farm-admin-grid-theme .datagrid-footer td {
+    border-color: rgba(110, 227, 101, 0.3) !important;
+}
+
+.farm-admin-grid-theme .datagrid-row {
+    background: rgba(0, 111, 0, 0.94);
+    color: #f8ffe9;
+}
+
+.farm-admin-grid-theme .datagrid-row-alt {
+    background: rgba(0, 95, 0, 0.94) !important;
+}
+
+.farm-admin-grid-theme .datagrid-row-selected {
+    background: rgba(0, 126, 0, 0.98) !important;
+    color: #ffffff !important;
+}
+
+.farm-admin-grid-theme .datagrid-cell {
+    font-size: 14px;
+    color: #f5ffe7;
+}
+
+.farm-admin-grid-theme .datagrid-header td.datagrid-header-rownumber,
+.farm-admin-grid-theme .datagrid-td-rownumber {
+    background: rgba(0, 108, 0, 0.94) !important;
+    border-right-color: rgba(0, 101, 0, 0.95) !important;
+}
+
+.farm-admin-grid-theme .datagrid-row-selected td.datagrid-td-rownumber {
+    background: rgba(0, 126, 0, 0.98) !important;
+}
+
+.farm-admin-grid-theme .datagrid-pager {
+    background: rgba(0, 104, 0, 0.95) !important;
+    border-top: 1px solid rgba(95, 225, 84, 0.86) !important;
+    color: #ecffd8;
+}
+
+.farm-admin-grid-theme .datagrid-pager .l-btn {
+    background: rgba(0, 150, 0, 0.98) !important;
+    border: 1px solid rgba(190, 255, 170, 0.95) !important;
+    border-radius: 2px !important;
+}
+
+.farm-admin-grid-theme .datagrid-pager .l-btn:hover {
+    background: rgba(8, 174, 16, 1) !important;
+    border-color: rgba(224, 255, 211, 1) !important;
+}
+
+.farm-admin-grid-theme .datagrid-pager .l-btn-icon {
+    opacity: 1 !important;
+    filter: brightness(2.1) saturate(1.4);
+}
+
+.farm-admin-grid-theme .datagrid-pager .pagination-page-list,
+.farm-admin-grid-theme .datagrid-pager .pagination-num {
+    height: 26px;
+    line-height: 26px;
+    background: #ecfff0 !important;
+    border: 1px solid rgba(89, 223, 80, 0.92) !important;
+}
+
+.farm-admin-grid-theme .datagrid-pager .pagination-info,
+.farm-admin-grid-theme .datagrid-pager .pagination-btn-separator,
+.farm-admin-grid-theme .datagrid-pager .pagination span {
+    color: #f4ffd8 !important;
+}
