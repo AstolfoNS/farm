@@ -90,3 +90,144 @@
 .farm-admin-grid-theme .datagrid-pager .pagination span {
     color: #f4ffd8 !important;
 }
+
+/* Legacy seed-style unified grid skin (toolbar/title/grid/pager). */
+.farm-admin-grid-theme-legacy .farm-admin-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border: 1px solid #1ede1e;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(0, 56, 0, 0.95), rgba(0, 41, 0, 0.95));
+}
+
+.farm-admin-grid-theme-legacy .farm-admin-toolbar .textbox .textbox-text {
+    height: 28px !important;
+    line-height: 28px !important;
+    font-size: 16px;
+    border-color: rgba(112, 194, 108, 0.94);
+    background: #f1f1f1;
+}
+
+.farm-admin-grid-theme-legacy .farm-admin-toolbar .l-btn {
+    min-width: 62px;
+    height: 30px;
+    border-radius: 4px;
+}
+
+.farm-admin-grid-theme-legacy .farm-admin-toolbar .l-btn .l-btn-text {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.farm-admin-grid-theme-legacy .farm-admin-grid-title {
+    margin-top: 6px;
+    height: 28px;
+    line-height: 28px;
+    padding: 0 8px;
+    color: #f3ffd8;
+    font-size: 16px;
+    font-weight: 700;
+    border: 1px solid #18e018;
+    border-bottom: 0;
+    background: linear-gradient(180deg, #10be0f 0%, #079107 100%);
+}
+
+.farm-admin-grid-theme-legacy .farm-admin-grid-panel {
+    border: 1px solid #18e018;
+    background: rgba(0, 73, 0, 0.86);
+}
+
+.farm-admin-grid-theme-legacy .farm-admin-stage-toolbar {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border-bottom: 1px solid rgba(102, 233, 96, 0.72);
+    background: linear-gradient(180deg, rgba(0, 88, 0, 0.94), rgba(0, 64, 0, 0.94));
+}
+
+.farm-admin-grid-theme-legacy .datagrid-view,
+.farm-admin-grid-theme-legacy .datagrid-view1,
+.farm-admin-grid-theme-legacy .datagrid-view2,
+.farm-admin-grid-theme-legacy .datagrid-view2 .datagrid-body,
+.farm-admin-grid-theme-legacy .datagrid-body-inner,
+.farm-admin-grid-theme-legacy .datagrid-header,
+.farm-admin-grid-theme-legacy .datagrid-header-inner,
+.farm-admin-grid-theme-legacy .datagrid-header-row {
+    background: #028d02 !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-header td {
+    background: linear-gradient(180deg, #008900 0%, #006f00 100%) !important;
+    border-color: rgba(0, 52, 0, 0.78) !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-header .datagrid-cell,
+.farm-admin-grid-theme-legacy .datagrid-header .datagrid-cell span {
+    color: #f6ffe8 !important;
+    font-size: 15px;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-body td,
+.farm-admin-grid-theme-legacy .datagrid-footer td {
+    border-color: rgba(0, 45, 0, 0.55) !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-row {
+    background: #03a503 !important;
+    color: #ffffff !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-row-alt {
+    background: #006100 !important;
+    color: #ffffff !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-row-selected,
+.farm-admin-grid-theme-legacy .datagrid-row-over {
+    background: #d90c0c !important;
+    color: #ffffff !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-header td.datagrid-header-rownumber,
+.farm-admin-grid-theme-legacy .datagrid-td-rownumber {
+    background: #005a00 !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-row-selected td.datagrid-td-rownumber {
+    background: #8f0000 !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-cell {
+    color: #ffffff !important;
+    font-size: 15px;
+    line-height: 22px;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-pager {
+    background: #017701 !important;
+    border-top: 1px solid #2be52b !important;
+    color: #edffd8;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-pager .l-btn {
+    background: #027f02 !important;
+    border: 1px solid rgba(173, 255, 145, 0.9) !important;
+    border-radius: 2px !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-pager .l-btn:hover {
+    background: #06a706 !important;
+}
+
+.farm-admin-grid-theme-legacy .datagrid-pager .pagination-page-list,
+.farm-admin-grid-theme-legacy .datagrid-pager .pagination-num {
+    height: 24px;
+    line-height: 24px;
+    border: 1px solid #5fcb5f !important;
+    background: #f2f2f2 !important;
+}

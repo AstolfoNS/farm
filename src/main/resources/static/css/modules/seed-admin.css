@@ -28,17 +28,6 @@
         radial-gradient(circle at 15% 8%, rgba(82, 200, 82, 0.26), rgba(0, 0, 0, 0) 64%);
 }
 
-.seed-admin-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    padding: 8px 10px;
-    border: 1px solid #1ede1e;
-    border-radius: 2px;
-    background: linear-gradient(180deg, rgba(0, 56, 0, 0.95), rgba(0, 41, 0, 0.95));
-}
-
 .seed-admin-toolbar-label {
     color: #f5ffe3;
     font-size: 18px;
@@ -46,47 +35,6 @@
     line-height: 1;
 }
 
-#seedAdminToolbar .textbox,
-#seedAdminToolbar .textbox .textbox-text {
-    border-radius: 2px;
-}
-
-#seedAdminToolbar .textbox .textbox-text {
-    height: 28px !important;
-    line-height: 28px !important;
-    font-size: 16px;
-    border-color: rgba(112, 194, 108, 0.94);
-    background: #f1f1f1;
-}
-
-#seedAdminToolbar .l-btn {
-    min-width: 62px;
-    height: 30px;
-    border-radius: 4px;
-}
-
-#seedAdminToolbar .l-btn .l-btn-text {
-    font-size: 15px;
-    font-weight: 700;
-}
-
-.seed-admin-grid-title {
-    margin-top: 6px;
-    height: 28px;
-    line-height: 28px;
-    padding: 0 8px;
-    color: #f3ffd8;
-    font-size: 16px;
-    font-weight: 700;
-    border: 1px solid #18e018;
-    border-bottom: 0;
-    background: linear-gradient(180deg, #10be0f 0%, #079107 100%);
-}
-
-.seed-admin-grid-panel {
-    border: 1px solid #18e018;
-    background: rgba(0, 73, 0, 0.86);
-}
 
 .seed-admin-grid-panel-top {
     height: 260px;
@@ -96,16 +44,6 @@
     height: 260px;
     display: flex;
     flex-direction: column;
-}
-
-.seed-admin-stage-toolbar {
-    height: 38px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 8px;
-    border-bottom: 1px solid rgba(102, 233, 96, 0.72);
-    background: linear-gradient(180deg, rgba(0, 88, 0, 0.94), rgba(0, 64, 0, 0.94));
 }
 
 .seed-admin-stage-hint {
@@ -139,88 +77,6 @@
 
 #seedAdminStageGrid {
     flex: 1;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-view,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-view1,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-view2,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-view2 .datagrid-body,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-body-inner,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-header,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-header-inner,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-header-row {
-    background: #028d02 !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-header td {
-    background: linear-gradient(180deg, #008900 0%, #006f00 100%) !important;
-    border-color: rgba(0, 52, 0, 0.78) !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-header .datagrid-cell,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-header .datagrid-cell span {
-    color: #f6ffe8 !important;
-    font-size: 15px;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-body td,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-footer td {
-    border-color: rgba(0, 45, 0, 0.55) !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-row {
-    background: #03a503 !important;
-    color: #ffffff !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-row-alt {
-    background: #006100 !important;
-    color: #ffffff !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-row-selected,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-row-over {
-    background: #d90c0c !important;
-    color: #ffffff !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-header td.datagrid-header-rownumber,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-td-rownumber {
-    background: #005a00 !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-row-selected td.datagrid-td-rownumber {
-    background: #8f0000 !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-cell {
-    color: #ffffff !important;
-    font-size: 15px;
-    line-height: 22px;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-pager {
-    background: #017701 !important;
-    border-top: 1px solid #2be52b !important;
-    color: #edffd8;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-pager .l-btn {
-    background: #027f02 !important;
-    border: 1px solid rgba(173, 255, 145, 0.9) !important;
-    border-radius: 2px !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-pager .l-btn:hover {
-    background: #06a706 !important;
-}
-
-#seedAdminPanel.farm-admin-grid-theme .datagrid-pager .pagination-page-list,
-#seedAdminPanel.farm-admin-grid-theme .datagrid-pager .pagination-num {
-    height: 24px;
-    line-height: 24px;
-    border: 1px solid #5fcb5f !important;
-    background: #f2f2f2 !important;
 }
 
 .seed-admin-dialog {

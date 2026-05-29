@@ -253,10 +253,10 @@
             </div>
         </section>
 
-        <section id="seedAdminPanel" class="home-panel seed-admin-panel farm-admin-grid-theme">
+        <section id="seedAdminPanel" class="home-panel seed-admin-panel farm-admin-grid-theme farm-admin-grid-theme-legacy">
             <div class="home-panel-title">种子管理</div>
             <div class="home-panel-body seed-admin-body">
-                <div id="seedAdminToolbar" class="seed-admin-toolbar">
+                <div id="seedAdminToolbar" class="seed-admin-toolbar farm-admin-toolbar">
                     <label class="seed-admin-toolbar-label" for="seedAdminName">种子名称:</label>
                     <input id="seedAdminName" class="easyui-textbox" style="width:180px">
                     <a id="seedAdminSearchBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
@@ -265,13 +265,13 @@
                     <a id="seedAdminEditBtn" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑种子</a>
                     <a id="seedAdminDeleteBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除种子</a>
                 </div>
-                <div class="seed-admin-grid-title">种子类型清单</div>
-                <div class="seed-admin-grid-panel seed-admin-grid-panel-top">
+                <div class="seed-admin-grid-title farm-admin-grid-title">种子类型清单</div>
+                <div class="seed-admin-grid-panel seed-admin-grid-panel-top farm-admin-grid-panel">
                     <table id="seedAdminTypeGrid"></table>
                 </div>
-                <div class="seed-admin-grid-title">成长阶段清单</div>
-                <div class="seed-admin-grid-panel seed-admin-grid-panel-bottom">
-                    <div id="seedAdminStageToolbar" class="seed-admin-stage-toolbar">
+                <div class="seed-admin-grid-title farm-admin-grid-title">成长阶段清单</div>
+                <div class="seed-admin-grid-panel seed-admin-grid-panel-bottom farm-admin-grid-panel">
+                    <div id="seedAdminStageToolbar" class="seed-admin-stage-toolbar farm-admin-stage-toolbar">
                         <span id="seedAdminStageHint" class="seed-admin-stage-hint">请先在上方选择一个种子，再进行阶段管理。</span>
                         <a id="seedAdminStageAddBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">新增阶段</a>
                         <a id="seedAdminStageEditBtn" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑阶段</a>

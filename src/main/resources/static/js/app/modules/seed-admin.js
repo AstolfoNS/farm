@@ -367,6 +367,50 @@
             return;
         }
         $("#seedStagePreviewImage").attr("src", src);
+        syncPreviewGeometryFromForm();
+    }
+
+    function stageGeometryFromForm() {
+        return {
+            width: asNumber($("#seedStageEditorForm input[name='width']").numberbox("getValue"), 100),
+            height: asNumber($("#seedStageEditorForm input[name='height']").numberbox("getValue"), 120),
+            left: asNumber($("#seedStageEditorForm input[name='offsetX']").numberbox("getValue"), 50),
+            top: asNumber($("#seedStageEditorForm input[name='offsetY']").numberbox("getValue"), 40)
+        };
+    }
+
+    function applyGeometryToPreview(geometry) {
+        $("#seedStagePreviewImage").css({
+            width: geometry.width + "px",
+            height: geometry.height + "px",
+            left: geometry.left + "px",
+            top: geometry.top + "px"
+        });
+    }
+
+    function applyGeometryToPositionImage(geometry) {
+        $("#seedStagePositionImage").css({
+            width: geometry.width + "px",
+            height: geometry.height + "px",
+            left: geometry.left + "px",
+            top: geometry.top + "px"
+        });
+    }
+
+    function syncPreviewGeometryFromForm() {
+        applyGeometryToPreview(stageGeometryFromForm());
+    }
+
+    function syncPositionImageFromForm() {
+        applyGeometryToPositionImage(stageGeometryFromForm());
+    }
+
+    function syncFormFromPositionImage() {
+        var $image = $("#seedStagePositionImage");
+        $("#seedStageEditorForm input[name='width']").numberbox("setValue", $image.outerWidth() || 0);
+        $("#seedStageEditorForm input[name='height']").numberbox("setValue", $image.outerHeight() || 0);
+        $("#seedStageEditorForm input[name='offsetX']").numberbox("setValue", parseInt($image.css("left"), 10) || 0);
+        $("#seedStageEditorForm input[name='offsetY']").numberbox("setValue", parseInt($image.css("top"), 10) || 0);
     }
 
     function fillSeedTypeForm(row) {
@@ -495,6 +539,7 @@
         $("#seedStageEditorForm input[name='bugProbability']").numberbox("setValue", 0);
         $("#seedStageEditorForm input[name='stageIndex']").numberbox("setValue", asNumber(state.stageRows.length, 0) + 1);
         previewImageFromUrl("");
+        syncPreviewGeometryFromForm();
         if (!row) {
             return;
         }
@@ -512,6 +557,7 @@
         $("#seedStageEditorForm input[name='id']").val(asNumber(row.id, 0));
         $("#seedStageEditorForm input[name='seedTypeId']").val(asNumber(row.seedTypeId, state.currentSeedId));
         previewImageFromUrl(row.assetUrl || "");
+        syncPreviewGeometryFromForm();
     }
 
     function openSeedStageEditor(mode) {
@@ -638,43 +684,35 @@
             alertMessage("请先上传或填写阶段资源图片URL");
             return;
         }
-        var width = asNumber($("#seedStageEditorForm input[name='width']").numberbox("getValue"), 100);
-        var height = asNumber($("#seedStageEditorForm input[name='height']").numberbox("getValue"), 120);
-        var offsetX = asNumber($("#seedStageEditorForm input[name='offsetX']").numberbox("getValue"), 50);
-        var offsetY = asNumber($("#seedStageEditorForm input[name='offsetY']").numberbox("getValue"), 40);
-        $("#seedStagePositionImage").attr("src", assetUrl).css({
-            width: width + "px",
-            height: height + "px",
-            left: offsetX + "px",
-            top: offsetY + "px"
-        });
-        $("#seedStagePositionImage").draggable({
-            containment: "#seedStagePositionCanvas"
+        var $image = $("#seedStagePositionImage");
+        $image.attr("src", assetUrl);
+        syncPositionImageFromForm();
+        try {
+            $image.draggable("destroy");
+        } catch (ignoreDragDestroy) {}
+        try {
+            $image.resizable("destroy");
+        } catch (ignoreResizeDestroy) {}
+        $image.draggable({
+            containment: "#seedStagePositionCanvas",
+            onDrag: function () {
+                syncFormFromPositionImage();
+                syncPreviewGeometryFromForm();
+            }
         }).resizable({
-            handles: "n,e,s,w,ne,se,sw,nw"
+            handles: "n,e,s,w,ne,se,sw,nw",
+            onResize: function () {
+                syncFormFromPositionImage();
+                syncPreviewGeometryFromForm();
+            }
         });
         $("#seedStagePositionDialog").dialog("open");
     }
 
     function applyPositionEditor() {
-        var $image = $("#seedStagePositionImage");
-        var left = parseInt($image.css("left"), 10) || 0;
-        var top = parseInt($image.css("top"), 10) || 0;
-        var width = $image.outerWidth() || 0;
-        var height = $image.outerHeight() || 0;
-        $("#seedStageEditorForm input[name='width']").numberbox("setValue", width);
-        $("#seedStageEditorForm input[name='height']").numberbox("setValue", height);
-        $("#seedStageEditorForm input[name='offsetX']").numberbox("setValue", left);
-        $("#seedStageEditorForm input[name='offsetY']").numberbox("setValue", top);
+        syncFormFromPositionImage();
         $("#seedStagePositionDialog").dialog("close");
-        var assetUrl = $("#seedStageAssetUrl").textbox("getValue");
-        previewImageFromUrl(assetUrl);
-        $("#seedStagePreviewImage").css({
-            width: width + "px",
-            height: height + "px",
-            left: left + "px",
-            top: top + "px"
-        });
+        syncPreviewGeometryFromForm();
     }
 
     function bindEvents() {
@@ -745,6 +783,16 @@
         $("#seedStageAssetUrl").textbox("textbox").on("change", function () {
             var val = $("#seedStageAssetUrl").textbox("getValue");
             previewImageFromUrl(val);
+        });
+
+        $.each(["width", "height", "offsetX", "offsetY"], function (_, name) {
+            var $field = $("#seedStageEditorForm input[name='" + name + "']");
+            $field.numberbox("textbox").on("input blur keyup", function () {
+                syncPreviewGeometryFromForm();
+                if ($("#seedStagePositionDialog").dialog("options").closed === false) {
+                    syncPositionImageFromForm();
+                }
+            });
         });
     }
 
