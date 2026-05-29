@@ -23,4 +23,7 @@
 
     FarmPlotAdminModule.setActive = setActive;
     window.FarmPlotAdminModule = FarmPlotAdminModule;
+    if (window.FarmCore && $.isFunction(window.FarmCore.registerSetActiveModule)) {
+        window.FarmCore.registerSetActiveModule("plot-admin", FarmPlotAdminModule);
+    }
 })(window, window.jQuery);

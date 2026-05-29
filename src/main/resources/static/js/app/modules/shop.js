@@ -651,5 +651,8 @@
     FarmShopModule.reload = reload;
 
     window.FarmShopModule = FarmShopModule;
+    if (window.FarmCore && $.isFunction(window.FarmCore.registerSetActiveModule)) {
+        window.FarmCore.registerSetActiveModule("shop", FarmShopModule, {refreshMethod: "reload"});
+    }
 })(window, window.jQuery);
 

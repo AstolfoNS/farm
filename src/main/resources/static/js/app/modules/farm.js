@@ -912,6 +912,13 @@
     FarmModule.updateOverview = updateOverview;
 
     window.FarmModule = FarmModule;
+    if (window.FarmCore && $.isFunction(window.FarmCore.registerSetActiveModule)) {
+        window.FarmCore.registerSetActiveModule("farm", FarmModule, {
+            refresh: function () {
+                loadOverviewByUser(currentUserId(), false);
+            }
+        });
+    }
 
     $(function () {
         bindRealtime();

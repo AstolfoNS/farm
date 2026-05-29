@@ -509,4 +509,7 @@
     FarmUserAdminModule.setActive = setActive;
     FarmUserAdminModule.reload = reload;
     window.FarmUserAdminModule = FarmUserAdminModule;
+    if (window.FarmCore && $.isFunction(window.FarmCore.registerSetActiveModule)) {
+        window.FarmCore.registerSetActiveModule("user-manage", FarmUserAdminModule, {refreshMethod: "reload"});
+    }
 })(window, window.jQuery);

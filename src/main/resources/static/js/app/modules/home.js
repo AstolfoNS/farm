@@ -380,33 +380,9 @@
 
     function buildModuleLifecycleMap() {
         return {
-            "user-manage": {
-                activate: function () { setUserManageActive(true); },
-                deactivate: function () { setUserManageActive(false); }
-            },
             "user-select": {
                 activate: function () { setUserSelectActive(true); },
                 deactivate: function () { setUserSelectActive(false); }
-            },
-            farm: {
-                activate: function () { setFarmModuleActive(true); },
-                deactivate: function () { setFarmModuleActive(false); }
-            },
-            "plot-admin": {
-                activate: function () { setPlotAdminActive(true); },
-                deactivate: function () { setPlotAdminActive(false); }
-            },
-            shop: {
-                activate: function () { setShopModuleActive(true); },
-                deactivate: function () { setShopModuleActive(false); }
-            },
-            store: {
-                activate: function () { setStoreModuleActive(true); },
-                deactivate: function () { setStoreModuleActive(false); }
-            },
-            "seed-admin": {
-                activate: function () { setSeedAdminActive(true); },
-                deactivate: function () { setSeedAdminActive(false); }
             },
             settings: {
                 activate: function () { setSettingsActive(true); },
@@ -470,6 +446,10 @@
             return;
         }
         window.FarmAppState.currentModule = nextModule;
+        if (window.FarmCore && $.isFunction(window.FarmCore.setContext)) {
+            window.FarmCore.setContext("currentModule", nextModule);
+            window.FarmCore.setContext("previousModule", prevModule);
+        }
         applyShellBackground(nextModule);
         setTopNav(nextModule);
         deactivateModule(prevModule);

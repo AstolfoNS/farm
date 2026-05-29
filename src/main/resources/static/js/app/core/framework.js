@@ -38,6 +38,37 @@
         return true;
     }
 
+    function registerSetActiveModule(name, moduleApi, options) {
+        var moduleName = normalizeModuleName(name);
+        var api = moduleApi || {};
+        if (!moduleName || !$.isFunction(api.setActive)) {
+            return false;
+        }
+        var opts = options || {};
+        var handlers = {
+            activate: function () {
+                api.setActive(true);
+            },
+            deactivate: function () {
+                api.setActive(false);
+            }
+        };
+        var refreshMethod = safeString(opts.refreshMethod).trim();
+        if (refreshMethod && $.isFunction(api[refreshMethod])) {
+            handlers.refresh = function () {
+                api[refreshMethod]();
+            };
+        } else if ($.isFunction(opts.refresh)) {
+            handlers.refresh = function () {
+                opts.refresh(api);
+            };
+        }
+        if (opts.handlers) {
+            handlers = $.extend({}, handlers, opts.handlers);
+        }
+        return registerModule(moduleName, handlers);
+    }
+
     function getModule(name) {
         return moduleRegistry[normalizeModuleName(name)] || null;
     }
@@ -139,6 +170,7 @@
         boot: boot,
         log: log,
         registerModule: registerModule,
+        registerSetActiveModule: registerSetActiveModule,
         getModule: getModule,
         listModules: listModules,
         activateModule: activateModule,

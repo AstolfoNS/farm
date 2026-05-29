@@ -834,4 +834,7 @@
     };
 
     window.FarmSeedAdminModule = FarmSeedAdminModule;
+    if (window.FarmCore && $.isFunction(window.FarmCore.registerSetActiveModule)) {
+        window.FarmCore.registerSetActiveModule("seed-admin", FarmSeedAdminModule, {refreshMethod: "refresh"});
+    }
 })(window, window.jQuery);

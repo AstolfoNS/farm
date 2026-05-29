@@ -143,4 +143,7 @@
     FarmStoreModule.setActive = setActive;
     FarmStoreModule.reload = reload;
     window.FarmStoreModule = FarmStoreModule;
+    if (window.FarmCore && $.isFunction(window.FarmCore.registerSetActiveModule)) {
+        window.FarmCore.registerSetActiveModule("store", FarmStoreModule, {refreshMethod: "reload"});
+    }
 })(window, window.jQuery);
