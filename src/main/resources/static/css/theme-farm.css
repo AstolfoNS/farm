@@ -22,7 +22,7 @@
 
 .farm-topbar {
     height: var(--farm-topbar-height);
-    background-image: url("/resources/imgs/ui/home/topbar-bg.png");
+    background-image: url("/resources/imgs/app/shell/topbar-bg.png");
     background-repeat: repeat-x;
     background-size: auto var(--farm-topbar-height);
     display: flex;
@@ -41,7 +41,7 @@
     right: 0;
     bottom: -1px;
     height: 5px;
-    background-image: url("/resources/imgs/ui/home/topbar-line.png");
+    background-image: url("/resources/imgs/app/shell/topbar-line.png");
     background-repeat: repeat-x;
     background-size: auto 5px;
     pointer-events: none;
@@ -226,7 +226,7 @@
 
 .farm-bottombar {
     height: var(--farm-bottombar-height);
-    background-image: url("/resources/imgs/ui/home/bottom.png");
+    background-image: url("/resources/imgs/app/shell/bottom.png");
     background-repeat: repeat-x;
     background-size: auto var(--farm-bottombar-height);
     border-top: 1px solid #3e9a35;

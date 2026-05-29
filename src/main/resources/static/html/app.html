@@ -42,7 +42,7 @@
 <div id="appShell" class="app-shell is-homepage">
     <header class="farm-topbar">
         <div class="topbar-user">
-            <img id="topUserAvatar" class="topbar-user-avatar" src="/resources/imgs/ui/user/default-avatar.png" alt="avatar">
+            <img id="topUserAvatar" class="topbar-user-avatar" src="/resources/imgs/app/user/default-avatar.png" alt="avatar">
             <div class="topbar-user-meta">
                 <div id="topUserName" class="topbar-user-name">未知用户</div>
                 <div class="topbar-user-stats">
@@ -63,35 +63,35 @@
         </div>
         <nav class="topbar-nav">
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="user-manage" title="用户管理">
-                <img src="/resources/imgs/ui/menu/menu-user-manage.png" alt="用户管理">
+                <img src="/resources/imgs/app/menu/menu-user-manage.png" alt="用户管理">
                 <span class="topbar-nav-text">用户管理</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="user-select" title="用户选择">
-                <img src="/resources/imgs/ui/menu/menu-user-select.png" alt="用户选择">
+                <img src="/resources/imgs/app/menu/menu-user-select.png" alt="用户选择">
                 <span class="topbar-nav-text">用户选择</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="farm" title="农场">
-                <img src="/resources/imgs/ui/menu/menu-farm.png" alt="农场">
+                <img src="/resources/imgs/app/menu/menu-farm.png" alt="农场">
                 <span class="topbar-nav-text">农场</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="plot-admin" title="地块管理">
-                <img src="/resources/imgs/ui/menu/land-manage.png" alt="地块管理">
+                <img src="/resources/imgs/app/menu/land-manage.png" alt="地块管理">
                 <span class="topbar-nav-text">地块管理</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="shop" title="种子商店">
-                <img src="/resources/imgs/ui/menu/menu-shop.png" alt="种子商店">
+                <img src="/resources/imgs/app/menu/menu-shop.png" alt="种子商店">
                 <span class="topbar-nav-text">种子商店</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="store" title="仓库">
-                <img src="/resources/imgs/ui/menu/menu-store.png" alt="仓库">
+                <img src="/resources/imgs/app/menu/menu-store.png" alt="仓库">
                 <span class="topbar-nav-text">仓库</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="seed-admin" title="种子管理">
-                <img src="/resources/imgs/ui/menu/menu-seed-admin.png" alt="种子管理">
+                <img src="/resources/imgs/app/menu/menu-seed-admin.png" alt="种子管理">
                 <span class="topbar-nav-text">种子管理</span>
             </a>
             <a href="javascript:void(0)" class="topbar-nav-item" data-module="settings" title="系统设置">
-                <img src="/resources/imgs/ui/menu/menu-system.png" alt="系统设置">
+                <img src="/resources/imgs/app/menu/menu-system.png" alt="系统设置">
                 <span class="topbar-nav-text">系统设置</span>
             </a>
         </nav>
@@ -102,7 +102,7 @@
             <div id="farmMetaBar" class="farm-meta-bar">
                 <div class="farm-meta-item">地块: <span data-key="unlocked">0</span>/<span data-key="total">0</span></div>
                 <div class="farm-meta-item">占用: <span data-key="occupied">0</span></div>
-                <div class="farm-meta-item">可收获: <span data-key="harvestable">0</span></div>
+                <div class="farm-meta-item">可收�? <span data-key="harvestable">0</span></div>
                 <div class="farm-meta-right">
                     <span id="farmWsStatus" class="farm-ws-status is-idle">WS: IDLE</span>
                     <label class="farm-fallback-switch">
@@ -125,8 +125,8 @@
                     <span>铲除</span>
                 </a>
                 <a href="javascript:void(0)" class="farm-tool-btn" data-tool="care">
-                    <img src="/resources/imgs/domain/farm/actions/action-clean-bug.png" alt="杀虫">
-                    <span>杀虫</span>
+                    <img src="/resources/imgs/domain/farm/actions/action-clean-bug.png" alt="杀�?>
+                    <span>杀�?/span>
                 </a>
                 <div id="farmToolHint" class="farm-tool-hint">当前工具：查看（点击地块打开操作窗）</div>
             </div>
@@ -138,7 +138,7 @@
                 <div class="shop-board-title">种子仓库</div>
                 <div class="shop-overview-strip">
                     <span class="shop-overview-item">金币 <em id="shopCurrentCoin">0</em></span>
-                    <span class="shop-overview-item">可售总值 <em id="shopSellableValue">0</em></span>
+                    <span class="shop-overview-item">可售总�?<em id="shopSellableValue">0</em></span>
                     <span class="shop-overview-item">果实总数 <em id="shopSellableFruitCount">0</em></span>
                     <span class="shop-overview-item">可买种类 <em id="shopPurchasableTypeCount">0</em></span>
                 </div>
@@ -171,7 +171,7 @@
             <div class="home-panel-title">用户管理</div>
             <div class="home-panel-body user-admin-body">
                 <div id="userAdminToolbar" class="user-admin-toolbar">
-                    <label class="user-admin-toolbar-label" for="userAdminName">用户名:</label>
+                    <label class="user-admin-toolbar-label" for="userAdminName">用户�?</label>
                     <input id="userAdminName" class="easyui-textbox" style="width:180px">
                     <a id="userAdminSearchBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
                     <a id="userAdminAddBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">添加</a>
@@ -196,7 +196,7 @@
                     <input id="userAvatarFile" name="file" type="file" accept="image/*" style="width:272px">
                 </form>
                 <div class="user-avatar-upload-actions">
-                    <a id="userAvatarUploadBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">开始上传</a>
+                    <a id="userAvatarUploadBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">开始上�?/a>
                     <a id="userAvatarCloseBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">关闭窗口</a>
                 </div>
             </div>
@@ -219,7 +219,7 @@
                     </div>
                 </div>
                 <div class="home-form-tip user-select-tip-row">
-                    <span class="home-form-tip-text">请在下拉框中选择用户昵称，并点击“确认”按钮设定当前用户信息。</span>
+                    <span class="home-form-tip-text">请在下拉框中选择用户昵称，并点击“确认”按钮设定当前用户信息�?/span>
                     <a id="homeConfirmUserBtn" href="javascript:void(0)" class="easyui-linkbutton c1">确认</a>
                 </div>
             </div>
@@ -249,7 +249,7 @@
         <section id="plotAdminPanel" class="home-panel plot-admin-panel">
             <div class="home-panel-title">地块管理</div>
             <div class="home-panel-body">
-                <div class="plot-admin-tip">地块管理模块将在下一阶段接入：地块类型、默认分配策略、用户地块分配与批量应用。</div>
+                <div class="plot-admin-tip">地块管理模块将在下一阶段接入：地块类型、默认分配策略、用户地块分配与批量应用�?/div>
             </div>
         </section>
 
@@ -272,7 +272,7 @@
                 <div class="seed-admin-grid-title farm-admin-grid-title">成长阶段清单</div>
                 <div class="seed-admin-grid-panel seed-admin-grid-panel-bottom farm-admin-grid-panel">
                     <div id="seedAdminStageToolbar" class="seed-admin-stage-toolbar farm-admin-stage-toolbar">
-                        <span id="seedAdminStageHint" class="seed-admin-stage-hint">请先在上方选择一个种子，再进行阶段管理。</span>
+                        <span id="seedAdminStageHint" class="seed-admin-stage-hint">请先在上方选择一个种子，再进行阶段管理�?/span>
                         <a id="seedAdminStageAddBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">新增阶段</a>
                         <a id="seedAdminStageEditBtn" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑阶段</a>
                         <a id="seedAdminStageDeleteBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除阶段</a>
@@ -313,26 +313,26 @@
                         <td>收获经验</td>
                         <td><input name="harvestExperience" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
                         <td>收获积分</td>
-                        <td><input name="harvestScore" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">分</span></td>
+                        <td><input name="harvestScore" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">�?/span></td>
                     </tr>
                     <tr>
                         <td>果实数量</td>
-                        <td><input name="harvestFruitNumber" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">个果实</span></td>
+                        <td><input name="harvestFruitNumber" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">个果�?/span></td>
                         <td>虫害损失</td>
                         <td><input name="fruitLossPerBug" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
                     </tr>
                     <tr>
                         <td>虫子上限</td>
                         <td><input name="maxBugLimit" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
-                        <td>最大收获次数</td>
+                        <td>最大收获次�?/td>
                         <td><input name="maxHarvestCount" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
                     </tr>
                     <tr>
-                        <td>封面图</td>
+                        <td>封面�?/td>
                         <td colspan="3">
                             <input id="seedTypeCoverImageUrl" name="coverImageUrl" class="easyui-textbox" style="width:540px">
                             <a id="seedTypeUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
-                            <img id="seedTypeCoverPreview" class="seed-admin-cover-preview" src="/resources/imgs/ui/home/watermark.png" alt="封面预览">
+                            <img id="seedTypeCoverPreview" class="seed-admin-cover-preview" src="/resources/imgs/app/shell/watermark.png" alt="封面预览">
                         </td>
                     </tr>
                     <tr>
@@ -361,8 +361,8 @@
                         <td><input id="seedStageGrowthStageId" name="growthStageId" class="easyui-combobox" style="width:220px" required="true"></td>
                     </tr>
                     <tr>
-                        <td>成长时长(秒)</td>
-                        <td><input name="durationSeconds" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">秒</span></td>
+                        <td>成长时长(�?</td>
+                        <td><input name="durationSeconds" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">�?/span></td>
                         <td>虫害概率(0~1)</td>
                         <td><input name="bugProbability" class="easyui-numberbox" data-options="min:0,max:1,precision:4" style="width:220px"></td>
                     </tr>
@@ -392,7 +392,7 @@
                                 <div class="seed-stage-reference-land"></div>
                                 <img id="seedStagePreviewImage" class="seed-stage-preview-image" src="" alt="">
                             </div>
-                            <a id="seedStagePositionEditorBtn" href="javascript:void(0)" class="easyui-linkbutton c1">定位编辑器</a>
+                            <a id="seedStagePositionEditorBtn" href="javascript:void(0)" class="easyui-linkbutton c1">定位编辑�?/a>
                         </td>
                     </tr>
                 </table>
@@ -404,7 +404,7 @@
             </div>
         </div>
 
-        <div id="seedStagePositionDialog" class="easyui-dialog seed-admin-dialog farm-dialog-shell" title="定位编辑器"
+        <div id="seedStagePositionDialog" class="easyui-dialog seed-admin-dialog farm-dialog-shell" title="定位编辑�?
              style="width:360px;height:520px;padding:8px" closed="true" modal="true" resizable="false">
             <div id="seedStagePositionCanvas" class="seed-stage-position-canvas">
                 <div class="seed-stage-reference-land seed-stage-reference-land-canvas"></div>
@@ -422,7 +422,7 @@
                 <div class="settings-row">
                     <label class="settings-label">游戏音效</label>
                     <input id="settingEffectEnable" type="checkbox" checked="checked">
-                    <span id="settingEffectText" class="settings-value">开启</span>
+                    <span id="settingEffectText" class="settings-value">开�?/span>
                 </div>
                 <div class="settings-row">
                     <label class="settings-label">音效音量</label>
@@ -442,7 +442,7 @@
                 <div class="home-form-actions settings-actions">
                     <a id="settingApplyBtn" href="javascript:void(0)" class="easyui-linkbutton c1">应用设置</a>
                 </div>
-                <div class="home-form-tip">说明：背景音乐默认未绑定独立曲目，后续补充资源后会自动生效。</div>
+                <div class="home-form-tip">说明：背景音乐默认未绑定独立曲目，后续补充资源后会自动生效�?/div>
             </div>
         </section>
     </main>

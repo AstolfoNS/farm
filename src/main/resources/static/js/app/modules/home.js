@@ -58,7 +58,7 @@
 
     function resolveHead(user) {
         var head = user && user.head ? String(user.head).trim() : "";
-        return head.length > 0 ? head : farmResolveImg("ui/user/default-avatar.png");
+        return head.length > 0 ? head : farmResolveImg("app/user/default-avatar.png");
     }
 
     function renderTopUser(user) {
@@ -136,9 +136,9 @@
         var exp = asNumber(row && row.experience, 0);
         var coin = asNumber(row && row.coin, 0);
         var score = asNumber(row && row.score, 0);
-        var expIcon = farmResolveImg("ui/user/stat-exp.png");
-        var coinIcon = farmResolveImg("ui/user/stat-gold.png");
-        var scoreIcon = farmResolveImg("ui/user/stat-score.png");
+        var expIcon = farmResolveImg("app/user/stat-exp.png");
+        var coinIcon = farmResolveImg("app/user/stat-gold.png");
+        var scoreIcon = farmResolveImg("app/user/stat-score.png");
         return "<div class='user-select-option'>" +
             "<span class='user-select-col user-select-col-avatar'><img class='user-select-option-avatar' src='" + escapeHtml(resolveHead(row)) + "' alt=''></span>" +
             "<span class='user-select-col user-select-col-username'>" + escapeHtml(username) + "</span>" +
@@ -422,7 +422,7 @@
         }
         $.messager.show({
             title: "提示",
-            msg: "模块 " + moduleName + " 正在重构中。",
+            msg: "模块 " + moduleName + " 正在重构中�?,
             timeout: motion().actionFeedbackMs,
             showType: "slide"
         });

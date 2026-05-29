@@ -24,8 +24,8 @@ body {
     --farm-color-border-strong: #00df0d;
     --farm-color-border-soft: rgba(122, 224, 96, 0.75);
     --farm-panel-shadow: 0 0 0 2px rgba(0, 60, 0, 0.62) inset, 0 9px 18px rgba(0, 0, 0, 0.45);
-    --farm-shell-bg-home: url("/resources/imgs/ui/home/watermark.png");
-    --farm-shell-bg-subpage: url("/resources/imgs/ui/home/background.png");
+    --farm-shell-bg-home: url("/resources/imgs/app/shell/watermark.png");
+    --farm-shell-bg-subpage: url("/resources/imgs/app/shell/background.png");
 }
 
 * {
