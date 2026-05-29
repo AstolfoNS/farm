@@ -54,6 +54,9 @@
     }
 
     function listFromPageData(data) {
+        if (window.FarmGrid && $.isFunction(window.FarmGrid.listFromPageData)) {
+            return window.FarmGrid.listFromPageData(data);
+        }
         if (!data) {
             return [];
         }
@@ -131,17 +134,33 @@
     }
 
     function initTypeGrid() {
-        $("#seedAdminTypeGrid").datagrid({
-            fit: true,
-            fitColumns: true,
-            striped: true,
-            rownumbers: true,
-            singleSelect: true,
+        var loader = (window.FarmGrid && $.isFunction(window.FarmGrid.buildRemoteLoader))
+            ? window.FarmGrid.buildRemoteLoader({
+                request: function (param, onSuccess, onError) {
+                    FarmApi.seedTypePage(buildSeedTypePagePayload(param), onSuccess, onError);
+                },
+                resolve: function (res) {
+                    if (!boolOk(res) || !res.data) {
+                        return {total: 0, rows: []};
+                    }
+                    var rows = listFromPageData(res.data);
+                    return {
+                        total: asNumber(res.data.total, rows.length),
+                        rows: rows
+                    };
+                },
+                onRows: function (rows) {
+                    state.seedRows = rows;
+                }
+            })
+            : null;
+
+        var options = {
             pagination: true,
             pageSize: 8,
             pageList: [8, 12, 20],
             idField: "id",
-            loader: function (param, success, error) {
+            loader: loader || function (param, success, error) {
                 FarmApi.seedTypePage(buildSeedTypePagePayload(param), function (res) {
                     if (!boolOk(res) || !res.data) {
                         success({total: 0, rows: []});
@@ -187,8 +206,8 @@
                 openSeedTypeEditor("edit");
             },
             onLoadSuccess: function () {
-                $("#seedAdminPanel .seed-admin-stage-open").off("click").on("click", function () {
-                    var index = asNumber($(this).attr("data-index"), -1);
+                var clickHandler = function ($trigger) {
+                    var index = asNumber($trigger.attr("data-index"), -1);
                     if (index < 0) {
                         return;
                     }
@@ -198,20 +217,54 @@
                         return;
                     }
                     selectSeedType(row);
+                };
+
+                if (window.FarmGrid && $.isFunction(window.FarmGrid.bindAction)) {
+                    window.FarmGrid.bindAction("#seedAdminPanel", ".seed-admin-stage-open", clickHandler);
+                    return;
+                }
+                $("#seedAdminPanel .seed-admin-stage-open").off("click").on("click", function () {
+                    clickHandler($(this));
                 });
             }
-        });
+        };
+
+        if (window.FarmGrid && $.isFunction(window.FarmGrid.init)) {
+            window.FarmGrid.init("#seedAdminTypeGrid", options);
+            return;
+        }
+        $("#seedAdminTypeGrid").datagrid(options);
     }
 
     function initStageGrid() {
-        $("#seedAdminStageGrid").datagrid({
-            fit: true,
-            fitColumns: true,
-            striped: true,
-            rownumbers: true,
-            singleSelect: true,
+        var loader = (window.FarmGrid && $.isFunction(window.FarmGrid.buildRemoteLoader))
+            ? window.FarmGrid.buildRemoteLoader({
+                request: function (param, onSuccess, onError) {
+                    if (state.currentSeedId <= 0) {
+                        onSuccess({code: 200, data: {records: [], total: 0}});
+                        return;
+                    }
+                    FarmApi.seedStagePage({seedTypeId: state.currentSeedId}, onSuccess, onError);
+                },
+                resolve: function (res) {
+                    if (!boolOk(res) || !res.data) {
+                        return {total: 0, rows: []};
+                    }
+                    var rows = listFromPageData(res.data);
+                    return {
+                        total: asNumber(res.data.total, rows.length),
+                        rows: rows
+                    };
+                },
+                onRows: function (rows) {
+                    state.stageRows = rows;
+                }
+            })
+            : null;
+
+        var options = {
             idField: "id",
-            loader: function (param, success, error) {
+            loader: loader || function (param, success, error) {
                 if (state.currentSeedId <= 0) {
                     state.stageRows = [];
                     success({total: 0, rows: []});
@@ -253,10 +306,20 @@
             onDblClickRow: function () {
                 openSeedStageEditor("edit");
             }
-        });
+        };
+
+        if (window.FarmGrid && $.isFunction(window.FarmGrid.init)) {
+            window.FarmGrid.init("#seedAdminStageGrid", options);
+            return;
+        }
+        $("#seedAdminStageGrid").datagrid(options);
     }
 
     function refreshTypeGrid(toFirstPage) {
+        if (window.FarmGrid && $.isFunction(window.FarmGrid.reload)) {
+            window.FarmGrid.reload("#seedAdminTypeGrid", toFirstPage);
+            return;
+        }
         if (toFirstPage) {
             $("#seedAdminTypeGrid").datagrid("load", {page: 1});
             return;
@@ -265,6 +328,10 @@
     }
 
     function refreshStageGrid() {
+        if (window.FarmGrid && $.isFunction(window.FarmGrid.reload)) {
+            window.FarmGrid.reload("#seedAdminStageGrid", false);
+            return;
+        }
         $("#seedAdminStageGrid").datagrid("reload");
     }
 

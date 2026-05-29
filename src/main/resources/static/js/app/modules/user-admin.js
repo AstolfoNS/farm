@@ -121,6 +121,10 @@
             return;
         }
         state.editIndex = -1;
+        if (window.FarmGrid && $.isFunction(window.FarmGrid.reload)) {
+            window.FarmGrid.reload("#userAdminGrid", false);
+            return;
+        }
         $("#userAdminGrid").datagrid("reload");
     }
 
@@ -321,19 +325,38 @@
         if (state.initialized) {
             return;
         }
-        $("#userAdminGrid").datagrid({
+        var loader = (window.FarmGrid && $.isFunction(window.FarmGrid.buildRemoteLoader))
+            ? window.FarmGrid.buildRemoteLoader({
+                request: function (param, onSuccess, onError) {
+                    FarmApi.userAdminPage(pagePayload(param), onSuccess, onError);
+                },
+                resolve: function (res) {
+                    if (!FarmApi.isOk(res) || !res.data) {
+                        return {total: 0, rows: []};
+                    }
+                    var pageRows = [];
+                    if ($.isArray(res.data.records)) {
+                        pageRows = res.data.records;
+                    } else if ($.isArray(res.data.rows)) {
+                        pageRows = res.data.rows;
+                    }
+                    return {
+                        total: asNumber(res.data.total, 0),
+                        rows: pageRows
+                    };
+                }
+            })
+            : null;
+
+        var options = {
             fit: false,
             width: "100%",
             height: 422,
-            fitColumns: true,
-            striped: true,
-            rownumbers: true,
-            singleSelect: true,
             pagination: true,
             pageSize: 5,
             pageList: [5, 10, 20],
             idField: "id",
-            loader: function (param, success, error) {
+            loader: loader || function (param, success, error) {
                 FarmApi.userAdminPage(pagePayload(param), function (res) {
                     if (!FarmApi.isOk(res) || !res.data) {
                         success({total: 0, rows: []});
@@ -438,7 +461,12 @@
             onLoadSuccess: function () {
                 state.editIndex = -1;
             }
-        });
+        };
+        if (window.FarmGrid && $.isFunction(window.FarmGrid.init)) {
+            window.FarmGrid.init("#userAdminGrid", options);
+        } else {
+            $("#userAdminGrid").datagrid(options);
+        }
         state.initialized = true;
     }
 
