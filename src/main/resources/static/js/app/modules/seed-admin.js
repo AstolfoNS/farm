@@ -413,6 +413,24 @@
         $("#seedStageEditorForm input[name='offsetY']").numberbox("setValue", parseInt($image.css("top"), 10) || 0);
     }
 
+    function bindStageGeometrySyncEvents() {
+        $.each(["width", "height", "offsetX", "offsetY"], function (_, name) {
+            var $field = $("#seedStageEditorForm input[name='" + name + "']");
+            try {
+                var $textbox = $field.numberbox("textbox");
+                if (!$textbox || $textbox.length <= 0) {
+                    return;
+                }
+                $textbox.off(".stageSync").on("input.stageSync blur.stageSync keyup.stageSync", function () {
+                    syncPreviewGeometryFromForm();
+                    if ($("#seedStagePositionDialog").dialog("options").closed === false) {
+                        syncPositionImageFromForm();
+                    }
+                });
+            } catch (ignoreBindError) {}
+        });
+    }
+
     function fillSeedTypeForm(row) {
         $("#seedTypeEditorForm").form("clear");
         $("#seedTypeEditorForm input[name='id']").val(0);
@@ -573,10 +591,12 @@
             }
             fillSeedStageForm(row);
             $("#seedStageEditorDialog").dialog("setTitle", "编辑成长阶段").dialog("open");
+            bindStageGeometrySyncEvents();
             return;
         }
         fillSeedStageForm(null);
         $("#seedStageEditorDialog").dialog("setTitle", "新增成长阶段").dialog("open");
+        bindStageGeometrySyncEvents();
     }
 
     function saveSeedStage() {
@@ -785,15 +805,7 @@
             previewImageFromUrl(val);
         });
 
-        $.each(["width", "height", "offsetX", "offsetY"], function (_, name) {
-            var $field = $("#seedStageEditorForm input[name='" + name + "']");
-            $field.numberbox("textbox").on("input blur keyup", function () {
-                syncPreviewGeometryFromForm();
-                if ($("#seedStagePositionDialog").dialog("options").closed === false) {
-                    syncPositionImageFromForm();
-                }
-            });
-        });
+        window.setTimeout(bindStageGeometrySyncEvents, 0);
     }
 
     function initComboboxes() {
@@ -843,11 +855,19 @@
     function setActive(flag) {
         state.active = !!flag;
         if (!state.bound) {
-            bindEvents();
+            try {
+                bindEvents();
+            } catch (bindError) {
+                window.__seedAdminInitError = "bindEvents: " + (bindError && bindError.message ? bindError.message : bindError);
+            }
             state.bound = true;
         }
         if (!state.initialized) {
-            init();
+            try {
+                init();
+            } catch (initError) {
+                window.__seedAdminInitError = "init: " + (initError && initError.message ? initError.message : initError);
+            }
         }
 
         if (state.active) {
