@@ -177,7 +177,7 @@
     transform: translateX(-50%);
     pointer-events: none;
     opacity: 0.96;
-    background: url("/resources/imgs/domain/farm/components/soil-land.png") center bottom / contain no-repeat;
+    background: url("/resources/imgs/domain/seed/preview/positioning-land.png") center bottom / contain no-repeat;
     z-index: 1;
 }
 
