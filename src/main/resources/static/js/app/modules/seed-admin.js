@@ -428,13 +428,30 @@
     }
 
     function previewImageFromUrl(assetUrl) {
-        var src = $.trim(assetUrl || "");
+        var src = normalizeAssetUrl(assetUrl);
         if (!src) {
             $("#seedStagePreviewImage").attr("src", "");
             return;
         }
         $("#seedStagePreviewImage").attr("src", src);
         syncPreviewGeometryFromForm();
+    }
+
+    function normalizeAssetUrl(value) {
+        var raw = $.trim(value || "");
+        if (!raw) {
+            return "";
+        }
+        if (/^(https?:)?\/\//i.test(raw) || /^data:/i.test(raw) || /^blob:/i.test(raw)) {
+            return raw;
+        }
+        if (raw.charAt(0) === "/") {
+            return raw;
+        }
+        if (raw.indexOf("resources/") === 0 || raw.indexOf("oss/") === 0) {
+            return "/" + raw;
+        }
+        return "/oss/" + raw.replace(/^\/+/, "");
     }
 
     function setStageNumberValue(fieldName, value) {
@@ -736,6 +753,8 @@
             alertMessage("请先完善阶段信息");
             return;
         }
+        var normalizedAssetUrl = normalizeAssetUrl(getTextboxValue($("#seedStageAssetUrl"), ""));
+        setTextboxValue($("#seedStageAssetUrl"), normalizedAssetUrl);
         var payload = {
             id: asNumber($("#seedStageEditorForm input[name='id']").val(), 0) || null,
             seedTypeId: state.currentSeedId,
@@ -747,7 +766,7 @@
             height: getStageNumberValue("height", 120),
             offsetX: getStageNumberValue("offsetX", 50),
             offsetY: getStageNumberValue("offsetY", 40),
-            assetUrl: getTextboxValue($("#seedStageAssetUrl"), "")
+            assetUrl: normalizedAssetUrl
         };
         FarmApi.seedStageSave(payload, function (res) {
             if (!boolOk(res)) {
@@ -811,13 +830,14 @@
                     alertMessage((res && res.msg) || "上传失败");
                     return;
                 }
-                var url = $.trim(res.data.accessUrl || "");
+                var url = $.trim(res.data.accessUrl || res.data.path || "");
                 if (!url) {
                     var rel = $.trim(res.data.relativePath || "");
                     if (rel) {
                         url = "/oss/" + rel.replace(/^\/+/, "");
                     }
                 }
+                url = normalizeAssetUrl(url);
                 if (!url) {
                     alertMessage("上传成功但未返回访问地址，请稍后重试");
                     return;
@@ -837,11 +857,12 @@
     }
 
     function openPositionEditor() {
-        var assetUrl = getTextboxValue($("#seedStageAssetUrl"), "");
+        var assetUrl = normalizeAssetUrl(getTextboxValue($("#seedStageAssetUrl"), ""));
         if (!$.trim(assetUrl)) {
             alertMessage("请先上传或填写阶段资源图片URL");
             return;
         }
+        setTextboxValue($("#seedStageAssetUrl"), assetUrl);
         var $image = $("#seedStagePositionImage");
         $image.attr("src", assetUrl);
         syncPositionImageFromForm();
@@ -956,8 +977,9 @@
         });
         $("#seedStageImageFile").off("change.seedAdmin").on("change.seedAdmin", function () {
             uploadFile($("#seedStageImageFile"), "seed-stage", function (url) {
-                setTextboxValue($("#seedStageAssetUrl"), url);
-                previewImageFromUrl(url);
+                var normalized = normalizeAssetUrl(url);
+                setTextboxValue($("#seedStageAssetUrl"), normalized);
+                previewImageFromUrl(normalized);
             });
         });
 
@@ -967,10 +989,15 @@
             $("#seedStagePositionDialog").dialog("close");
         });
 
-        $("#seedStageAssetUrl").textbox("textbox").off("change.seedAdmin").on("change.seedAdmin", function () {
-            var val = getTextboxValue($("#seedStageAssetUrl"), "");
-            previewImageFromUrl(val);
-        });
+        $("#seedStageAssetUrl").textbox("textbox")
+            .off(".seedAdminAssetUrl")
+            .on("change.seedAdminAssetUrl blur.seedAdminAssetUrl input.seedAdminAssetUrl", function () {
+                var val = normalizeAssetUrl(getTextboxValue($("#seedStageAssetUrl"), ""));
+                if (val) {
+                    setTextboxValue($("#seedStageAssetUrl"), val);
+                }
+                previewImageFromUrl(val);
+            });
         $("#seedTypeCoverImageUrl").textbox("textbox").off("change.seedAdmin").on("change.seedAdmin", function () {
             previewSeedTypeCover(getTextboxValue($("#seedTypeCoverImageUrl"), ""));
         });
