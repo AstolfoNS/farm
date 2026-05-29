@@ -133,6 +133,30 @@
         return "<img class='seed-admin-cover-thumb' src='" + escapeHtml(src) + "' alt='cover'>";
     }
 
+    function setLinkButtonEnabled(selector, enabled) {
+        try {
+            $(selector).linkbutton(enabled ? "enable" : "disable");
+        } catch (ignoreLinkbuttonError) {}
+    }
+
+    function syncActionButtons() {
+        var hasSeed = state.currentSeedId > 0;
+        var hasStage = hasSeed && state.currentStageId > 0;
+        setLinkButtonEnabled("#seedAdminEditBtn", hasSeed);
+        setLinkButtonEnabled("#seedAdminDeleteBtn", hasSeed);
+        setLinkButtonEnabled("#seedAdminStageAddBtn", hasSeed);
+        setLinkButtonEnabled("#seedAdminStageEditBtn", hasStage);
+        setLinkButtonEnabled("#seedAdminStageDeleteBtn", hasStage);
+    }
+
+    function previewSeedTypeCover(url) {
+        var src = $.trim(url || "");
+        if (!src) {
+            src = farmResolveImg("ui/home/watermark.png");
+        }
+        $("#seedTypeCoverPreview").attr("src", src);
+    }
+
     function initTypeGrid() {
         var loader = (window.FarmGrid && $.isFunction(window.FarmGrid.buildRemoteLoader))
             ? window.FarmGrid.buildRemoteLoader({
@@ -206,6 +230,27 @@
                 openSeedTypeEditor("edit");
             },
             onLoadSuccess: function () {
+                var rows = $("#seedAdminTypeGrid").datagrid("getRows") || [];
+                if (rows.length <= 0) {
+                    state.currentSeedId = 0;
+                    state.currentSeedName = "";
+                    state.currentStageId = 0;
+                    $("#seedAdminStageHint").text("请先在上方选择一个种子，再进行阶段管理。");
+                    syncActionButtons();
+                } else {
+                    var selectedIndex = 0;
+                    if (state.currentSeedId > 0) {
+                        $.each(rows, function (i, row) {
+                            if (asNumber(row && row.id, 0) === state.currentSeedId) {
+                                selectedIndex = i;
+                                return false;
+                            }
+                            return true;
+                        });
+                    }
+                    $("#seedAdminTypeGrid").datagrid("selectRow", selectedIndex);
+                }
+
                 var clickHandler = function ($trigger) {
                     var index = asNumber($trigger.attr("data-index"), -1);
                     if (index < 0) {
@@ -302,9 +347,29 @@
             ]],
             onSelect: function (index, row) {
                 state.currentStageId = asNumber(row && row.id, 0);
+                syncActionButtons();
             },
             onDblClickRow: function () {
                 openSeedStageEditor("edit");
+            },
+            onLoadSuccess: function () {
+                var rows = $("#seedAdminStageGrid").datagrid("getRows") || [];
+                if (rows.length <= 0) {
+                    state.currentStageId = 0;
+                    syncActionButtons();
+                    return;
+                }
+                var selectedIndex = 0;
+                if (state.currentStageId > 0) {
+                    $.each(rows, function (i, row) {
+                        if (asNumber(row && row.id, 0) === state.currentStageId) {
+                            selectedIndex = i;
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+                $("#seedAdminStageGrid").datagrid("selectRow", selectedIndex);
             }
         };
 
@@ -341,10 +406,12 @@
         state.currentStageId = 0;
         if (state.currentSeedId <= 0) {
             $("#seedAdminStageHint").text("请先在上方选择一个种子，再进行阶段管理。");
+            syncActionButtons();
             refreshStageGrid();
             return;
         }
         $("#seedAdminStageHint").text("当前种子: " + state.currentSeedName + " (ID: " + state.currentSeedId + ")");
+        syncActionButtons();
         refreshStageGrid();
     }
 
@@ -436,6 +503,7 @@
         $("#seedTypeEditorForm input[name='id']").val(0);
         $("#seedTypeQualityId").combobox("setValue", "");
         $("#seedTypeSoilIds").combobox("clear");
+        previewSeedTypeCover("");
         if (!row) {
             if (state.seedQualityOptions.length > 0) {
                 $("#seedTypeQualityId").combobox("setValue", state.seedQualityOptions[0].id);
@@ -461,6 +529,7 @@
         $("#seedTypeEditorForm input[name='id']").val(asNumber(row.id, 0));
         $("#seedTypeQualityId").combobox("setValue", asNumber(row.seedQualityId, 0));
         $("#seedTypeSoilIds").combobox("setValues", soilIdsByBits(row.enableSoilTypeBits));
+        previewSeedTypeCover(row.coverImageUrl || "");
     }
 
     function openSeedTypeEditor(mode) {
@@ -743,77 +812,102 @@
         }
     }
 
+    function tryBindEventsWithRetry(attempt, maxAttempts) {
+        var current = asNumber(attempt, 1);
+        var max = asNumber(maxAttempts, 18);
+        try {
+            bindEvents();
+            state.bound = true;
+            return;
+        } catch (bindError) {
+            reportInitError("bindEvents#" + current, bindError);
+        }
+        if (current >= max) {
+            return;
+        }
+        window.setTimeout(function () {
+            if (!state.bound) {
+                tryBindEventsWithRetry(current + 1, max);
+            }
+        }, 80);
+    }
+
     function bindEvents() {
-        $("#seedAdminSearchBtn").on("click", function () {
+        $("#seedAdminSearchBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             refreshTypeGrid(true);
         });
-        $("#seedAdminName").textbox("textbox").on("keydown", function (event) {
+        $("#seedAdminName").textbox("textbox").off("keydown.seedAdmin").on("keydown.seedAdmin", function (event) {
             if (event.keyCode === 13) {
                 refreshTypeGrid(true);
             }
         });
-        $("#seedAdminResetBtn").on("click", function () {
+        $("#seedAdminResetBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedAdminName").textbox("setValue", "");
             refreshTypeGrid(true);
         });
-        $("#seedAdminAddBtn").on("click", function () {
+        $("#seedAdminAddBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             openSeedTypeEditor("add");
         });
-        $("#seedAdminEditBtn").on("click", function () {
+        $("#seedAdminEditBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             openSeedTypeEditor("edit");
         });
-        $("#seedAdminDeleteBtn").on("click", deleteSeedType);
+        $("#seedAdminDeleteBtn").off("click.seedAdmin").on("click.seedAdmin", deleteSeedType);
 
-        $("#seedAdminStageAddBtn").on("click", function () {
+        $("#seedAdminStageAddBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             openSeedStageEditor("add");
         });
-        $("#seedAdminStageEditBtn").on("click", function () {
+        $("#seedAdminStageEditBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             openSeedStageEditor("edit");
         });
-        $("#seedAdminStageDeleteBtn").on("click", deleteSeedStage);
+        $("#seedAdminStageDeleteBtn").off("click.seedAdmin").on("click.seedAdmin", deleteSeedStage);
 
-        $("#seedTypeSaveBtn").on("click", saveSeedType);
-        $("#seedTypeCancelBtn").on("click", function () {
+        $("#seedTypeSaveBtn").off("click.seedAdmin").on("click.seedAdmin", saveSeedType);
+        $("#seedTypeCancelBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedTypeEditorDialog").dialog("close");
         });
-        $("#seedStageSaveBtn").on("click", saveSeedStage);
-        $("#seedStageCancelBtn").on("click", function () {
+        $("#seedStageSaveBtn").off("click.seedAdmin").on("click.seedAdmin", saveSeedStage);
+        $("#seedStageCancelBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedStageEditorDialog").dialog("close");
         });
 
-        $("#seedTypeUploadCoverBtn").on("click", function () {
+        $("#seedTypeUploadCoverBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedTypeCoverFile").val("");
             $("#seedTypeCoverFile").trigger("click");
         });
-        $("#seedTypeCoverFile").on("change", function () {
+        $("#seedTypeCoverFile").off("change.seedAdmin").on("change.seedAdmin", function () {
             uploadFile($("#seedTypeCoverFile"), "seed-cover", function (url) {
                 $("#seedTypeCoverImageUrl").textbox("setValue", url);
+                previewSeedTypeCover(url);
             });
         });
 
-        $("#seedStageUploadImageBtn").on("click", function () {
+        $("#seedStageUploadImageBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedStageImageFile").val("");
             $("#seedStageImageFile").trigger("click");
         });
-        $("#seedStageImageFile").on("change", function () {
+        $("#seedStageImageFile").off("change.seedAdmin").on("change.seedAdmin", function () {
             uploadFile($("#seedStageImageFile"), "seed-stage", function (url) {
                 $("#seedStageAssetUrl").textbox("setValue", url);
                 previewImageFromUrl(url);
             });
         });
 
-        $("#seedStagePositionEditorBtn").on("click", openPositionEditor);
-        $("#seedStagePositionApplyBtn").on("click", applyPositionEditor);
-        $("#seedStagePositionCancelBtn").on("click", function () {
+        $("#seedStagePositionEditorBtn").off("click.seedAdmin").on("click.seedAdmin", openPositionEditor);
+        $("#seedStagePositionApplyBtn").off("click.seedAdmin").on("click.seedAdmin", applyPositionEditor);
+        $("#seedStagePositionCancelBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedStagePositionDialog").dialog("close");
         });
 
-        $("#seedStageAssetUrl").textbox("textbox").on("change", function () {
+        $("#seedStageAssetUrl").textbox("textbox").off("change.seedAdmin").on("change.seedAdmin", function () {
             var val = $("#seedStageAssetUrl").textbox("getValue");
             previewImageFromUrl(val);
         });
+        $("#seedTypeCoverImageUrl").textbox("textbox").off("change.seedAdmin").on("change.seedAdmin", function () {
+            previewSeedTypeCover($("#seedTypeCoverImageUrl").textbox("getValue"));
+        });
 
         window.setTimeout(bindStageGeometrySyncEvents, 0);
+        syncActionButtons();
     }
 
     function initComboboxes() {
@@ -870,23 +964,7 @@
             }
         }
         if (!state.bound) {
-            try {
-                bindEvents();
-                state.bound = true;
-            } catch (bindError) {
-                reportInitError("bindEvents", bindError);
-                window.setTimeout(function () {
-                    if (state.bound) {
-                        return;
-                    }
-                    try {
-                        bindEvents();
-                        state.bound = true;
-                    } catch (retryBindError) {
-                        reportInitError("bindEvents(retry)", retryBindError);
-                    }
-                }, 60);
-            }
+            tryBindEventsWithRetry(1, 18);
         }
         if (!state.initialized) {
             return;

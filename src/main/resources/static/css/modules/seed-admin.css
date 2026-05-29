@@ -83,6 +83,17 @@
     background: transparent;
 }
 
+.seed-admin-cover-preview {
+    width: 52px;
+    height: 52px;
+    margin-left: 10px;
+    vertical-align: middle;
+    object-fit: cover;
+    border: 1px solid rgba(198, 255, 175, 0.92);
+    box-shadow: 0 0 0 1px rgba(3, 90, 3, 0.68) inset;
+    background: rgba(0, 70, 0, 0.62);
+}
+
 .seed-admin-form-table {
     width: 100%;
 }

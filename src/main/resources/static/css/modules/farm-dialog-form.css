@@ -1,24 +1,29 @@
 /* Reusable green form-dialog theme for EasyUI dialog/window forms. */
 .farm-dialog-window.window {
     border: 2px solid #18e118 !important;
-    border-radius: 2px !important;
-    background: #009800 !important;
-    box-shadow: 0 0 0 1px rgba(0, 58, 0, 0.9) inset, 0 8px 14px rgba(0, 0, 0, 0.36) !important;
+    border-radius: 0 !important;
+    background: #008e00 !important;
+    box-shadow: 0 0 0 1px rgba(0, 64, 0, 0.95) inset, 0 10px 16px rgba(0, 0, 0, 0.36) !important;
 }
 
 .farm-dialog-window .window-header {
-    background: #00a800 !important;
-    border-bottom: 1px solid #16dc16 !important;
+    height: 30px;
+    padding: 0 6px;
+    background: linear-gradient(180deg, #18be16 0%, #0b8f08 100%) !important;
+    border-bottom: 1px solid #4aff4a !important;
 }
 
 .farm-dialog-window .panel-title {
     color: #f2ffd8 !important;
     font-weight: 700;
+    font-size: 15px;
+    line-height: 30px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
 }
 
 .farm-dialog-window .window-body {
-    background: #009900 !important;
-    border: 1px solid #0e7a0e !important;
+    background: linear-gradient(180deg, #038f03 0%, #017101 100%) !important;
+    border: 1px solid #0b650b !important;
     color: #efffdd;
 }
 
@@ -31,14 +36,15 @@
 .farm-dialog-form td {
     padding: 6px 8px;
     color: #efffdd;
-    font-size: 15px;
+    font-size: 14px;
     white-space: nowrap;
+    border-bottom: 1px dashed rgba(127, 236, 111, 0.28);
 }
 
 .farm-dialog-form td:nth-child(odd) {
     width: 132px;
     font-weight: 700;
-    color: #f6ffe1;
+    color: #f7ffe8;
 }
 
 .farm-dialog-form td:nth-child(even) {
@@ -51,7 +57,10 @@
     height: 30px !important;
     line-height: 30px !important;
     font-size: 14px;
-    border-radius: 3px !important;
+    border-radius: 0 !important;
+    border: 1px solid #5fce5a !important;
+    background: #f2fff0 !important;
+    color: #154115 !important;
 }
 
 .farm-dialog-unit {
@@ -66,23 +75,25 @@
 .farm-dialog-actions {
     margin-top: 10px;
     padding: 8px 6px 0;
-    border-top: 1px solid #16dc16;
+    border-top: 1px solid #27e327;
     text-align: right;
 }
 
 .farm-dialog-actions .l-btn {
     min-width: 78px;
-    border-radius: 6px !important;
+    height: 30px;
+    border-radius: 0 !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset;
 }
 
 .farm-dialog-actions .l-btn.c2 {
-    border-color: #0d6f0d !important;
-    background: linear-gradient(180deg, #0ba10b, #067806) !important;
+    border: 1px solid #0d690d !important;
+    background: linear-gradient(180deg, #1ab31a, #0f800f) !important;
 }
 
 .farm-dialog-actions .l-btn.c5 {
-    border-color: #9b2f2f !important;
-    background: linear-gradient(180deg, #d04d4d, #aa3131) !important;
+    border: 1px solid #8b2525 !important;
+    background: linear-gradient(180deg, #d34f4f, #a72d2d) !important;
 }
 
 .farm-dialog-shell .seed-stage-preview-box,

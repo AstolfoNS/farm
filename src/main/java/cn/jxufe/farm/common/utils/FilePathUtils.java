@@ -8,7 +8,13 @@ import java.util.UUID;
 
 public final class FilePathUtils {
 
-    private static final List<String> ALLOWED_CATEGORIES = List.of("avatar", "seed-stage", "seed-icon", "other");
+    private static final List<String> ALLOWED_CATEGORIES = List.of(
+            "avatar",
+            "seed-cover",
+            "seed-stage",
+            "seed-icon",
+            "other"
+    );
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
