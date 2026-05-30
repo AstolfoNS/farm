@@ -15,7 +15,11 @@
         growthStageOptions: []
     };
     var DEFAULT_STAGE_ASSET_RAW = "/oss/defaults/seed/seed-stage-default.png";
-    var DEFAULT_STAGE_ASSET_DISPLAY = "/oss/defaults/seed/seed-stage-default.png?v=20260530";
+    var DEFAULT_STAGE_ASSET_DISPLAY = "/oss/defaults/seed/seed-stage-default.png?v=202605301433";
+    var POSITION_CANVAS_DEFAULT_WIDTH = 320;
+    var POSITION_CANVAS_DEFAULT_HEIGHT = 410;
+    var PREVIEW_CANVAS_DEFAULT_WIDTH = 220;
+    var PREVIEW_CANVAS_DEFAULT_HEIGHT = 282;
 
     function motion() {
         if (window.FarmUi && $.isFunction(window.FarmUi.motion)) {
@@ -207,16 +211,16 @@
             },
             columns: [[
                 {field: "id", title: "ID", width: 42, sortable: true},
-                {field: "coverImageUrl", title: "灏侀潰", width: 72, formatter: function (value) { return renderCover(value); }},
+                {field: "coverImageUrl", title: "封面", width: 72, formatter: function (value) { return renderCover(value); }},
                 {field: "name", title: "种子名称", width: 90, sortable: true},
-                {field: "seedQualityName", title: "鍝佽川", width: 70},
-                {field: "level", title: "绛夌骇", width: 45, sortable: true},
+                {field: "seedQualityName", title: "品质", width: 70},
+                {field: "level", title: "等级", width: 45, sortable: true},
                 {field: "enableSoilTypeNames", title: "可种土壤", width: 120},
-                {field: "price", title: "浠锋牸", width: 56, sortable: true},
-                {field: "fruitPrice", title: "鏋滃疄鍗曚环", width: 72, sortable: true},
-                {field: "harvestExperience", title: "鏀惰幏缁忛獙", width: 70},
+                {field: "price", title: "价格", width: 56, sortable: true},
+                {field: "fruitPrice", title: "果实单价", width: 72, sortable: true},
+                {field: "harvestExperience", title: "收获经验", width: 70},
                 {field: "harvestScore", title: "收获积分", width: 70},
-                {field: "totalGrowSeconds", title: "鎬绘垚闀?s)", width: 70},
+                {field: "totalGrowSeconds", title: "总成长(s)", width: 70},
                 {
                     field: "action",
                     title: "阶段管理",
@@ -553,12 +557,24 @@
         };
     }
 
+    function getPreviewGeometryScale() {
+        var previewWidth = $("#seedStagePreviewBox").innerWidth() || PREVIEW_CANVAS_DEFAULT_WIDTH;
+        var previewHeight = $("#seedStagePreviewBox").innerHeight() || PREVIEW_CANVAS_DEFAULT_HEIGHT;
+        var positionWidth = $("#seedStagePositionCanvas").innerWidth() || POSITION_CANVAS_DEFAULT_WIDTH;
+        var positionHeight = $("#seedStagePositionCanvas").innerHeight() || POSITION_CANVAS_DEFAULT_HEIGHT;
+        return {
+            x: previewWidth / positionWidth,
+            y: previewHeight / positionHeight
+        };
+    }
+
     function applyGeometryToPreview(geometry) {
+        var scale = getPreviewGeometryScale();
         $("#seedStagePreviewImage").css({
-            width: geometry.width + "px",
-            height: geometry.height + "px",
-            left: geometry.left + "px",
-            top: geometry.top + "px"
+            width: Math.round(geometry.width * scale.x) + "px",
+            height: Math.round(geometry.height * scale.y) + "px",
+            left: Math.round(geometry.left * scale.x) + "px",
+            top: Math.round(geometry.top * scale.y) + "px"
         });
     }
 

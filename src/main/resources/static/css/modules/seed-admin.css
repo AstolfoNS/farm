@@ -105,6 +105,29 @@
     white-space: nowrap;
 }
 
+.seed-admin-form-table td.seed-admin-full-field {
+    white-space: normal;
+}
+
+.seed-admin-full-field .seed-admin-full-input,
+.seed-admin-full-field .seed-admin-description-input {
+    width: 100%;
+}
+
+.seed-admin-full-field .textbox,
+.seed-admin-full-field .combo {
+    width: 100% !important;
+}
+
+.seed-admin-full-field .textbox .textbox-text {
+    width: 100% !important;
+}
+
+.seed-admin-description-input + .textbox,
+.seed-admin-description-input.textbox-f {
+    min-height: 86px;
+}
+
 .seed-admin-form-table.farm-dialog-form td:nth-child(odd) {
     font-weight: 700;
     color: #f6ffe1;
@@ -124,8 +147,8 @@
 .farm-dialog-shell .seed-stage-preview-box,
 .seed-stage-preview-box {
     position: relative;
-    width: 280px;
-    height: 170px;
+    width: 220px;
+    height: 282px;
     display: inline-block;
     margin-right: 8px;
     vertical-align: middle;
