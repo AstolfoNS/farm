@@ -48,7 +48,7 @@ import java.util.stream.IntStream;
 @Service
 public class UserServiceImp implements UserService {
 
-    private static final String DEFAULT_AVATAR_URL = "/resources/imgs/app/user/default-avatar.png";
+    private static final String DEFAULT_AVATAR_URL = "/oss/defaults/avatar/default-avatar.png";
     private static final String DEFAULT_PREFERENCES_JSON = "{\"audio\":{\"effectEnabled\":true,\"effectVolume\":0.8,\"bgmEnabled\":false,\"bgmVolume\":0.6}}";
 
     private final UserDao userDao;

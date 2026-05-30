@@ -58,7 +58,7 @@
 
     function resolveHead(user) {
         var head = user && user.head ? String(user.head).trim() : "";
-        return head.length > 0 ? head : farmResolveImg("app/user/default-avatar.png");
+        return head.length > 0 ? head : ((window.farmDefaultAsset && window.farmDefaultAsset("avatar")) || "/oss/defaults/avatar/default-avatar.png");
     }
 
     function renderTopUser(user) {

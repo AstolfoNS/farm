@@ -49,6 +49,9 @@ import java.util.Set;
 @Primary
 public class SeedServiceGuardedDecorator implements SeedService {
 
+    private static final String DEFAULT_SEED_COVER_URL = "/oss/defaults/seed/seed-cover-default.png";
+    private static final String DEFAULT_STAGE_ASSET_URL = "/oss/defaults/seed/seed-stage-default.png";
+
     private static final int STAGE_WIDTH_MIN = 1;
     private static final int STAGE_WIDTH_MAX = 4096;
     private static final int STAGE_HEIGHT_MIN = 1;
@@ -84,12 +87,16 @@ public class SeedServiceGuardedDecorator implements SeedService {
 
     @Override
     public PageResult<SeedGridVO> pageSeedTypes(SeedTypeQueryDTO query) {
-        return delegate.pageSeedTypes(query);
+        PageResult<SeedGridVO> result = delegate.pageSeedTypes(query);
+        applySeedGridDefaults(result);
+        return result;
     }
 
     @Override
     public PageResult<SeedShopItemVO> pageSeedShop(SeedShopQueryDTO query) {
-        return delegate.pageSeedShop(query);
+        PageResult<SeedShopItemVO> result = delegate.pageSeedShop(query);
+        applySeedShopDefaults(result);
+        return result;
     }
 
     @Override
@@ -109,7 +116,9 @@ public class SeedServiceGuardedDecorator implements SeedService {
 
     @Override
     public PageResult<SeedFruitInventoryItemVO> pageFruitInventory(SeedFruitInventoryQueryDTO query) {
-        return delegate.pageFruitInventory(query);
+        PageResult<SeedFruitInventoryItemVO> result = delegate.pageFruitInventory(query);
+        applyFruitInventoryDefaults(result);
+        return result;
     }
 
     @Override
@@ -119,12 +128,19 @@ public class SeedServiceGuardedDecorator implements SeedService {
 
     @Override
     public SeedShopHomeVO shopHome(SeedShopHomeQueryDTO query) {
-        return delegate.shopHome(query);
+        SeedShopHomeVO result = delegate.shopHome(query);
+        if (result != null) {
+            applySeedShopDefaults(result.getShopPage());
+        }
+        return result;
     }
 
     @Override
     @Transactional
     public Long saveSeedType(SeedAddOrUpdateDTO params) {
+        if (params != null) {
+            params.setCoverImageUrl(normalizeSeedCoverUrl(params.getCoverImageUrl()));
+        }
         Long seedTypeId = delegate.saveSeedType(params);
         validateStageSequenceAndRegrow(seedTypeId);
         validateRegrowStageIndex(seedTypeId, params == null ? null : params.getRegrowStageIndex());
@@ -159,12 +175,17 @@ public class SeedServiceGuardedDecorator implements SeedService {
 
     @Override
     public PageResult<SeedStageGridVO> pageSeedStages(SeedStageQueryDTO query) {
-        return delegate.pageSeedStages(query);
+        PageResult<SeedStageGridVO> result = delegate.pageSeedStages(query);
+        applySeedStageDefaults(result);
+        return result;
     }
 
     @Override
     @Transactional
     public void saveSeedStage(SeedStageAddOrUpdateDTO params) {
+        if (params != null) {
+            params.setAssetUrl(normalizeStageAssetUrl(params.getAssetUrl()));
+        }
         validateStageAssetUrl(params == null ? null : params.getAssetUrl());
         validateStageLayout(params);
         delegate.saveSeedStage(params);
@@ -229,6 +250,78 @@ public class SeedServiceGuardedDecorator implements SeedService {
         if (regrow != null && !stageIndexSet.contains(regrow)) {
             throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段必须存在于该种子的阶段集合中");
         }
+    }
+
+    private void applySeedGridDefaults(PageResult<SeedGridVO> pageResult) {
+        if (pageResult == null || pageResult.getRecords() == null) {
+            return;
+        }
+        for (SeedGridVO row : pageResult.getRecords()) {
+            if (row != null) {
+                row.setCoverImageUrl(normalizeSeedCoverUrl(row.getCoverImageUrl()));
+            }
+        }
+    }
+
+    private void applySeedShopDefaults(PageResult<SeedShopItemVO> pageResult) {
+        if (pageResult == null || pageResult.getRecords() == null) {
+            return;
+        }
+        for (SeedShopItemVO row : pageResult.getRecords()) {
+            if (row != null) {
+                row.setCoverImageUrl(normalizeSeedCoverUrl(row.getCoverImageUrl()));
+            }
+        }
+    }
+
+    private void applyFruitInventoryDefaults(PageResult<SeedFruitInventoryItemVO> pageResult) {
+        if (pageResult == null || pageResult.getRecords() == null) {
+            return;
+        }
+        for (SeedFruitInventoryItemVO row : pageResult.getRecords()) {
+            if (row != null) {
+                row.setCoverImageUrl(normalizeSeedCoverUrl(row.getCoverImageUrl()));
+            }
+        }
+    }
+
+    private void applySeedStageDefaults(PageResult<SeedStageGridVO> pageResult) {
+        if (pageResult == null || pageResult.getRecords() == null) {
+            return;
+        }
+        for (SeedStageGridVO row : pageResult.getRecords()) {
+            if (row != null) {
+                row.setAssetUrl(normalizeStageAssetUrl(row.getAssetUrl()));
+            }
+        }
+    }
+
+    private String normalizeSeedCoverUrl(String rawUrl) {
+        String value = rawUrl == null ? "" : rawUrl.trim();
+        if (value.isEmpty()) {
+            return DEFAULT_SEED_COVER_URL;
+        }
+        if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/")) {
+            return value;
+        }
+        if (value.startsWith("resources/") || value.startsWith("oss/")) {
+            return "/" + value;
+        }
+        return "/oss/" + value.replaceFirst("^/+", "");
+    }
+
+    private String normalizeStageAssetUrl(String rawUrl) {
+        String value = rawUrl == null ? "" : rawUrl.trim();
+        if (value.isEmpty()) {
+            return DEFAULT_STAGE_ASSET_URL;
+        }
+        if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/")) {
+            return value;
+        }
+        if (value.startsWith("resources/") || value.startsWith("oss/")) {
+            return "/" + value;
+        }
+        return "/oss/" + value.replaceFirst("^/+", "");
     }
 
     private void validateRegrowStageIndex(Long seedTypeId, Short regrowStageIndex) {

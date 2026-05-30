@@ -3,6 +3,11 @@
         resourceRoot: "/resources",
         imgRoot: "/resources/imgs",
         soundRoot: "/resources/sounds",
+        defaults: {
+            avatar: "/oss/defaults/avatar/default-avatar.png",
+            seedCover: "/oss/defaults/seed/seed-cover-default.png",
+            seedStage: "/oss/defaults/seed/seed-stage-default.png"
+        },
         currentUser: null,
         currentModule: "home",
         motion: {
@@ -25,6 +30,11 @@
     window.farmResolveSound = function (relativePath) {
         var safePath = (relativePath || "").replace(/^\/+/, "");
         return window.FarmAppState.soundRoot + "/" + safePath;
+    };
+
+    window.farmDefaultAsset = function (key) {
+        var defaults = (window.FarmAppState && window.FarmAppState.defaults) || {};
+        return defaults[key] || "";
     };
 
     window.farmBuildRequestId = function (prefix) {

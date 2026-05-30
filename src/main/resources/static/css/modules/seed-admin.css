@@ -121,6 +121,7 @@
     border-top: 1px solid rgba(112, 242, 90, 0.72);
 }
 
+.farm-dialog-shell .seed-stage-preview-box,
 .seed-stage-preview-box {
     position: relative;
     width: 280px;
@@ -129,7 +130,7 @@
     margin-right: 8px;
     vertical-align: middle;
     border: 1px solid #74da74;
-    background: transparent;
+    background: url("/resources/imgs/domain/seed/preview/positioning-land.png") center center / 100% 100% no-repeat !important;
     overflow: hidden;
 }
 
@@ -144,20 +145,14 @@
     z-index: 2;
 }
 
+.farm-dialog-shell .seed-stage-position-canvas,
 .seed-stage-position-canvas {
     position: relative;
     width: 320px;
     height: 410px;
     margin: 0 auto;
     border: 1px solid #74da74;
-    background-color: #f8f8f8;
-    background-image:
-        linear-gradient(45deg, #d7d7d7 25%, transparent 25%),
-        linear-gradient(-45deg, #d7d7d7 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #d7d7d7 75%),
-        linear-gradient(-45deg, transparent 75%, #d7d7d7 75%);
-    background-size: 16px 16px;
-    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    background: url("/resources/imgs/domain/seed/preview/positioning-land.png") center center / 100% 100% no-repeat !important;
     overflow: hidden;
 }
 
@@ -170,8 +165,9 @@
     transform: translateX(-50%);
     pointer-events: none;
     opacity: 0.96;
-    background: url("/resources/imgs/domain/seed/preview/positioning-land.png") center bottom / contain no-repeat;
+    background: none;
     z-index: 1;
+    display: none;
 }
 
 .seed-stage-preview-box .seed-stage-reference-land::before {

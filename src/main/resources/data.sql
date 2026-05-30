@@ -162,7 +162,7 @@ INSERT INTO farm.users
     created_at, updated_at, created_by, updated_by, remark, status, is_deleted, opt_lock_version
 )
 SELECT
-    'liubei', '刘备', '123456', 'liubei@farm.local', '/resources/imgs/ui/user/default-avatar.png',
+    'liubei', '刘备', '123456', 'liubei@farm.local', '/oss/defaults/avatar/default-avatar.png',
     2000, 575, 4090, '{"audio":{"effectEnable":true,"effectVolume":0.8,"bgmEnable":false,"bgmVolume":0.6}}'::jsonb,
     NOW(), NOW(), 0, 0, 'init user', 1, false, 0
 WHERE NOT EXISTS (SELECT 1 FROM farm.users WHERE username = 'liubei' AND is_deleted = false);
@@ -174,7 +174,7 @@ INSERT INTO farm.users
     created_at, updated_at, created_by, updated_by, remark, status, is_deleted, opt_lock_version
 )
 SELECT
-    'caocao', '曹操', '123456', 'caocao@farm.local', '/resources/imgs/ui/user/default-avatar.png',
+    'caocao', '曹操', '123456', 'caocao@farm.local', '/oss/defaults/avatar/default-avatar.png',
     1800, 420, 2600, '{"audio":{"effectEnable":true,"effectVolume":0.8,"bgmEnable":false,"bgmVolume":0.6}}'::jsonb,
     NOW(), NOW(), 0, 0, 'init user', 1, false, 0
 WHERE NOT EXISTS (SELECT 1 FROM farm.users WHERE username = 'caocao' AND is_deleted = false);
@@ -186,7 +186,7 @@ INSERT INTO farm.users
     created_at, updated_at, created_by, updated_by, remark, status, is_deleted, opt_lock_version
 )
 SELECT
-    'sunquan', '孙权', '123456', 'sunquan@farm.local', '/resources/imgs/ui/user/default-avatar.png',
+    'sunquan', '孙权', '123456', 'sunquan@farm.local', '/oss/defaults/avatar/default-avatar.png',
     1600, 360, 2100, '{"audio":{"effectEnable":true,"effectVolume":0.8,"bgmEnable":false,"bgmVolume":0.6}}'::jsonb,
     NOW(), NOW(), 0, 0, 'init user', 1, false, 0
 WHERE NOT EXISTS (SELECT 1 FROM farm.users WHERE username = 'sunquan' AND is_deleted = false);

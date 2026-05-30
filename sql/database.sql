@@ -19,7 +19,7 @@ CREATE TABLE farm.users
     nickname                    VARCHAR(500)        NOT NULL,
     password_hash               VARCHAR(500)        NOT NULL,
     email                       citext              NOT NULL,
-    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '/resources/imgs/ui/user/default-avatar.png',
+    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '',
     experience                  BIGINT              NOT NULL DEFAULT 0,
     score                       BIGINT              NOT NULL DEFAULT 0,
     coin                        BIGINT              NOT NULL DEFAULT 0,

@@ -1,9 +1,10 @@
-(function (window, $) {
+﻿(function (window, $) {
     var FarmSeedAdminModule = {};
     var state = {
         active: false,
         initialized: false,
         bound: false,
+        stageGeometrySyncing: false,
         seedRows: [],
         stageRows: [],
         currentSeedId: 0,
@@ -13,6 +14,8 @@
         soilOptions: [],
         growthStageOptions: []
     };
+    var DEFAULT_STAGE_ASSET_RAW = "/oss/defaults/seed/seed-stage-default.png";
+    var DEFAULT_STAGE_ASSET_DISPLAY = "/oss/defaults/seed/seed-stage-default.png?v=20260530";
 
     function motion() {
         if (window.FarmUi && $.isFunction(window.FarmUi.motion)) {
@@ -128,7 +131,7 @@
     function renderCover(value) {
         var src = $.trim(value || "");
         if (!src) {
-            src = farmResolveImg("app/shell/watermark.png");
+            src = (window.farmDefaultAsset && window.farmDefaultAsset("seedCover")) || "/oss/defaults/seed/seed-cover-default.png";
         }
         return "<img class='seed-admin-cover-thumb' src='" + escapeHtml(src) + "' alt='cover'>";
     }
@@ -152,7 +155,7 @@
     function previewSeedTypeCover(url) {
         var src = $.trim(url || "");
         if (!src) {
-            src = farmResolveImg("app/shell/watermark.png");
+            src = (window.farmDefaultAsset && window.farmDefaultAsset("seedCover")) || "/oss/defaults/seed/seed-cover-default.png";
         }
         $("#seedTypeCoverPreview").attr("src", src);
     }
@@ -204,16 +207,16 @@
             },
             columns: [[
                 {field: "id", title: "ID", width: 42, sortable: true},
-                {field: "coverImageUrl", title: "封面", width: 72, formatter: function (value) { return renderCover(value); }},
+                {field: "coverImageUrl", title: "灏侀潰", width: 72, formatter: function (value) { return renderCover(value); }},
                 {field: "name", title: "种子名称", width: 90, sortable: true},
-                {field: "seedQualityName", title: "品质", width: 70},
-                {field: "level", title: "等级", width: 45, sortable: true},
+                {field: "seedQualityName", title: "鍝佽川", width: 70},
+                {field: "level", title: "绛夌骇", width: 45, sortable: true},
                 {field: "enableSoilTypeNames", title: "可种土壤", width: 120},
-                {field: "price", title: "价格", width: 56, sortable: true},
-                {field: "fruitPrice", title: "果实单价", width: 72, sortable: true},
-                {field: "harvestExperience", title: "收获经验", width: 70},
+                {field: "price", title: "浠锋牸", width: 56, sortable: true},
+                {field: "fruitPrice", title: "鏋滃疄鍗曚环", width: 72, sortable: true},
+                {field: "harvestExperience", title: "鏀惰幏缁忛獙", width: 70},
                 {field: "harvestScore", title: "收获积分", width: 70},
-                {field: "totalGrowSeconds", title: "总成长(s)", width: 70},
+                {field: "totalGrowSeconds", title: "鎬绘垚闀?s)", width: 70},
                 {
                     field: "action",
                     title: "阶段管理",
@@ -428,13 +431,21 @@
     }
 
     function previewImageFromUrl(assetUrl) {
-        var src = normalizeAssetUrl(assetUrl);
-        if (!src) {
-            $("#seedStagePreviewImage").attr("src", "");
-            return;
-        }
+        var src = resolveStagePreviewSrc(assetUrl);
         $("#seedStagePreviewImage").attr("src", src);
         syncPreviewGeometryFromForm();
+    }
+
+    function resolveStagePreviewSrc(assetUrl) {
+        var src = normalizeAssetUrl(assetUrl);
+        var fallback = (window.farmDefaultAsset && window.farmDefaultAsset("seedStage")) || DEFAULT_STAGE_ASSET_RAW;
+        if (!src) {
+            return DEFAULT_STAGE_ASSET_DISPLAY;
+        }
+        if (src === DEFAULT_STAGE_ASSET_RAW || src === fallback) {
+            return DEFAULT_STAGE_ASSET_DISPLAY;
+        }
+        return src;
     }
 
     function normalizeAssetUrl(value) {
@@ -455,7 +466,17 @@
     }
 
     function setStageNumberValue(fieldName, value) {
-        var $field = $("#seedStageEditorForm input[name='" + fieldName + "']");
+        var fieldIdMap = {
+            stageIndex: "#seedStageStageIndex",
+            durationSeconds: "#seedStageDurationSeconds",
+            bugProbability: "#seedStageBugProbability",
+            width: "#seedStageWidth",
+            height: "#seedStageHeight",
+            offsetX: "#seedStageOffsetX",
+            offsetY: "#seedStageOffsetY"
+        };
+        var selector = fieldIdMap[fieldName] || ("#seedStageEditorForm input[name='" + fieldName + "']");
+        var $field = $(selector).first();
         if ($field.length <= 0) {
             return;
         }
@@ -470,7 +491,17 @@
     }
 
     function getStageNumberValue(fieldName, def) {
-        var $field = $("#seedStageEditorForm input[name='" + fieldName + "']");
+        var fieldIdMap = {
+            stageIndex: "#seedStageStageIndex",
+            durationSeconds: "#seedStageDurationSeconds",
+            bugProbability: "#seedStageBugProbability",
+            width: "#seedStageWidth",
+            height: "#seedStageHeight",
+            offsetX: "#seedStageOffsetX",
+            offsetY: "#seedStageOffsetY"
+        };
+        var selector = fieldIdMap[fieldName] || ("#seedStageEditorForm input[name='" + fieldName + "']");
+        var $field = $(selector).first();
         if ($field.length <= 0) {
             return asNumber(def, 0);
         }
@@ -550,21 +581,40 @@
 
     function syncFormFromPositionImage() {
         var $image = $("#seedStagePositionImage");
+        state.stageGeometrySyncing = true;
         setStageNumberValue("width", $image.outerWidth() || 0);
         setStageNumberValue("height", $image.outerHeight() || 0);
         setStageNumberValue("offsetX", parseInt($image.css("left"), 10) || 0);
         setStageNumberValue("offsetY", parseInt($image.css("top"), 10) || 0);
+        state.stageGeometrySyncing = false;
+    }
+
+    function syncFormOffsetFromPositionImage() {
+        var $image = $("#seedStagePositionImage");
+        state.stageGeometrySyncing = true;
+        setStageNumberValue("offsetX", parseInt($image.css("left"), 10) || 0);
+        setStageNumberValue("offsetY", parseInt($image.css("top"), 10) || 0);
+        state.stageGeometrySyncing = false;
     }
 
     function bindStageGeometrySyncEvents() {
+        var fieldIdMap = {
+            width: "#seedStageWidth",
+            height: "#seedStageHeight",
+            offsetX: "#seedStageOffsetX",
+            offsetY: "#seedStageOffsetY"
+        };
         $.each(["width", "height", "offsetX", "offsetY"], function (_, name) {
-            var $field = $("#seedStageEditorForm input[name='" + name + "']");
+            var $field = $(fieldIdMap[name] || ("#seedStageEditorForm input[name='" + name + "']")).first();
             try {
                 var $textbox = $field.numberbox("textbox");
                 if (!$textbox || $textbox.length <= 0) {
                     return;
                 }
                 $textbox.off(".stageSync").on("input.stageSync blur.stageSync keyup.stageSync", function () {
+                    if (state.stageGeometrySyncing) {
+                        return;
+                    }
                     syncPreviewGeometryFromForm();
                     if ($("#seedStagePositionDialog").dialog("options").closed === false) {
                         syncPositionImageFromForm();
@@ -859,12 +909,11 @@
     function openPositionEditor() {
         var assetUrl = normalizeAssetUrl(getTextboxValue($("#seedStageAssetUrl"), ""));
         if (!$.trim(assetUrl)) {
-            alertMessage("请先上传或填写阶段资源图片URL");
-            return;
+            assetUrl = DEFAULT_STAGE_ASSET_RAW;
         }
         setTextboxValue($("#seedStageAssetUrl"), assetUrl);
         var $image = $("#seedStagePositionImage");
-        $image.attr("src", assetUrl);
+        $image.attr("src", resolveStagePreviewSrc(assetUrl));
         syncPositionImageFromForm();
         try {
             $image.draggable("destroy");
@@ -875,13 +924,7 @@
         $image.draggable({
             containment: "#seedStagePositionCanvas",
             onDrag: function () {
-                syncFormFromPositionImage();
-                syncPreviewGeometryFromForm();
-            }
-        }).resizable({
-            handles: "n,e,s,w,ne,se,sw,nw",
-            onResize: function () {
-                syncFormFromPositionImage();
+                syncFormOffsetFromPositionImage();
                 syncPreviewGeometryFromForm();
             }
         });
@@ -1102,3 +1145,4 @@
         window.FarmCore.registerSetActiveModule("seed-admin", FarmSeedAdminModule, {refreshMethod: "refresh"});
     }
 })(window, window.jQuery);
+

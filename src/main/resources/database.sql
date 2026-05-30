@@ -19,7 +19,7 @@ CREATE TABLE farm.users
     nickname                    VARCHAR(500)        NOT NULL,
     password_hash               VARCHAR(500)        NOT NULL,
     email                       citext              NOT NULL,
-    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '/resources/imgs/ui/user/default-avatar.png',
+    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '/oss/defaults/avatar/default-avatar.png',
     experience                  BIGINT              NOT NULL DEFAULT 0,
     score                       BIGINT              NOT NULL DEFAULT 0,
     coin                        BIGINT              NOT NULL DEFAULT 0,
@@ -77,7 +77,7 @@ CREATE TABLE farm.soil_types
 
     name                        VARCHAR(500)    NOT NULL,
     bit_code                    INT             NOT NULL,
-    cover_image_url             VARCHAR(1024)   NOT NULL DEFAULT '',
+    cover_image_url             VARCHAR(1024)   NOT NULL DEFAULT '/oss/defaults/seed/seed-cover-default.png',
     level                       SMALLINT        NOT NULL,
     unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
     grow_speed_multiplier       NUMERIC(5, 2)   NOT NULL DEFAULT 1.00,
@@ -285,7 +285,7 @@ CREATE TABLE farm.seed_growth_stages
 
     stage_index                 SMALLINT        NOT NULL,
     duration_seconds            INT             NOT NULL,
-    asset_url                   VARCHAR(1024)       NULL,
+    asset_url                   VARCHAR(1024)       NOT NULL DEFAULT '/oss/defaults/seed/seed-stage-default.png',
     bug_probability             NUMERIC(5, 4)   NOT NULL DEFAULT 0.0000,
 
     width                       INT             NOT NULL DEFAULT 0,

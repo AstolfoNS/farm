@@ -222,7 +222,7 @@
         if (url && $.trim(url).length > 0) {
             return url;
         }
-        return farmResolveImg("app/user/default-avatar.png");
+        return (window.farmDefaultAsset && window.farmDefaultAsset("seedCover")) || "/oss/defaults/seed/seed-cover-default.png";
     }
 
     function renderSeedList(pageData) {
