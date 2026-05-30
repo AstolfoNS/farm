@@ -149,12 +149,25 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    border: 2px solid rgba(129, 86, 42, 0.86);
+    border: 2px solid rgba(117, 55, 20, 0.96);
     border-radius: 3px;
     background: rgba(0, 112, 0, 0.74);
     padding: 8px 8px 14px;
     overflow: hidden;
     min-height: 318px;
+    box-shadow:
+        0 0 0 1px rgba(205, 140, 76, 0.95) inset,
+        0 0 0 2px rgba(34, 15, 6, 0.85),
+        0 2px 6px rgba(0, 0, 0, 0.32);
+}
+
+.shop-seed-card::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(164, 92, 38, 0.92);
+    pointer-events: none;
+    opacity: 0.95;
 }
 
 .shop-seed-card::after {
@@ -162,7 +175,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.22;
+    opacity: 0.28;
     background-image: url("/resources/imgs/app/panel/seed-storage-frame.png");
     background-size: cover;
     background-position: center;
@@ -340,6 +353,42 @@
     color: #dfffd6;
     font-size: 14px;
     text-align: center;
+}
+
+.shop-seed-info-tip {
+    position: absolute;
+    z-index: 12000;
+    width: 246px;
+    border: 2px solid rgba(123, 57, 23, 0.98);
+    box-shadow:
+        0 0 0 1px rgba(212, 154, 85, 0.92) inset,
+        0 8px 16px rgba(0, 0, 0, 0.44);
+    background: rgba(10, 102, 10, 0.96);
+    color: #e8ffd6;
+    padding: 8px 10px;
+    border-radius: 3px;
+    line-height: 1.35;
+}
+
+.shop-seed-info-title {
+    color: #fff0ae;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.shop-seed-info-line {
+    color: #ddffc7;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.shop-seed-info-desc {
+    margin-top: 6px;
+    border-top: 1px solid rgba(179, 255, 148, 0.2);
+    padding-top: 5px;
+    color: #f2ffe1;
+    font-size: 12px;
 }
 
 @media screen and (max-width: 1280px) {

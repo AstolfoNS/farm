@@ -5,6 +5,7 @@
         inited: false,
         userId: 0,
         loading: false,
+        seedCardRows: [],
         currentTab: "seed",
         seedQuery: {
             page: 1,
@@ -24,6 +25,7 @@
             rows: 10
         }
     };
+    var SEED_INFO_HOVER_DELAY_MS = 550;
 
     function motion() {
         if ($.isFunction(window.farmMotion)) {
@@ -227,6 +229,7 @@
 
     function renderSeedList(pageData) {
         var records = toArray(pageData && pageData.records);
+        state.seedCardRows = records;
         if (records.length === 0) {
             $("#shopSeedList").html("<div class='shop-empty'>暂无可购买种子</div>");
             $("#shopSeedPager").empty();
@@ -249,7 +252,7 @@
                 ? "已解锁"
                 : ("需经验 " + unlockRequired + "（当前 " + currentExp + "，进度 " + unlockProgress + "%）");
             html.push(
-                "<div class='shop-seed-card'>" +
+                "<div class='shop-seed-card' data-seed-index='" + _ + "'>" +
                 "<div class='shop-seed-name'>" + escapeHtml(row.name || ("种子#" + seedTypeId)) + "</div>" +
                 "<div class='shop-seed-meta'>品质: " + escapeHtml(row.seedQualityName || "-") + " | 等级: " + asNumber(row.level, 0) + "</div>" +
                 "<div class='shop-seed-meta'>土地需求: " + escapeHtml(row.enableSoilTypeNames || "-") + "</div>" +
@@ -266,7 +269,103 @@
         $("#shopSeedList").html(html.join(""));
         $("#shopSeedList .easyui-linkbutton").linkbutton();
         bindSeedActions();
+        bindSeedHoverInfo();
         renderSeedPager(pageData);
+    }
+
+    function ensureSeedInfoTooltip() {
+        var $tip = $("#shopSeedInfoTooltip");
+        if ($tip.length > 0) {
+            return $tip;
+        }
+        $("body").append("<div id='shopSeedInfoTooltip' class='shop-seed-info-tip' style='display:none;'></div>");
+        return $("#shopSeedInfoTooltip");
+    }
+
+    function buildSeedInfoTooltipHtml(row) {
+        var data = row || {};
+        var quality = data.seedQualityName || "-";
+        var level = asNumber(data.level, 0);
+        var lockReq = asNumber(data.unlockExperienceRequired, 0);
+        var growSeconds = asNumber(data.totalGrowSeconds, 0);
+        var harvestFruit = asNumber(data.harvestFruitNumber, 0);
+        var fruitPrice = asNumber(data.fruitPrice, 0);
+        var harvestExp = asNumber(data.harvestExperience, 0);
+        var harvestScore = asNumber(data.harvestScore, 0);
+        var harvestTimes = asNumber(data.maxHarvestCount, 1);
+        var bugLimit = asNumber(data.maxBugLimit, 0);
+        var netValue = asNumber(data.estimatedNetValue, 0);
+        var desc = data.description || "暂无描述";
+        return "" +
+            "<div class='shop-seed-info-title'>" + escapeHtml(data.name || "种子详情") + "</div>" +
+            "<div class='shop-seed-info-line'>品质: " + escapeHtml(quality) + " | 等级: " + level + "</div>" +
+            "<div class='shop-seed-info-line'>采购价: " + asNumber(data.price, 0) + " 金币</div>" +
+            "<div class='shop-seed-info-line'>解锁经验: " + lockReq + "</div>" +
+            "<div class='shop-seed-info-line'>总成长: " + growSeconds + " 秒</div>" +
+            "<div class='shop-seed-info-line'>单次果实: " + harvestFruit + " | 果实单价: " + fruitPrice + "</div>" +
+            "<div class='shop-seed-info-line'>收获次数: " + harvestTimes + " | 虫害上限: " + bugLimit + "</div>" +
+            "<div class='shop-seed-info-line'>收获经验: " + harvestExp + " | 收获积分: " + harvestScore + "</div>" +
+            "<div class='shop-seed-info-line'>预估净值: " + netValue + "</div>" +
+            "<div class='shop-seed-info-desc'>" + escapeHtml(desc) + "</div>";
+    }
+
+    function showSeedInfoTooltip($card, row) {
+        var $tip = ensureSeedInfoTooltip();
+        $tip.html(buildSeedInfoTooltipHtml(row)).show();
+        var cardOffset = $card.offset();
+        if (!cardOffset) {
+            return;
+        }
+        var left = cardOffset.left + $card.outerWidth() + 8;
+        var top = cardOffset.top + 6;
+        var winLeft = $(window).scrollLeft();
+        var winTop = $(window).scrollTop();
+        var winWidth = $(window).width();
+        var winHeight = $(window).height();
+        var tipWidth = $tip.outerWidth();
+        var tipHeight = $tip.outerHeight();
+        if (left + tipWidth > winLeft + winWidth - 10) {
+            left = cardOffset.left - tipWidth - 8;
+        }
+        if (left < winLeft + 8) {
+            left = winLeft + 8;
+        }
+        if (top + tipHeight > winTop + winHeight - 10) {
+            top = winTop + winHeight - tipHeight - 10;
+        }
+        if (top < winTop + 8) {
+            top = winTop + 8;
+        }
+        $tip.css({left: left, top: top});
+    }
+
+    function hideSeedInfoTooltip() {
+        $("#shopSeedInfoTooltip").hide();
+    }
+
+    function bindSeedHoverInfo() {
+        var $cards = $("#shopSeedList .shop-seed-card");
+        $cards.off(".seedHover");
+        $cards.on("mouseenter.seedHover", function () {
+            var $card = $(this);
+            var hoverTimer = window.setTimeout(function () {
+                var idx = asNumber($card.attr("data-seed-index"), -1);
+                if (idx < 0 || idx >= state.seedCardRows.length) {
+                    return;
+                }
+                showSeedInfoTooltip($card, state.seedCardRows[idx]);
+            }, SEED_INFO_HOVER_DELAY_MS);
+            $card.data("seedHoverTimer", hoverTimer);
+        });
+        $cards.on("mouseleave.seedHover", function () {
+            var $card = $(this);
+            var timer = $card.data("seedHoverTimer");
+            if (timer) {
+                window.clearTimeout(timer);
+            }
+            $card.removeData("seedHoverTimer");
+            hideSeedInfoTooltip();
+        });
     }
 
     function renderSeedPager(pageData) {
@@ -651,6 +750,7 @@
             reload();
             return;
         }
+        hideSeedInfoTooltip();
         $("#shopPanel").removeClass("is-active");
     }
 
