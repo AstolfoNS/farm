@@ -548,6 +548,20 @@
         }
     }
 
+    function getNumberboxValue($field, def) {
+        if (!$field || $field.length <= 0) {
+            return asNumber(def, 0);
+        }
+        try {
+            if (!$field.data("numberbox")) {
+                $field.numberbox();
+            }
+            return asNumber($field.numberbox("getValue"), def);
+        } catch (ignoreNumberboxGetError) {
+            return asNumber($field.val(), def);
+        }
+    }
+
     function stageGeometryFromForm() {
         return {
             width: getStageNumberValue("width", 100),
@@ -816,25 +830,33 @@
             alertMessage("请先完善种子必填信息");
             return;
         }
-        var id = asNumber($("#seedTypeEditorForm input[name='id']").val(), 0);
-        var soilIds = $("#seedTypeSoilIds").combobox("getValues");
+        var $form = $("#seedTypeEditorForm");
+        var id = asNumber($form.find("input[name='id']").val(), 0);
+        var soilIds = [];
+        var seedQualityId = 0;
+        try {
+            soilIds = $("#seedTypeSoilIds").combobox("getValues") || [];
+        } catch (ignoreSoilGetError) {}
+        try {
+            seedQualityId = asNumber($("#seedTypeQualityId").combobox("getValue"), 0);
+        } catch (ignoreQualityGetError) {}
         var payload = {
             id: id > 0 ? id : null,
-            name: $("#seedTypeEditorForm input[name='name']").textbox("getValue"),
-            seedQualityId: asNumber($("#seedTypeQualityId").combobox("getValue"), 0),
+            name: getTextboxValue($form.find("input[name='name']").first(), ""),
+            seedQualityId: seedQualityId,
             soilTypeIds: (soilIds || []).join(","),
-            level: asNumber($("#seedTypeEditorForm input[name='level']").numberbox("getValue"), 1),
-            regrowStageIndex: asNumber($("#seedTypeEditorForm input[name='regrowStageIndex']").numberbox("getValue"), 0) || null,
-            price: asNumber($("#seedTypeEditorForm input[name='price']").numberbox("getValue"), 0),
-            fruitPrice: asNumber($("#seedTypeEditorForm input[name='fruitPrice']").numberbox("getValue"), 0),
-            harvestExperience: asNumber($("#seedTypeEditorForm input[name='harvestExperience']").numberbox("getValue"), 0),
-            harvestScore: asNumber($("#seedTypeEditorForm input[name='harvestScore']").numberbox("getValue"), 0),
-            harvestFruitNumber: asNumber($("#seedTypeEditorForm input[name='harvestFruitNumber']").numberbox("getValue"), 0),
-            fruitLossPerBug: asNumber($("#seedTypeEditorForm input[name='fruitLossPerBug']").numberbox("getValue"), 0),
-            maxBugLimit: asNumber($("#seedTypeEditorForm input[name='maxBugLimit']").numberbox("getValue"), 0),
-            maxHarvestCount: asNumber($("#seedTypeEditorForm input[name='maxHarvestCount']").numberbox("getValue"), 1),
-            coverImageUrl: $("#seedTypeCoverImageUrl").textbox("getValue"),
-            description: $("#seedTypeEditorForm input[name='description']").textbox("getValue")
+            level: getNumberboxValue($form.find("input[name='level']").first(), 1),
+            regrowStageIndex: getNumberboxValue($form.find("input[name='regrowStageIndex']").first(), 0) || null,
+            price: getNumberboxValue($form.find("input[name='price']").first(), 0),
+            fruitPrice: getNumberboxValue($form.find("input[name='fruitPrice']").first(), 0),
+            harvestExperience: getNumberboxValue($form.find("input[name='harvestExperience']").first(), 0),
+            harvestScore: getNumberboxValue($form.find("input[name='harvestScore']").first(), 0),
+            harvestFruitNumber: getNumberboxValue($form.find("input[name='harvestFruitNumber']").first(), 0),
+            fruitLossPerBug: getNumberboxValue($form.find("input[name='fruitLossPerBug']").first(), 0),
+            maxBugLimit: getNumberboxValue($form.find("input[name='maxBugLimit']").first(), 0),
+            maxHarvestCount: getNumberboxValue($form.find("input[name='maxHarvestCount']").first(), 1),
+            coverImageUrl: getTextboxValue($("#seedTypeCoverImageUrl"), ""),
+            description: getTextboxValue($form.find("input[name='description']").first(), "")
         };
         FarmApi.seedTypeSave(payload, function (res) {
             if (!boolOk(res)) {
