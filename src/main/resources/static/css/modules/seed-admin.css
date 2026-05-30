@@ -180,6 +180,94 @@
     padding-bottom: 6px;
 }
 
+.seed-stage-editor-window .window-body {
+    padding: 10px 10px 8px !important;
+}
+
+.seed-stage-editor-table {
+    border: 1px solid rgba(12, 90, 12, 0.88);
+    box-shadow: 0 0 0 1px rgba(88, 214, 80, 0.28) inset;
+}
+
+.seed-stage-editor-table td {
+    height: 36px;
+    padding: 5px 10px;
+    border-bottom: 1px solid rgba(101, 236, 89, 0.2);
+}
+
+.seed-stage-editor-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.seed-stage-editor-table td:nth-child(odd) {
+    width: 124px;
+}
+
+.seed-stage-editor-table td:nth-child(even) {
+    width: 286px;
+}
+
+.seed-stage-editor-table .seed-admin-full-field {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.seed-stage-editor-table .numberbox + .farm-dialog-unit,
+.seed-stage-editor-table .textbox + .farm-dialog-unit,
+.seed-stage-editor-table .combo + .farm-dialog-unit {
+    margin-left: 6px;
+}
+
+.seed-stage-editor-table .seed-stage-asset-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.seed-stage-editor-table .seed-stage-asset-input-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.seed-stage-editor-table .seed-stage-asset-input-wrap .textbox {
+    width: 100% !important;
+}
+
+.seed-stage-editor-table .seed-stage-preview-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.seed-stage-editor-table .seed-stage-preview-controls {
+    min-width: 122px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.seed-stage-editor-table .seed-stage-preview-controls > span {
+    color: #ddffd5;
+    font-size: 12px;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.seed-stage-editor-window .seed-admin-dialog-actions.farm-dialog-actions {
+    margin-top: 12px;
+    padding: 10px 10px 0;
+    border-top: 1px solid rgba(116, 236, 98, 0.78);
+    box-shadow: 0 -1px 0 rgba(9, 70, 9, 0.7) inset;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.seed-stage-editor-window .seed-admin-dialog-actions.farm-dialog-actions .l-btn {
+    min-width: 82px;
+}
+
 .seed-admin-form-table.farm-dialog-form td:nth-child(odd) {
     font-weight: 700;
     color: #f6ffe1;

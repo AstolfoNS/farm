@@ -356,12 +356,12 @@
             </div>
         </div>
 
-        <div id="seedStageEditorDialog" class="easyui-dialog seed-admin-dialog farm-dialog-shell" title="编辑成长阶段"
-             style="width:860px;height:530px;padding:8px" closed="true" modal="true" resizable="false">
+        <div id="seedStageEditorDialog" class="easyui-dialog seed-admin-dialog farm-dialog-shell seed-stage-editor-window" title="编辑成长阶段"
+             style="width:900px;height:560px;padding:8px" closed="true" modal="true" resizable="false">
             <form id="seedStageEditorForm" method="post">
                 <input type="hidden" name="id" value="0">
                 <input type="hidden" name="seedTypeId" value="0">
-                <table class="seed-admin-form-table farm-dialog-form">
+                <table class="seed-admin-form-table farm-dialog-form seed-stage-editor-table">
                     <tr>
                         <td>阶段序号</td>
                         <td><input id="seedStageStageIndex" name="stageIndex" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px" required="true"></td>
@@ -388,18 +388,27 @@
                     </tr>
                     <tr>
                         <td>资源URL</td>
-                        <td colspan="3">
-                            <input id="seedStageAssetUrl" name="assetUrl" class="easyui-textbox" style="width:540px">
-                            <a id="seedStageUploadImageBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
+                        <td colspan="3" class="seed-admin-full-field">
+                            <div class="seed-stage-asset-row">
+                                <div class="seed-stage-asset-input-wrap">
+                                    <input id="seedStageAssetUrl" name="assetUrl" class="easyui-textbox seed-admin-full-input">
+                                </div>
+                                <a id="seedStageUploadImageBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
+                            </div>
                         </td>
                     </tr>
                     <tr>
                         <td>预览</td>
-                        <td colspan="3">
-                            <div id="seedStagePreviewBox" class="seed-stage-preview-box">
-                                <img id="seedStagePreviewImage" class="seed-stage-preview-image" src="" alt="">
+                        <td colspan="3" class="seed-admin-full-field">
+                            <div class="seed-stage-preview-row">
+                                <div id="seedStagePreviewBox" class="seed-stage-preview-box">
+                                    <img id="seedStagePreviewImage" class="seed-stage-preview-image" src="" alt="">
+                                </div>
+                                <div class="seed-stage-preview-controls">
+                                    <a id="seedStagePositionEditorBtn" href="javascript:void(0)" class="easyui-linkbutton c1">定位编辑器</a>
+                                    <span>拖拽定位，输入微调</span>
+                                </div>
                             </div>
-                            <a id="seedStagePositionEditorBtn" href="javascript:void(0)" class="easyui-linkbutton c1">定位编辑器</a>
                         </td>
                     </tr>
                 </table>

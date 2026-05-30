@@ -640,6 +640,41 @@
         });
     }
 
+    function bindSearchEnterEvent() {
+        try {
+            var $searchInput = $("#seedAdminName").textbox("textbox");
+            $searchInput.off("keydown.seedAdmin").on("keydown.seedAdmin", function (event) {
+                if (event.keyCode === 13) {
+                    refreshTypeGrid(true);
+                }
+            });
+        } catch (ignoreSearchBindError) {}
+    }
+
+    function bindSeedTypeCoverUrlWatcher() {
+        try {
+            var $coverInput = $("#seedTypeCoverImageUrl").textbox("textbox");
+            $coverInput.off("change.seedAdmin blur.seedAdmin input.seedAdmin")
+                .on("change.seedAdmin blur.seedAdmin input.seedAdmin", function () {
+                    previewSeedTypeCover(getTextboxValue($("#seedTypeCoverImageUrl"), ""));
+                });
+        } catch (ignoreCoverBindError) {}
+    }
+
+    function bindSeedStageAssetUrlWatcher() {
+        try {
+            var $assetInput = $("#seedStageAssetUrl").textbox("textbox");
+            $assetInput.off(".seedAdminAssetUrl")
+                .on("change.seedAdminAssetUrl blur.seedAdminAssetUrl input.seedAdminAssetUrl", function () {
+                    var val = normalizeAssetUrl(getTextboxValue($("#seedStageAssetUrl"), ""));
+                    if (val) {
+                        setTextboxValue($("#seedStageAssetUrl"), val);
+                    }
+                    previewImageFromUrl(val);
+                });
+        } catch (ignoreAssetBindError) {}
+    }
+
     function fillSeedTypeForm(row) {
         $("#seedTypeEditorForm").form("clear");
         $("#seedTypeEditorForm input[name='id']").val(0);
@@ -685,6 +720,40 @@
             try { $soil.combobox("resize", fullWidth); } catch (ignoreSoilResizeError) {}
             try { $desc.textbox("resize", fullWidth); } catch (ignoreDescResizeError) {}
             try { $coverUrl.textbox("resize", coverInputWidth); } catch (ignoreCoverResizeError) {}
+        }, 0);
+    }
+
+    function refreshSeedStageEditorLayout() {
+        window.setTimeout(function () {
+            var $table = $(".seed-stage-editor-table");
+            var fullWidth = Math.max(560, $table.find(".seed-admin-full-field").first().innerWidth() || 560);
+            var editorWidth = Math.max(220, Math.min(236, Math.floor((($table.innerWidth() || 760) - 320) / 2)));
+            var assetInputWidth = Math.max(300, fullWidth - 96);
+            var stageFieldSelectors = [
+                "#seedStageStageIndex",
+                "#seedStageGrowthStageId",
+                "#seedStageDurationSeconds",
+                "#seedStageBugProbability",
+                "#seedStageWidth",
+                "#seedStageHeight",
+                "#seedStageOffsetX",
+                "#seedStageOffsetY"
+            ];
+            $.each(stageFieldSelectors, function (_, selector) {
+                var $field = $(selector);
+                if ($field.length <= 0) {
+                    return;
+                }
+                try {
+                    if ($field.hasClass("easyui-combobox")) {
+                        $field.combobox("resize", editorWidth);
+                        return;
+                    }
+                    $field.numberbox("resize", editorWidth);
+                } catch (ignoreStageFieldResizeError) {}
+            });
+            try { $("#seedStageAssetUrl").textbox("resize", assetInputWidth); } catch (ignoreAssetResizeError) {}
+            syncPreviewGeometryFromForm();
         }, 0);
     }
 
@@ -818,11 +887,13 @@
             }
             fillSeedStageForm(row);
             $("#seedStageEditorDialog").dialog("setTitle", "编辑成长阶段").dialog("open");
+            refreshSeedStageEditorLayout();
             bindStageGeometrySyncEvents();
             return;
         }
         fillSeedStageForm(null);
         $("#seedStageEditorDialog").dialog("setTitle", "新增成长阶段").dialog("open");
+        refreshSeedStageEditorLayout();
         bindStageGeometrySyncEvents();
     }
 
@@ -1001,11 +1072,7 @@
         $("#seedAdminSearchBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             refreshTypeGrid(true);
         });
-        $("#seedAdminName").textbox("textbox").off("keydown.seedAdmin").on("keydown.seedAdmin", function (event) {
-            if (event.keyCode === 13) {
-                refreshTypeGrid(true);
-            }
-        });
+        bindSearchEnterEvent();
         $("#seedAdminResetBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedAdminName").textbox("setValue", "");
             refreshTypeGrid(true);
@@ -1064,20 +1131,11 @@
             $("#seedStagePositionDialog").dialog("close");
         });
 
-        $("#seedStageAssetUrl").textbox("textbox")
-            .off(".seedAdminAssetUrl")
-            .on("change.seedAdminAssetUrl blur.seedAdminAssetUrl input.seedAdminAssetUrl", function () {
-                var val = normalizeAssetUrl(getTextboxValue($("#seedStageAssetUrl"), ""));
-                if (val) {
-                    setTextboxValue($("#seedStageAssetUrl"), val);
-                }
-                previewImageFromUrl(val);
-            });
-        $("#seedTypeCoverImageUrl").textbox("textbox").off("change.seedAdmin").on("change.seedAdmin", function () {
-            previewSeedTypeCover(getTextboxValue($("#seedTypeCoverImageUrl"), ""));
-        });
+        bindSeedStageAssetUrlWatcher();
+        bindSeedTypeCoverUrlWatcher();
 
         window.setTimeout(bindStageGeometrySyncEvents, 0);
+        window.setTimeout(bindSearchEnterEvent, 80);
         syncActionButtons();
     }
 
@@ -1108,10 +1166,21 @@
     function initDialogs() {
         $("#seedTypeEditorDialog").dialog({
             cls: "farm-dialog-window seed-admin-dialog-window",
-            onOpen: refreshSeedTypeEditorLayout,
+            onOpen: function () {
+                refreshSeedTypeEditorLayout();
+                bindSeedTypeCoverUrlWatcher();
+            },
             onResize: refreshSeedTypeEditorLayout
         });
-        $("#seedStageEditorDialog").dialog({cls: "farm-dialog-window seed-admin-dialog-window"});
+        $("#seedStageEditorDialog").dialog({
+            cls: "farm-dialog-window seed-admin-dialog-window",
+            onOpen: function () {
+                refreshSeedStageEditorLayout();
+                bindSeedStageAssetUrlWatcher();
+                bindStageGeometrySyncEvents();
+            },
+            onResize: refreshSeedStageEditorLayout
+        });
         $("#seedStagePositionDialog").dialog({cls: "farm-dialog-window seed-admin-dialog-window"});
     }
 
