@@ -15,6 +15,7 @@ public class SeedGridVO implements Serializable {
     private Long enableSoilTypeBits;
     private String enableSoilTypeNames;
     private Short level;
+    private Long unlockExperienceRequired;
     private String description;
     private Short maxBugLimit;
     private Short maxHarvestCount;

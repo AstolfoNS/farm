@@ -28,6 +28,9 @@ public class SeedType extends BaseEntity {
     @Column(name = "level", nullable = false)
     private Short level;
 
+    @Column(name = "unlock_experience_required", nullable = false)
+    private Long unlockExperienceRequired;
+
     @Column(name = "description")
     private String description;
 

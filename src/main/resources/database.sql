@@ -240,6 +240,7 @@ CREATE TABLE farm.seed_types
     seed_quality_id             BIGINT          NOT NULL,
     enable_soil_type_bits       BIGINT          NOT NULL,
     level                       SMALLINT        NOT NULL,
+    unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
     description                 TEXT                NULL,
 
     -- 机制与事件配置

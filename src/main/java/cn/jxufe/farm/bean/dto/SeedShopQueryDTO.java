@@ -10,6 +10,8 @@ import java.io.Serializable;
 @Data
 public class SeedShopQueryDTO implements Serializable {
 
+    @Positive(message = "userId必须大于0")
+    private Long userId;
     private String name;
     @Positive(message = "seedQualityId必须大于0")
     private Long seedQualityId;

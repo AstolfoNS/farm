@@ -13,6 +13,10 @@ public class SeedShopItemVO implements Serializable {
     private Long seedQualityId;
     private String seedQualityName;
     private Short level;
+    private Long unlockExperienceRequired;
+    private Long currentUserExperience;
+    private Boolean unlockedByExperience;
+    private Integer unlockProgressPercent;
     private Long enableSoilTypeBits;
     private String enableSoilTypeNames;
     private String description;

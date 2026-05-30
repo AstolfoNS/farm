@@ -176,6 +176,23 @@
     color: #d6ffd1;
 }
 
+.shop-seed-lock {
+    position: relative;
+    z-index: 1;
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 700;
+}
+
+.shop-seed-lock.is-unlocked {
+    color: #9fff8f;
+}
+
+.shop-seed-lock.is-locked {
+    color: #ffd56f;
+}
+
 .shop-seed-desc {
     position: relative;
     z-index: 1;

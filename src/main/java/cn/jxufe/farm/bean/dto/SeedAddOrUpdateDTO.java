@@ -1,6 +1,7 @@
 package cn.jxufe.farm.bean.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -19,6 +20,8 @@ public class SeedAddOrUpdateDTO implements Serializable {
     private String soilTypeId;
     private Long enableSoilTypeBits;
     private Short level;
+    @PositiveOrZero(message = "unlockExperienceRequired必须大于等于0")
+    private Long unlockExperienceRequired;
     private String season;
     private String description;
     private String tips;

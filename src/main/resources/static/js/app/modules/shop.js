@@ -236,16 +236,29 @@
         $.each(records, function (_, row) {
             var seedTypeId = asNumber(row.id, 0);
             var price = asNumber(row.price, 0);
+            var unlockRequired = asNumber(row.unlockExperienceRequired, 0);
+            var currentExp = asNumber(row.currentUserExperience, 0);
+            var unlockedByExperience = row.unlockedByExperience !== false && currentExp >= unlockRequired;
+            var unlockProgress = asNumber(row.unlockProgressPercent, unlockRequired <= 0 ? 100 : Math.floor((currentExp * 100) / unlockRequired));
+            if (unlockProgress < 0) {
+                unlockProgress = 0;
+            } else if (unlockProgress > 100) {
+                unlockProgress = 100;
+            }
+            var lockText = unlockedByExperience
+                ? "已解锁"
+                : ("需经验 " + unlockRequired + "（当前 " + currentExp + "，进度 " + unlockProgress + "%）");
             html.push(
                 "<div class='shop-seed-card'>" +
                 "<div class='shop-seed-name'>" + escapeHtml(row.name || ("种子#" + seedTypeId)) + "</div>" +
                 "<div class='shop-seed-meta'>品质: " + escapeHtml(row.seedQualityName || "-") + " | 等级: " + asNumber(row.level, 0) + "</div>" +
                 "<div class='shop-seed-meta'>土地需求: " + escapeHtml(row.enableSoilTypeNames || "-") + "</div>" +
+                "<div class='shop-seed-lock " + (unlockedByExperience ? "is-unlocked" : "is-locked") + "'>" + escapeHtml(lockText) + "</div>" +
                 "<div class='shop-seed-desc'>" + escapeHtml(row.description || "暂无描述") + "</div>" +
                 "<img class='shop-seed-cover' src='" + escapeAttr(resolveCover(row.coverImageUrl)) + "' alt=''>" +
                 "<div class='shop-seed-price'>采购价: " + price + " 金币 | 预估净值: " + asNumber(row.estimatedNetValue, 0) + "</div>" +
                 "<div class='shop-seed-actions'>" +
-                "<a href='javascript:void(0)' class='easyui-linkbutton c1 shop-buy-btn' data-seed-type-id='" + seedTypeId + "' data-price='" + price + "' data-seed-name='" + escapeAttr(row.name || "") + "'>我要购买</a>" +
+                "<a href='javascript:void(0)' class='easyui-linkbutton " + (unlockedByExperience ? "c1" : "c5") + " shop-buy-btn' data-seed-type-id='" + seedTypeId + "' data-price='" + price + "' data-seed-name='" + escapeAttr(row.name || "") + "' data-exp-locked='" + (unlockedByExperience ? "0" : "1") + "' " + (unlockedByExperience ? "" : "disabled='disabled'") + ">" + (unlockedByExperience ? "我要购买" : "经验未解锁") + "</a>" +
                 "</div>" +
                 "</div>"
             );
@@ -518,6 +531,14 @@
     function bindSeedActions() {
         $("#shopSeedList .shop-buy-btn").off("click").on("click", function () {
             var $btn = $(this);
+            if (String($btn.attr("data-exp-locked") || "0") === "1") {
+                return;
+            }
+            try {
+                if ($btn.linkbutton("options").disabled) {
+                    return;
+                }
+            } catch (ignoreLinkOptionError) {}
             var seedTypeId = asNumber($btn.attr("data-seed-type-id"), 0);
             var seedName = $btn.attr("data-seed-name") || "";
             var price = asNumber($btn.attr("data-price"), 0);

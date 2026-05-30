@@ -1,4 +1,4 @@
--- ==========================================
+﻿-- ==========================================
 -- 初始化 Schema 与 扩展
 -- ==========================================
 DROP SCHEMA IF EXISTS farm CASCADE;
@@ -240,6 +240,7 @@ CREATE TABLE farm.seed_types
     seed_quality_id             BIGINT          NOT NULL,
     enable_soil_type_bits       BIGINT          NOT NULL,
     level                       SMALLINT        NOT NULL,
+    unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
     description                 TEXT                NULL,
 
     -- 机制与事件配置
@@ -1006,6 +1007,24 @@ JOIN quality_dict q ON q.name = cfg.quality_name
 WHERE NOT EXISTS (
     SELECT 1 FROM farm.seed_types st WHERE st.name = cfg.name AND st.is_deleted = false
 );
+
+-- 11.2.1 种子商店经验解锁梯度（全部展示，按经验解锁）
+UPDATE farm.seed_types st
+SET unlock_experience_required = CASE
+    WHEN COALESCE(st.level, 1) <= 1
+        THEN CASE
+            WHEN COALESCE(st.max_harvest_count, 1) >= 2 THEN 120
+            ELSE 0
+        END
+    WHEN st.level = 2
+        THEN 420 + GREATEST(COALESCE(st.max_harvest_count, 1) - 1, 0) * 80
+    WHEN st.level = 3
+        THEN 980 + GREATEST(COALESCE(st.max_harvest_count, 1) - 1, 0) * 140
+    ELSE 1600 + (st.level - 4) * 700 + GREATEST(COALESCE(st.max_harvest_count, 1) - 1, 0) * 180
+END,
+updated_at = NOW(),
+updated_by = 0
+WHERE st.is_deleted = false;
 
 -- 11.3 生长阶段配置重建（4/5/6 阶段混合）
 WITH stage_dict AS (

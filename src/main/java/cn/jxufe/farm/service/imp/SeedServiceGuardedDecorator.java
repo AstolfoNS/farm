@@ -28,12 +28,14 @@ import cn.jxufe.farm.common.exception.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
 import cn.jxufe.farm.dao.SeedGrowthStageDao;
 import cn.jxufe.farm.dao.SeedTypeDao;
+import cn.jxufe.farm.dao.UserDao;
 import cn.jxufe.farm.dao.UserCropDao;
 import cn.jxufe.farm.dao.UserFruitDao;
 import cn.jxufe.farm.dao.UserInventoryFlowDao;
 import cn.jxufe.farm.dao.UserSeedDao;
 import cn.jxufe.farm.entity.SeedGrowthStage;
 import cn.jxufe.farm.entity.SeedType;
+import cn.jxufe.farm.entity.User;
 import cn.jxufe.farm.service.SeedService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,7 +45,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Primary
@@ -61,6 +65,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
 
     private final SeedService delegate;
     private final SeedTypeDao seedTypeDao;
+    private final UserDao userDao;
     private final SeedGrowthStageDao seedGrowthStageDao;
     private final UserSeedDao userSeedDao;
     private final UserFruitDao userFruitDao;
@@ -70,6 +75,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     public SeedServiceGuardedDecorator(
             @Qualifier("seedServiceImp") SeedService delegate,
             SeedTypeDao seedTypeDao,
+            UserDao userDao,
             SeedGrowthStageDao seedGrowthStageDao,
             UserSeedDao userSeedDao,
             UserFruitDao userFruitDao,
@@ -78,6 +84,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     ) {
         this.delegate = delegate;
         this.seedTypeDao = seedTypeDao;
+        this.userDao = userDao;
         this.seedGrowthStageDao = seedGrowthStageDao;
         this.userSeedDao = userSeedDao;
         this.userFruitDao = userFruitDao;
@@ -95,12 +102,17 @@ public class SeedServiceGuardedDecorator implements SeedService {
     @Override
     public PageResult<SeedShopItemVO> pageSeedShop(SeedShopQueryDTO query) {
         PageResult<SeedShopItemVO> result = delegate.pageSeedShop(query);
-        applySeedShopDefaults(result);
+        Long userExperience = resolveUserExperience(query == null ? null : query.getUserId());
+        applySeedShopDefaults(result, userExperience);
         return result;
     }
 
     @Override
     public SeedShopBuyResultVO buySeed(SeedShopBuyDTO params) {
+        validateSeedUnlockByExperience(
+                params == null ? null : params.getUserId(),
+                params == null ? null : params.getSeedTypeId()
+        );
         return delegate.buySeed(params);
     }
 
@@ -130,7 +142,8 @@ public class SeedServiceGuardedDecorator implements SeedService {
     public SeedShopHomeVO shopHome(SeedShopHomeQueryDTO query) {
         SeedShopHomeVO result = delegate.shopHome(query);
         if (result != null) {
-            applySeedShopDefaults(result.getShopPage());
+            Long userExperience = resolveUserExperience(query == null ? null : query.getUserId());
+            applySeedShopDefaults(result.getShopPage(), userExperience);
         }
         return result;
     }
@@ -140,8 +153,18 @@ public class SeedServiceGuardedDecorator implements SeedService {
     public Long saveSeedType(SeedAddOrUpdateDTO params) {
         if (params != null) {
             params.setCoverImageUrl(normalizeSeedCoverUrl(params.getCoverImageUrl()));
+            params.setUnlockExperienceRequired(normalizeUnlockExperienceRequired(params.getUnlockExperienceRequired(), params.getLevel()));
         }
         Long seedTypeId = delegate.saveSeedType(params);
+        if (seedTypeId != null && seedTypeId > 0) {
+            SeedType seedType = seedTypeDao.findByIdAndIsDeletedFalse(seedTypeId)
+                    .orElseThrow(() -> new ServiceException(BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在"));
+            long unlockRequired = params == null
+                    ? normalizeUnlockExperienceRequired(null, seedType.getLevel())
+                    : normalizeUnlockExperienceRequired(params.getUnlockExperienceRequired(), seedType.getLevel());
+            seedType.setUnlockExperienceRequired(unlockRequired);
+            seedTypeDao.save(seedType);
+        }
         validateStageSequenceAndRegrow(seedTypeId);
         validateRegrowStageIndex(seedTypeId, params == null ? null : params.getRegrowStageIndex());
         return seedTypeId;
@@ -256,20 +279,36 @@ public class SeedServiceGuardedDecorator implements SeedService {
         if (pageResult == null || pageResult.getRecords() == null) {
             return;
         }
+        Map<Long, SeedType> seedTypeMap = buildSeedTypeMap(pageResult.getRecords().stream()
+                .map(SeedGridVO::getId)
+                .collect(Collectors.toSet()));
         for (SeedGridVO row : pageResult.getRecords()) {
             if (row != null) {
                 row.setCoverImageUrl(normalizeSeedCoverUrl(row.getCoverImageUrl()));
+                SeedType seedType = seedTypeMap.get(row.getId());
+                row.setUnlockExperienceRequired(resolveUnlockExperienceRequired(seedType));
             }
         }
     }
 
-    private void applySeedShopDefaults(PageResult<SeedShopItemVO> pageResult) {
+    private void applySeedShopDefaults(PageResult<SeedShopItemVO> pageResult, Long userExperience) {
         if (pageResult == null || pageResult.getRecords() == null) {
             return;
         }
+        long currentExperience = userExperience == null || userExperience < 0 ? 0L : userExperience;
+        Map<Long, SeedType> seedTypeMap = buildSeedTypeMap(pageResult.getRecords().stream()
+                .map(SeedShopItemVO::getId)
+                .collect(Collectors.toSet()));
         for (SeedShopItemVO row : pageResult.getRecords()) {
             if (row != null) {
                 row.setCoverImageUrl(normalizeSeedCoverUrl(row.getCoverImageUrl()));
+                SeedType seedType = seedTypeMap.get(row.getId());
+                long unlockRequired = resolveUnlockExperienceRequired(seedType);
+                boolean unlocked = currentExperience >= unlockRequired;
+                row.setUnlockExperienceRequired(unlockRequired);
+                row.setCurrentUserExperience(currentExperience);
+                row.setUnlockedByExperience(unlocked);
+                row.setUnlockProgressPercent(calcUnlockProgressPercent(currentExperience, unlockRequired));
             }
         }
     }
@@ -322,6 +361,91 @@ public class SeedServiceGuardedDecorator implements SeedService {
             return "/" + value;
         }
         return "/oss/" + value.replaceFirst("^/+", "");
+    }
+
+    private Map<Long, SeedType> buildSeedTypeMap(Set<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> idList = ids.stream()
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .toList();
+        if (idList.isEmpty()) {
+            return Map.of();
+        }
+        return seedTypeDao.findByIdInAndIsDeletedFalse(idList).stream()
+                .collect(Collectors.toMap(SeedType::getId, item -> item));
+    }
+
+    private Long resolveUserExperience(Long userId) {
+        if (userId == null || userId <= 0) {
+            return 0L;
+        }
+        User user = userDao.findByIdAndIsDeletedFalse(userId).orElse(null);
+        if (user == null || user.getExperience() == null) {
+            return 0L;
+        }
+        return Math.max(user.getExperience(), 0L);
+    }
+
+    private long resolveUnlockExperienceRequired(SeedType seedType) {
+        if (seedType == null) {
+            return 0L;
+        }
+        return normalizeUnlockExperienceRequired(seedType.getUnlockExperienceRequired(), seedType.getLevel());
+    }
+
+    private long normalizeUnlockExperienceRequired(Long unlockExperienceRequired, Short level) {
+        if (unlockExperienceRequired != null && unlockExperienceRequired >= 0) {
+            return unlockExperienceRequired;
+        }
+        int lv = level == null ? 1 : Math.max(level, (short) 1);
+        if (lv <= 1) {
+            return 0L;
+        }
+        if (lv == 2) {
+            return 300L;
+        }
+        if (lv == 3) {
+            return 900L;
+        }
+        return 1500L + (long) (lv - 4) * 600L;
+    }
+
+    private int calcUnlockProgressPercent(long currentExperience, long unlockRequired) {
+        if (unlockRequired <= 0) {
+            return 100;
+        }
+        if (currentExperience <= 0) {
+            return 0;
+        }
+        long percent = (currentExperience * 100L) / unlockRequired;
+        if (percent < 0L) {
+            return 0;
+        }
+        if (percent > 100L) {
+            return 100;
+        }
+        return (int) percent;
+    }
+
+    private void validateSeedUnlockByExperience(Long userId, Long seedTypeId) {
+        if (userId == null || userId <= 0 || seedTypeId == null || seedTypeId <= 0) {
+            return;
+        }
+        User user = userDao.findByIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new ServiceException(BizErrorCode.USER_NOT_FOUND, "用户不存在"));
+        SeedType seedType = seedTypeDao.findByIdAndIsDeletedFalse(seedTypeId)
+                .orElseThrow(() -> new ServiceException(BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在"));
+        long unlockRequired = resolveUnlockExperienceRequired(seedType);
+        long userExperience = user.getExperience() == null ? 0L : Math.max(user.getExperience(), 0L);
+        if (userExperience < unlockRequired) {
+            throw new ServiceException(
+                    BizErrorCode.EXPERIENCE_NOT_ENOUGH,
+                    "经验不足，尚未解锁该种子。需要经验: " + unlockRequired + "，当前经验: " + userExperience
+            );
+        }
     }
 
     private void validateRegrowStageIndex(Long seedTypeId, Short regrowStageIndex) {
