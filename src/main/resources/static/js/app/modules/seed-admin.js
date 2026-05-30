@@ -675,6 +675,43 @@
         } catch (ignoreAssetBindError) {}
     }
 
+    function bindUploadPickerEvents() {
+        $(document)
+            .off("click.seedAdminUpload", "#seedTypeUploadCoverBtn")
+            .on("click.seedAdminUpload", "#seedTypeUploadCoverBtn", function () {
+                var $file = $("#seedTypeCoverFile");
+                $file.val("");
+                $file.trigger("click");
+            });
+
+        $(document)
+            .off("click.seedAdminUpload", "#seedStageUploadImageBtn")
+            .on("click.seedAdminUpload", "#seedStageUploadImageBtn", function () {
+                var $file = $("#seedStageImageFile");
+                $file.val("");
+                $file.trigger("click");
+            });
+
+        $(document)
+            .off("change.seedAdminUpload", "#seedTypeCoverFile")
+            .on("change.seedAdminUpload", "#seedTypeCoverFile", function () {
+                uploadFile($(this), "seed-cover", function (url) {
+                    setTextboxValue($("#seedTypeCoverImageUrl"), url);
+                    previewSeedTypeCover(url);
+                });
+            });
+
+        $(document)
+            .off("change.seedAdminUpload", "#seedStageImageFile")
+            .on("change.seedAdminUpload", "#seedStageImageFile", function () {
+                uploadFile($(this), "seed-stage", function (url) {
+                    var normalized = normalizeAssetUrl(url);
+                    setTextboxValue($("#seedStageAssetUrl"), normalized);
+                    previewImageFromUrl(normalized);
+                });
+            });
+    }
+
     function fillSeedTypeForm(row) {
         $("#seedTypeEditorForm").form("clear");
         $("#seedTypeEditorForm input[name='id']").val(0);
@@ -1102,28 +1139,7 @@
             $("#seedStageEditorDialog").dialog("close");
         });
 
-        $("#seedTypeUploadCoverBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
-            $("#seedTypeCoverFile").val("");
-            $("#seedTypeCoverFile").trigger("click");
-        });
-        $("#seedTypeCoverFile").off("change.seedAdmin").on("change.seedAdmin", function () {
-            uploadFile($("#seedTypeCoverFile"), "seed-cover", function (url) {
-                setTextboxValue($("#seedTypeCoverImageUrl"), url);
-                previewSeedTypeCover(url);
-            });
-        });
-
-        $("#seedStageUploadImageBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
-            $("#seedStageImageFile").val("");
-            $("#seedStageImageFile").trigger("click");
-        });
-        $("#seedStageImageFile").off("change.seedAdmin").on("change.seedAdmin", function () {
-            uploadFile($("#seedStageImageFile"), "seed-stage", function (url) {
-                var normalized = normalizeAssetUrl(url);
-                setTextboxValue($("#seedStageAssetUrl"), normalized);
-                previewImageFromUrl(normalized);
-            });
-        });
+        bindUploadPickerEvents();
 
         $("#seedStagePositionEditorBtn").off("click.seedAdmin").on("click.seedAdmin", openPositionEditor);
         $("#seedStagePositionApplyBtn").off("click.seedAdmin").on("click.seedAdmin", applyPositionEditor);
