@@ -136,7 +136,7 @@
 
 .shop-seed-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(198px, 1fr));
     align-content: start;
     flex: 1;
     min-height: 0;
@@ -152,9 +152,9 @@
     border: 1px solid rgba(70, 30, 10, 0.52);
     border-radius: 3px;
     background: rgba(0, 112, 0, 0.74);
-    padding: 7px 7px 22px;
+    padding: 7px 7px 16px;
     overflow: hidden;
-    min-height: 318px;
+    min-height: 344px;
     box-shadow:
         0 0 0 1px rgba(150, 82, 34, 0.62) inset,
         0 0 0 1px rgba(34, 14, 6, 0.62),
@@ -225,8 +225,8 @@
     font-size: 14px;
     line-height: 1.45;
     color: #ecffd8;
-    min-height: 36px;
-    max-height: 42px;
+    min-height: 42px;
+    max-height: 44px;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -238,7 +238,7 @@
     position: relative;
     z-index: 1;
     width: 100%;
-    height: 98px;
+    height: 106px;
     object-fit: contain;
     margin: 4px 0;
 }
@@ -256,9 +256,9 @@
 .shop-seed-actions {
     position: relative;
     z-index: 1;
-    margin-top: 4px;
-    padding-top: 4px;
-    padding-bottom: 12px;
+    margin-top: auto;
+    padding-top: 8px;
+    padding-bottom: 18px;
     border-top: 1px solid rgba(176, 255, 151, 0.18);
     display: flex;
     justify-content: center;
@@ -266,8 +266,8 @@
 }
 
 .shop-seed-actions .l-btn {
-    min-width: 74px;
-    transform: translateY(-4px);
+    min-width: 82px;
+    transform: none;
 }
 
 .shop-seed-pager {
@@ -393,6 +393,53 @@
     padding-top: 5px;
     color: #f2ffe1;
     font-size: 12px;
+}
+
+.shop-action-dialog-shell {
+    padding: 4px 2px 0;
+}
+
+.shop-action-dialog-shell .farm-action-row {
+    margin-bottom: 10px;
+    line-height: 1.45;
+    color: #eeffde;
+}
+
+.shop-action-dialog-shell .farm-action-row:first-child {
+    color: #fff2b3;
+    font-weight: 700;
+}
+
+.shop-dialog-window .window-body {
+    padding: 8px 8px 4px !important;
+}
+
+.shop-dialog-window .dialog-button.shop-dialog-actions {
+    padding: 7px 8px 8px !important;
+}
+
+.shop-dialog-window .dialog-button .l-btn {
+    min-width: 78px;
+    border-radius: 0 !important;
+}
+
+.shop-dialog-window .dialog-button .l-btn.c2 {
+    border: 1px solid #0d690d !important;
+    background: linear-gradient(180deg, #1ab31a, #0f800f) !important;
+}
+
+.shop-dialog-window .dialog-button .l-btn.c5 {
+    border: 1px solid #8b2525 !important;
+    background: linear-gradient(180deg, #d34f4f, #a72d2d) !important;
+}
+
+.shop-dialog-window .numberbox .textbox-text {
+    height: 30px !important;
+    line-height: 30px !important;
+    border-radius: 0 !important;
+    border: 1px solid #5fce5a !important;
+    background: #f2fff0 !important;
+    color: #154115 !important;
 }
 
 @media screen and (max-width: 1280px) {

@@ -449,10 +449,12 @@
             return;
         }
         $("body").append(
-            "<div id='shopBuyDialog' style='display:none;'>" +
+            "<div id='shopBuyDialog' class='shop-action-dialog' style='display:none;'>" +
+            "<div class='farm-dialog-shell shop-action-dialog-shell'>" +
             "<div class='farm-action-row' id='shopBuySeedLabel'>种子</div>" +
             "<div class='farm-action-row'>数量: <input id='shopBuyQty' style='width:180px;'></div>" +
             "<div class='farm-action-row' id='shopBuyCostTip'>预计花费: 0 金币</div>" +
+            "</div>" +
             "</div>"
         );
         $("#shopBuyDialog").dialog({
@@ -460,6 +462,11 @@
             height: 230,
             modal: true,
             closed: true,
+            cls: "farm-dialog-window shop-dialog-window",
+            onOpen: function () {
+                var $panel = $(this).dialog("dialog");
+                $panel.find(".dialog-button").addClass("farm-dialog-actions shop-dialog-actions");
+            },
             buttons: [{
                 text: "确认购买",
                 handler: function () {
@@ -472,6 +479,9 @@
                 }
             }]
         });
+        var $buyButtons = $("#shopBuyDialog").dialog("dialog").find(".dialog-button .l-btn");
+        $buyButtons.eq(0).addClass("c2");
+        $buyButtons.eq(1).addClass("c5");
         $("#shopBuyQty").numberbox({
             min: 1,
             precision: 0,
@@ -484,10 +494,12 @@
             return;
         }
         $("body").append(
-            "<div id='shopSellDialog' style='display:none;'>" +
+            "<div id='shopSellDialog' class='shop-action-dialog' style='display:none;'>" +
+            "<div class='farm-dialog-shell shop-action-dialog-shell'>" +
             "<div class='farm-action-row' id='shopSellSeedLabel'>果实</div>" +
             "<div class='farm-action-row'>数量: <input id='shopSellQty' style='width:180px;'></div>" +
             "<div class='farm-action-row' id='shopSellIncomeTip'>预计获得: 0 金币</div>" +
+            "</div>" +
             "</div>"
         );
         $("#shopSellDialog").dialog({
@@ -495,6 +507,11 @@
             height: 230,
             modal: true,
             closed: true,
+            cls: "farm-dialog-window shop-dialog-window",
+            onOpen: function () {
+                var $panel = $(this).dialog("dialog");
+                $panel.find(".dialog-button").addClass("farm-dialog-actions shop-dialog-actions");
+            },
             buttons: [{
                 text: "确认出售",
                 handler: function () {
@@ -507,6 +524,9 @@
                 }
             }]
         });
+        var $sellButtons = $("#shopSellDialog").dialog("dialog").find(".dialog-button .l-btn");
+        $sellButtons.eq(0).addClass("c2");
+        $sellButtons.eq(1).addClass("c5");
         $("#shopSellQty").numberbox({
             min: 1,
             precision: 0,
