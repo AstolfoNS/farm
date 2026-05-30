@@ -3,6 +3,7 @@ package cn.jxufe.farm.service.imp;
 import cn.jxufe.farm.bean.dto.IdDTO;
 import cn.jxufe.farm.bean.dto.SeedAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.SeedFruitInventoryQueryDTO;
+import cn.jxufe.farm.bean.dto.SeedInventoryQueryDTO;
 import cn.jxufe.farm.bean.dto.SeedShopBuyDTO;
 import cn.jxufe.farm.bean.dto.SeedShopHomeQueryDTO;
 import cn.jxufe.farm.bean.dto.SeedShopOverviewDTO;
@@ -15,6 +16,7 @@ import cn.jxufe.farm.bean.dto.SeedTypeQueryDTO;
 import cn.jxufe.farm.bean.vo.OptionVO;
 import cn.jxufe.farm.bean.vo.SeedFruitInventoryItemVO;
 import cn.jxufe.farm.bean.vo.SeedGridVO;
+import cn.jxufe.farm.bean.vo.SeedInventoryItemVO;
 import cn.jxufe.farm.bean.vo.SeedShopBuyResultVO;
 import cn.jxufe.farm.bean.vo.SeedShopHomeVO;
 import cn.jxufe.farm.bean.vo.SeedShopItemVO;
@@ -131,6 +133,44 @@ public class SeedServiceGuardedDecorator implements SeedService {
         PageResult<SeedFruitInventoryItemVO> result = delegate.pageFruitInventory(query);
         applyFruitInventoryDefaults(result);
         return result;
+    }
+
+    @Override
+    public PageResult<SeedInventoryItemVO> pageSeedInventory(SeedInventoryQueryDTO query) {
+        if (query == null || query.getUserId() == null || query.getUserId() <= 0) {
+            throw new ServiceException(BizErrorCode.PARAM_INVALID, "用户ID无效");
+        }
+        userDao.findByIdAndIsDeletedFalse(query.getUserId())
+                .orElseThrow(() -> new ServiceException(BizErrorCode.USER_NOT_FOUND, "用户不存在"));
+
+        int pageNo = query.getPage() == null || query.getPage() < 1 ? 1 : query.getPage();
+        int pageSize = query.getRows() == null || query.getRows() < 1 ? 10 : Math.min(query.getRows(), 100);
+        String nameKeyword = query.getName() == null ? "" : query.getName().trim().toLowerCase();
+
+        List<SeedType> seedTypes = seedTypeDao.findByIsDeletedFalseOrderByIdAsc();
+        Map<Long, SeedType> seedTypeMap = seedTypes.stream().collect(Collectors.toMap(SeedType::getId, item -> item));
+
+        List<SeedInventoryItemVO> rows = userSeedDao.findByUserIdAndIsDeletedFalseOrderByIdAsc(query.getUserId()).stream()
+                .filter(item -> seedTypeMap.containsKey(item.getSeedTypeId()))
+                .map(item -> {
+                    SeedType seedType = seedTypeMap.get(item.getSeedTypeId());
+                    SeedInventoryItemVO vo = new SeedInventoryItemVO();
+                    long quantity = item.getQuantity() == null ? 0L : Math.max(item.getQuantity(), 0L);
+                    long frozen = item.getFrozenQuantity() == null ? 0L : Math.max(item.getFrozenQuantity(), 0L);
+                    vo.setSeedTypeId(seedType.getId());
+                    vo.setSeedName(seedType.getName() == null ? "" : seedType.getName());
+                    vo.setCoverImageUrl(normalizeSeedCoverUrl(seedType.getCoverImageUrl()));
+                    vo.setQuantity(quantity);
+                    vo.setFrozenQuantity(frozen);
+                    vo.setAvailableQuantity(Math.max(quantity - frozen, 0L));
+                    vo.setUnitBuyPrice(seedType.getPrice() == null ? 0L : Math.max(seedType.getPrice(), 0L));
+                    vo.setUnlockExperienceRequired(resolveUnlockExperienceRequired(seedType));
+                    return vo;
+                })
+                .filter(item -> nameKeyword.isEmpty() || item.getSeedName().toLowerCase().contains(nameKeyword))
+                .collect(Collectors.toList());
+
+        return PageResult.of(rows, pageNo, pageSize);
     }
 
     @Override

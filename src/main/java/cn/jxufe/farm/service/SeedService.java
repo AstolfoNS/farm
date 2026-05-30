@@ -2,6 +2,7 @@ package cn.jxufe.farm.service;
 
 import cn.jxufe.farm.bean.dto.SeedAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.SeedFruitInventoryQueryDTO;
+import cn.jxufe.farm.bean.dto.SeedInventoryQueryDTO;
 import cn.jxufe.farm.bean.dto.SeedShopBuyDTO;
 import cn.jxufe.farm.bean.dto.SeedShopHomeQueryDTO;
 import cn.jxufe.farm.bean.dto.SeedShopOverviewDTO;
@@ -14,6 +15,7 @@ import cn.jxufe.farm.bean.dto.SeedStageAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.IdDTO;
 import cn.jxufe.farm.bean.vo.OptionVO;
 import cn.jxufe.farm.bean.vo.SeedGridVO;
+import cn.jxufe.farm.bean.vo.SeedInventoryItemVO;
 import cn.jxufe.farm.bean.vo.SeedFruitInventoryItemVO;
 import cn.jxufe.farm.bean.vo.SeedShopBuyResultVO;
 import cn.jxufe.farm.bean.vo.SeedShopHomeVO;
@@ -25,6 +27,7 @@ import cn.jxufe.farm.bean.vo.SeedStageGridVO;
 import cn.jxufe.farm.bean.vo.SoilOptionVO;
 import cn.jxufe.farm.common.pages.PageResult;
 
+import java.util.Collections;
 import java.util.List;
 
 public interface SeedService {
@@ -39,6 +42,10 @@ public interface SeedService {
     PageResult<SeedShopTradeRecordVO> pageShopTrades(SeedShopTradeQueryDTO query);
 
     PageResult<SeedFruitInventoryItemVO> pageFruitInventory(SeedFruitInventoryQueryDTO query);
+
+    default PageResult<SeedInventoryItemVO> pageSeedInventory(SeedInventoryQueryDTO query) {
+        return PageResult.of(Collections.emptyList(), 1L, 10L);
+    }
 
     SeedShopOverviewVO shopOverview(SeedShopOverviewDTO query);
 

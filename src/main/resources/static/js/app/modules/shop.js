@@ -1,4 +1,4 @@
-(function (window, $) {
+﻿(function (window, $) {
     var FarmShopModule = {};
     var state = {
         active: false,
@@ -300,28 +300,26 @@
     function renderFruitList(pageData) {
         var records = toArray(pageData && pageData.records);
         if (records.length === 0) {
-            $("#shopFruitList").html("<div class='shop-empty'>暂无果实库存</div>");
+            $("#shopFruitList").html("<div class='shop-empty'>暂无种子库存</div>");
             return;
         }
         var html = [];
         $.each(records, function (_, row) {
             var seedTypeId = asNumber(row.seedTypeId, 0);
+            var quantity = asNumber(row.quantity, 0);
+            var frozen = asNumber(row.frozenQuantity, 0);
             var available = asNumber(row.availableQuantity, 0);
-            var unitPrice = asNumber(row.unitFruitPrice, 0);
+            var unitPrice = asNumber(row.unitBuyPrice, 0);
+            var unlockRequired = asNumber(row.unlockExperienceRequired, 0);
             html.push(
                 "<div class='shop-fruit-item'>" +
-                "<div class='shop-fruit-name'>" + escapeHtml(row.seedName || ("果实#" + seedTypeId)) + "</div>" +
-                "<div class='shop-fruit-meta'>可售: " + available + " | 冻结: " + asNumber(row.frozenQuantity, 0) + " | 单价: " + unitPrice + "</div>" +
-                "<div class='shop-fruit-meta'>预计可售: " + asNumber(row.estimatedIncomeCoin, 0) + " 金币</div>" +
-                "<div class='shop-seed-actions'>" +
-                "<a href='javascript:void(0)' class='easyui-linkbutton shop-sell-btn' data-seed-type-id='" + seedTypeId + "' data-seed-name='" + escapeAttr(row.seedName || "") + "' data-available='" + available + "' data-unit-price='" + unitPrice + "' " + (available <= 0 ? "disabled='disabled'" : "") + ">出售</a>" +
-                "</div>" +
+                "<div class='shop-fruit-name'>" + escapeHtml(row.seedName || ("种子#" + seedTypeId)) + "</div>" +
+                "<div class='shop-fruit-meta'>库存: " + quantity + " | 冻结: " + frozen + " | 可用: " + available + "</div>" +
+                "<div class='shop-fruit-meta'>采购价: " + unitPrice + " 金币 | 解锁经验: " + unlockRequired + "</div>" +
                 "</div>"
             );
         });
         $("#shopFruitList").html(html.join(""));
-        $("#shopFruitList .easyui-linkbutton").linkbutton();
-        bindFruitActions();
     }
 
     function renderTradeList(pageData) {
@@ -546,25 +544,13 @@
         });
     }
 
-    function bindFruitActions() {
-        $("#shopFruitList .shop-sell-btn").off("click").on("click", function () {
-            var $btn = $(this);
-            if ($btn.linkbutton("options").disabled) {
-                return;
-            }
-            var seedTypeId = asNumber($btn.attr("data-seed-type-id"), 0);
-            var seedName = $btn.attr("data-seed-name") || "";
-            var available = asNumber($btn.attr("data-available"), 0);
-            var unitPrice = asNumber($btn.attr("data-unit-price"), 0);
-            openSellDialog(seedTypeId, seedName, available, unitPrice);
-        });
-    }
+    function bindFruitActions() {}
 
     function loadFruitPage() {
         if (!state.active || state.userId <= 0) {
             return;
         }
-        FarmApi.fruitPage({
+        FarmApi.seedInventoryPage({
             userId: state.userId,
             page: state.fruitQuery.page,
             rows: state.fruitQuery.rows
@@ -676,4 +662,5 @@
         window.FarmCore.registerSetActiveModule("shop", FarmShopModule, {refreshMethod: "reload"});
     }
 })(window, window.jQuery);
+
 

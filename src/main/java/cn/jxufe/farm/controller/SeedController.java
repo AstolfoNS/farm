@@ -3,6 +3,7 @@ package cn.jxufe.farm.controller;
 import cn.jxufe.farm.bean.dto.IdDTO;
 import cn.jxufe.farm.bean.dto.SeedAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.SeedFruitInventoryQueryDTO;
+import cn.jxufe.farm.bean.dto.SeedInventoryQueryDTO;
 import cn.jxufe.farm.bean.dto.SeedShopBuyDTO;
 import cn.jxufe.farm.bean.dto.SeedShopHomeQueryDTO;
 import cn.jxufe.farm.bean.dto.SeedShopOverviewDTO;
@@ -14,6 +15,7 @@ import cn.jxufe.farm.bean.dto.SeedStageQueryDTO;
 import cn.jxufe.farm.bean.dto.SeedTypeQueryDTO;
 import cn.jxufe.farm.bean.vo.OptionVO;
 import cn.jxufe.farm.bean.vo.SeedGridVO;
+import cn.jxufe.farm.bean.vo.SeedInventoryItemVO;
 import cn.jxufe.farm.bean.vo.SeedFruitInventoryItemVO;
 import cn.jxufe.farm.bean.vo.SeedShopBuyResultVO;
 import cn.jxufe.farm.bean.vo.SeedShopHomeVO;
@@ -76,6 +78,11 @@ public class SeedController {
     @PostMapping(value = "/shop/fruit/page", consumes = MediaType.APPLICATION_JSON_VALUE)
     public R<PageResult<SeedFruitInventoryItemVO>> pageFruitInventory(@Valid @RequestBody SeedFruitInventoryQueryDTO query) {
         return R.ok(seedService.pageFruitInventory(query));
+    }
+
+    @PostMapping(value = "/shop/seed/page", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public R<PageResult<SeedInventoryItemVO>> pageSeedInventory(@Valid @RequestBody SeedInventoryQueryDTO query) {
+        return R.ok(seedService.pageSeedInventory(query));
     }
 
     @PostMapping(value = "/shop/overview", consumes = MediaType.APPLICATION_JSON_VALUE)

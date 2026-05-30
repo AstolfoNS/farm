@@ -435,6 +435,26 @@
         });
     };
 
+    FarmApi.seedInventoryPage = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/seed/shop/seed/page",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
     FarmApi.sellFruit = function (params, onSuccess, onError) {
         $.ajax({
             url: "/seed/shop/sell-fruit",
