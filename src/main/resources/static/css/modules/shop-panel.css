@@ -240,8 +240,12 @@
 .shop-seed-actions {
     position: relative;
     z-index: 1;
-    margin-top: 6px;
-    text-align: right;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(176, 255, 151, 0.18);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .shop-seed-actions .l-btn {
