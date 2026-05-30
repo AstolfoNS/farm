@@ -147,12 +147,14 @@
 
 .shop-seed-card {
     position: relative;
+    display: flex;
+    flex-direction: column;
     border: 2px solid rgba(129, 86, 42, 0.86);
     border-radius: 3px;
     background: rgba(0, 112, 0, 0.74);
     padding: 8px 8px 10px;
     overflow: hidden;
-    min-height: 332px;
+    min-height: 372px;
 }
 
 .shop-seed-card::after {
@@ -207,7 +209,9 @@
     font-size: 14px;
     line-height: 1.45;
     color: #ecffd8;
-    min-height: 88px;
+    min-height: 48px;
+    max-height: 64px;
+    overflow: hidden;
     margin: 6px 0;
 }
 
@@ -231,7 +235,8 @@
 .shop-seed-actions {
     position: relative;
     z-index: 1;
-    margin-top: 8px;
+    margin-top: auto;
+    padding-top: 8px;
     text-align: center;
 }
 
