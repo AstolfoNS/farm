@@ -284,10 +284,10 @@
         </section>
 
         <div id="seedTypeEditorDialog" class="easyui-dialog seed-admin-dialog farm-dialog-shell" title="编辑种子类型"
-             style="width:860px;height:518px;padding:8px" closed="true" modal="true" resizable="false">
+             style="width:900px;height:552px;padding:8px" closed="true" modal="true" resizable="false">
             <form id="seedTypeEditorForm" method="post">
                 <input type="hidden" name="id" value="0">
-                <table class="seed-admin-form-table farm-dialog-form">
+                <table class="seed-admin-form-table farm-dialog-form seed-type-editor-table">
                     <tr>
                         <td>种子名称</td>
                         <td><input name="name" class="easyui-textbox" style="width:220px" required="true"></td>
@@ -330,10 +330,17 @@
                     </tr>
                     <tr>
                         <td>封面图</td>
-                        <td colspan="3">
-                            <input id="seedTypeCoverImageUrl" name="coverImageUrl" class="easyui-textbox" style="width:540px">
-                            <a id="seedTypeUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
-                            <img id="seedTypeCoverPreview" class="seed-admin-cover-preview" src="/oss/defaults/seed/seed-cover-default.png" alt="封面预览">
+                        <td colspan="3" class="seed-admin-full-field">
+                            <div class="seed-type-cover-row">
+                                <div class="seed-type-cover-input-wrap">
+                                    <input id="seedTypeCoverImageUrl" name="coverImageUrl" class="easyui-textbox seed-admin-full-input">
+                                    <a id="seedTypeUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
+                                </div>
+                                <div class="seed-type-cover-preview-wrap">
+                                    <img id="seedTypeCoverPreview" class="seed-admin-cover-preview" src="/oss/defaults/seed/seed-cover-default.png" alt="封面预览">
+                                    <span>预览</span>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>

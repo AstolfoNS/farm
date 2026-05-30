@@ -123,9 +123,61 @@
     width: 100% !important;
 }
 
+.seed-type-editor-table td:nth-child(odd) {
+    width: 118px;
+}
+
+.seed-type-editor-table td:nth-child(even) {
+    width: 290px;
+}
+
+.seed-type-editor-table .seed-admin-full-field {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.seed-type-cover-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.seed-type-cover-input-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.seed-type-cover-input-wrap .textbox {
+    flex: 1;
+    min-width: 0;
+}
+
+.seed-type-cover-preview-wrap {
+    width: 68px;
+    color: #e8ffd8;
+    text-align: center;
+    font-size: 12px;
+}
+
+.seed-type-cover-preview-wrap .seed-admin-cover-preview {
+    margin: 0 auto 4px;
+    width: 58px;
+    height: 58px;
+}
+
 .seed-admin-description-input + .textbox,
 .seed-admin-description-input.textbox-f {
     min-height: 86px;
+}
+
+.seed-type-editor-table .seed-admin-description-input + .textbox .textbox-text {
+    min-height: 72px !important;
+    line-height: 1.45 !important;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 .seed-admin-form-table.farm-dialog-form td:nth-child(odd) {

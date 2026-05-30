@@ -674,6 +674,20 @@
         previewSeedTypeCover(row.coverImageUrl || "");
     }
 
+    function refreshSeedTypeEditorLayout() {
+        window.setTimeout(function () {
+            var $soil = $("#seedTypeSoilIds");
+            var $desc = $("#seedTypeEditorForm input[name='description']");
+            var $coverUrl = $("#seedTypeCoverImageUrl");
+            var fullWidth = Math.max(560, $(".seed-type-editor-table .seed-admin-full-field").first().innerWidth() || 560);
+            var coverWrapWidth = Math.max(360, $(".seed-type-cover-input-wrap").innerWidth() || (fullWidth - 90));
+            var coverInputWidth = Math.max(260, coverWrapWidth - 90);
+            try { $soil.combobox("resize", fullWidth); } catch (ignoreSoilResizeError) {}
+            try { $desc.textbox("resize", fullWidth); } catch (ignoreDescResizeError) {}
+            try { $coverUrl.textbox("resize", coverInputWidth); } catch (ignoreCoverResizeError) {}
+        }, 0);
+    }
+
     function openSeedTypeEditor(mode) {
         if (mode === "edit") {
             var row = $("#seedAdminTypeGrid").datagrid("getSelected");
@@ -683,10 +697,12 @@
             }
             fillSeedTypeForm(row);
             $("#seedTypeEditorDialog").dialog("setTitle", "编辑种子类型").dialog("open");
+            refreshSeedTypeEditorLayout();
             return;
         }
         fillSeedTypeForm(null);
         $("#seedTypeEditorDialog").dialog("setTitle", "新增种子类型").dialog("open");
+        refreshSeedTypeEditorLayout();
     }
 
     function saveSeedType() {
@@ -1090,7 +1106,11 @@
     }
 
     function initDialogs() {
-        $("#seedTypeEditorDialog").dialog({cls: "farm-dialog-window seed-admin-dialog-window"});
+        $("#seedTypeEditorDialog").dialog({
+            cls: "farm-dialog-window seed-admin-dialog-window",
+            onOpen: refreshSeedTypeEditorLayout,
+            onResize: refreshSeedTypeEditorLayout
+        });
         $("#seedStageEditorDialog").dialog({cls: "farm-dialog-window seed-admin-dialog-window"});
         $("#seedStagePositionDialog").dialog({cls: "farm-dialog-window seed-admin-dialog-window"});
     }
