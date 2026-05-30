@@ -1,5 +1,7 @@
 (function (window, $) {
     var FarmModule = {};
+    var CROP_STATUS_WITHERED = 3;
+    var WITHERED_CROP_IMAGE = "domain/farm/crops/crop-withered-default.png";
     var layout = {
         cols: 5,
         tileX: 118,
@@ -215,6 +217,9 @@
     }
 
     function resolveCropImage(crop) {
+        if (asNumber(crop && crop.growStatus, 0) === CROP_STATUS_WITHERED) {
+            return farmResolveImg(WITHERED_CROP_IMAGE);
+        }
         if (crop && crop.stageAssetUrl && String(crop.stageAssetUrl).trim().length > 0) {
             var raw = String(crop.stageAssetUrl).trim();
             if (raw.indexOf("http://") === 0 || raw.indexOf("https://") === 0 || raw.indexOf("/") === 0) {
