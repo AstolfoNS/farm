@@ -374,36 +374,40 @@
         });
     }
 
-    function chooseAndUploadFile(category, onSuccess) {
-        var $picker = $("<input type='file' accept='image/*'>").css({
-            position: "fixed",
-            left: "-9999px",
-            top: "-9999px",
-            width: "1px",
-            height: "1px",
-            opacity: 0
-        });
-        $("body").append($picker);
-        $picker.off("change.plotAdminTemp").on("change.plotAdminTemp", function () {
-            var $current = $(this);
-            var files = $current.prop("files");
-            if (!files || files.length <= 0) {
-                $current.remove();
-                return;
-            }
-            uploadFile($current, category, onSuccess, function () {
-                $current.remove();
+    function bindUploadPickerEvents() {
+        $(document)
+            .off("click.plotAdminUpload", "#plotSoilUploadCoverBtn")
+            .on("click.plotAdminUpload", "#plotSoilUploadCoverBtn", function () {
+                var $file = $("#plotSoilCoverFile");
+                $file.val("");
+                $file.trigger("click");
             });
-        });
-        $picker.trigger("click");
-        setTimeout(function () {
-            if ($picker.closest("body").length > 0) {
-                var chosen = $picker.prop("files");
-                if (!chosen || chosen.length <= 0) {
-                    $picker.remove();
-                }
-            }
-        }, 1200);
+
+        $(document)
+            .off("click.plotAdminUpload", "#plotTypeUploadCoverBtn")
+            .on("click.plotAdminUpload", "#plotTypeUploadCoverBtn", function () {
+                var $file = $("#plotTypeCoverFile");
+                $file.val("");
+                $file.trigger("click");
+            });
+
+        $(document)
+            .off("change.plotAdminUpload", "#plotSoilCoverFile")
+            .on("change.plotAdminUpload", "#plotSoilCoverFile", function () {
+                uploadFile($(this), "soil-cover", function (url) {
+                    setTextboxValue($("#plotSoilCoverImageUrl"), url);
+                    previewSoilCover(url);
+                });
+            });
+
+        $(document)
+            .off("change.plotAdminUpload", "#plotTypeCoverFile")
+            .on("change.plotAdminUpload", "#plotTypeCoverFile", function () {
+                uploadFile($(this), "plot-cover", function (url) {
+                    setTextboxValue($("#plotTypeCoverImageUrl"), url);
+                    previewTypeCover(url);
+                });
+            });
     }
 
     function saveSoil() {
@@ -742,30 +746,7 @@
             $("#plotUserAllocationDialog").dialog("close");
         });
 
-        $("#plotSoilUploadCoverBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
-            chooseAndUploadFile("soil-cover", function (url) {
-                setTextboxValue($("#plotSoilCoverImageUrl"), url);
-                previewSoilCover(url);
-            });
-        });
-        $("#plotTypeUploadCoverBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
-            chooseAndUploadFile("plot-cover", function (url) {
-                setTextboxValue($("#plotTypeCoverImageUrl"), url);
-                previewTypeCover(url);
-            });
-        });
-        $("#plotSoilCoverFile").off("change.plotAdmin").on("change.plotAdmin", function () {
-            uploadFile($(this), "soil-cover", function (url) {
-                setTextboxValue($("#plotSoilCoverImageUrl"), url);
-                previewSoilCover(url);
-            });
-        });
-        $("#plotTypeCoverFile").off("change.plotAdmin").on("change.plotAdmin", function () {
-            uploadFile($(this), "plot-cover", function (url) {
-                setTextboxValue($("#plotTypeCoverImageUrl"), url);
-                previewTypeCover(url);
-            });
-        });
+        bindUploadPickerEvents();
         $("#plotSoilCoverImageUrl").textbox("textbox").off("change.plotAdmin blur.plotAdmin input.plotAdmin")
             .on("change.plotAdmin blur.plotAdmin input.plotAdmin", function () {
                 previewSoilCover(getTextboxValue($("#plotSoilCoverImageUrl"), DEFAULT_SOIL_COVER));
