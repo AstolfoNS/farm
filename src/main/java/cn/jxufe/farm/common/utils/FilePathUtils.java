@@ -13,6 +13,8 @@ public final class FilePathUtils {
             "seed-cover",
             "seed-stage",
             "seed-icon",
+            "soil-cover",
+            "plot-cover",
             "other"
     );
 
