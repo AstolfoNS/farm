@@ -6,7 +6,9 @@
         tab: "soil",
         soilQuery: {page: 1, rows: 10, name: ""},
         typeQuery: {page: 1, rows: 10, name: ""},
-        userQuery: {page: 1, rows: 10, username: ""}
+        userQuery: {page: 1, rows: 10, username: ""},
+        currentPolicy: null,
+        plotTypeOptions: []
     };
 
     var DEFAULT_SOIL_COVER = "/oss/defaults/soil/soil-default.png";
@@ -26,16 +28,13 @@
         return $.trim(value == null ? "" : String(value));
     }
 
-    function escapeHtml(text) {
-        return $("<div/>").text(text == null ? "" : String(text)).html();
-    }
-
     function defaultText(value, fallback) {
         var safe = trimText(value);
-        if (safe.length > 0) {
-            return safe;
-        }
-        return fallback || "";
+        return safe.length > 0 ? safe : (fallback || "");
+    }
+
+    function escapeHtml(text) {
+        return $("<div/>").text(text == null ? "" : String(text)).html();
     }
 
     function showMessage(msg) {
@@ -56,8 +55,7 @@
 
     function getTextboxValue($el, fallback) {
         try {
-            var v = $el.textbox("getValue");
-            return trimText(v);
+            return trimText($el.textbox("getValue"));
         } catch (ignoreTextboxGet) {
             return trimText($el.val()) || (fallback || "");
         }
@@ -84,21 +82,12 @@
         return "<img src='" + escapeHtml(safe) + "' alt='' style='width:46px;height:46px;object-fit:cover;border:1px solid rgba(172,236,153,.64);background:rgba(0,62,0,.55)'>";
     }
 
-    function loadFilterData(data) {
-        if (data && data.records) {
-            return data;
-        }
-        if (data && data.data && data.data.records) {
-            return data.data;
-        }
-        return {total: 0, records: []};
-    }
-
     function switchTab(tabName) {
         state.tab = tabName;
         $(".plot-admin-tab").removeClass("is-active");
         $(".plot-admin-tab[data-tab='" + tabName + "']").addClass("is-active");
         $(".plot-admin-pane").removeClass("is-active");
+
         if (tabName === "type") {
             $("#plotAdminTypePane").addClass("is-active");
             refreshTypeGrid();
@@ -106,27 +95,20 @@
         }
         if (tabName === "user") {
             $("#plotAdminUserPane").addClass("is-active");
+            refreshPolicyBoard();
             refreshUserGrid();
             return;
         }
+
         $("#plotAdminSoilPane").addClass("is-active");
         refreshSoilGrid();
-    }
-
-    function initTabs() {
-        $(".plot-admin-tab").off("click.plotAdminTab").on("click.plotAdminTab", function () {
-            var tab = $(this).attr("data-tab");
-            switchTab(tab || "soil");
-        });
     }
 
     function refreshSoilGrid() {
         $("#plotAdminSoilGrid").datagrid("load", {
             page: state.soilQuery.page,
             rows: state.soilQuery.rows,
-            name: state.soilQuery.name,
-            sort: "id",
-            order: "asc"
+            name: state.soilQuery.name
         });
     }
 
@@ -134,9 +116,7 @@
         $("#plotAdminTypeGrid").datagrid("load", {
             page: state.typeQuery.page,
             rows: state.typeQuery.rows,
-            name: state.typeQuery.name,
-            sort: "id",
-            order: "asc"
+            name: state.typeQuery.name
         });
     }
 
@@ -144,168 +124,54 @@
         $("#plotAdminUserGrid").datagrid("load", {
             page: state.userQuery.page,
             rows: state.userQuery.rows,
-            username: state.userQuery.username,
-            sort: "userId",
-            order: "asc"
+            username: state.userQuery.username
         });
     }
 
-    function initSoilGrid() {
-        $("#plotAdminSoilGrid").datagrid({
-            fit: true,
-            border: false,
-            singleSelect: true,
-            pagination: true,
-            rownumbers: true,
-            loader: function (param, success, error) {
-                var request = {
-                    page: asNumber(param.page, state.soilQuery.page),
-                    rows: asNumber(param.rows, state.soilQuery.rows),
-                    name: trimText(param.name)
-                };
-                window.FarmApi.plotSoilPage(request, function (res) {
-                    if (!boolOk(res) || !res.data) {
-                        success({total: 0, records: []});
-                        return;
-                    }
-                    success(res.data);
-                }, function () {
-                    if ($.isFunction(error)) {
-                        error.apply(this, arguments);
-                    }
-                });
-            },
-            queryParams: {
-                page: state.soilQuery.page,
-                rows: state.soilQuery.rows,
-                name: state.soilQuery.name
-            },
-            columns: [[
-                {field: "id", title: "ID", width: 56},
-                {field: "name", title: "土壤名称", width: 110},
-                {field: "bitCode", title: "bitCode", width: 78},
-                {field: "level", title: "等级", width: 66},
-                {field: "unlockExperienceRequired", title: "解锁经验", width: 94},
-                {field: "growSpeedMultiplier", title: "成长倍率", width: 86},
-                {field: "coverImageUrl", title: "图片", width: 62, formatter: function (value) { return renderCover(value, DEFAULT_SOIL_COVER); }},
-                {field: "description", title: "描述", width: 240}
-            ]],
-            onLoadSuccess: function () {
-                var pager = $("#plotAdminSoilGrid").datagrid("getPager");
-                pager.pagination({
-                    onSelectPage: function (pageNo, pageSize) {
-                        state.soilQuery.page = pageNo;
-                        state.soilQuery.rows = pageSize;
-                        refreshSoilGrid();
-                    }
+    function refreshPolicyBoard() {
+        window.FarmApi.plotPolicyCurrent({}, function (res) {
+            if (!boolOk(res) || !res.data) {
+                alertMessage((res && res.msg) || "读取策略失败");
+                return;
+            }
+            state.currentPolicy = res.data;
+            renderPolicyBoard(res.data);
+        }, function () {
+            alertMessage("读取策略失败，请稍后重试");
+        });
+    }
+
+    function renderPolicyBoard(policy) {
+        var row = policy || {};
+        $("#plotAdminPolicyName").text(defaultText(row.policyName, "-"));
+        $("#plotAdminPolicyVersion").text(defaultText(row.policyVersion, "v1"));
+        $("#plotAdminPolicyStatus").text(defaultText(row.publishStatus, "DRAFT"));
+        $("#plotAdminPolicyScope").text(defaultText(row.effectiveScope, "NEW_USER_ONLY"));
+        $("#plotAdminPolicyTotal").text(asNumber(row.defaultTotalPlotCount, 0));
+        $("#plotAdminPolicyUnlocked").text(asNumber(row.defaultUnlockedPlotCount, 0));
+        $("#plotAdminPolicyLocked").text(asNumber(row.defaultLockedPlotCount, 0));
+        $("#plotAdminPolicyDefaultType").text(defaultText(row.defaultPlotTypeName, "-"));
+    }
+
+    function loadPlotTypeOptions(callback) {
+        window.FarmApi.plotTypePage({page: 1, rows: 500, sort: "sortOrder", order: "asc"}, function (res) {
+            var options = [];
+            if (boolOk(res) && res.data && $.isArray(res.data.records)) {
+                $.each(res.data.records, function (_, item) {
+                    options.push({
+                        id: asNumber(item.id, 0),
+                        text: item.name || ("类型#" + asNumber(item.id, 0))
+                    });
                 });
             }
-        });
-    }
-
-    function initTypeGrid() {
-        $("#plotAdminTypeGrid").datagrid({
-            fit: true,
-            border: false,
-            singleSelect: true,
-            pagination: true,
-            rownumbers: true,
-            loader: function (param, success, error) {
-                var request = {
-                    page: asNumber(param.page, state.typeQuery.page),
-                    rows: asNumber(param.rows, state.typeQuery.rows),
-                    name: trimText(param.name)
-                };
-                window.FarmApi.plotTypePage(request, function (res) {
-                    if (!boolOk(res) || !res.data) {
-                        success({total: 0, records: []});
-                        return;
-                    }
-                    success(res.data);
-                }, function () {
-                    if ($.isFunction(error)) {
-                        error.apply(this, arguments);
-                    }
-                });
-            },
-            queryParams: {
-                page: state.typeQuery.page,
-                rows: state.typeQuery.rows,
-                name: state.typeQuery.name
-            },
-            columns: [[
-                {field: "id", title: "ID", width: 56},
-                {field: "name", title: "地块类型", width: 110},
-                {field: "soilTypeName", title: "关联土壤", width: 98},
-                {field: "unlockRequired", title: "需解锁", width: 70, formatter: function (v) { return v ? "是" : "否"; }},
-                {field: "defaultUsable", title: "默认可用", width: 82, formatter: function (v) { return v ? "是" : "否"; }},
-                {field: "defaultUnlockExperienceRequired", title: "默认经验", width: 92},
-                {field: "sortOrder", title: "排序", width: 66},
-                {field: "coverImageUrl", title: "封面", width: 62, formatter: function (value) { return renderCover(value, DEFAULT_PLOT_COVER); }},
-                {field: "description", title: "描述", width: 220}
-            ]],
-            onLoadSuccess: function () {
-                var pager = $("#plotAdminTypeGrid").datagrid("getPager");
-                pager.pagination({
-                    onSelectPage: function (pageNo, pageSize) {
-                        state.typeQuery.page = pageNo;
-                        state.typeQuery.rows = pageSize;
-                        refreshTypeGrid();
-                    }
-                });
+            state.plotTypeOptions = options;
+            if ($.isFunction(callback)) {
+                callback(options);
             }
-        });
-    }
-
-    function initUserGrid() {
-        $("#plotAdminUserGrid").datagrid({
-            fit: true,
-            border: false,
-            singleSelect: true,
-            pagination: true,
-            rownumbers: true,
-            loader: function (param, success, error) {
-                var request = {
-                    page: asNumber(param.page, state.userQuery.page),
-                    rows: asNumber(param.rows, state.userQuery.rows),
-                    username: trimText(param.username)
-                };
-                window.FarmApi.plotUserPage(request, function (res) {
-                    if (!boolOk(res) || !res.data) {
-                        success({total: 0, records: []});
-                        return;
-                    }
-                    success(res.data);
-                }, function () {
-                    if ($.isFunction(error)) {
-                        error.apply(this, arguments);
-                    }
-                });
-            },
-            queryParams: {
-                page: state.userQuery.page,
-                rows: state.userQuery.rows,
-                username: state.userQuery.username
-            },
-            columns: [[
-                {field: "userId", title: "用户ID", width: 76},
-                {field: "username", title: "用户名", width: 110},
-                {field: "nickname", title: "昵称", width: 110},
-                {field: "currentTotalPlots", title: "当前总地块", width: 92},
-                {field: "currentUnlockedPlots", title: "当前已解锁", width: 92},
-                {field: "totalPlotCount", title: "配置总地块", width: 92},
-                {field: "unlockedPlotCount", title: "配置已解锁", width: 96},
-                {field: "defaultPlotTypeName", title: "默认地块类型", width: 112}
-            ]],
-            onLoadSuccess: function () {
-                var pager = $("#plotAdminUserGrid").datagrid("getPager");
-                pager.pagination({
-                    onSelectPage: function (pageNo, pageSize) {
-                        state.userQuery.page = pageNo;
-                        state.userQuery.rows = pageSize;
-                        refreshUserGrid();
-                    }
-                });
+        }, function () {
+            state.plotTypeOptions = [];
+            if ($.isFunction(callback)) {
+                callback([]);
             }
         });
     }
@@ -361,7 +227,7 @@
         setNumberboxValue($("#plotSoilEditorForm input[name='level']"), asNumber(data.level, 1));
         setNumberboxValue($("#plotSoilEditorForm input[name='unlockExperienceRequired']"), asNumber(data.unlockExperienceRequired, 0));
         setTextboxValue($("#plotSoilEditorForm input[name='growSpeedMultiplier']"), data.growSpeedMultiplier || "1.00");
-        setTextboxValue($("#plotSoilEditorForm input[name='coverImageUrl']"), data.coverImageUrl || DEFAULT_SOIL_COVER);
+        setTextboxValue($("#plotSoilCoverImageUrl"), data.coverImageUrl || DEFAULT_SOIL_COVER);
         setTextboxValue($("#plotSoilEditorForm input[name='description']"), data.description || "");
         previewSoilCover(data.coverImageUrl || DEFAULT_SOIL_COVER);
         $("#plotSoilEditorDialog").dialog("setTitle", data.id ? "编辑土壤类型" : "新增土壤类型").dialog("open");
@@ -380,18 +246,81 @@
         previewTypeCover(data.coverImageUrl || data.iconUrl || DEFAULT_PLOT_COVER);
         loadSoilOptionsForTypeForm(data.soilTypeId);
         try {
-            if (data.unlockRequired === false) {
-                $("#plotTypeUnlockRequired").switchbutton("uncheck");
-            } else {
-                $("#plotTypeUnlockRequired").switchbutton("check");
-            }
-            if (data.defaultUsable === false) {
-                $("#plotTypeDefaultUsable").switchbutton("uncheck");
-            } else {
-                $("#plotTypeDefaultUsable").switchbutton("check");
-            }
+            (data.unlockRequired === false ? $("#plotTypeUnlockRequired").switchbutton("uncheck") : $("#plotTypeUnlockRequired").switchbutton("check"));
+            (data.defaultUsable === false ? $("#plotTypeDefaultUsable").switchbutton("uncheck") : $("#plotTypeDefaultUsable").switchbutton("check"));
         } catch (ignoreSwitchSet) {}
         $("#plotTypeEditorDialog").dialog("setTitle", data.id ? "编辑地块类型" : "新增地块类型").dialog("open");
+    }
+
+    function openPolicyEditor() {
+        var row = state.currentPolicy || {};
+        $("#plotPolicyEditorForm").form("clear");
+        setTextboxValue($("#plotPolicyEditorForm input[name='id']"), asNumber(row.id, 0));
+        setTextboxValue($("#plotPolicyEditorForm input[name='policyName']"), defaultText(row.policyName, "default-policy"));
+        setTextboxValue($("#plotPolicyEditorForm input[name='policyVersion']"), defaultText(row.policyVersion, "v1"));
+        setNumberboxValue($("#plotPolicyEditorForm input[name='defaultTotalPlotCount']"), asNumber(row.defaultTotalPlotCount, 6));
+        setNumberboxValue($("#plotPolicyEditorForm input[name='defaultUnlockedPlotCount']"), asNumber(row.defaultUnlockedPlotCount, 1));
+        setTextboxValue($("#plotPolicyEditorForm input[name='defaultLockRuleCode']"), defaultText(row.defaultLockRuleCode, "DEFAULT_LOCKED"));
+        setTextboxValue($("#plotPolicyEditorForm input[name='defaultLockReason']"), defaultText(row.defaultLockReason, "pending unlock"));
+        setTextboxValue($("#plotPolicyEditorForm input[name='allocationRuleJson']"), defaultText(row.allocationRuleJson, "{}"));
+        $("#plotPolicyPublishStatus").combobox("setValue", defaultText(row.publishStatus, "DRAFT"));
+        $("#plotPolicyEffectiveScope").combobox("setValue", defaultText(row.effectiveScope, "NEW_USER_ONLY"));
+        try {
+            (row.active ? $("#plotPolicyActiveSwitch").switchbutton("check") : $("#plotPolicyActiveSwitch").switchbutton("uncheck"));
+        } catch (ignorePolicySwitch) {}
+
+        loadPlotTypeOptions(function (options) {
+            $("#plotPolicyDefaultPlotTypeId").combobox({
+                valueField: "id",
+                textField: "text",
+                editable: false,
+                panelHeight: 180,
+                data: options
+            });
+            if (asNumber(row.defaultPlotTypeId, 0) > 0) {
+                $("#plotPolicyDefaultPlotTypeId").combobox("setValue", asNumber(row.defaultPlotTypeId, 0));
+            } else if (options.length > 0) {
+                $("#plotPolicyDefaultPlotTypeId").combobox("setValue", options[0].id);
+            }
+        });
+        $("#plotPolicyEditorDialog").dialog("open");
+    }
+
+    function openUserAllocationEditor(row) {
+        var data = row || {};
+        if (asNumber(data.userId, 0) <= 0) {
+            alertMessage("请先选择用户记录");
+            return;
+        }
+        $("#plotUserAllocationForm").form("clear");
+        setTextboxValue($("#plotUserAllocationForm input[name='id']"), asNumber(data.id, 0));
+        setTextboxValue($("#plotUserAllocationForm input[name='userId']"), asNumber(data.userId, 0));
+        setTextboxValue($("#plotUserAllocUserName"), (data.username || "-") + " / " + (data.nickname || "-"));
+        setTextboxValue($("#plotUserAllocCurrentUnlocked"), asNumber(data.currentUnlockedPlots, 0));
+        setNumberboxValue($("#plotUserAllocationForm input[name='totalPlotCount']"), asNumber(data.totalPlotCount, 1));
+        setNumberboxValue($("#plotUserAllocationForm input[name='unlockedPlotCount']"), asNumber(data.unlockedPlotCount, asNumber(data.currentUnlockedPlots, 0)));
+        setTextboxValue($("#plotUserAllocationForm input[name='lockRuleCode']"), defaultText(data.lockRuleCode, "DEFAULT_LOCKED"));
+        setTextboxValue($("#plotUserAllocationForm input[name='lockReason']"), defaultText(data.lockReason, "pending unlock"));
+        setTextboxValue($("#plotUserAllocationForm input[name='allocationRuleJson']"), defaultText(data.allocationRuleJson, "{}"));
+        try {
+            (data.active === false ? $("#plotUserAllocActiveSwitch").switchbutton("uncheck") : $("#plotUserAllocActiveSwitch").switchbutton("check"));
+        } catch (ignoreUserActiveSwitch) {}
+
+        loadPlotTypeOptions(function (options) {
+            $("#plotUserAllocDefaultPlotTypeId").combobox({
+                valueField: "id",
+                textField: "text",
+                editable: false,
+                panelHeight: 180,
+                data: options
+            });
+            if (asNumber(data.defaultPlotTypeId, 0) > 0) {
+                $("#plotUserAllocDefaultPlotTypeId").combobox("setValue", asNumber(data.defaultPlotTypeId, 0));
+            } else if (options.length > 0) {
+                $("#plotUserAllocDefaultPlotTypeId").combobox("setValue", options[0].id);
+            }
+        });
+        $("#plotUserAllocationDialog").dialog("open");
     }
 
     function uploadFile($fileInput, category, onSuccess) {
@@ -506,6 +435,117 @@
         });
     }
 
+    function savePolicy() {
+        if (!$("#plotPolicyEditorForm").form("validate")) {
+            return;
+        }
+        var total = getNumberboxValue($("#plotPolicyEditorForm input[name='defaultTotalPlotCount']"), 6);
+        var unlocked = getNumberboxValue($("#plotPolicyEditorForm input[name='defaultUnlockedPlotCount']"), 1);
+        if (unlocked > total) {
+            alertMessage("默认已解锁不能大于总地块数");
+            return;
+        }
+        var active = false;
+        try {
+            active = !!$("#plotPolicyActiveSwitch").switchbutton("options").checked;
+        } catch (ignorePolicySwitchGet) {}
+
+        var payload = {
+            id: asNumber(getTextboxValue($("#plotPolicyEditorForm input[name='id']"), "0"), 0) || null,
+            policyName: getTextboxValue($("#plotPolicyEditorForm input[name='policyName']"), ""),
+            policyVersion: getTextboxValue($("#plotPolicyEditorForm input[name='policyVersion']"), "v1"),
+            defaultTotalPlotCount: total,
+            defaultUnlockedPlotCount: unlocked,
+            defaultLockedPlotCount: Math.max(total - unlocked, 0),
+            defaultPlotTypeId: asNumber($("#plotPolicyDefaultPlotTypeId").combobox("getValue"), 0) || null,
+            publishStatus: trimText($("#plotPolicyPublishStatus").combobox("getValue")) || "DRAFT",
+            effectiveScope: trimText($("#plotPolicyEffectiveScope").combobox("getValue")) || "NEW_USER_ONLY",
+            active: active,
+            defaultLockRuleCode: getTextboxValue($("#plotPolicyEditorForm input[name='defaultLockRuleCode']"), "DEFAULT_LOCKED"),
+            defaultLockReason: getTextboxValue($("#plotPolicyEditorForm input[name='defaultLockReason']"), "pending unlock"),
+            allocationRuleJson: getTextboxValue($("#plotPolicyEditorForm input[name='allocationRuleJson']"), "{}")
+        };
+        window.FarmApi.plotPolicySave(payload, function (res) {
+            if (!boolOk(res)) {
+                alertMessage((res && res.msg) || "保存策略失败");
+                return;
+            }
+            $("#plotPolicyEditorDialog").dialog("close");
+            showMessage((res && res.msg) || "策略保存成功");
+            refreshPolicyBoard();
+        }, function () {
+            alertMessage("保存策略失败，请稍后重试");
+        });
+    }
+
+    function activatePolicy() {
+        var policyId = asNumber(state.currentPolicy && state.currentPolicy.id, 0);
+        if (policyId <= 0) {
+            alertMessage("当前策略不存在，无法激活");
+            return;
+        }
+        $.messager.confirm("确认", "确认激活当前策略吗？激活后仅对新用户生效。", function (ok) {
+            if (!ok) {
+                return;
+            }
+            window.FarmApi.plotPolicyActivate({id: policyId}, function (res) {
+                if (!boolOk(res)) {
+                    alertMessage((res && res.msg) || "激活策略失败");
+                    return;
+                }
+                showMessage((res && res.msg) || "策略激活成功（仅新用户生效）");
+                refreshPolicyBoard();
+            }, function () {
+                alertMessage("激活策略失败，请稍后重试");
+            });
+        });
+    }
+
+    function saveUserAllocation() {
+        if (!$("#plotUserAllocationForm").form("validate")) {
+            return;
+        }
+        var userId = asNumber(getTextboxValue($("#plotUserAllocationForm input[name='userId']"), "0"), 0);
+        var total = getNumberboxValue($("#plotUserAllocationForm input[name='totalPlotCount']"), 1);
+        var unlocked = getNumberboxValue($("#plotUserAllocationForm input[name='unlockedPlotCount']"), 0);
+        var currentUnlocked = asNumber(getTextboxValue($("#plotUserAllocCurrentUnlocked"), "0"), 0);
+        if (unlocked > total) {
+            alertMessage("配置已解锁不能大于配置总地块");
+            return;
+        }
+        if (unlocked < currentUnlocked) {
+            alertMessage("不允许回滚已解锁地块进度");
+            return;
+        }
+        var active = true;
+        try {
+            active = !!$("#plotUserAllocActiveSwitch").switchbutton("options").checked;
+        } catch (ignoreUserActiveGet) {}
+
+        var payload = {
+            id: asNumber(getTextboxValue($("#plotUserAllocationForm input[name='id']"), "0"), 0) || null,
+            userId: userId,
+            totalPlotCount: total,
+            unlockedPlotCount: unlocked,
+            defaultPlotTypeId: asNumber($("#plotUserAllocDefaultPlotTypeId").combobox("getValue"), 0) || null,
+            active: active,
+            lockRuleCode: getTextboxValue($("#plotUserAllocationForm input[name='lockRuleCode']"), "DEFAULT_LOCKED"),
+            lockReason: getTextboxValue($("#plotUserAllocationForm input[name='lockReason']"), "pending unlock"),
+            allocationRuleJson: getTextboxValue($("#plotUserAllocationForm input[name='allocationRuleJson']"), "{}")
+        };
+        window.FarmApi.plotUserUpdate(payload, function (res) {
+            if (!boolOk(res)) {
+                alertMessage((res && res.msg) || "保存用户配置失败");
+                return;
+            }
+            $("#plotUserAllocationDialog").dialog("close");
+            showMessage((res && res.msg) || "用户配置保存成功");
+            refreshUserGrid();
+        }, function () {
+            alertMessage("保存用户配置失败，请稍后重试");
+        });
+    }
+
     function deleteSoil() {
         var row = $("#plotAdminSoilGrid").datagrid("getSelected");
         if (!row) {
@@ -552,7 +592,11 @@
         });
     }
 
-    function bindToolbarEvents() {
+    function bindEvents() {
+        $(".plot-admin-tab").off("click.plotAdminTab").on("click.plotAdminTab", function () {
+            switchTab($(this).attr("data-tab") || "soil");
+        });
+
         $("#plotAdminSoilSearchBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
             state.soilQuery.name = getTextboxValue($("#plotAdminSoilName"), "");
             state.soilQuery.page = 1;
@@ -616,6 +660,24 @@
             state.userQuery.page = 1;
             refreshUserGrid();
         });
+        $("#plotAdminUserEditBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
+            var row = $("#plotAdminUserGrid").datagrid("getSelected");
+            if (!row) {
+                alertMessage("请先选择用户记录");
+                return;
+            }
+            openUserAllocationEditor(row);
+        });
+
+        $("#plotAdminPolicyRefreshBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
+            refreshPolicyBoard();
+        });
+        $("#plotAdminPolicyEditBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
+            openPolicyEditor();
+        });
+        $("#plotAdminPolicyActivateBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
+            activatePolicy();
+        });
 
         $("#plotSoilSaveBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
             saveSoil();
@@ -629,6 +691,18 @@
         $("#plotTypeCancelBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
             $("#plotTypeEditorDialog").dialog("close");
         });
+        $("#plotPolicySaveBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
+            savePolicy();
+        });
+        $("#plotPolicyCancelBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
+            $("#plotPolicyEditorDialog").dialog("close");
+        });
+        $("#plotUserAllocSaveBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
+            saveUserAllocation();
+        });
+        $("#plotUserAllocCancelBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
+            $("#plotUserAllocationDialog").dialog("close");
+        });
 
         $("#plotSoilUploadCoverBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
             var $file = $("#plotSoilCoverFile");
@@ -640,7 +714,6 @@
             $file.val("");
             $file.trigger("click");
         });
-
         $("#plotSoilCoverFile").off("change.plotAdmin").on("change.plotAdmin", function () {
             uploadFile($(this), "soil-cover", function (url) {
                 setTextboxValue($("#plotSoilCoverImageUrl"), url);
@@ -653,7 +726,6 @@
                 previewTypeCover(url);
             });
         });
-
         $("#plotSoilCoverImageUrl").textbox("textbox").off("change.plotAdmin blur.plotAdmin input.plotAdmin")
             .on("change.plotAdmin blur.plotAdmin input.plotAdmin", function () {
                 previewSoilCover(getTextboxValue($("#plotSoilCoverImageUrl"), DEFAULT_SOIL_COVER));
@@ -664,29 +736,197 @@
             });
     }
 
-    function initDialogs() {
-        $("#plotSoilEditorDialog").dialog({
-            cls: "farm-dialog-window plot-admin-dialog-window"
+    function initSoilGrid() {
+        $("#plotAdminSoilGrid").datagrid({
+            fit: true,
+            border: false,
+            singleSelect: true,
+            pagination: true,
+            rownumbers: true,
+            loader: function (param, success, error) {
+                window.FarmApi.plotSoilPage({
+                    page: asNumber(param.page, state.soilQuery.page),
+                    rows: asNumber(param.rows, state.soilQuery.rows),
+                    name: trimText(param.name)
+                }, function (res) {
+                    success(boolOk(res) && res.data ? res.data : {total: 0, records: []});
+                }, function () {
+                    if ($.isFunction(error)) {
+                        error.apply(this, arguments);
+                    }
+                });
+            },
+            queryParams: {
+                page: state.soilQuery.page,
+                rows: state.soilQuery.rows,
+                name: state.soilQuery.name
+            },
+            columns: [[
+                {field: "id", title: "ID", width: 56},
+                {field: "name", title: "土壤名称", width: 110},
+                {field: "bitCode", title: "bitCode", width: 78},
+                {field: "level", title: "等级", width: 66},
+                {field: "unlockExperienceRequired", title: "解锁经验", width: 94},
+                {field: "growSpeedMultiplier", title: "成长倍率", width: 86},
+                {field: "coverImageUrl", title: "图片", width: 62, formatter: function (v) { return renderCover(v, DEFAULT_SOIL_COVER); }},
+                {field: "description", title: "描述", width: 240}
+            ]],
+            onLoadSuccess: function () {
+                var pager = $("#plotAdminSoilGrid").datagrid("getPager");
+                pager.pagination({
+                    onSelectPage: function (pageNo, pageSize) {
+                        state.soilQuery.page = pageNo;
+                        state.soilQuery.rows = pageSize;
+                        refreshSoilGrid();
+                    }
+                });
+            }
         });
-        $("#plotTypeEditorDialog").dialog({
+    }
+
+    function initTypeGrid() {
+        $("#plotAdminTypeGrid").datagrid({
+            fit: true,
+            border: false,
+            singleSelect: true,
+            pagination: true,
+            rownumbers: true,
+            loader: function (param, success, error) {
+                window.FarmApi.plotTypePage({
+                    page: asNumber(param.page, state.typeQuery.page),
+                    rows: asNumber(param.rows, state.typeQuery.rows),
+                    name: trimText(param.name)
+                }, function (res) {
+                    success(boolOk(res) && res.data ? res.data : {total: 0, records: []});
+                }, function () {
+                    if ($.isFunction(error)) {
+                        error.apply(this, arguments);
+                    }
+                });
+            },
+            queryParams: {
+                page: state.typeQuery.page,
+                rows: state.typeQuery.rows,
+                name: state.typeQuery.name
+            },
+            columns: [[
+                {field: "id", title: "ID", width: 56},
+                {field: "name", title: "地块类型", width: 110},
+                {field: "soilTypeName", title: "关联土壤", width: 98},
+                {field: "unlockRequired", title: "需解锁", width: 70, formatter: function (v) { return v ? "是" : "否"; }},
+                {field: "defaultUsable", title: "默认可用", width: 82, formatter: function (v) { return v ? "是" : "否"; }},
+                {field: "defaultUnlockExperienceRequired", title: "默认经验", width: 92},
+                {field: "sortOrder", title: "排序", width: 66},
+                {field: "coverImageUrl", title: "封面", width: 62, formatter: function (v) { return renderCover(v, DEFAULT_PLOT_COVER); }},
+                {field: "description", title: "描述", width: 220}
+            ]],
+            onLoadSuccess: function () {
+                var pager = $("#plotAdminTypeGrid").datagrid("getPager");
+                pager.pagination({
+                    onSelectPage: function (pageNo, pageSize) {
+                        state.typeQuery.page = pageNo;
+                        state.typeQuery.rows = pageSize;
+                        refreshTypeGrid();
+                    }
+                });
+            }
+        });
+    }
+
+    function initUserGrid() {
+        $("#plotAdminUserGrid").datagrid({
+            fit: true,
+            border: false,
+            singleSelect: true,
+            pagination: true,
+            rownumbers: true,
+            loader: function (param, success, error) {
+                window.FarmApi.plotUserPage({
+                    page: asNumber(param.page, state.userQuery.page),
+                    rows: asNumber(param.rows, state.userQuery.rows),
+                    username: trimText(param.username)
+                }, function (res) {
+                    success(boolOk(res) && res.data ? res.data : {total: 0, records: []});
+                }, function () {
+                    if ($.isFunction(error)) {
+                        error.apply(this, arguments);
+                    }
+                });
+            },
+            queryParams: {
+                page: state.userQuery.page,
+                rows: state.userQuery.rows,
+                username: state.userQuery.username
+            },
+            columns: [[
+                {field: "userId", title: "用户ID", width: 76},
+                {field: "username", title: "用户名", width: 110},
+                {field: "nickname", title: "昵称", width: 110},
+                {field: "currentTotalPlots", title: "当前总地块", width: 92},
+                {field: "currentUnlockedPlots", title: "当前已解锁", width: 92},
+                {field: "totalPlotCount", title: "配置总地块", width: 92},
+                {field: "unlockedPlotCount", title: "配置已解锁", width: 96},
+                {field: "defaultPlotTypeName", title: "默认地块类型", width: 112}
+            ]],
+            onDblClickRow: function (index, row) {
+                openUserAllocationEditor(row);
+            },
+            onLoadSuccess: function () {
+                var pager = $("#plotAdminUserGrid").datagrid("getPager");
+                pager.pagination({
+                    onSelectPage: function (pageNo, pageSize) {
+                        state.userQuery.page = pageNo;
+                        state.userQuery.rows = pageSize;
+                        refreshUserGrid();
+                    }
+                });
+            }
+        });
+    }
+
+    function initDialogs() {
+        $("#plotSoilEditorDialog, #plotTypeEditorDialog, #plotPolicyEditorDialog, #plotUserAllocationDialog").dialog({
             cls: "farm-dialog-window plot-admin-dialog-window"
         });
         $("#plotTypeUnlockRequired").switchbutton();
         $("#plotTypeDefaultUsable").switchbutton();
+        $("#plotPolicyActiveSwitch").switchbutton();
+        $("#plotUserAllocActiveSwitch").switchbutton();
+
+        $("#plotPolicyPublishStatus").combobox({
+            valueField: "id",
+            textField: "text",
+            editable: false,
+            panelHeight: 120,
+            data: [
+                {id: "DRAFT", text: "DRAFT"},
+                {id: "ACTIVE", text: "ACTIVE"},
+                {id: "ARCHIVED", text: "ARCHIVED"}
+            ]
+        });
+        $("#plotPolicyEffectiveScope").combobox({
+            valueField: "id",
+            textField: "text",
+            editable: false,
+            panelHeight: 100,
+            data: [
+                {id: "NEW_USER_ONLY", text: "NEW_USER_ONLY"},
+                {id: "MANUAL_APPLY", text: "MANUAL_APPLY"}
+            ]
+        });
     }
 
     function ensureInit() {
         if (state.inited) {
             return;
         }
-        $("#plotAdminSoilName, #plotAdminTypeName, #plotAdminUserName").textbox();
-        $(".plot-admin-toolbar .easyui-linkbutton").linkbutton();
-        initTabs();
+        $("#plotAdminSoilName, #plotAdminTypeName, #plotAdminUserName, #plotUserAllocUserName, #plotUserAllocCurrentUnlocked").textbox();
+        $(".plot-admin-toolbar .easyui-linkbutton, .plot-admin-dialog-actions .easyui-linkbutton").linkbutton();
         initSoilGrid();
         initTypeGrid();
         initUserGrid();
         initDialogs();
-        bindToolbarEvents();
+        bindEvents();
         state.inited = true;
     }
 
@@ -711,10 +951,9 @@
 
     FarmPlotAdminModule.setActive = setActive;
     FarmPlotAdminModule.reload = function () {
-        if (!state.active) {
-            return;
+        if (state.active) {
+            switchTab(state.tab || "soil");
         }
-        switchTab(state.tab || "soil");
     };
     window.FarmPlotAdminModule = FarmPlotAdminModule;
     if (window.FarmCore && $.isFunction(window.FarmCore.registerSetActiveModule)) {

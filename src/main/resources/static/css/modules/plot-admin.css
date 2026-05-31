@@ -61,6 +61,36 @@
     min-height: 0;
 }
 
+.plot-admin-policy-board {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    border: 1px solid rgba(154, 232, 136, 0.58);
+    border-radius: 6px;
+    background: rgba(0, 81, 0, 0.52);
+}
+
+.plot-admin-policy-title {
+    color: #fff3b2;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+.plot-admin-policy-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: #e7ffd8;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.plot-admin-policy-row em {
+    color: #ffe274;
+    font-style: normal;
+    font-weight: 700;
+}
+
 #plotAdminSoilGrid,
 #plotAdminTypeGrid,
 #plotAdminUserGrid {
