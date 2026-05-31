@@ -119,25 +119,20 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
         if (name.isEmpty()) {
             throw new ServiceException(BizErrorCode.SOIL_TYPE_REQUIRED, "soil type name is required");
         }
-        Integer bitCode = params.getBitCode();
-        if (bitCode == null || bitCode <= 0) {
-            throw new ServiceException(BizErrorCode.PARAM_INVALID, "bitCode must be > 0");
-        }
+        boolean isNew = params.getId() == null || params.getId() <= 0;
 
         soilTypeDao.findByNameAndIsDeletedFalse(name)
                 .filter(item -> !Objects.equals(item.getId(), params.getId()))
                 .ifPresent(item -> {
                     throw new ServiceException(BizErrorCode.PARAM_INVALID, "duplicate soil type name");
                 });
-        soilTypeDao.findByBitCodeAndIsDeletedFalse(bitCode)
-                .filter(item -> !Objects.equals(item.getId(), params.getId()))
-                .ifPresent(item -> {
-                    throw new ServiceException(BizErrorCode.PARAM_INVALID, "duplicate soil type bitCode");
-                });
 
-        SoilType entity = (params.getId() != null && params.getId() > 0)
+        SoilType entity = !isNew
                 ? soilTypeDao.findByIdAndIsDeletedFalse(params.getId()).orElseThrow(() -> new ServiceException(BizErrorCode.SOIL_TYPE_NOT_FOUND, "soil type not found"))
                 : newSoilTypeEntity();
+        int bitCode = isNew
+                ? allocateNextSoilBitCode()
+                : defaultInt(entity.getBitCode(), allocateNextSoilBitCode());
 
         entity.setName(name);
         entity.setBitCode(bitCode);
@@ -148,6 +143,22 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
         entity.setDescription(safeString(params.getDescription()));
         touchForUpdate(entity);
         return soilTypeDao.save(entity).getId();
+    }
+
+    private int allocateNextSoilBitCode() {
+        Set<Integer> usedCodes = soilTypeDao.findByIsDeletedFalseOrderByIdAsc().stream()
+                .map(SoilType::getBitCode)
+                .filter(Objects::nonNull)
+                .filter(code -> code > 0)
+                .collect(Collectors.toSet());
+        int candidate = 1;
+        while (usedCodes.contains(candidate)) {
+            if (candidate >= (1 << 30)) {
+                throw new ServiceException(BizErrorCode.PARAM_INVALID, "soil type bitCode exhausted");
+            }
+            candidate = candidate << 1;
+        }
+        return candidate;
     }
 
     @Override

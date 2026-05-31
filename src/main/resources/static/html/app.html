@@ -34,7 +34,7 @@
     <script src="/js/app/modules/farm.js"></script>
     <script src="/js/app/modules/shop.js"></script>
     <script src="/js/app/modules/store.js"></script>
-    <script src="/js/app/modules/plot-admin.js?v=20260531-5"></script>
+    <script src="/js/app/modules/plot-admin.js?v=20260531-6"></script>
     <script src="/js/app/modules/user-admin.js"></script>
     <script src="/js/app/modules/seed-admin.js"></script>
     <script src="/js/app/modules/home.js"></script>
@@ -337,8 +337,8 @@
                     <tr>
                         <td>土壤名称</td>
                         <td><input name="name" class="easyui-textbox" style="width:220px" required="true"></td>
-                        <td>bitCode</td>
-                        <td><input name="bitCode" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px" required="true"></td>
+                        <td>bitCode(自动)</td>
+                        <td><input id="plotSoilBitCodeDisplay" class="easyui-textbox" style="width:220px" readonly="readonly"></td>
                     </tr>
                     <tr>
                         <td>等级</td>

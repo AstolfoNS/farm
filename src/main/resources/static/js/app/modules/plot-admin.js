@@ -223,7 +223,7 @@
         $("#plotSoilEditorForm").form("clear");
         setTextboxValue($("#plotSoilEditorForm input[name='id']"), asNumber(data.id, 0));
         setTextboxValue($("#plotSoilEditorForm input[name='name']"), data.name || "");
-        setNumberboxValue($("#plotSoilEditorForm input[name='bitCode']"), asNumber(data.bitCode, 1));
+        setTextboxValue($("#plotSoilBitCodeDisplay"), data.id ? String(asNumber(data.bitCode, 0)) : "系统保存时自动分配");
         setNumberboxValue($("#plotSoilEditorForm input[name='level']"), asNumber(data.level, 1));
         setNumberboxValue($("#plotSoilEditorForm input[name='unlockExperienceRequired']"), asNumber(data.unlockExperienceRequired, 0));
         setTextboxValue($("#plotSoilEditorForm input[name='growSpeedMultiplier']"), data.growSpeedMultiplier || "1.00");
@@ -417,7 +417,6 @@
         var payload = {
             id: asNumber(getTextboxValue($("#plotSoilEditorForm input[name='id']"), "0"), 0) || null,
             name: getTextboxValue($("#plotSoilEditorForm input[name='name']"), ""),
-            bitCode: getNumberboxValue($("#plotSoilEditorForm input[name='bitCode']"), 1),
             level: getNumberboxValue($("#plotSoilEditorForm input[name='level']"), 1),
             unlockExperienceRequired: getNumberboxValue($("#plotSoilEditorForm input[name='unlockExperienceRequired']"), 0),
             growSpeedMultiplier: getTextboxValue($("#plotSoilEditorForm input[name='growSpeedMultiplier']"), "1.00"),
@@ -953,7 +952,7 @@
         if (state.inited) {
             return;
         }
-        $("#plotAdminSoilName, #plotAdminTypeName, #plotAdminUserName, #plotUserAllocUserName, #plotUserAllocCurrentUnlocked").textbox();
+        $("#plotAdminSoilName, #plotAdminTypeName, #plotAdminUserName, #plotUserAllocUserName, #plotUserAllocCurrentUnlocked, #plotSoilBitCodeDisplay").textbox();
         $(".plot-admin-toolbar .easyui-linkbutton, .plot-admin-dialog-actions .easyui-linkbutton").linkbutton();
         initSoilGrid();
         initTypeGrid();
