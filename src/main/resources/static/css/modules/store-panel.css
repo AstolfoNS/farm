@@ -86,10 +86,11 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
     border: 1px solid rgba(157, 228, 136, 0.56);
     border-radius: 6px;
     background: rgba(0, 78, 0, 0.4);
-    padding: 10px;
+    padding: 10px 10px 12px;
 }
 
 .store-block-title {
@@ -106,15 +107,21 @@
     flex: 1;
     min-height: 0;
     overflow: auto;
+    padding-right: 2px;
 }
 
 .store-item {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 0 0 auto;
+    min-height: 88px;
     border: 0;
     border-radius: 3px;
     background: rgba(0, 112, 0, 0.56);
-    padding: 8px;
-    overflow: hidden;
+    padding: 8px 10px;
+    overflow: visible;
     box-shadow: 0 0 0 1px rgba(98, 212, 88, 0.24) inset;
 }
 
@@ -126,14 +133,15 @@
     position: relative;
     z-index: 1;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .store-item-cover {
     width: 56px;
     height: 56px;
+    flex: 0 0 56px;
     object-fit: contain;
     background: rgba(0, 78, 0, 0.68);
     border: 1px solid rgba(166, 243, 145, 0.52);
@@ -148,6 +156,7 @@
     position: relative;
     z-index: 1;
     font-size: 16px;
+    line-height: 1.35;
     color: #fff0be;
     font-weight: 700;
 }
@@ -158,7 +167,9 @@
     margin-top: 4px;
     font-size: 13px;
     color: #ddffd3;
-    line-height: 1.4;
+    line-height: 1.5;
+    white-space: normal;
+    word-break: break-all;
 }
 
 .store-item-actions {
@@ -180,7 +191,8 @@
 }
 
 .store-pager {
-    margin-top: 8px;
+    margin-top: 10px;
+    min-height: 34px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
