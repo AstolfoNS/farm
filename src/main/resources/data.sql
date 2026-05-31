@@ -1,4 +1,4 @@
-﻿-- ==========================================
+-- ==========================================
 -- 初始化 Schema 与 扩展
 -- ==========================================
 DROP SCHEMA IF EXISTS farm CASCADE;
@@ -19,7 +19,7 @@ CREATE TABLE farm.users
     nickname                    VARCHAR(500)        NOT NULL,
     password_hash               VARCHAR(500)        NOT NULL,
     email                       citext              NOT NULL,
-    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '',
+    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '/oss/defaults/avatar/default-avatar.png',
     experience                  BIGINT              NOT NULL DEFAULT 0,
     score                       BIGINT              NOT NULL DEFAULT 0,
     coin                        BIGINT              NOT NULL DEFAULT 0,
@@ -326,7 +326,7 @@ CREATE TABLE farm.seed_growth_stages
 
     stage_index                 SMALLINT        NOT NULL,
     duration_seconds            INT             NOT NULL,
-    asset_url                   VARCHAR(1024)       NULL,
+    asset_url                   VARCHAR(1024)       NOT NULL DEFAULT '/oss/defaults/seed/seed-stage-default.png',
     bug_probability             NUMERIC(5, 4)   NOT NULL DEFAULT 0.0000,
 
     width                       INT             NOT NULL DEFAULT 0,

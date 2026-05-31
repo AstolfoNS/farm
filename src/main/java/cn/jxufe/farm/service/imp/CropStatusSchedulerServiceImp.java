@@ -21,6 +21,7 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +67,7 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
     private final int partitionSize;
 
     private final ExecutorService schedulerExecutor;
+    private volatile boolean missingUserCropsTableWarned = false;
 
     public CropStatusSchedulerServiceImp(
             UserCropDao userCropDao,
@@ -96,7 +98,20 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
     @Override
     @Scheduled(fixedDelayString = "${farm.gameplay.realtime.crop-status-refresh-interval-ms:1000}")
     public void scheduleTick() {
-        List<UserCrop> crops = userCropDao.findByIsDeletedFalseOrderByIdAsc();
+        List<UserCrop> crops;
+        try {
+            crops = userCropDao.findByIsDeletedFalseOrderByIdAsc();
+            missingUserCropsTableWarned = false;
+        } catch (DataAccessException ex) {
+            if (isMissingUserCropsTable(ex)) {
+                if (!missingUserCropsTableWarned) {
+                    log.warn("Skip crop-status tick: table farm.user_crops is temporarily unavailable.");
+                    missingUserCropsTableWarned = true;
+                }
+                return;
+            }
+            throw ex;
+        }
         if (crops.isEmpty()) {
             return;
         }
@@ -144,6 +159,23 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
         if (!changedUserIds.isEmpty()) {
             farmRealtimePushService.pushOverviewToOnlineUsers(changedUserIds);
         }
+    }
+
+    private boolean isMissingUserCropsTable(Throwable ex) {
+        Throwable cursor = ex;
+        while (cursor != null) {
+            String message = cursor.getMessage();
+            if (message != null) {
+                String normalized = message.toLowerCase();
+                if (normalized.contains("relation \"farm.user_crops\" does not exist")
+                        || normalized.contains("relation \"user_crops\" does not exist")
+                        || normalized.contains("sqlstate: 42p01")) {
+                    return true;
+                }
+            }
+            cursor = cursor.getCause();
+        }
+        return false;
     }
 
     @PreDestroy

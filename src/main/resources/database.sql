@@ -1,4 +1,4 @@
-﻿-- ==========================================
+-- ==========================================
 -- 初始化 Schema 与 扩展
 -- ==========================================
 DROP SCHEMA IF EXISTS farm CASCADE;
@@ -77,7 +77,7 @@ CREATE TABLE farm.soil_types
 
     name                        VARCHAR(500)    NOT NULL,
     bit_code                    INT             NOT NULL,
-    cover_image_url             VARCHAR(1024)   NOT NULL DEFAULT '/oss/defaults/seed/seed-cover-default.png',
+    cover_image_url             VARCHAR(1024)   NOT NULL DEFAULT '',
     level                       SMALLINT        NOT NULL,
     unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
     grow_speed_multiplier       NUMERIC(5, 2)   NOT NULL DEFAULT 1.00,
