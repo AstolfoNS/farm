@@ -337,6 +337,226 @@
         });
     };
 
+    FarmApi.plotSoilPage = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/soil/page",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotSoilSave = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/soil/save",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotSoilDelete = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/soil/delete",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotTypePage = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/type/page",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotTypeSave = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/type/save",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotTypeDelete = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/type/delete",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotPolicyCurrent = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/policy/current",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotPolicySave = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/policy/save",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotPolicyActivate = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/policy/activate",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotUserPage = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/user/page",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotUserUpdate = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/user/update",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
     FarmApi.listSeedQualityOptions = function (onSuccess, onError) {
         $.ajax({
             url: "/seed/quality/options",

@@ -16,7 +16,7 @@
     <link rel="stylesheet" type="text/css" href="/css/modules/farm-stage.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/shop-panel.css?v=20260531-9">
     <link rel="stylesheet" type="text/css" href="/css/modules/store-panel.css?v=20260531-1">
-    <link rel="stylesheet" type="text/css" href="/css/modules/plot-admin.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/plot-admin.css?v=20260531-1">
     <link rel="stylesheet" type="text/css" href="/css/modules/user-admin.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/seed-admin.css">
     <script src="/js/easyui/jquery.min.js"></script>
@@ -34,7 +34,7 @@
     <script src="/js/app/modules/farm.js"></script>
     <script src="/js/app/modules/shop.js"></script>
     <script src="/js/app/modules/store.js"></script>
-    <script src="/js/app/modules/plot-admin.js"></script>
+    <script src="/js/app/modules/plot-admin.js?v=20260531-1"></script>
     <script src="/js/app/modules/user-admin.js"></script>
     <script src="/js/app/modules/seed-admin.js"></script>
     <script src="/js/app/modules/home.js"></script>
@@ -253,12 +253,168 @@
             </div>
         </section>
 
-        <section id="plotAdminPanel" class="home-panel plot-admin-panel">
+        <section id="plotAdminPanel" class="home-panel plot-admin-panel farm-admin-grid-theme">
             <div class="home-panel-title">地块管理</div>
-            <div class="home-panel-body">
-                <div class="plot-admin-tip">地块管理模块将在下一阶段接入：地块类型、默认分配策略、用户地块分配与批量应用。</div>
+            <div class="home-panel-body plot-admin-body">
+                <div class="plot-admin-tabs">
+                    <a id="plotAdminTabSoil" href="javascript:void(0)" class="plot-admin-tab is-active" data-tab="soil">土壤类型管理</a>
+                    <a id="plotAdminTabType" href="javascript:void(0)" class="plot-admin-tab" data-tab="type">地块类型管理</a>
+                    <a id="plotAdminTabUser" href="javascript:void(0)" class="plot-admin-tab" data-tab="user">用户土地配置</a>
+                </div>
+
+                <div id="plotAdminSoilPane" class="plot-admin-pane is-active">
+                    <div id="plotAdminSoilToolbar" class="plot-admin-toolbar farm-admin-toolbar">
+                        <label class="plot-admin-toolbar-label" for="plotAdminSoilName">土壤名称:</label>
+                        <input id="plotAdminSoilName" class="easyui-textbox" style="width:180px">
+                        <a id="plotAdminSoilSearchBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
+                        <a id="plotAdminSoilResetBtn" href="javascript:void(0)" class="easyui-linkbutton">重置</a>
+                        <a id="plotAdminSoilAddBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">新增土壤</a>
+                        <a id="plotAdminSoilEditBtn" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑土壤</a>
+                        <a id="plotAdminSoilDeleteBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除土壤</a>
+                    </div>
+                    <div class="plot-admin-grid-title farm-admin-grid-title">土壤类型清单</div>
+                    <div class="plot-admin-grid-panel farm-admin-grid-panel">
+                        <table id="plotAdminSoilGrid"></table>
+                    </div>
+                </div>
+
+                <div id="plotAdminTypePane" class="plot-admin-pane">
+                    <div id="plotAdminTypeToolbar" class="plot-admin-toolbar farm-admin-toolbar">
+                        <label class="plot-admin-toolbar-label" for="plotAdminTypeName">地块类型:</label>
+                        <input id="plotAdminTypeName" class="easyui-textbox" style="width:180px">
+                        <a id="plotAdminTypeSearchBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
+                        <a id="plotAdminTypeResetBtn" href="javascript:void(0)" class="easyui-linkbutton">重置</a>
+                        <a id="plotAdminTypeAddBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">新增地块类型</a>
+                        <a id="plotAdminTypeEditBtn" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑地块类型</a>
+                        <a id="plotAdminTypeDeleteBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除地块类型</a>
+                    </div>
+                    <div class="plot-admin-grid-title farm-admin-grid-title">地块类型清单</div>
+                    <div class="plot-admin-grid-panel farm-admin-grid-panel">
+                        <table id="plotAdminTypeGrid"></table>
+                    </div>
+                </div>
+
+                <div id="plotAdminUserPane" class="plot-admin-pane">
+                    <div id="plotAdminUserToolbar" class="plot-admin-toolbar farm-admin-toolbar">
+                        <label class="plot-admin-toolbar-label" for="plotAdminUserName">用户:</label>
+                        <input id="plotAdminUserName" class="easyui-textbox" style="width:180px">
+                        <a id="plotAdminUserSearchBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
+                        <a id="plotAdminUserResetBtn" href="javascript:void(0)" class="easyui-linkbutton">重置</a>
+                    </div>
+                    <div class="plot-admin-grid-title farm-admin-grid-title">用户土地配置（阶段B骨架）</div>
+                    <div class="plot-admin-grid-panel farm-admin-grid-panel">
+                        <table id="plotAdminUserGrid"></table>
+                    </div>
+                    <div class="plot-admin-tip">阶段B仅提供用户土地配置的查询骨架。编辑与策略联调将在阶段C完成。</div>
+                </div>
             </div>
         </section>
+
+        <div id="plotSoilEditorDialog" class="easyui-dialog plot-admin-dialog farm-dialog-shell" title="编辑土壤类型"
+             style="width:860px;height:416px;padding:8px" closed="true" modal="true" resizable="false">
+            <form id="plotSoilEditorForm" method="post">
+                <input type="hidden" name="id" value="0">
+                <table class="plot-admin-form-table farm-dialog-form">
+                    <tr>
+                        <td>土壤名称</td>
+                        <td><input name="name" class="easyui-textbox" style="width:220px" required="true"></td>
+                        <td>bitCode</td>
+                        <td><input name="bitCode" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px" required="true"></td>
+                    </tr>
+                    <tr>
+                        <td>等级</td>
+                        <td><input name="level" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                        <td>解锁经验</td>
+                        <td><input name="unlockExperienceRequired" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">exp</span></td>
+                    </tr>
+                    <tr>
+                        <td>成长倍率</td>
+                        <td><input name="growSpeedMultiplier" class="easyui-textbox" style="width:220px"></td>
+                        <td>说明</td>
+                        <td class="plot-admin-cell-tip">示例：1.00 表示不加速，0.90 表示成长更快。</td>
+                    </tr>
+                    <tr>
+                        <td>图片URL</td>
+                        <td colspan="3" class="plot-admin-full-field">
+                            <div class="plot-admin-cover-row">
+                                <div class="plot-admin-cover-input-wrap">
+                                    <input id="plotSoilCoverImageUrl" name="coverImageUrl" class="easyui-textbox plot-admin-full-input">
+                                    <a id="plotSoilUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
+                                </div>
+                                <div class="plot-admin-cover-preview-wrap">
+                                    <img id="plotSoilCoverPreview" class="plot-admin-cover-preview" src="/oss/defaults/soil/soil-default.png" alt="土壤预览">
+                                    <span>预览</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>描述</td>
+                        <td colspan="3" class="plot-admin-full-field"><input name="description" class="easyui-textbox plot-admin-description-input" style="height:86px" data-options="multiline:true"></td>
+                    </tr>
+                </table>
+                <input id="plotSoilCoverFile" type="file" accept="image/*" style="display:none">
+            </form>
+            <div class="plot-admin-dialog-actions farm-dialog-actions">
+                <a id="plotSoilSaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存</a>
+                <a id="plotSoilCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
+            </div>
+        </div>
+
+        <div id="plotTypeEditorDialog" class="easyui-dialog plot-admin-dialog farm-dialog-shell" title="编辑地块类型"
+             style="width:860px;height:452px;padding:8px" closed="true" modal="true" resizable="false">
+            <form id="plotTypeEditorForm" method="post">
+                <input type="hidden" name="id" value="0">
+                <table class="plot-admin-form-table farm-dialog-form">
+                    <tr>
+                        <td>地块类型</td>
+                        <td><input name="name" class="easyui-textbox" style="width:220px" required="true"></td>
+                        <td>关联土壤</td>
+                        <td><input id="plotTypeSoilTypeId" name="soilTypeId" class="easyui-combobox" style="width:220px" required="true"></td>
+                    </tr>
+                    <tr>
+                        <td>默认解锁经验</td>
+                        <td><input name="defaultUnlockExperienceRequired" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">exp</span></td>
+                        <td>排序</td>
+                        <td><input name="sortOrder" class="easyui-numberbox" data-options="precision:0" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>需要解锁</td>
+                        <td><input id="plotTypeUnlockRequired" name="unlockRequired" class="easyui-switchbutton" data-options="onText:'是',offText:'否'"></td>
+                        <td>默认可用</td>
+                        <td><input id="plotTypeDefaultUsable" name="defaultUsable" class="easyui-switchbutton" data-options="onText:'是',offText:'否'"></td>
+                    </tr>
+                    <tr>
+                        <td>图标URL</td>
+                        <td colspan="3" class="plot-admin-full-field"><input name="iconUrl" class="easyui-textbox plot-admin-full-input"></td>
+                    </tr>
+                    <tr>
+                        <td>封面URL</td>
+                        <td colspan="3" class="plot-admin-full-field">
+                            <div class="plot-admin-cover-row">
+                                <div class="plot-admin-cover-input-wrap">
+                                    <input id="plotTypeCoverImageUrl" name="coverImageUrl" class="easyui-textbox plot-admin-full-input">
+                                    <a id="plotTypeUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
+                                </div>
+                                <div class="plot-admin-cover-preview-wrap">
+                                    <img id="plotTypeCoverPreview" class="plot-admin-cover-preview" src="/oss/defaults/plot/plot-cover-default.png" alt="地块预览">
+                                    <span>预览</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>描述</td>
+                        <td colspan="3" class="plot-admin-full-field"><input name="description" class="easyui-textbox plot-admin-description-input" style="height:86px" data-options="multiline:true"></td>
+                    </tr>
+                </table>
+                <input id="plotTypeCoverFile" type="file" accept="image/*" style="display:none">
+            </form>
+            <div class="plot-admin-dialog-actions farm-dialog-actions">
+                <a id="plotTypeSaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存</a>
+                <a id="plotTypeCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
+            </div>
+        </div>
 
         <section id="seedAdminPanel" class="home-panel seed-admin-panel farm-admin-grid-theme farm-admin-grid-theme-legacy">
             <div class="home-panel-title">种子管理</div>

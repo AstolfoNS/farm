@@ -1,14 +1,173 @@
 .plot-admin-panel {
-    width: 700px;
+    width: min(1220px, calc(100% - 20px));
+}
+
+.plot-admin-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.plot-admin-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.plot-admin-tab {
+    min-width: 136px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border: 1px solid rgba(168, 244, 144, 0.75);
+    border-radius: 4px;
+    color: #e3ffd3;
+    background: rgba(0, 96, 0, 0.65);
+}
+
+.plot-admin-tab.is-active {
+    color: #fff7a5;
+    background: linear-gradient(180deg, rgba(14, 165, 14, 0.92), rgba(0, 118, 0, 0.92));
+}
+
+.plot-admin-pane {
+    display: none;
+    flex: 1;
+    min-height: 0;
+}
+
+.plot-admin-pane.is-active {
+    display: flex;
+    flex-direction: column;
+}
+
+.plot-admin-toolbar {
+    margin-bottom: 8px;
+}
+
+.plot-admin-toolbar-label {
+    color: #eefeda;
+    font-size: 15px;
+    margin-right: 4px;
+}
+
+.plot-admin-grid-title {
+    margin-bottom: 6px;
+}
+
+.plot-admin-grid-panel {
+    flex: 1;
+    min-height: 0;
+}
+
+#plotAdminSoilGrid,
+#plotAdminTypeGrid,
+#plotAdminUserGrid {
+    width: 100%;
+    height: 100%;
 }
 
 .plot-admin-tip {
-    min-height: 110px;
-    padding: 14px;
-    font-size: 20px;
-    line-height: 1.7;
+    margin-top: 10px;
+    min-height: 46px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.6;
     color: #e9ffd7;
     border: 1px dashed rgba(188, 255, 162, 0.8);
     background: rgba(0, 86, 0, 0.56);
     border-radius: 6px;
+}
+
+.plot-admin-dialog {
+    background: transparent;
+}
+
+.plot-admin-form-table {
+    width: 100%;
+}
+
+.plot-admin-form-table td {
+    padding: 6px 8px;
+    color: #f6ffe3;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.plot-admin-form-table td.plot-admin-full-field {
+    white-space: normal;
+}
+
+.plot-admin-full-field .plot-admin-full-input,
+.plot-admin-full-field .plot-admin-description-input {
+    width: 100%;
+}
+
+.plot-admin-full-field .textbox,
+.plot-admin-full-field .combo {
+    width: 100% !important;
+}
+
+.plot-admin-full-field .textbox .textbox-text {
+    width: 100% !important;
+}
+
+.plot-admin-cell-tip {
+    white-space: normal;
+    line-height: 1.35;
+    font-size: 12px;
+    color: #cdeec3;
+}
+
+.plot-admin-cover-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.plot-admin-cover-input-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.plot-admin-cover-input-wrap .textbox {
+    flex: 1;
+    min-width: 0;
+}
+
+.plot-admin-cover-preview-wrap {
+    width: 68px;
+    color: #e8ffd8;
+    text-align: center;
+    font-size: 12px;
+}
+
+.plot-admin-cover-preview {
+    margin: 0 auto 4px;
+    width: 58px;
+    height: 58px;
+    object-fit: cover;
+    border: 1px solid rgba(198, 255, 175, 0.92);
+    box-shadow: 0 0 0 1px rgba(3, 90, 3, 0.68) inset;
+    background: rgba(0, 70, 0, 0.62);
+}
+
+.plot-admin-description-input + .textbox,
+.plot-admin-description-input.textbox-f {
+    min-height: 86px;
+}
+
+.plot-admin-description-input + .textbox .textbox-text {
+    min-height: 72px !important;
+    line-height: 1.45 !important;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.plot-admin-dialog-actions {
+    margin-top: 10px;
 }
