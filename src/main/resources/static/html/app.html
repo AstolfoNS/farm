@@ -15,7 +15,7 @@
     <link rel="stylesheet" type="text/css" href="/css/modules/admin-grid.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/farm-stage.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/shop-panel.css?v=20260531-9">
-    <link rel="stylesheet" type="text/css" href="/css/modules/store-panel.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/store-panel.css?v=20260531-1">
     <link rel="stylesheet" type="text/css" href="/css/modules/plot-admin.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/user-admin.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/seed-admin.css">
@@ -227,22 +227,28 @@
         </section>
 
         <section id="storePanel" class="store-panel">
-            <div class="store-toolbar">
-                <div class="store-toolbar-title">仓库总览</div>
-                <a id="storeRefreshBtn" href="javascript:void(0)" class="easyui-linkbutton c1">刷新仓库</a>
-            </div>
-            <div class="store-main">
-                <div class="store-block">
-                    <div class="store-block-title">种子库存</div>
-                    <div id="storeSeedList" class="store-list"></div>
+            <div class="store-board">
+                <div class="store-board-title">仓库</div>
+                <div class="store-overview-strip">
+                    <span class="store-overview-item">种子总量 <em id="storeSeedTotal">0</em></span>
+                    <span class="store-overview-item">果实总量 <em id="storeFruitTotal">0</em></span>
+                    <span class="store-overview-item">可售果实 <em id="storeSellableFruit">0</em></span>
+                    <span class="store-overview-item">可售估值 <em id="storeSellableValue">0</em></span>
                 </div>
-                <div class="store-block">
-                    <div class="store-block-title">果实库存</div>
-                    <div id="storeFruitList" class="store-list"></div>
+                <div class="store-toolbar">
+                    <a id="storeRefreshBtn" href="javascript:void(0)" class="easyui-linkbutton c1">刷新仓库</a>
                 </div>
-                <div class="store-block">
-                    <div class="store-block-title">可种地块</div>
-                    <div id="storePlotSummary" class="store-list"></div>
+                <div class="store-main">
+                    <div class="store-block">
+                        <div class="store-block-title">种子库存</div>
+                        <div id="storeSeedList" class="store-list"></div>
+                        <div id="storeSeedPager" class="store-pager"></div>
+                    </div>
+                    <div class="store-block">
+                        <div class="store-block-title">果实库存</div>
+                        <div id="storeFruitList" class="store-list"></div>
+                        <div id="storeFruitPager" class="store-pager"></div>
+                    </div>
                 </div>
             </div>
         </section>

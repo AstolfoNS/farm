@@ -5,53 +5,95 @@
     top: 16px;
     bottom: 16px;
     display: none;
-    background: rgba(12, 92, 20, 0.62);
-    border: 1px solid rgba(137, 223, 113, 0.58);
-    border-radius: 8px;
-    padding: 10px;
-    animation: storePanelEnter var(--farm-motion-module-ms, 260ms) ease both;
 }
 
 .store-panel.is-active {
     display: block;
 }
 
-.store-toolbar {
+.store-board {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    width: min(1120px, calc(100% - 20px));
+    height: min(650px, calc(100% - 20px));
+    border: 3px solid #0ec10f;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(0, 120, 0, 0.82), rgba(0, 78, 0, 0.78));
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    padding: 12px;
+}
+
+.store-board-title {
+    height: 38px;
+    line-height: 38px;
+    padding: 0 12px;
+    color: #ecff9c;
+    font-size: 32px;
+    font-weight: 700;
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(0, 178, 0, 0.9), rgba(0, 140, 0, 0.9));
+    margin-bottom: 10px;
+}
+
+.store-overview-strip {
+    display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 10px;
 }
 
-.store-toolbar-title {
-    font-size: 24px;
+.store-overview-item {
+    min-height: 32px;
+    line-height: 32px;
+    padding: 0 10px;
+    border: 1px solid rgba(165, 255, 143, 0.6);
+    border-radius: 4px;
+    color: #e8ffd2;
+    background: rgba(0, 95, 0, 0.62);
+    font-size: 16px;
+}
+
+.store-overview-item em {
+    font-style: normal;
+    margin-left: 4px;
+    color: #ffe576;
     font-weight: 700;
-    color: #ffe478;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.45);
+}
+
+.store-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(150, 236, 129, 0.6);
+    background: rgba(0, 86, 0, 0.54);
 }
 
 .store-main {
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    top: 56px;
-    bottom: 10px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+    flex: 1;
+    min-height: 0;
 }
 
 .store-block {
-    background: rgba(9, 73, 15, 0.62);
-    border: 1px solid rgba(163, 238, 141, 0.56);
-    border-radius: 8px;
-    padding: 8px;
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: 1px solid rgba(157, 228, 136, 0.56);
+    border-radius: 6px;
+    background: rgba(0, 78, 0, 0.4);
+    padding: 10px;
 }
 
 .store-block-title {
-    font-size: 18px;
+    font-size: 20px;
     color: #fff4bd;
     font-weight: 700;
     margin-bottom: 8px;
@@ -61,38 +103,71 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
 }
 
 .store-item {
     position: relative;
-    border: 1px solid rgba(175, 239, 150, 0.52);
-    border-radius: 6px;
-    background: rgba(0, 96, 8, 0.45);
+    border: 0;
+    border-radius: 3px;
+    background: rgba(0, 112, 0, 0.56);
     padding: 8px;
     overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(98, 212, 88, 0.24) inset;
 }
 
-.store-item::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.16;
-    background-image: url("/resources/imgs/app/panel/seed-storage-frame.png");
-    background-size: cover;
-    background-position: center;
+.store-item::before {
+    content: none;
+}
+
+.store-item-head {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.store-item-cover {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    background: rgba(0, 78, 0, 0.68);
+    border: 1px solid rgba(166, 243, 145, 0.52);
+}
+
+.store-item-title-wrap {
+    flex: 1;
+    min-width: 0;
 }
 
 .store-item-name {
-    font-size: 14px;
+    position: relative;
+    z-index: 1;
+    font-size: 16px;
     color: #fff0be;
     font-weight: 700;
 }
 
 .store-item-meta {
+    position: relative;
+    z-index: 1;
     margin-top: 4px;
-    font-size: 12px;
+    font-size: 13px;
     color: #ddffd3;
+    line-height: 1.4;
+}
+
+.store-item-actions {
+    position: relative;
+    z-index: 1;
+    margin-top: 7px;
+    padding-top: 7px;
+    border-top: 1px solid rgba(176, 255, 151, 0.18);
+    text-align: center;
 }
 
 .store-empty {
@@ -104,20 +179,91 @@
     text-align: center;
 }
 
+.store-pager {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.store-page-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+}
+
+.store-page-btn[disabled] {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.store-page-btn.prev {
+    background: url("/resources/imgs/app/pager/prev-100x150.png") center center / contain no-repeat;
+}
+
+.store-page-btn.next {
+    background: url("/resources/imgs/app/pager/next-100x150.png") center center / contain no-repeat;
+}
+
+.store-page-label {
+    color: #fff4c1;
+    font-size: 13px;
+}
+
+.store-action-dialog-shell {
+    padding: 4px 2px 0;
+}
+
+.store-action-dialog-shell .farm-action-row {
+    margin-bottom: 10px;
+    line-height: 1.45;
+    color: #eeffde;
+}
+
+.store-action-dialog-shell .farm-action-row:first-child {
+    color: #fff2b3;
+    font-weight: 700;
+}
+
+.store-dialog-window .window-body {
+    padding: 8px 8px 4px !important;
+}
+
+.store-dialog-window .dialog-button.store-dialog-actions {
+    padding: 7px 8px 8px !important;
+}
+
+.store-dialog-window .dialog-button .l-btn {
+    min-width: 78px;
+    border-radius: 0 !important;
+}
+
+.store-dialog-window .dialog-button .l-btn.c2 {
+    border: 1px solid #0d690d !important;
+    background: linear-gradient(180deg, #1ab31a, #0f800f) !important;
+}
+
+.store-dialog-window .dialog-button .l-btn.c5 {
+    border: 1px solid #8b2525 !important;
+    background: linear-gradient(180deg, #d34f4f, #a72d2d) !important;
+}
+
+.store-dialog-window .numberbox .textbox-text {
+    height: 30px !important;
+    line-height: 30px !important;
+    border-radius: 0 !important;
+    border: 1px solid #5fce5a !important;
+    background: #f2fff0 !important;
+    color: #154115 !important;
+}
+
 @media screen and (max-width: 1200px) {
     .store-main {
         grid-template-columns: 1fr;
     }
 }
-
-@keyframes storePanelEnter {
-    0% {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
