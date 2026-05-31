@@ -789,7 +789,11 @@
                     rows: asNumber(param.rows, state.soilQuery.rows),
                     name: trimText(param.name)
                 }, function (res) {
-                    success(boolOk(res) && res.data ? res.data : {total: 0, records: []});
+                    var pageData = (boolOk(res) && res.data) ? res.data : {total: 0, records: []};
+                    success({
+                        total: asNumber(pageData.total, 0),
+                        rows: $.isArray(pageData.records) ? pageData.records : []
+                    });
                 }, function () {
                     if ($.isFunction(error)) {
                         error.apply(this, arguments);
@@ -837,7 +841,11 @@
                     rows: asNumber(param.rows, state.typeQuery.rows),
                     name: trimText(param.name)
                 }, function (res) {
-                    success(boolOk(res) && res.data ? res.data : {total: 0, records: []});
+                    var pageData = (boolOk(res) && res.data) ? res.data : {total: 0, records: []};
+                    success({
+                        total: asNumber(pageData.total, 0),
+                        rows: $.isArray(pageData.records) ? pageData.records : []
+                    });
                 }, function () {
                     if ($.isFunction(error)) {
                         error.apply(this, arguments);
@@ -886,7 +894,11 @@
                     rows: asNumber(param.rows, state.userQuery.rows),
                     username: trimText(param.username)
                 }, function (res) {
-                    success(boolOk(res) && res.data ? res.data : {total: 0, records: []});
+                    var pageData = (boolOk(res) && res.data) ? res.data : {total: 0, records: []};
+                    success({
+                        total: asNumber(pageData.total, 0),
+                        rows: $.isArray(pageData.records) ? pageData.records : []
+                    });
                 }, function () {
                     if ($.isFunction(error)) {
                         error.apply(this, arguments);
