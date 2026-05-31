@@ -18,5 +18,6 @@ public interface UserPlotAllocationDao extends JpaRepository<UserPlotAllocation,
     Optional<UserPlotAllocation> findByUserIdAndActiveTrueAndIsDeletedFalse(Long userId);
 
     Page<UserPlotAllocation> findByIsDeletedFalse(Pageable pageable);
-}
 
+    boolean existsByDefaultPlotTypeIdAndIsDeletedFalse(Long defaultPlotTypeId);
+}

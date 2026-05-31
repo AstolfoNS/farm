@@ -11,18 +11,24 @@ public class PlotPolicySaveDTO implements Serializable {
 
     private Long id;
 
-    @NotBlank(message = "策略名称不能为空")
+    @NotBlank(message = "policyName is required")
     private String policyName;
+
+    private String policyVersion;
 
     private Boolean active;
 
-    @Min(value = 1, message = "defaultTotalPlotCount必须大于0")
+    private String effectiveScope;
+
+    private String publishStatus;
+
+    @Min(value = 1, message = "defaultTotalPlotCount must be > 0")
     private Integer defaultTotalPlotCount;
 
-    @Min(value = 0, message = "defaultUnlockedPlotCount不能小于0")
+    @Min(value = 0, message = "defaultUnlockedPlotCount must be >= 0")
     private Integer defaultUnlockedPlotCount;
 
-    @Min(value = 0, message = "defaultLockedPlotCount不能小于0")
+    @Min(value = 0, message = "defaultLockedPlotCount must be >= 0")
     private Integer defaultLockedPlotCount;
 
     private Long defaultPlotTypeId;
@@ -33,4 +39,3 @@ public class PlotPolicySaveDTO implements Serializable {
 
     private String allocationRuleJson;
 }
-

@@ -12,13 +12,15 @@ public class PlotTypeSaveDTO implements Serializable {
 
     private Long id;
 
-    @NotBlank(message = "地块类型名称不能为空")
+    @NotBlank(message = "plot type name is required")
     private String name;
 
     private String iconUrl;
 
-    @NotNull(message = "soilTypeId不能为空")
-    @Positive(message = "soilTypeId必须大于0")
+    private String coverImageUrl;
+
+    @NotNull(message = "soilTypeId is required")
+    @Positive(message = "soilTypeId must be > 0")
     private Long soilTypeId;
 
     private Boolean unlockRequired;
@@ -31,4 +33,3 @@ public class PlotTypeSaveDTO implements Serializable {
 
     private String description;
 }
-

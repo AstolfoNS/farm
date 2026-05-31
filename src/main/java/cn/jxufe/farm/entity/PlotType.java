@@ -19,6 +19,9 @@ public class PlotType extends BaseEntity {
     @Column(name = "icon_url", nullable = false, length = 1024)
     private String iconUrl;
 
+    @Column(name = "cover_image_url", length = 1024)
+    private String coverImageUrl;
+
     @Column(name = "soil_type_id", nullable = false)
     private Long soilTypeId;
 
@@ -37,4 +40,3 @@ public class PlotType extends BaseEntity {
     @Column(name = "description")
     private String description;
 }
-

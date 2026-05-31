@@ -17,8 +17,17 @@ public class PlotPolicy extends BaseEntity {
     @Column(name = "policy_name", nullable = false, length = 128)
     private String policyName;
 
+    @Column(name = "policy_version", length = 64)
+    private String policyVersion;
+
     @Column(name = "active", nullable = false)
     private Boolean active;
+
+    @Column(name = "effective_scope", length = 32)
+    private String effectiveScope;
+
+    @Column(name = "publish_status", length = 32)
+    private String publishStatus;
 
     @Column(name = "default_total_plot_count", nullable = false)
     private Short defaultTotalPlotCount;
@@ -42,4 +51,3 @@ public class PlotPolicy extends BaseEntity {
     @ColumnTransformer(write = "?::jsonb")
     private String allocationRuleJson;
 }
-

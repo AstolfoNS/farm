@@ -9,7 +9,10 @@ public class PlotPolicyVO implements Serializable {
 
     private Long id;
     private String policyName;
+    private String policyVersion;
     private Boolean active;
+    private String effectiveScope;
+    private String publishStatus;
     private Short defaultTotalPlotCount;
     private Short defaultUnlockedPlotCount;
     private Short defaultLockedPlotCount;
@@ -19,4 +22,3 @@ public class PlotPolicyVO implements Serializable {
     private String defaultLockReason;
     private String allocationRuleJson;
 }
-

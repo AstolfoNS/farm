@@ -21,5 +21,6 @@ public interface PlotTypeDao extends JpaRepository<PlotType, Long> {
     Optional<PlotType> findByNameAndIsDeletedFalse(String name);
 
     List<PlotType> findByIsDeletedFalseOrderBySortOrderAscIdAsc();
-}
 
+    boolean existsBySoilTypeIdAndIsDeletedFalse(Long soilTypeId);
+}

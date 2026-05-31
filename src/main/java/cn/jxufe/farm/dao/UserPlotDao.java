@@ -20,4 +20,10 @@ public interface UserPlotDao extends JpaRepository<UserPlot, Long> {
     Optional<UserPlot> findTopByUserIdAndIsDeletedFalseOrderByPlotIndexDesc(Long userId);
 
     List<UserPlot> findByIdInAndIsDeletedFalse(List<Long> ids);
+
+    boolean existsBySoilTypeIdAndIsDeletedFalse(Long soilTypeId);
+
+    long countByUserIdAndIsDeletedFalse(Long userId);
+
+    long countByUserIdAndIsLockedFalseAndIsDeletedFalse(Long userId);
 }
