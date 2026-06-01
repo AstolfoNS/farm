@@ -164,6 +164,22 @@
         radial-gradient(circle at 80% 16%, rgba(135, 215, 88, 0.16), transparent 34%);
 }
 
+#farmIsoContainer.farm-cursor-inspect {
+    cursor: url("/resources/imgs/domain/farm/actions/action-wait.cur"), auto;
+}
+
+#farmIsoContainer.farm-cursor-plant {
+    cursor: url("/resources/imgs/domain/farm/actions/action-plant.cur"), auto;
+}
+
+#farmIsoContainer.farm-cursor-clean {
+    cursor: url("/resources/imgs/domain/farm/actions/action-clean-land.cur"), auto;
+}
+
+#farmIsoContainer.farm-cursor-care {
+    cursor: url("/resources/imgs/domain/farm/actions/action-clean-bug.cur"), auto;
+}
+
 .farm-iso-grid {
     position: relative;
     min-width: 1180px;
