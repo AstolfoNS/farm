@@ -172,6 +172,10 @@
     cursor: url("/resources/imgs/domain/farm/actions/action-plant.cur"), auto;
 }
 
+#farmIsoContainer.farm-cursor-harvest {
+    cursor: url("/resources/imgs/domain/farm/actions/action-harvest.cur"), auto;
+}
+
 #farmIsoContainer.farm-cursor-clean {
     cursor: url("/resources/imgs/domain/farm/actions/action-clean-land.cur"), auto;
 }

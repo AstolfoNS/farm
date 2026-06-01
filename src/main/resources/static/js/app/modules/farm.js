@@ -32,6 +32,7 @@
   var toolTitleMap = {
     inspect: "查看",
     plant: "播种",
+    harvest: "收获",
     clean: "铲除",
     care: "杀虫",
   };
@@ -112,7 +113,7 @@
       return;
     }
     $iso.removeClass(
-      "farm-cursor-inspect farm-cursor-plant farm-cursor-clean farm-cursor-care",
+      "farm-cursor-inspect farm-cursor-plant farm-cursor-harvest farm-cursor-clean farm-cursor-care",
     );
     $iso.addClass("farm-cursor-" + String(toolName || "inspect"));
   }
@@ -122,6 +123,7 @@
     if (
       next !== "inspect" &&
       next !== "plant" &&
+      next !== "harvest" &&
       next !== "clean" &&
       next !== "care"
     ) {
@@ -1510,25 +1512,34 @@
       executeCare(plot);
       return;
     }
+    if (mode === "harvest") {
+      if (plot.locked || !plot.hasCrop) {
+        showActionError("该地块暂无可收获作物");
+        return;
+      }
+      if (!(plot.crop && plot.crop.harvestable)) {
+        showActionError("当前作物尚未成熟，无法收获");
+        return;
+      }
+      executeHarvest(plot);
+      return;
+    }
     if (mode === "clean") {
       if (plot.locked || !plot.hasCrop) {
         showActionError("该地块暂无可铲除作物");
         return;
       }
-      if (plot.crop && plot.crop.harvestable) {
-        confirmAction({
-          title: "确认收获",
-          message: "当前作物已成熟，是否立即收获？",
-          onConfirm: function () {
-            executeHarvest(plot);
-          },
-        });
-        return;
-      }
       confirmAction({
         title: "确认铲除",
-        message: "该作物尚未成熟，确认直接铲除吗？",
-        detail: "铲除后不会获得果实、经验与积分。",
+        message:
+          plot.crop && plot.crop.harvestable
+            ? "该作物已成熟，确认直接铲除吗？"
+            : "该作物尚未成熟，确认直接铲除吗？",
+        detail:
+          "铲除后不会获得果实、经验与积分。" +
+          (plot.crop && plot.crop.harvestable
+            ? "建议使用“收获”工具先收获。"
+            : ""),
         onConfirm: function () {
           executeClear(plot);
         },
