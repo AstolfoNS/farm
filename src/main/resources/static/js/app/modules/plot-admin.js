@@ -339,6 +339,61 @@
         $("#plotTypeEditorDialog").dialog("setTitle", data.id ? "编辑地块类型" : "新增地块类型").dialog("open");
     }
 
+    function pickText(primary, fallback, def) {
+        var p = trimText(primary);
+        if (p) {
+            return p;
+        }
+        var f = trimText(fallback);
+        if (f) {
+            return f;
+        }
+        return def || "";
+    }
+
+    function pickNumber(primary, fallback, def) {
+        if (primary !== null && primary !== undefined && primary !== "") {
+            return asNumber(primary, def || 0);
+        }
+        if (fallback !== null && fallback !== undefined && fallback !== "") {
+            return asNumber(fallback, def || 0);
+        }
+        return def || 0;
+    }
+
+    function mergeSoilEditorData(detail, row) {
+        var d = detail || {};
+        var r = row || {};
+        return {
+            id: pickNumber(d.id, r.id, 0),
+            name: pickText(d.name, r.name, ""),
+            bitCode: pickNumber(d.bitCode, r.bitCode, 0),
+            level: pickNumber(d.level, r.level, 1),
+            unlockExperienceRequired: pickNumber(d.unlockExperienceRequired, r.unlockExperienceRequired, 0),
+            growSpeedMultiplier: pickText(d.growSpeedMultiplier, r.growSpeedMultiplier, "1.00"),
+            coverImageUrl: pickText(d.coverImageUrl, r.coverImageUrl, DEFAULT_SOIL_COVER),
+            description: pickText(d.description, r.description, "")
+        };
+    }
+
+    function mergeTypeEditorData(detail, row) {
+        var d = detail || {};
+        var r = row || {};
+        var iconUrl = pickText(d.iconUrl, r.iconUrl, DEFAULT_PLOT_ICON);
+        return {
+            id: pickNumber(d.id, r.id, 0),
+            name: pickText(d.name, r.name, ""),
+            iconUrl: iconUrl,
+            coverImageUrl: pickText(d.coverImageUrl, r.coverImageUrl, iconUrl || DEFAULT_PLOT_COVER),
+            soilTypeId: pickNumber(d.soilTypeId, r.soilTypeId, 0),
+            unlockRequired: (d.unlockRequired === null || d.unlockRequired === undefined) ? r.unlockRequired : d.unlockRequired,
+            defaultUsable: (d.defaultUsable === null || d.defaultUsable === undefined) ? r.defaultUsable : d.defaultUsable,
+            defaultUnlockExperienceRequired: pickNumber(d.defaultUnlockExperienceRequired, r.defaultUnlockExperienceRequired, 0),
+            sortOrder: pickNumber(d.sortOrder, r.sortOrder, 0),
+            description: pickText(d.description, r.description, "")
+        };
+    }
+
     function loadSoilDetailById(id, done) {
         var targetId = asNumber(id, 0);
         if (targetId <= 0) {
@@ -875,7 +930,7 @@
             }
             loadSoilDetailById(row.id, function (detail, errMsg) {
                 if (detail) {
-                    openSoilEditor(detail);
+                    openSoilEditor(mergeSoilEditorData(detail, row));
                     return;
                 }
                 if (errMsg) {
@@ -910,7 +965,7 @@
             }
             loadTypeDetailById(row.id, function (detail, errMsg) {
                 if (detail) {
-                    openTypeEditor(detail);
+                    openTypeEditor(mergeTypeEditorData(detail, row));
                     return;
                 }
                 if (errMsg) {
@@ -1096,6 +1151,7 @@
         $("#plotAdminUserGrid").datagrid({
             fit: true,
             border: false,
+            fitColumns: true,
             striped: true,
             nowrap: false,
             singleSelect: true,
