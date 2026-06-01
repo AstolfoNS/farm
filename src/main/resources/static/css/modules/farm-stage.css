@@ -376,6 +376,10 @@
     background: rgba(49, 121, 186, 0.92);
 }
 
+.farm-plot-float-tip.type-clean {
+    background: rgba(188, 66, 66, 0.92);
+}
+
 .farm-plot-float-tip.type-unlock,
 .farm-plot-float-tip.type-expand {
     background: rgba(92, 92, 92, 0.9);

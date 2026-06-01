@@ -46,6 +46,7 @@ public class GameplayCoreServiceImp implements GameplayCoreService {
         if (actionType == null || actionType.isBlank()) return "";
         return switch (actionType.trim().toUpperCase()) {
             case "CARE" -> "CARE";
+            case "CLEAR", "CLEAN" -> "CLEAR";
             case "HARVEST" -> "HARVEST";
             case "PLANT" -> "PLANT";
             case "BUG_SPAWN" -> "BUG_SPAWN";

@@ -1,6 +1,7 @@
 package cn.jxufe.farm.service.imp;
 
 import cn.jxufe.farm.bean.dto.CareCropDTO;
+import cn.jxufe.farm.bean.dto.ClearCropDTO;
 import cn.jxufe.farm.bean.dto.CropActionLogQueryDTO;
 import cn.jxufe.farm.bean.dto.HarvestCropDTO;
 import cn.jxufe.farm.bean.dto.MyFarmOverviewDTO;
@@ -12,6 +13,7 @@ import cn.jxufe.farm.bean.dto.PlotTradeQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotUnlockDTO;
 import cn.jxufe.farm.bean.dto.SeedPlantablePlotsDTO;
 import cn.jxufe.farm.bean.vo.CareResultVO;
+import cn.jxufe.farm.bean.vo.ClearResultVO;
 import cn.jxufe.farm.bean.vo.CropActionLogRecordVO;
 import cn.jxufe.farm.bean.vo.HarvestResultVO;
 import cn.jxufe.farm.bean.vo.MyFarmOverviewVO;
@@ -104,6 +106,33 @@ public class GameplayServiceImp implements GameplayService {
         );
         try {
             HarvestResultVO result = cropLifecycleService.harvest(params);
+            requestIdempotencyService.markSuccess(idempotency.getId(), result);
+            return result;
+        } catch (RuntimeException ex) {
+            requestIdempotencyService.markFailed(idempotency.getId(), ex.getMessage());
+            throw ex;
+        }
+    }
+
+    @Override
+    @Transactional
+    public ClearResultVO clear(ClearCropDTO params) {
+        ClearResultVO cached = requestIdempotencyService.getCachedSuccessResult(
+                params == null ? null : params.getUserId(),
+                "CLEAR",
+                params == null ? null : params.getRequestId(),
+                ClearResultVO.class
+        );
+        if (cached != null) {
+            return cached;
+        }
+        RequestIdempotency idempotency = requestIdempotencyService.claimProcessing(
+                params == null ? null : params.getUserId(),
+                "CLEAR",
+                params == null ? null : params.getRequestId()
+        );
+        try {
+            ClearResultVO result = cropLifecycleService.clear(params);
             requestIdempotencyService.markSuccess(idempotency.getId(), result);
             return result;
         } catch (RuntimeException ex) {

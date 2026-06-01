@@ -1,10 +1,12 @@
 package cn.jxufe.farm.controller;
 
 import cn.jxufe.farm.bean.dto.CareCropDTO;
+import cn.jxufe.farm.bean.dto.ClearCropDTO;
 import cn.jxufe.farm.bean.dto.CropActionLogQueryDTO;
 import cn.jxufe.farm.bean.dto.HarvestCropDTO;
 import cn.jxufe.farm.bean.dto.PlantCropDTO;
 import cn.jxufe.farm.bean.vo.CareResultVO;
+import cn.jxufe.farm.bean.vo.ClearResultVO;
 import cn.jxufe.farm.bean.vo.CropActionLogRecordVO;
 import cn.jxufe.farm.bean.vo.HarvestResultVO;
 import cn.jxufe.farm.bean.vo.PlantResultVO;
@@ -38,6 +40,11 @@ public class CropGameplayController {
     @PostMapping(value = "/harvest", produces = MediaType.APPLICATION_JSON_VALUE)
     public R<HarvestResultVO> harvest(@Valid @RequestBody HarvestCropDTO params) {
         return R.ok(cropGameplayService.harvest(params));
+    }
+
+    @PostMapping(value = "/clear", produces = MediaType.APPLICATION_JSON_VALUE)
+    public R<ClearResultVO> clear(@Valid @RequestBody ClearCropDTO params) {
+        return R.ok(cropGameplayService.clear(params));
     }
 
     @PostMapping(value = "/care", produces = MediaType.APPLICATION_JSON_VALUE)

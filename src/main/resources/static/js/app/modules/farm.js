@@ -55,7 +55,7 @@
 
     function normalizeActionType(actionType) {
         var raw = String(actionType || "").toLowerCase();
-        if (raw === "plant" || raw === "harvest" || raw === "care" || raw === "unlock" || raw === "expand") {
+        if (raw === "plant" || raw === "harvest" || raw === "care" || raw === "clean" || raw === "unlock" || raw === "expand") {
             return raw;
         }
         return "plant";
@@ -845,6 +845,25 @@
         });
     }
 
+    function executeClear(plot) {
+        runFarmAction({
+            request: function (ok, fail) {
+                FarmApi.clear({
+                    requestId: farmBuildRequestId("clear"),
+                    userId: currentUserId(),
+                    plotId: plot.plotId
+                }, ok, fail);
+            },
+            successMessage: "铲除成功",
+            failMessage: "铲除失败，请稍后重试",
+            successSound: "clean",
+            afterSuccess: function () {
+                closeDialog("#farmActionDialog");
+                postActionRefresh({plotId: plot.plotId, actionType: "clean", tipText: "铲除成功"});
+            }
+        });
+    }
+
     function openSeedDialog(plot) {
         ensureSeedDialog();
         renderDialogTemplate({
@@ -963,6 +982,9 @@
         if (!plot.locked && plot.hasCrop && plot.crop && plot.crop.harvestable) {
             buttons.push({action: "harvest", text: "收获", skin: "c1"});
         }
+        if (!plot.locked && plot.hasCrop && plot.crop && !plot.crop.harvestable) {
+            buttons.push({action: "clear", text: "铲除作物", skin: "c5"});
+        }
         buttons.push({action: "expand", text: "扩地(默认土壤)"});
         buttons.push({action: "refresh", text: "刷新"});
         return buttons;
@@ -1006,6 +1028,7 @@
                 plant: function () { openSeedDialog(plot); },
                 care: function () { executeCare(plot); },
                 harvest: function () { executeHarvest(plot); },
+                clear: function () { executeClear(plot); },
                 expand: function () { executeExpand(); },
                 refresh: function () { loadOverviewByUser(currentUserId(), true); }
             }, ".farmDialogAction");
@@ -1014,6 +1037,7 @@
             $("#farmActionButtons [data-action='plant']").off("click.farmDialogAction").on("click.farmDialogAction", function () { openSeedDialog(plot); });
             $("#farmActionButtons [data-action='care']").off("click.farmDialogAction").on("click.farmDialogAction", function () { executeCare(plot); });
             $("#farmActionButtons [data-action='harvest']").off("click.farmDialogAction").on("click.farmDialogAction", function () { executeHarvest(plot); });
+            $("#farmActionButtons [data-action='clear']").off("click.farmDialogAction").on("click.farmDialogAction", function () { executeClear(plot); });
             $("#farmActionButtons [data-action='expand']").off("click.farmDialogAction").on("click.farmDialogAction", function () { executeExpand(); });
             $("#farmActionButtons [data-action='refresh']").off("click.farmDialogAction").on("click.farmDialogAction", function () { loadOverviewByUser(currentUserId(), true); });
         }
@@ -1070,7 +1094,14 @@
                 });
                 return;
             }
-            showActionError("当前后端未开放未成熟作物铲除接口，请先养护或等待收获");
+            confirmAction({
+                title: "确认铲除",
+                message: "该作物尚未成熟，确认直接铲除吗？",
+                detail: "铲除后不会获得果实、经验与积分。",
+                onConfirm: function () {
+                    executeClear(plot);
+                }
+            });
             return;
         }
         openPlotActionDialog(plotId);

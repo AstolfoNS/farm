@@ -1,10 +1,12 @@
 package cn.jxufe.farm.service.imp;
 
 import cn.jxufe.farm.bean.dto.CareCropDTO;
+import cn.jxufe.farm.bean.dto.ClearCropDTO;
 import cn.jxufe.farm.bean.dto.CropActionLogQueryDTO;
 import cn.jxufe.farm.bean.dto.HarvestCropDTO;
 import cn.jxufe.farm.bean.dto.PlantCropDTO;
 import cn.jxufe.farm.bean.vo.CareResultVO;
+import cn.jxufe.farm.bean.vo.ClearResultVO;
 import cn.jxufe.farm.bean.vo.CropActionLogRecordVO;
 import cn.jxufe.farm.bean.vo.HarvestResultVO;
 import cn.jxufe.farm.bean.vo.PlantResultVO;
@@ -30,6 +32,11 @@ public class CropGameplayServiceImp implements CropGameplayService {
     @Override
     public HarvestResultVO harvest(HarvestCropDTO params) {
         return gameplayService.harvest(params);
+    }
+
+    @Override
+    public ClearResultVO clear(ClearCropDTO params) {
+        return gameplayService.clear(params);
     }
 
     @Override

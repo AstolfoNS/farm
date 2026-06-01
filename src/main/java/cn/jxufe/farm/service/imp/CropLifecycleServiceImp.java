@@ -388,6 +388,49 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
 
     @Override
     @Transactional
+    public ClearResultVO clear(ClearCropDTO params) {
+        requireNotNull(params);
+        CropActionContext ctx = new CropActionContext(params.getUserId(), params.getPlotId(), true);
+
+        if (ctx.crop == null) {
+            throw new ServiceException(BizErrorCode.CROP_NOT_FOUND, "作物不存在");
+        }
+
+        OffsetDateTime now = OffsetDateTime.now();
+        syncCropStatus(ctx.crop, now);
+
+        Short growStatusBefore = ctx.crop.getGrowStatus();
+        Short stageIndexBefore = ctx.crop.getCurrentStageIndex();
+        Short bugCountBefore = ctx.crop.getBugCount();
+        Long seedTypeId = ctx.crop.getSeedTypeId();
+        Long cropId = ctx.crop.getId();
+
+        ctx.crop.setIsDeleted(true);
+        gameplayCoreService.touchForUpdate(ctx.crop, ctx.userId, now);
+        userCropDao.save(ctx.crop);
+
+        userCropActionLogDao.save(gameplayCoreService.buildCropActionLog(
+                ctx.userId, ctx.plotId, cropId, seedTypeId, "CLEAR", "SUCCESS", now,
+                "{\"growStatusBefore\":" + safeShort(growStatusBefore)
+                        + ",\"stageIndexBefore\":" + safeShort(stageIndexBefore)
+                        + ",\"bugCountBefore\":" + safeShort(bugCountBefore) + "}"
+        ));
+
+        ClearResultVO result = new ClearResultVO();
+        result.setUserId(ctx.userId);
+        result.setPlotId(ctx.plotId);
+        result.setCropId(cropId);
+        result.setSeedTypeId(seedTypeId);
+        result.setGrowStatusBefore(growStatusBefore);
+        result.setStageIndexBefore(stageIndexBefore);
+        result.setBugCountBefore(bugCountBefore);
+        result.setCleared(true);
+        result.setClearedAt(now);
+        return result;
+    }
+
+    @Override
+    @Transactional
     public CareResultVO care(CareCropDTO params) {
         requireNotNull(params);
         CropActionContext ctx = new CropActionContext(params.getUserId(), params.getPlotId(), true);

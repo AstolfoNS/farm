@@ -259,6 +259,26 @@
         });
     };
 
+    FarmApi.clear = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/gameplay/clear",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
     FarmApi.care = function (params, onSuccess, onError) {
         $.ajax({
             url: "/gameplay/care",
