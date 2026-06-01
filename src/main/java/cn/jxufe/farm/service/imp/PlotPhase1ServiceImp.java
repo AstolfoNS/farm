@@ -110,6 +110,14 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
     }
 
     @Override
+    public SoilTypeGridVO getSoilType(IdDTO params) {
+        Long id = requirePositiveId(params == null ? null : params.getId(), "soilTypeId");
+        SoilType entity = soilTypeDao.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new ServiceException(BizErrorCode.SOIL_TYPE_NOT_FOUND, "soil type not found"));
+        return toSoilGridVO(entity);
+    }
+
+    @Override
     @Transactional
     public Long saveSoilType(SoilTypeSaveDTO params) {
         if (params == null) {
@@ -195,6 +203,14 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
                 .map(item -> toPlotTypeGridVO(item, soilNameMap))
                 .collect(Collectors.toList());
         return new PageResult<>(pageNo, pageSize, page.getTotalElements(), records);
+    }
+
+    @Override
+    public PlotTypeGridVO getPlotType(IdDTO params) {
+        Long id = requirePositiveId(params == null ? null : params.getId(), "plotTypeId");
+        PlotType entity = plotTypeDao.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new ServiceException(BizErrorCode.PLOT_TYPE_NOT_FOUND, "plot type not found"));
+        return toPlotTypeGridVO(entity, plotTypeNameMapBySoilId());
     }
 
     @Override
@@ -577,6 +593,11 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
     private Map<Long, String> plotTypeNameMap() {
         return plotTypeDao.findByIsDeletedFalseOrderBySortOrderAscIdAsc().stream()
                 .collect(Collectors.toMap(PlotType::getId, item -> safeString(item.getName()), (a, b) -> a, LinkedHashMap::new));
+    }
+
+    private Map<Long, String> plotTypeNameMapBySoilId() {
+        return soilTypeDao.findByIsDeletedFalseOrderByIdAsc().stream()
+                .collect(Collectors.toMap(SoilType::getId, item -> safeString(item.getName()), (a, b) -> a, LinkedHashMap::new));
     }
 
     private void deactivateOtherPolicies(Long activePolicyId) {

@@ -40,6 +40,11 @@ public class PlotController {
         return R.ok(plotPhase1Service.pageSoilTypes(query));
     }
 
+    @PostMapping(value = "/soil/get", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public R<SoilTypeGridVO> getSoilType(@Valid @RequestBody IdDTO params) {
+        return R.ok(plotPhase1Service.getSoilType(params));
+    }
+
     @PostMapping(value = "/soil/save", consumes = MediaType.APPLICATION_JSON_VALUE)
     public R<Long> saveSoilType(@Valid @RequestBody SoilTypeSaveDTO params) {
         return R.ok(plotPhase1Service.saveSoilType(params));
@@ -54,6 +59,11 @@ public class PlotController {
     @PostMapping(value = "/type/page", consumes = MediaType.APPLICATION_JSON_VALUE)
     public R<PageResult<PlotTypeGridVO>> pagePlotTypes(@Valid @RequestBody(required = false) PlotTypeQueryDTO query) {
         return R.ok(plotPhase1Service.pagePlotTypes(query));
+    }
+
+    @PostMapping(value = "/type/get", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public R<PlotTypeGridVO> getPlotType(@Valid @RequestBody IdDTO params) {
+        return R.ok(plotPhase1Service.getPlotType(params));
     }
 
     @PostMapping(value = "/type/save", consumes = MediaType.APPLICATION_JSON_VALUE)

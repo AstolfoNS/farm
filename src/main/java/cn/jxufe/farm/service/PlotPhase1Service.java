@@ -19,11 +19,15 @@ public interface PlotPhase1Service {
 
     PageResult<SoilTypeGridVO> pageSoilTypes(SoilTypeQueryDTO query);
 
+    SoilTypeGridVO getSoilType(IdDTO params);
+
     Long saveSoilType(SoilTypeSaveDTO params);
 
     void removeSoilType(IdDTO params);
 
     PageResult<PlotTypeGridVO> pagePlotTypes(PlotTypeQueryDTO query);
+
+    PlotTypeGridVO getPlotType(IdDTO params);
 
     Long savePlotType(PlotTypeSaveDTO params);
 

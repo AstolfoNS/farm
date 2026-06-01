@@ -339,6 +339,56 @@
         $("#plotTypeEditorDialog").dialog("setTitle", data.id ? "编辑地块类型" : "新增地块类型").dialog("open");
     }
 
+    function loadSoilDetailById(id, done) {
+        var targetId = asNumber(id, 0);
+        if (targetId <= 0) {
+            if ($.isFunction(done)) {
+                done(null);
+            }
+            return;
+        }
+        window.FarmApi.plotSoilGet({id: targetId}, function (res) {
+            if (!boolOk(res) || !res.data) {
+                if ($.isFunction(done)) {
+                    done(null, (res && res.msg) || "读取土壤详情失败");
+                }
+                return;
+            }
+            if ($.isFunction(done)) {
+                done(res.data, null);
+            }
+        }, function () {
+            if ($.isFunction(done)) {
+                done(null, "读取土壤详情失败，请稍后重试");
+            }
+        });
+    }
+
+    function loadTypeDetailById(id, done) {
+        var targetId = asNumber(id, 0);
+        if (targetId <= 0) {
+            if ($.isFunction(done)) {
+                done(null);
+            }
+            return;
+        }
+        window.FarmApi.plotTypeGet({id: targetId}, function (res) {
+            if (!boolOk(res) || !res.data) {
+                if ($.isFunction(done)) {
+                    done(null, (res && res.msg) || "读取地块类型详情失败");
+                }
+                return;
+            }
+            if ($.isFunction(done)) {
+                done(res.data, null);
+            }
+        }, function () {
+            if ($.isFunction(done)) {
+                done(null, "读取地块类型详情失败，请稍后重试");
+            }
+        });
+    }
+
     function openPolicyEditor() {
         var row = state.currentPolicy || {};
         $("#plotPolicyEditorForm").form("clear");
@@ -823,7 +873,16 @@
                 alertMessage("请先选择要编辑的土壤类型");
                 return;
             }
-            openSoilEditor(row);
+            loadSoilDetailById(row.id, function (detail, errMsg) {
+                if (detail) {
+                    openSoilEditor(detail);
+                    return;
+                }
+                if (errMsg) {
+                    alertMessage(errMsg + "，已回退使用列表数据");
+                }
+                openSoilEditor(row);
+            });
         });
         $("#plotAdminSoilDeleteBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
             deleteSoil();
@@ -849,7 +908,16 @@
                 alertMessage("请先选择要编辑的地块类型");
                 return;
             }
-            openTypeEditor(row);
+            loadTypeDetailById(row.id, function (detail, errMsg) {
+                if (detail) {
+                    openTypeEditor(detail);
+                    return;
+                }
+                if (errMsg) {
+                    alertMessage(errMsg + "，已回退使用列表数据");
+                }
+                openTypeEditor(row);
+            });
         });
         $("#plotAdminTypeDeleteBtn").off("click.plotAdmin").on("click.plotAdmin", function () {
             deleteType();

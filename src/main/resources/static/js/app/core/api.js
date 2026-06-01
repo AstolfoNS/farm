@@ -377,6 +377,26 @@
         });
     };
 
+    FarmApi.plotSoilGet = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/soil/get",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
     FarmApi.plotSoilDelete = function (params, onSuccess, onError) {
         $.ajax({
             url: "/plot/soil/delete",
@@ -420,6 +440,26 @@
     FarmApi.plotTypeSave = function (params, onSuccess, onError) {
         $.ajax({
             url: "/plot/type/save",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(params || {}),
+            success: function (res) {
+                if ($.isFunction(onSuccess)) {
+                    onSuccess(res);
+                }
+            },
+            error: function (xhr, status) {
+                if ($.isFunction(onError)) {
+                    onError(xhr, status);
+                }
+            }
+        });
+    };
+
+    FarmApi.plotTypeGet = function (params, onSuccess, onError) {
+        $.ajax({
+            url: "/plot/type/get",
             type: "post",
             dataType: "json",
             contentType: "application/json",
