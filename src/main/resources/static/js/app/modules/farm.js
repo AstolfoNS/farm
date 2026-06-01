@@ -10,8 +10,8 @@
         baseY: 36
     };
     var cropAnchor = {
-        left: 36,
-        top: -86
+        left: 0,
+        top: -148
     };
     var STAGE_OFFSET_SCALE_X = 220 / 320;
     var STAGE_OFFSET_SCALE_Y = 282 / 410;
@@ -163,7 +163,8 @@
             crop.stageHeight || 0,
             crop.stageOffsetX || 0,
             crop.stageOffsetY || 0,
-            crop.stageAssetUrl || ""
+            crop.stageAssetUrl || "",
+            plot.soilCoverImageUrl || ""
         ].join("|");
     }
 
@@ -227,7 +228,7 @@
             cropLayer = "<img class='farm-crop-sprite' style='" + escapeAttr(resolveCropStyle(crop)) + "' src='" + escapeAttr(resolveCropImage(crop)) + "' alt='crop'>";
         }
 
-        var plotStyle = "left:" + pos.x + "px;top:" + pos.y + "px;background-image:url('" + escapeAttr(resolveSoilCoverImage(plot)) + "');";
+        var plotStyle = "left:" + pos.x + "px;top:" + pos.y + "px;background-image:url(" + escapeAttr(resolveSoilCoverImage(plot)) + ");";
         return "<div id='farmPlot_" + safeId + "' class='" + buildPlotClasses(plot) + "' data-plot-id='" + safeId + "' style='" + plotStyle + "'>" +
             "<div class='farm-plot-surface'></div>" +
             cropLayer +
@@ -269,9 +270,11 @@
         if (height <= 0) {
             height = 132;
         }
+        var renderWidth = Math.max(1, Math.round(width * STAGE_OFFSET_SCALE_X));
+        var renderHeight = Math.max(1, Math.round(height * STAGE_OFFSET_SCALE_Y));
         var left = cropAnchor.left + Math.round(offsetX * STAGE_OFFSET_SCALE_X);
         var top = cropAnchor.top + Math.round(offsetY * STAGE_OFFSET_SCALE_Y);
-        return "left:" + left + "px;top:" + top + "px;width:" + width + "px;height:" + height + "px;";
+        return "left:" + left + "px;top:" + top + "px;width:" + renderWidth + "px;height:" + renderHeight + "px;";
     }
 
     function ensureSeedVisuals() {

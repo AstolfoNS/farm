@@ -612,17 +612,30 @@ SELECT '稀有', '稀有品质种子'
 WHERE NOT EXISTS (SELECT 1 FROM farm.seed_qualities WHERE name = '稀有' AND is_deleted = false);
 
 -- 2) 土地类型字典（bit_code 用于位运算）
-INSERT INTO farm.soil_types (name, bit_code, level, unlock_experience_required, grow_speed_multiplier, description)
-SELECT '黄土地', 1, 1, 0, 1.00, '基础土地，适配多数作物'
+INSERT INTO farm.soil_types (name, bit_code, cover_image_url, level, unlock_experience_required, grow_speed_multiplier, description)
+SELECT '黄土地', 1, '/resources/imgs/domain/farm/components/soil-land.png', 1, 0, 1.00, '基础土地，适配多数作物'
 WHERE NOT EXISTS (SELECT 1 FROM farm.soil_types WHERE bit_code = 1 AND is_deleted = false);
 
-INSERT INTO farm.soil_types (name, bit_code, level, unlock_experience_required, grow_speed_multiplier, description)
-SELECT '黑土地', 2, 2, 500, 0.90, '生长速度更快的改良土地'
+INSERT INTO farm.soil_types (name, bit_code, cover_image_url, level, unlock_experience_required, grow_speed_multiplier, description)
+SELECT '黑土地', 2, '/resources/imgs/domain/farm/components/soil-land-black.png', 2, 500, 0.90, '生长速度更快的改良土地'
 WHERE NOT EXISTS (SELECT 1 FROM farm.soil_types WHERE bit_code = 2 AND is_deleted = false);
 
-INSERT INTO farm.soil_types (name, bit_code, level, unlock_experience_required, grow_speed_multiplier, description)
-SELECT '金土地', 4, 3, 2000, 0.80, '高级土地，适配高等级作物'
+INSERT INTO farm.soil_types (name, bit_code, cover_image_url, level, unlock_experience_required, grow_speed_multiplier, description)
+SELECT '金土地', 4, '/resources/imgs/domain/farm/components/soil-land-gold.png', 3, 2000, 0.80, '高级土地，适配高等级作物'
 WHERE NOT EXISTS (SELECT 1 FROM farm.soil_types WHERE bit_code = 4 AND is_deleted = false);
+
+UPDATE farm.soil_types
+SET cover_image_url = CASE bit_code
+    WHEN 1 THEN '/resources/imgs/domain/farm/components/soil-land.png'
+    WHEN 2 THEN '/resources/imgs/domain/farm/components/soil-land-black.png'
+    WHEN 4 THEN '/resources/imgs/domain/farm/components/soil-land-gold.png'
+    ELSE cover_image_url
+END,
+updated_at = NOW(),
+updated_by = 0
+WHERE is_deleted = false
+  AND bit_code IN (1, 2, 4)
+  AND (cover_image_url IS NULL OR cover_image_url = '' OR cover_image_url LIKE '%positioning-land%');
 
 -- 3) 生长阶段字典
 INSERT INTO farm.growth_stages (name, description)
