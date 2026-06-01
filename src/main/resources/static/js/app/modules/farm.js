@@ -9,6 +9,10 @@
         baseX: 460,
         baseY: 36
     };
+    var cropAnchor = {
+        left: 36,
+        top: -86
+    };
     var state = {
         active: false,
         userId: 0,
@@ -143,7 +147,12 @@
             crop.bugCount || 0,
             crop.harvestable ? 1 : 0,
             crop.remainMatureSeconds || 0,
-            crop.remainWitherSeconds || 0
+            crop.remainWitherSeconds || 0,
+            crop.stageWidth || 0,
+            crop.stageHeight || 0,
+            crop.stageOffsetX || 0,
+            crop.stageOffsetY || 0,
+            crop.stageAssetUrl || ""
         ].join("|");
     }
 
@@ -246,8 +255,8 @@
         if (height <= 0) {
             height = 132;
         }
-        var left = 36 + Math.round(offsetX * 0.68);
-        var top = -86 + Math.round(offsetY * 0.68);
+        var left = cropAnchor.left + Math.round(offsetX);
+        var top = cropAnchor.top + Math.round(offsetY);
         return "left:" + left + "px;top:" + top + "px;width:" + width + "px;height:" + height + "px;";
     }
 
@@ -393,23 +402,23 @@
     function onRealtimeStatus(status) {
         state.wsStatus = status || "idle";
         if (state.wsStatus === "connected") {
-            setWsStatusUI("WS: ONLINE", "is-connected");
+            setWsStatusUI("实时同步: 已连接", "is-connected");
             stopPolling();
             return;
         }
         if (state.wsStatus === "connecting" || state.wsStatus === "reconnecting") {
-            setWsStatusUI("WS: CONNECTING", "is-connecting");
+            setWsStatusUI("实时同步: 连接中", "is-connecting");
             if (fallbackEnabled()) {
                 startPolling();
             }
             return;
         }
         if (state.wsStatus === "closed" || state.wsStatus === "error") {
-            setWsStatusUI("WS: OFFLINE", "is-disconnected");
+            setWsStatusUI("实时同步: 已切换自动刷新", "is-disconnected");
             startPolling();
             return;
         }
-        setWsStatusUI("WS: IDLE", "is-idle");
+        setWsStatusUI("实时同步: 待连接", "is-idle");
         if (state.wsStatus === "idle" || state.wsStatus === "stopped") {
             startPolling();
         }
@@ -874,7 +883,7 @@
     }
 
     function bindRealtime() {
-        $(document).on("farm:realtime:overview", function (_, payload) {
+        $(document).off("farm:realtime:overview.farm").on("farm:realtime:overview.farm", function (_, payload) {
             if (!(payload && payload.overview)) {
                 return;
             }
@@ -886,13 +895,13 @@
             updateOverview(payload.overview, false);
         });
 
-        $(document).on("farm:realtime:status", function (_, text) {
+        $(document).off("farm:realtime:status.farm").on("farm:realtime:status.farm", function (_, text) {
             onRealtimeStatus(text);
         });
     }
 
     function bindEvents() {
-        $("#farmFallbackSwitch").on("change", function () {
+        $("#farmFallbackSwitch").off("change.farm").on("change.farm", function () {
             fallbackEnabled();
             if ($(this).prop("checked")) {
                 startPolling();
@@ -901,12 +910,12 @@
             }
         });
 
-        $("#farmToolBar").on("click", ".farm-tool-btn", function () {
+        $("#farmToolBar").off("click.farm", ".farm-tool-btn").on("click.farm", ".farm-tool-btn", function () {
             switchTool($(this).attr("data-tool"));
             playSound("click");
         });
 
-        $("#farmIsoContainer").on("click", ".farm-plot", function () {
+        $("#farmIsoContainer").off("click.farm", ".farm-plot").on("click.farm", ".farm-plot", function () {
             var plotId = $(this).attr("data-plot-id");
             applyToolOnPlot(plotId);
         });
