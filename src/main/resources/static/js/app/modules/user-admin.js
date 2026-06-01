@@ -34,7 +34,7 @@
         if (raw.length > 0) {
             return raw;
         }
-        return (window.farmDefaultAsset && window.farmDefaultAsset("avatar")) || "/oss/defaults/avatar/default-avatar.png";
+        return (window.farmDefaultAsset && window.farmDefaultAsset("avatar")) || "";
     }
 
     function statCell(icon, value) {
@@ -142,7 +142,7 @@
             score: 0,
             coin: 0,
             avatarPath: "",
-            head: (window.farmDefaultAsset && window.farmDefaultAsset("avatar")) || "/oss/defaults/avatar/default-avatar.png",
+            head: (window.farmDefaultAsset && window.farmDefaultAsset("avatar")) || "",
             _isNew: true
         });
         $("#userAdminGrid").datagrid("selectRow", index);

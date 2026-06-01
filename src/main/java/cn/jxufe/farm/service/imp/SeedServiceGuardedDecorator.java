@@ -25,6 +25,7 @@ import cn.jxufe.farm.bean.vo.SeedShopSellFruitResultVO;
 import cn.jxufe.farm.bean.vo.SeedShopTradeRecordVO;
 import cn.jxufe.farm.bean.vo.SeedStageGridVO;
 import cn.jxufe.farm.bean.vo.SoilOptionVO;
+import cn.jxufe.farm.common.constants.AssetDefaultKeys;
 import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.exception.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
@@ -39,6 +40,7 @@ import cn.jxufe.farm.entity.SeedGrowthStage;
 import cn.jxufe.farm.entity.SeedType;
 import cn.jxufe.farm.entity.User;
 import cn.jxufe.farm.service.SeedService;
+import cn.jxufe.farm.service.support.AssetDefaultProvider;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -55,9 +57,6 @@ import java.util.stream.Collectors;
 @Primary
 public class SeedServiceGuardedDecorator implements SeedService {
 
-    private static final String DEFAULT_SEED_COVER_URL = "/oss/defaults/seed/seed-cover-default.png";
-    private static final String DEFAULT_STAGE_ASSET_URL = "/oss/defaults/seed/seed-stage-default.png";
-
     private static final int STAGE_WIDTH_MIN = 1;
     private static final int STAGE_WIDTH_MAX = 4096;
     private static final int STAGE_HEIGHT_MIN = 1;
@@ -73,6 +72,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     private final UserFruitDao userFruitDao;
     private final UserCropDao userCropDao;
     private final UserInventoryFlowDao userInventoryFlowDao;
+    private final AssetDefaultProvider assetDefaultProvider;
 
     public SeedServiceGuardedDecorator(
             @Qualifier("seedServiceImp") SeedService delegate,
@@ -82,7 +82,8 @@ public class SeedServiceGuardedDecorator implements SeedService {
             UserSeedDao userSeedDao,
             UserFruitDao userFruitDao,
             UserCropDao userCropDao,
-            UserInventoryFlowDao userInventoryFlowDao
+            UserInventoryFlowDao userInventoryFlowDao,
+            AssetDefaultProvider assetDefaultProvider
     ) {
         this.delegate = delegate;
         this.seedTypeDao = seedTypeDao;
@@ -92,6 +93,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
         this.userFruitDao = userFruitDao;
         this.userCropDao = userCropDao;
         this.userInventoryFlowDao = userInventoryFlowDao;
+        this.assetDefaultProvider = assetDefaultProvider;
     }
 
     @Override
@@ -378,7 +380,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     private String normalizeSeedCoverUrl(String rawUrl) {
         String value = rawUrl == null ? "" : rawUrl.trim();
         if (value.isEmpty()) {
-            return DEFAULT_SEED_COVER_URL;
+            return defaultSeedCoverUrl();
         }
         if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/")) {
             return value;
@@ -392,7 +394,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     private String normalizeStageAssetUrl(String rawUrl) {
         String value = rawUrl == null ? "" : rawUrl.trim();
         if (value.isEmpty()) {
-            return DEFAULT_STAGE_ASSET_URL;
+            return defaultSeedStageUrl();
         }
         if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/")) {
             return value;
@@ -416,6 +418,18 @@ public class SeedServiceGuardedDecorator implements SeedService {
         }
         return seedTypeDao.findByIdInAndIsDeletedFalse(idList).stream()
                 .collect(Collectors.toMap(SeedType::getId, item -> item));
+    }
+
+    private String defaultSeedCoverUrl() {
+        return safeString(assetDefaultProvider.get(AssetDefaultKeys.SEED_COVER)).trim();
+    }
+
+    private String defaultSeedStageUrl() {
+        return safeString(assetDefaultProvider.get(AssetDefaultKeys.SEED_STAGE)).trim();
+    }
+
+    private String safeString(String value) {
+        return value == null ? "" : value;
     }
 
     private Long resolveUserExperience(Long userId) {

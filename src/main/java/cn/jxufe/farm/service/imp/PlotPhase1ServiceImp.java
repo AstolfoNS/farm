@@ -17,6 +17,7 @@ import cn.jxufe.farm.bean.vo.UserPlotAllocationGridVO;
 import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.exception.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
+import cn.jxufe.farm.common.constants.AssetDefaultKeys;
 import cn.jxufe.farm.dao.PlotPolicyApplyLogDao;
 import cn.jxufe.farm.dao.PlotPolicyDao;
 import cn.jxufe.farm.dao.PlotTypeDao;
@@ -31,6 +32,7 @@ import cn.jxufe.farm.entity.SoilType;
 import cn.jxufe.farm.entity.User;
 import cn.jxufe.farm.entity.UserPlotAllocation;
 import cn.jxufe.farm.service.PlotPhase1Service;
+import cn.jxufe.farm.service.support.AssetDefaultProvider;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,10 +57,6 @@ import java.util.stream.Collectors;
 @Service
 public class PlotPhase1ServiceImp implements PlotPhase1Service {
 
-    private static final String DEFAULT_SOIL_COVER = "/oss/defaults/soil/soil-default.png";
-    private static final String DEFAULT_PLOT_COVER = "/oss/defaults/plot/plot-cover-default.png";
-    private static final String DEFAULT_PLOT_ICON = "/oss/defaults/plot/plot-icon-default.png";
-
     private static final String SCOPE_NEW_USER_ONLY = "NEW_USER_ONLY";
     private static final String SCOPE_MANUAL_APPLY = "MANUAL_APPLY";
     private static final String STATUS_DRAFT = "DRAFT";
@@ -73,6 +71,7 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
     private final UserDao userDao;
     private final PlotPolicyApplyLogDao plotPolicyApplyLogDao;
     private final ObjectMapper objectMapper;
+    private final AssetDefaultProvider assetDefaultProvider;
 
     public PlotPhase1ServiceImp(
             SoilTypeDao soilTypeDao,
@@ -82,7 +81,8 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
             UserPlotDao userPlotDao,
             UserDao userDao,
             PlotPolicyApplyLogDao plotPolicyApplyLogDao,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            AssetDefaultProvider assetDefaultProvider
     ) {
         this.soilTypeDao = soilTypeDao;
         this.plotTypeDao = plotTypeDao;
@@ -92,6 +92,7 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
         this.userDao = userDao;
         this.plotPolicyApplyLogDao = plotPolicyApplyLogDao;
         this.objectMapper = objectMapper;
+        this.assetDefaultProvider = assetDefaultProvider;
     }
 
     @Override
@@ -144,7 +145,7 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
 
         entity.setName(name);
         entity.setBitCode(bitCode);
-        entity.setCoverImageUrl(defaultString(params.getCoverImageUrl(), DEFAULT_SOIL_COVER));
+        entity.setCoverImageUrl(defaultString(params.getCoverImageUrl(), defaultSoilCover()));
         entity.setLevel((short) Math.max(1, params.getLevel() == null ? 1 : params.getLevel()));
         entity.setUnlockExperienceRequired(Math.max(0L, params.getUnlockExperienceRequired() == null ? 0L : params.getUnlockExperienceRequired()));
         entity.setGrowSpeedMultiplier(parseGrowMultiplier(params.getGrowSpeedMultiplier()));
@@ -237,8 +238,8 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
                 ? plotTypeDao.findByIdAndIsDeletedFalse(params.getId()).orElseThrow(() -> new ServiceException(BizErrorCode.PLOT_TYPE_NOT_FOUND, "plot type not found"))
                 : newPlotTypeEntity();
 
-        String iconUrl = defaultString(params.getIconUrl(), DEFAULT_PLOT_ICON);
-        String coverImageUrl = defaultString(params.getCoverImageUrl(), iconUrl.isEmpty() ? DEFAULT_PLOT_COVER : iconUrl);
+        String iconUrl = defaultString(params.getIconUrl(), defaultPlotIcon());
+        String coverImageUrl = defaultString(params.getCoverImageUrl(), iconUrl.isEmpty() ? defaultPlotCover() : iconUrl);
 
         entity.setName(name);
         entity.setIconUrl(iconUrl);
@@ -516,7 +517,7 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
         vo.setId(item.getId());
         vo.setName(safeString(item.getName()));
         vo.setBitCode(item.getBitCode());
-        vo.setCoverImageUrl(defaultString(item.getCoverImageUrl(), DEFAULT_SOIL_COVER));
+        vo.setCoverImageUrl(defaultString(item.getCoverImageUrl(), defaultSoilCover()));
         vo.setLevel(item.getLevel());
         vo.setUnlockExperienceRequired(item.getUnlockExperienceRequired());
         vo.setGrowSpeedMultiplier(item.getGrowSpeedMultiplier() == null ? "1.00" : item.getGrowSpeedMultiplier().toPlainString());
@@ -528,8 +529,8 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
         PlotTypeGridVO vo = new PlotTypeGridVO();
         vo.setId(item.getId());
         vo.setName(safeString(item.getName()));
-        vo.setIconUrl(defaultString(item.getIconUrl(), DEFAULT_PLOT_ICON));
-        vo.setCoverImageUrl(defaultString(item.getCoverImageUrl(), defaultString(item.getIconUrl(), DEFAULT_PLOT_COVER)));
+        vo.setIconUrl(defaultString(item.getIconUrl(), defaultPlotIcon()));
+        vo.setCoverImageUrl(defaultString(item.getCoverImageUrl(), defaultString(item.getIconUrl(), defaultPlotCover())));
         vo.setSoilTypeId(item.getSoilTypeId());
         vo.setSoilTypeName(safeString(soilNameMap.get(item.getSoilTypeId())));
         vo.setUnlockRequired(defaultBool(item.getUnlockRequired(), true));
@@ -670,7 +671,7 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
     private SoilType newSoilTypeEntity() {
         SoilType entity = new SoilType();
         initBaseEntity(entity);
-        entity.setCoverImageUrl(DEFAULT_SOIL_COVER);
+        entity.setCoverImageUrl(defaultSoilCover());
         entity.setGrowSpeedMultiplier(BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP));
         entity.setLevel((short) 1);
         entity.setUnlockExperienceRequired(0L);
@@ -680,8 +681,8 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
     private PlotType newPlotTypeEntity() {
         PlotType entity = new PlotType();
         initBaseEntity(entity);
-        entity.setIconUrl(DEFAULT_PLOT_ICON);
-        entity.setCoverImageUrl(DEFAULT_PLOT_COVER);
+        entity.setIconUrl(defaultPlotIcon());
+        entity.setCoverImageUrl(defaultPlotCover());
         entity.setUnlockRequired(true);
         entity.setDefaultUsable(true);
         entity.setDefaultPlotUnlockExperienceConfig(0L);
@@ -773,6 +774,18 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
 
     private int defaultInt(Number value, int fallback) {
         return value == null ? fallback : value.intValue();
+    }
+
+    private String defaultSoilCover() {
+        return safeString(assetDefaultProvider.get(AssetDefaultKeys.SOIL_COVER)).trim();
+    }
+
+    private String defaultPlotCover() {
+        return safeString(assetDefaultProvider.get(AssetDefaultKeys.PLOT_COVER)).trim();
+    }
+
+    private String defaultPlotIcon() {
+        return safeString(assetDefaultProvider.get(AssetDefaultKeys.PLOT_ICON)).trim();
     }
 
     private String safeString(String value) {

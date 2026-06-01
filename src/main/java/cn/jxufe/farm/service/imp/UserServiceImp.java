@@ -15,6 +15,7 @@ import cn.jxufe.farm.bean.vo.UserAvatarVO;
 import cn.jxufe.farm.bean.vo.UserInfoVO;
 import cn.jxufe.farm.bean.vo.UserSettingsVO;
 import cn.jxufe.farm.common.enums.BizErrorCode;
+import cn.jxufe.farm.common.constants.AssetDefaultKeys;
 import cn.jxufe.farm.common.constants.SessionKeys;
 import cn.jxufe.farm.common.exception.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
@@ -31,6 +32,7 @@ import cn.jxufe.farm.entity.UserPlot;
 import cn.jxufe.farm.service.FileService;
 import cn.jxufe.farm.service.PlotAdminService;
 import cn.jxufe.farm.service.UserService;
+import cn.jxufe.farm.service.support.AssetDefaultProvider;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
@@ -48,7 +50,6 @@ import java.util.stream.IntStream;
 @Service
 public class UserServiceImp implements UserService {
 
-    private static final String DEFAULT_AVATAR_URL = "/oss/defaults/avatar/default-avatar.png";
     private static final String DEFAULT_PREFERENCES_JSON = "{\"audio\":{\"effectEnabled\":true,\"effectVolume\":0.8,\"bgmEnabled\":false,\"bgmVolume\":0.6}}";
 
     private final UserDao userDao;
@@ -64,6 +65,7 @@ public class UserServiceImp implements UserService {
     private final GameplayPolicyProperties gameplayPolicyProperties;
     private final ObjectMapper objectMapper;
     private final PlotAdminService plotAdminService;
+    private final AssetDefaultProvider assetDefaultProvider;
 
     public UserServiceImp(
             UserDao userDao,
@@ -73,7 +75,8 @@ public class UserServiceImp implements UserService {
             LocalFileStorageProperties fileStorageProperties,
             GameplayPolicyProperties gameplayPolicyProperties,
             ObjectMapper objectMapper,
-            PlotAdminService plotAdminService
+            PlotAdminService plotAdminService,
+            AssetDefaultProvider assetDefaultProvider
     ) {
         this.userDao = userDao;
         this.userPlotDao = userPlotDao;
@@ -83,6 +86,7 @@ public class UserServiceImp implements UserService {
         this.gameplayPolicyProperties = gameplayPolicyProperties;
         this.objectMapper = objectMapper;
         this.plotAdminService = plotAdminService;
+        this.assetDefaultProvider = assetDefaultProvider;
     }
 
     @Override
@@ -143,7 +147,7 @@ public class UserServiceImp implements UserService {
         entity.setCoin(Math.max(0L, parseLong(params.getCoin(), 0L)));
 
         String avatarPath = normalizeAvatarPath(params.getAvatarPath());
-        entity.setAvatarUrl(avatarPath.isBlank() ? DEFAULT_AVATAR_URL : avatarPath);
+        entity.setAvatarUrl(avatarPath.isBlank() ? defaultAvatarUrl() : avatarPath);
 
         entity.setUpdatedAt(OffsetDateTime.now());
         entity.setUpdatedBy(0L);
@@ -276,7 +280,7 @@ public class UserServiceImp implements UserService {
         entity.setOptLockVersion(0);
         entity.setPasswordHash("123456");
         entity.setEmail(username + "_" + System.currentTimeMillis() + "@farm.local");
-        entity.setAvatarUrl(DEFAULT_AVATAR_URL);
+        entity.setAvatarUrl(defaultAvatarUrl());
         entity.setPreferencesJson(DEFAULT_PREFERENCES_JSON);
         return entity;
     }
@@ -309,6 +313,7 @@ public class UserServiceImp implements UserService {
         CurUserVO data = new CurUserVO();
         BeanUtils.copyProperties(buildUserInfoVO(user), data);
         data.setLoggedIn(true);
+        data.setDefaultAssets(assetDefaultProvider.getAll());
         return data;
     }
 
@@ -321,8 +326,9 @@ public class UserServiceImp implements UserService {
         guest.setScore(0L);
         guest.setCoin(0L);
         guest.setAvatarPath("");
-        guest.setHead(DEFAULT_AVATAR_URL);
+        guest.setHead(defaultAvatarUrl());
         guest.setLoggedIn(false);
+        guest.setDefaultAssets(assetDefaultProvider.getAll());
         return guest;
     }
 
@@ -399,7 +405,7 @@ public class UserServiceImp implements UserService {
 
     private String resolveAvatarAccessUrl(String avatarPath) {
         String value = safeString(avatarPath).trim();
-        if (value.isBlank()) return DEFAULT_AVATAR_URL;
+        if (value.isBlank()) return defaultAvatarUrl();
 
         String lower = value.toLowerCase();
         if (lower.startsWith("http://") || lower.startsWith("https://")
@@ -412,6 +418,10 @@ public class UserServiceImp implements UserService {
     private String normalizeAvatarPath(String avatarPath) {
         String input = safeString(avatarPath).trim();
         return input.isBlank() ? "" : FileAccessPathUtils.normalizeIncomingRelativePath(input, fileStorageProperties.getPublicPrefix());
+    }
+
+    private String defaultAvatarUrl() {
+        return safeString(assetDefaultProvider.get(AssetDefaultKeys.AVATAR)).trim();
     }
 
     private String safeString(String value) {

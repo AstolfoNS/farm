@@ -15,7 +15,6 @@
   };
   var STAGE_OFFSET_SCALE_X = 220 / 320;
   var STAGE_OFFSET_SCALE_Y = 282 / 410;
-  var DEFAULT_SOIL_COVER = "/oss/defaults/soil/soil-default.png";
   var ActionKit = window.FarmActionKit || null;
   var state = {
     active: false,
@@ -105,6 +104,10 @@
   function toolLabel(toolName) {
     var key = String(toolName || "").toLowerCase();
     return toolTitleMap[key] || "查看";
+  }
+
+  function defaultSoilCover() {
+    return (window.farmDefaultAsset && window.farmDefaultAsset("soilCover")) || "";
   }
 
   function applyToolCursor(toolName) {
@@ -239,7 +242,7 @@
       plot && plot.soilCoverImageUrl ? String(plot.soilCoverImageUrl) : "",
     );
     if (!raw) {
-      return DEFAULT_SOIL_COVER;
+      return defaultSoilCover();
     }
     if (
       raw.indexOf("http://") === 0 ||

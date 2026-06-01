@@ -12,9 +12,17 @@
         plotTypeOptions: []
     };
 
-    var DEFAULT_SOIL_COVER = "/oss/defaults/soil/soil-default.png";
-    var DEFAULT_PLOT_COVER = "/oss/defaults/plot/plot-cover-default.png";
-    var DEFAULT_PLOT_ICON = "/oss/defaults/plot/plot-icon-default.png";
+    function defaultSoilCover() {
+        return (window.farmDefaultAsset && window.farmDefaultAsset("soilCover")) || "";
+    }
+
+    function defaultPlotCover() {
+        return (window.farmDefaultAsset && window.farmDefaultAsset("plotCover")) || "";
+    }
+
+    function defaultPlotIcon() {
+        return (window.farmDefaultAsset && window.farmDefaultAsset("plotIcon")) || "";
+    }
 
     function asNumber(value, def) {
         if ($.isFunction(Admin.asNumber)) {
@@ -341,11 +349,11 @@
     }
 
     function previewSoilCover(url) {
-        $("#plotSoilCoverPreview").attr("src", defaultText(url, DEFAULT_SOIL_COVER));
+        $("#plotSoilCoverPreview").attr("src", defaultText(url, defaultSoilCover()));
     }
 
     function previewTypeCover(url) {
-        $("#plotTypeCoverPreview").attr("src", defaultText(url, DEFAULT_PLOT_COVER));
+        $("#plotTypeCoverPreview").attr("src", defaultText(url, defaultPlotCover()));
     }
 
     function openSoilEditor(row) {
@@ -357,9 +365,9 @@
         setNumberboxValue(soilField("level"), asNumber(data.level, 1));
         setNumberboxValue(soilField("unlockExperienceRequired"), asNumber(data.unlockExperienceRequired, 0));
         setTextboxValue(soilField("growSpeedMultiplier"), data.growSpeedMultiplier || "1.00");
-        setTextboxValue($("#plotSoilCoverImageUrl"), data.coverImageUrl || DEFAULT_SOIL_COVER);
+        setTextboxValue($("#plotSoilCoverImageUrl"), data.coverImageUrl || defaultSoilCover());
         setTextboxValue(soilField("description"), data.description || "");
-        previewSoilCover(data.coverImageUrl || DEFAULT_SOIL_COVER);
+        previewSoilCover(data.coverImageUrl || defaultSoilCover());
         $("#plotSoilEditorDialog").dialog("setTitle", data.id ? "编辑土壤类型" : "新增土壤类型").dialog("open");
     }
 
@@ -368,12 +376,12 @@
         $("#plotTypeEditorForm").form("clear");
         setTextboxValue(typeField("id"), asNumber(data.id, 0));
         setTextboxValue(typeField("name"), data.name || "");
-        setTextboxValue(typeField("iconUrl"), data.iconUrl || DEFAULT_PLOT_ICON);
-        setTextboxValue($("#plotTypeCoverImageUrl"), data.coverImageUrl || data.iconUrl || DEFAULT_PLOT_COVER);
+        setTextboxValue(typeField("iconUrl"), data.iconUrl || defaultPlotIcon());
+        setTextboxValue($("#plotTypeCoverImageUrl"), data.coverImageUrl || data.iconUrl || defaultPlotCover());
         setNumberboxValue(typeField("defaultPlotUnlockExperienceConfig"), asNumber(data.defaultPlotUnlockExperienceConfig, 0));
         setNumberboxValue(typeField("sortOrder"), asNumber(data.sortOrder, 0));
         setTextboxValue(typeField("description"), data.description || "");
-        previewTypeCover(data.coverImageUrl || data.iconUrl || DEFAULT_PLOT_COVER);
+        previewTypeCover(data.coverImageUrl || data.iconUrl || defaultPlotCover());
         loadSoilOptionsForTypeForm(data.soilTypeId);
         try {
             (data.unlockRequired === false ? $("#plotTypeUnlockRequired").switchbutton("uncheck") : $("#plotTypeUnlockRequired").switchbutton("check"));
@@ -414,7 +422,7 @@
             level: pickNumber(d.level, r.level, 1),
             unlockExperienceRequired: pickNumber(d.unlockExperienceRequired, r.unlockExperienceRequired, 0),
             growSpeedMultiplier: pickText(d.growSpeedMultiplier, r.growSpeedMultiplier, "1.00"),
-            coverImageUrl: pickText(d.coverImageUrl, r.coverImageUrl, DEFAULT_SOIL_COVER),
+            coverImageUrl: pickText(d.coverImageUrl, r.coverImageUrl, defaultSoilCover()),
             description: pickText(d.description, r.description, "")
         };
     }
@@ -422,12 +430,12 @@
     function mergeTypeEditorData(detail, row) {
         var d = detail || {};
         var r = row || {};
-        var iconUrl = pickText(d.iconUrl, r.iconUrl, DEFAULT_PLOT_ICON);
+        var iconUrl = pickText(d.iconUrl, r.iconUrl, defaultPlotIcon());
         return {
             id: pickNumber(d.id, r.id, 0),
             name: pickText(d.name, r.name, ""),
             iconUrl: iconUrl,
-            coverImageUrl: pickText(d.coverImageUrl, r.coverImageUrl, iconUrl || DEFAULT_PLOT_COVER),
+            coverImageUrl: pickText(d.coverImageUrl, r.coverImageUrl, iconUrl || defaultPlotCover()),
             soilTypeId: pickNumber(d.soilTypeId, r.soilTypeId, 0),
             unlockRequired: (d.unlockRequired === null || d.unlockRequired === undefined) ? r.unlockRequired : d.unlockRequired,
             defaultUsable: (d.defaultUsable === null || d.defaultUsable === undefined) ? r.defaultUsable : d.defaultUsable,
@@ -712,7 +720,7 @@
             level: getNumberboxValue(soilField("level"), 1),
             unlockExperienceRequired: getNumberboxValue(soilField("unlockExperienceRequired"), 0),
             growSpeedMultiplier: getTextboxValue(soilField("growSpeedMultiplier"), "1.00"),
-            coverImageUrl: getTextboxValue($("#plotSoilCoverImageUrl"), DEFAULT_SOIL_COVER),
+            coverImageUrl: getTextboxValue($("#plotSoilCoverImageUrl"), defaultSoilCover()),
             description: getTextboxValue(soilField("description"), "")
         };
         window.FarmApi.plotSoilSave(payload, function (res) {
@@ -743,8 +751,8 @@
             id: asNumber(getTextboxValue(typeField("id"), "0"), 0) || null,
             name: getTextboxValue(typeField("name"), ""),
             soilTypeId: asNumber($("#plotTypeSoilTypeId").combobox("getValue"), 0),
-            iconUrl: getTextboxValue(typeField("iconUrl"), DEFAULT_PLOT_ICON),
-            coverImageUrl: getTextboxValue($("#plotTypeCoverImageUrl"), DEFAULT_PLOT_COVER),
+            iconUrl: getTextboxValue(typeField("iconUrl"), defaultPlotIcon()),
+            coverImageUrl: getTextboxValue($("#plotTypeCoverImageUrl"), defaultPlotCover()),
             unlockRequired: unlockRequired,
             defaultUsable: defaultUsable,
             defaultPlotUnlockExperienceConfig: getNumberboxValue(typeField("defaultPlotUnlockExperienceConfig"), 0),
@@ -1079,11 +1087,11 @@
         bindUploadPickerEvents();
         $("#plotSoilCoverImageUrl").textbox("textbox").off("change.plotAdmin blur.plotAdmin input.plotAdmin")
             .on("change.plotAdmin blur.plotAdmin input.plotAdmin", function () {
-                previewSoilCover(getTextboxValue($("#plotSoilCoverImageUrl"), DEFAULT_SOIL_COVER));
+                previewSoilCover(getTextboxValue($("#plotSoilCoverImageUrl"), defaultSoilCover()));
             });
         $("#plotTypeCoverImageUrl").textbox("textbox").off("change.plotAdmin blur.plotAdmin input.plotAdmin")
             .on("change.plotAdmin blur.plotAdmin input.plotAdmin", function () {
-                previewTypeCover(getTextboxValue($("#plotTypeCoverImageUrl"), DEFAULT_PLOT_COVER));
+                previewTypeCover(getTextboxValue($("#plotTypeCoverImageUrl"), defaultPlotCover()));
             });
     }
 
@@ -1122,7 +1130,7 @@
                 {field: "level", title: "等级", width: 56, align: "center"},
                 {field: "unlockExperienceRequired", title: "土壤解锁经验", width: 86, align: "right"},
                 {field: "growSpeedMultiplier", title: "成长倍率", width: 80, align: "center"},
-                {field: "coverImageUrl", title: "图片", width: 66, align: "center", formatter: function (v) { return renderCover(v, DEFAULT_SOIL_COVER); }},
+                {field: "coverImageUrl", title: "图片", width: 66, align: "center", formatter: function (v) { return renderCover(v, defaultSoilCover()); }},
                 {field: "description", title: "描述", width: 250}
             ]],
             onLoadSuccess: function () {
@@ -1174,7 +1182,7 @@
                 {field: "defaultUsable", title: "默认可用", width: 74, align: "center", formatter: function (v) { return v ? "是" : "否"; }},
                 {field: "defaultPlotUnlockExperienceConfig", title: "地块解锁经验配置值", width: 122, align: "right"},
                 {field: "sortOrder", title: "排序", width: 56, align: "center"},
-                {field: "coverImageUrl", title: "封面", width: 66, align: "center", formatter: function (v) { return renderCover(v, DEFAULT_PLOT_COVER); }},
+                {field: "coverImageUrl", title: "封面", width: 66, align: "center", formatter: function (v) { return renderCover(v, defaultPlotCover()); }},
                 {field: "description", title: "描述", width: 225}
             ]],
             onLoadSuccess: function () {

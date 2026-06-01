@@ -9,6 +9,33 @@ CREATE EXTENSION IF NOT EXISTS citext;
 
 
 -- ==========================================
+-- 0. 默认资源配置表
+-- ==========================================
+CREATE TABLE farm.asset_defaults
+(
+    id                          BIGINT              NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    asset_key                   VARCHAR(128)        NOT NULL,
+    asset_url                   VARCHAR(1024)       NOT NULL DEFAULT '',
+    description                 TEXT                    NULL,
+
+    created_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT                  NULL,
+    updated_by                  BIGINT                  NULL,
+    remark                      TEXT                    NULL,
+
+    status                      SMALLINT            NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN             NOT NULL DEFAULT false,
+    opt_lock_version            INT                 NOT NULL DEFAULT 0
+);
+COMMENT ON TABLE farm.asset_defaults IS '默认资源路径配置表';
+CREATE UNIQUE INDEX uk_asset_defaults_key_active
+    ON farm.asset_defaults(asset_key)
+    WHERE is_deleted = false;
+
+
+-- ==========================================
 -- 1. 用户信息表
 -- ==========================================
 CREATE TABLE farm.users
@@ -19,7 +46,7 @@ CREATE TABLE farm.users
     nickname                    VARCHAR(500)        NOT NULL,
     password_hash               VARCHAR(500)        NOT NULL,
     email                       citext              NOT NULL,
-    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '/oss/defaults/avatar/default-avatar.png',
+    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '',
     experience                  BIGINT              NOT NULL DEFAULT 0,
     score                       BIGINT              NOT NULL DEFAULT 0,
     coin                        BIGINT              NOT NULL DEFAULT 0,
@@ -326,7 +353,7 @@ CREATE TABLE farm.seed_growth_stages
 
     stage_index                 SMALLINT        NOT NULL,
     duration_seconds            INT             NOT NULL,
-    asset_url                   VARCHAR(1024)       NOT NULL DEFAULT '/oss/defaults/seed/seed-stage-default.png',
+    asset_url                   VARCHAR(1024)       NOT NULL DEFAULT '',
     bug_probability             NUMERIC(5, 4)   NOT NULL DEFAULT 0.0000,
 
     width                       INT             NOT NULL DEFAULT 0,
@@ -597,6 +624,31 @@ COMMENT ON TABLE farm.request_idempotencies IS '请求幂等记录表';
 -- 农场基础字典与种子配置初始化数据（UTF-8）
 -- 说明：仅做数据初始化，不做表结构变更
 -- ==========================================
+
+-- 0) 默认资源路径
+INSERT INTO farm.asset_defaults (asset_key, asset_url, description)
+SELECT 'avatar', '/oss/defaults/avatar/default-avatar.png', '用户头像默认图'
+WHERE NOT EXISTS (SELECT 1 FROM farm.asset_defaults WHERE asset_key = 'avatar' AND is_deleted = false);
+
+INSERT INTO farm.asset_defaults (asset_key, asset_url, description)
+SELECT 'seedCover', '/oss/defaults/seed/seed-cover-default.png', '种子封面默认图'
+WHERE NOT EXISTS (SELECT 1 FROM farm.asset_defaults WHERE asset_key = 'seedCover' AND is_deleted = false);
+
+INSERT INTO farm.asset_defaults (asset_key, asset_url, description)
+SELECT 'seedStage', '/oss/defaults/seed/seed-stage-default.png', '种子阶段默认图'
+WHERE NOT EXISTS (SELECT 1 FROM farm.asset_defaults WHERE asset_key = 'seedStage' AND is_deleted = false);
+
+INSERT INTO farm.asset_defaults (asset_key, asset_url, description)
+SELECT 'soilCover', '/oss/defaults/soil/soil-default.png', '土壤默认图'
+WHERE NOT EXISTS (SELECT 1 FROM farm.asset_defaults WHERE asset_key = 'soilCover' AND is_deleted = false);
+
+INSERT INTO farm.asset_defaults (asset_key, asset_url, description)
+SELECT 'plotCover', '/oss/defaults/plot/plot-cover-default.png', '地块封面默认图'
+WHERE NOT EXISTS (SELECT 1 FROM farm.asset_defaults WHERE asset_key = 'plotCover' AND is_deleted = false);
+
+INSERT INTO farm.asset_defaults (asset_key, asset_url, description)
+SELECT 'plotIcon', '/oss/defaults/plot/plot-icon-default.png', '地块图标默认图'
+WHERE NOT EXISTS (SELECT 1 FROM farm.asset_defaults WHERE asset_key = 'plotIcon' AND is_deleted = false);
 
 -- 1) 种子品质字典
 INSERT INTO farm.seed_qualities (name, description)

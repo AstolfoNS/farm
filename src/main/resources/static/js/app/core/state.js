@@ -4,9 +4,12 @@
         imgRoot: "/resources/imgs",
         soundRoot: "/resources/sounds",
         defaults: {
-            avatar: "/oss/defaults/avatar/default-avatar.png",
-            seedCover: "/oss/defaults/seed/seed-cover-default.png",
-            seedStage: "/oss/defaults/seed/seed-stage-default.png"
+            avatar: "",
+            seedCover: "",
+            seedStage: "",
+            soilCover: "",
+            plotCover: "",
+            plotIcon: ""
         },
         currentUser: null,
         currentModule: "home",
@@ -35,6 +38,20 @@
     window.farmDefaultAsset = function (key) {
         var defaults = (window.FarmAppState && window.FarmAppState.defaults) || {};
         return defaults[key] || "";
+    };
+
+    window.farmSetDefaultAssets = function (assetMap) {
+        var map = assetMap && typeof assetMap === "object" ? assetMap : {};
+        var defaults = window.FarmAppState.defaults || {};
+        Object.keys(map).forEach(function (key) {
+            var safeKey = (key == null ? "" : String(key)).trim();
+            if (!safeKey) {
+                return;
+            }
+            defaults[safeKey] = map[key] == null ? "" : String(map[key]).trim();
+        });
+        window.FarmAppState.defaults = defaults;
+        return defaults;
     };
 
     window.farmBuildRequestId = function (prefix) {

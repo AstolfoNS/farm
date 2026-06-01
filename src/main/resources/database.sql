@@ -9,6 +9,33 @@ CREATE EXTENSION IF NOT EXISTS citext;
 
 
 -- ==========================================
+-- 0. 默认资源配置表
+-- ==========================================
+CREATE TABLE farm.asset_defaults
+(
+    id                          BIGINT              NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    asset_key                   VARCHAR(128)        NOT NULL,
+    asset_url                   VARCHAR(1024)       NOT NULL DEFAULT '',
+    description                 TEXT                    NULL,
+
+    created_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT                  NULL,
+    updated_by                  BIGINT                  NULL,
+    remark                      TEXT                    NULL,
+
+    status                      SMALLINT            NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN             NOT NULL DEFAULT false,
+    opt_lock_version            INT                 NOT NULL DEFAULT 0
+);
+COMMENT ON TABLE farm.asset_defaults IS '默认资源路径配置表';
+CREATE UNIQUE INDEX uk_asset_defaults_key_active
+    ON farm.asset_defaults(asset_key)
+    WHERE is_deleted = false;
+
+
+-- ==========================================
 -- 1. 用户信息表
 -- ==========================================
 CREATE TABLE farm.users
@@ -19,7 +46,7 @@ CREATE TABLE farm.users
     nickname                    VARCHAR(500)        NOT NULL,
     password_hash               VARCHAR(500)        NOT NULL,
     email                       citext              NOT NULL,
-    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '/oss/defaults/avatar/default-avatar.png',
+    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '',
     experience                  BIGINT              NOT NULL DEFAULT 0,
     score                       BIGINT              NOT NULL DEFAULT 0,
     coin                        BIGINT              NOT NULL DEFAULT 0,
@@ -326,7 +353,7 @@ CREATE TABLE farm.seed_growth_stages
 
     stage_index                 SMALLINT        NOT NULL,
     duration_seconds            INT             NOT NULL,
-    asset_url                   VARCHAR(1024)       NOT NULL DEFAULT '/oss/defaults/seed/seed-stage-default.png',
+    asset_url                   VARCHAR(1024)       NOT NULL DEFAULT '',
     bug_probability             NUMERIC(5, 4)   NOT NULL DEFAULT 0.0000,
 
     width                       INT             NOT NULL DEFAULT 0,

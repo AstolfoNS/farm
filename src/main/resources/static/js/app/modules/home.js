@@ -58,7 +58,7 @@
 
     function resolveHead(user) {
         var head = user && user.head ? String(user.head).trim() : "";
-        return head.length > 0 ? head : ((window.farmDefaultAsset && window.farmDefaultAsset("avatar")) || "/oss/defaults/avatar/default-avatar.png");
+        return head.length > 0 ? head : ((window.farmDefaultAsset && window.farmDefaultAsset("avatar")) || "");
     }
 
     function renderTopUser(user) {
@@ -97,6 +97,9 @@
                     onDone();
                 }
                 return;
+            }
+            if (window.farmSetDefaultAssets && res.data.defaultAssets) {
+                window.farmSetDefaultAssets(res.data.defaultAssets);
             }
             window.FarmAppState.currentUser = res.data;
             renderTopUser(res.data);

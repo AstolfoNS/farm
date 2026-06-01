@@ -15,8 +15,6 @@
         soilOptions: [],
         growthStageOptions: []
     };
-    var DEFAULT_STAGE_ASSET_RAW = "/oss/defaults/seed/seed-stage-default.png";
-    var DEFAULT_STAGE_ASSET_DISPLAY = "/oss/defaults/seed/seed-stage-default.png?v=202605301433";
     var POSITION_CANVAS_DEFAULT_WIDTH = 320;
     var POSITION_CANVAS_DEFAULT_HEIGHT = 410;
     var PREVIEW_CANVAS_DEFAULT_WIDTH = 220;
@@ -150,7 +148,7 @@
     function renderCover(value) {
         var src = $.trim(value || "");
         if (!src) {
-            src = (window.farmDefaultAsset && window.farmDefaultAsset("seedCover")) || "/oss/defaults/seed/seed-cover-default.png";
+            src = defaultSeedCover();
         }
         return "<img class='seed-admin-cover-thumb' src='" + escapeHtml(src) + "' alt='cover'>";
     }
@@ -174,7 +172,7 @@
     function previewSeedTypeCover(url) {
         var src = $.trim(url || "");
         if (!src) {
-            src = (window.farmDefaultAsset && window.farmDefaultAsset("seedCover")) || "/oss/defaults/seed/seed-cover-default.png";
+            src = defaultSeedCover();
         }
         $("#seedTypeCoverPreview").attr("src", src);
     }
@@ -458,12 +456,12 @@
 
     function resolveStagePreviewSrc(assetUrl) {
         var src = normalizeAssetUrl(assetUrl);
-        var fallback = (window.farmDefaultAsset && window.farmDefaultAsset("seedStage")) || DEFAULT_STAGE_ASSET_RAW;
+        var fallback = defaultSeedStage();
         if (!src) {
-            return DEFAULT_STAGE_ASSET_DISPLAY;
+            return fallback;
         }
-        if (src === DEFAULT_STAGE_ASSET_RAW || src === fallback) {
-            return DEFAULT_STAGE_ASSET_DISPLAY;
+        if (src === fallback) {
+            return fallback;
         }
         return src;
     }
@@ -1171,7 +1169,7 @@
     function openPositionEditor() {
         var assetUrl = normalizeAssetUrl(getTextboxValue($("#seedStageAssetUrl"), ""));
         if (!$.trim(assetUrl)) {
-            assetUrl = DEFAULT_STAGE_ASSET_RAW;
+            assetUrl = defaultSeedStage();
         }
         setTextboxValue($("#seedStageAssetUrl"), assetUrl);
         var $image = $("#seedStagePositionImage");
@@ -1390,3 +1388,10 @@
 })(window, window.jQuery);
 
 
+    function defaultSeedCover() {
+        return (window.farmDefaultAsset && window.farmDefaultAsset("seedCover")) || "";
+    }
+
+    function defaultSeedStage() {
+        return (window.farmDefaultAsset && window.farmDefaultAsset("seedStage")) || "";
+    }

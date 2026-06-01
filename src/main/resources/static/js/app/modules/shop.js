@@ -224,7 +224,7 @@
         if (url && $.trim(url).length > 0) {
             return url;
         }
-        return (window.farmDefaultAsset && window.farmDefaultAsset("seedCover")) || "/oss/defaults/seed/seed-cover-default.png";
+        return (window.farmDefaultAsset && window.farmDefaultAsset("seedCover")) || "";
     }
 
     function renderSeedList(pageData) {
