@@ -10,8 +10,8 @@
         baseY: 36
     };
     var cropAnchor = {
-        left: 0,
-        top: -148
+        left: 36,
+        top: -124
     };
     var STAGE_OFFSET_SCALE_X = 220 / 320;
     var STAGE_OFFSET_SCALE_Y = 282 / 410;
@@ -215,17 +215,18 @@
         var subText = plot.locked ? (plot.lockReason || "待解锁") : cropStatusText(crop);
         var badges = [];
         var cropLayer = "";
+        var bugOverlay = "";
         if (plot.locked) {
             badges.push("<span class='farm-plot-badge lock'>锁</span>");
         }
         if (crop && asNumber(crop.bugCount, 0) > 0) {
-            badges.push("<span class='farm-plot-badge bug'><img src='" + escapeAttr(farmResolveImg("domain/farm/components/bug.png")) + "' alt='bug'><em>" + asNumber(crop.bugCount, 0) + "</em></span>");
+            bugOverlay = buildBugOverlay(plot, crop);
         }
         if (crop && crop.harvestable) {
             badges.push("<span class='farm-plot-badge harvest'>熟</span>");
         }
         if (!plot.locked && plot.hasCrop && crop) {
-            cropLayer = "<img class='farm-crop-sprite' style='" + escapeAttr(resolveCropStyle(crop)) + "' src='" + escapeAttr(resolveCropImage(crop)) + "' alt='crop'>";
+            cropLayer = "<img class='farm-crop-sprite' style='" + escapeAttr(resolveCropStyle(crop)) + "' src='" + escapeAttr(resolveCropImage(crop)) + "' alt='crop'>" + bugOverlay;
         }
 
         var plotStyle = "left:" + pos.x + "px;top:" + pos.y + "px;background-image:url(" + escapeAttr(resolveSoilCoverImage(plot)) + ");";
@@ -260,6 +261,11 @@
     }
 
     function resolveCropStyle(crop) {
+        var box = resolveCropBox(crop);
+        return "left:" + box.left + "px;top:" + box.top + "px;width:" + box.width + "px;height:" + box.height + "px;";
+    }
+
+    function resolveCropBox(crop) {
         var width = asNumber(crop && crop.stageWidth, 132);
         var height = asNumber(crop && crop.stageHeight, 132);
         var offsetX = asNumber(crop && crop.stageOffsetX, 0);
@@ -274,7 +280,39 @@
         var renderHeight = Math.max(1, Math.round(height * STAGE_OFFSET_SCALE_Y));
         var left = cropAnchor.left + Math.round(offsetX * STAGE_OFFSET_SCALE_X);
         var top = cropAnchor.top + Math.round(offsetY * STAGE_OFFSET_SCALE_Y);
-        return "left:" + left + "px;top:" + top + "px;width:" + renderWidth + "px;height:" + renderHeight + "px;";
+        return {
+            left: left,
+            top: top,
+            width: renderWidth,
+            height: renderHeight
+        };
+    }
+
+    function seededUnit(seed) {
+        var x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+        return x - Math.floor(x);
+    }
+
+    function buildBugOverlay(plot, crop) {
+        var count = asNumber(crop && crop.bugCount, 0);
+        if (count <= 0) {
+            return "";
+        }
+        var box = resolveCropBox(crop);
+        var maxDots = Math.min(4, Math.max(1, count));
+        var bugSrc = escapeAttr(farmResolveImg("domain/farm/components/bug.png"));
+        var html = ["<div class='farm-bug-layer'>"];
+        for (var i = 0; i < maxDots; i++) {
+            var seed = asNumber(plot && plot.plotId, 0) * 17 + asNumber(crop && crop.cropId, 0) * 13 + i * 7;
+            var rx = seededUnit(seed);
+            var ry = seededUnit(seed + 3.33);
+            var bx = box.left + Math.round(box.width * (0.18 + rx * 0.64));
+            var by = box.top + Math.round(box.height * (0.1 + ry * 0.62));
+            html.push("<span class='farm-bug-dot' style='left:" + bx + "px;top:" + by + "px;'><img src='" + bugSrc + "' alt='bug'></span>");
+        }
+        html.push("<span class='farm-bug-count'>x" + count + "</span>");
+        html.push("</div>");
+        return html.join("");
     }
 
     function ensureSeedVisuals() {
