@@ -284,7 +284,7 @@
     }
 
     function loadPlotTypeOptions(callback) {
-        window.FarmApi.plotTypePage({page: 1, rows: 500, sort: "sortOrder", order: "asc"}, function (res) {
+        window.FarmApi.plotTypePage({page: 1, rows: 100, sort: "sortOrder", order: "asc"}, function (res) {
             var options = [];
             if (boolOk(res) && res.data && $.isArray(res.data.records)) {
                 $.each(res.data.records, function (_, item) {
@@ -307,7 +307,7 @@
     }
 
     function loadSoilOptionsForTypeForm(selectedId) {
-        window.FarmApi.plotSoilPage({page: 1, rows: 200, sort: "id", order: "asc"}, function (res) {
+        window.FarmApi.plotSoilPage({page: 1, rows: 100, sort: "id", order: "asc"}, function (res) {
             var options = [];
             if (boolOk(res) && res.data && $.isArray(res.data.records)) {
                 $.each(res.data.records, function (_, item) {
