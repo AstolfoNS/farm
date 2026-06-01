@@ -27,7 +27,7 @@ public class PlotTypeSaveDTO implements Serializable {
 
     private Boolean defaultUsable;
 
-    private Long defaultUnlockExperienceRequired;
+    private Long defaultPlotUnlockExperienceConfig;
 
     private Integer sortOrder;
 

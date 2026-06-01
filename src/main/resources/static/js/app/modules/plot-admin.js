@@ -370,7 +370,7 @@
         setTextboxValue(typeField("name"), data.name || "");
         setTextboxValue(typeField("iconUrl"), data.iconUrl || DEFAULT_PLOT_ICON);
         setTextboxValue($("#plotTypeCoverImageUrl"), data.coverImageUrl || data.iconUrl || DEFAULT_PLOT_COVER);
-        setNumberboxValue(typeField("defaultUnlockExperienceRequired"), asNumber(data.defaultUnlockExperienceRequired, 0));
+        setNumberboxValue(typeField("defaultPlotUnlockExperienceConfig"), asNumber(data.defaultPlotUnlockExperienceConfig, 0));
         setNumberboxValue(typeField("sortOrder"), asNumber(data.sortOrder, 0));
         setTextboxValue(typeField("description"), data.description || "");
         previewTypeCover(data.coverImageUrl || data.iconUrl || DEFAULT_PLOT_COVER);
@@ -431,7 +431,7 @@
             soilTypeId: pickNumber(d.soilTypeId, r.soilTypeId, 0),
             unlockRequired: (d.unlockRequired === null || d.unlockRequired === undefined) ? r.unlockRequired : d.unlockRequired,
             defaultUsable: (d.defaultUsable === null || d.defaultUsable === undefined) ? r.defaultUsable : d.defaultUsable,
-            defaultUnlockExperienceRequired: pickNumber(d.defaultUnlockExperienceRequired, r.defaultUnlockExperienceRequired, 0),
+            defaultPlotUnlockExperienceConfig: pickNumber(d.defaultPlotUnlockExperienceConfig, r.defaultPlotUnlockExperienceConfig, 0),
             sortOrder: pickNumber(d.sortOrder, r.sortOrder, 0),
             description: pickText(d.description, r.description, "")
         };
@@ -747,7 +747,7 @@
             coverImageUrl: getTextboxValue($("#plotTypeCoverImageUrl"), DEFAULT_PLOT_COVER),
             unlockRequired: unlockRequired,
             defaultUsable: defaultUsable,
-            defaultUnlockExperienceRequired: getNumberboxValue(typeField("defaultUnlockExperienceRequired"), 0),
+            defaultPlotUnlockExperienceConfig: getNumberboxValue(typeField("defaultPlotUnlockExperienceConfig"), 0),
             sortOrder: getNumberboxValue(typeField("sortOrder"), 0),
             description: getTextboxValue(typeField("description"), "")
         };
@@ -1120,7 +1120,7 @@
                 {field: "name", title: "土壤名称", width: 110},
                 {field: "bitCode", title: "bitCode", width: 72, align: "center"},
                 {field: "level", title: "等级", width: 56, align: "center"},
-                {field: "unlockExperienceRequired", title: "解锁经验", width: 86, align: "right"},
+                {field: "unlockExperienceRequired", title: "土壤解锁经验", width: 86, align: "right"},
                 {field: "growSpeedMultiplier", title: "成长倍率", width: 80, align: "center"},
                 {field: "coverImageUrl", title: "图片", width: 66, align: "center", formatter: function (v) { return renderCover(v, DEFAULT_SOIL_COVER); }},
                 {field: "description", title: "描述", width: 250}
@@ -1172,7 +1172,7 @@
                 {field: "soilTypeName", title: "关联土壤", width: 98},
                 {field: "unlockRequired", title: "需解锁", width: 66, align: "center", formatter: function (v) { return v ? "是" : "否"; }},
                 {field: "defaultUsable", title: "默认可用", width: 74, align: "center", formatter: function (v) { return v ? "是" : "否"; }},
-                {field: "defaultUnlockExperienceRequired", title: "默认经验", width: 84, align: "right"},
+                {field: "defaultPlotUnlockExperienceConfig", title: "地块解锁经验配置值", width: 122, align: "right"},
                 {field: "sortOrder", title: "排序", width: 56, align: "center"},
                 {field: "coverImageUrl", title: "封面", width: 66, align: "center", formatter: function (v) { return renderCover(v, DEFAULT_PLOT_COVER); }},
                 {field: "description", title: "描述", width: 225}

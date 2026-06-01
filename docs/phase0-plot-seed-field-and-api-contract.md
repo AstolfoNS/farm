@@ -74,7 +74,7 @@
 4. `soilTypeId`：默认土壤类型 ID（用于实例初始化映射）。
 5. `unlockRequired`：是否需要解锁。
 6. `defaultUsable`：默认可用（策略初始化时使用）。
-7. `defaultUnlockExperienceRequired`：默认解锁经验阈值。
+7. `defaultPlotUnlockExperienceConfig`：地块解锁经验默认配置值。
 8. `sortOrder`：排序权重（小到大）。
 9. `description`：描述。
 
@@ -162,7 +162,7 @@
         "soilTypeName": "黄土地",
         "unlockRequired": false,
         "defaultUsable": true,
-        "defaultUnlockExperienceRequired": 0,
+        "defaultPlotUnlockExperienceConfig": 0,
         "sortOrder": 10,
         "description": "默认地块类型"
       }
@@ -183,7 +183,7 @@
   "soilTypeId": 2,
   "unlockRequired": true,
   "defaultUsable": false,
-  "defaultUnlockExperienceRequired": 800,
+  "defaultPlotUnlockExperienceConfig": 800,
   "sortOrder": 20,
   "description": "高阶地块类型"
 }
@@ -458,4 +458,3 @@
 1. Phase 1 实现允许旧数据按 `SYSTEM` 兜底。
 2. Phase 2 迁移完成后，优先由 `USER_ALLOCATION/GLOBAL_POLICY` 驱动。
 3. 前端模块与后端联调时，严格按本文档字段名与枚举值进行断言。
-

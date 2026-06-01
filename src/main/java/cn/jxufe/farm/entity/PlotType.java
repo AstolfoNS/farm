@@ -31,8 +31,8 @@ public class PlotType extends BaseEntity {
     @Column(name = "default_usable", nullable = false)
     private Boolean defaultUsable;
 
-    @Column(name = "default_unlock_experience_required", nullable = false)
-    private Long defaultUnlockExperienceRequired;
+    @Column(name = "default_plot_unlock_experience_config", nullable = false)
+    private Long defaultPlotUnlockExperienceConfig;
 
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder;

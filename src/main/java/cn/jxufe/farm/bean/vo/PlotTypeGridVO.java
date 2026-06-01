@@ -15,7 +15,7 @@ public class PlotTypeGridVO implements Serializable {
     private String soilTypeName;
     private Boolean unlockRequired;
     private Boolean defaultUsable;
-    private Long defaultUnlockExperienceRequired;
+    private Long defaultPlotUnlockExperienceConfig;
     private Integer sortOrder;
     private String description;
 }

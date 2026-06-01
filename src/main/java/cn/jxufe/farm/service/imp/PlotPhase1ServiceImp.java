@@ -246,7 +246,7 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
         entity.setSoilTypeId(soilTypeId);
         entity.setUnlockRequired(defaultBool(params.getUnlockRequired(), true));
         entity.setDefaultUsable(defaultBool(params.getDefaultUsable(), true));
-        entity.setDefaultUnlockExperienceRequired(Math.max(0L, params.getDefaultUnlockExperienceRequired() == null ? 0L : params.getDefaultUnlockExperienceRequired()));
+        entity.setDefaultPlotUnlockExperienceConfig(Math.max(0L, params.getDefaultPlotUnlockExperienceConfig() == null ? 0L : params.getDefaultPlotUnlockExperienceConfig()));
         entity.setSortOrder(params.getSortOrder() == null ? 0 : params.getSortOrder());
         entity.setDescription(safeString(params.getDescription()));
         touchForUpdate(entity);
@@ -534,7 +534,7 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
         vo.setSoilTypeName(safeString(soilNameMap.get(item.getSoilTypeId())));
         vo.setUnlockRequired(defaultBool(item.getUnlockRequired(), true));
         vo.setDefaultUsable(defaultBool(item.getDefaultUsable(), true));
-        vo.setDefaultUnlockExperienceRequired(item.getDefaultUnlockExperienceRequired() == null ? 0L : item.getDefaultUnlockExperienceRequired());
+        vo.setDefaultPlotUnlockExperienceConfig(item.getDefaultPlotUnlockExperienceConfig() == null ? 0L : item.getDefaultPlotUnlockExperienceConfig());
         vo.setSortOrder(item.getSortOrder() == null ? 0 : item.getSortOrder());
         vo.setDescription(safeString(item.getDescription()));
         return vo;
@@ -684,7 +684,7 @@ public class PlotPhase1ServiceImp implements PlotPhase1Service {
         entity.setCoverImageUrl(DEFAULT_PLOT_COVER);
         entity.setUnlockRequired(true);
         entity.setDefaultUsable(true);
-        entity.setDefaultUnlockExperienceRequired(0L);
+        entity.setDefaultPlotUnlockExperienceConfig(0L);
         entity.setSortOrder(0);
         return entity;
     }

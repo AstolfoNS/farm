@@ -113,7 +113,7 @@ CREATE TABLE farm.plot_types
     soil_type_id                        BIGINT          NOT NULL,
     unlock_required                     BOOLEAN         NOT NULL DEFAULT true,
     default_usable                      BOOLEAN         NOT NULL DEFAULT true,
-    default_unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
+    default_plot_unlock_experience_config BIGINT        NOT NULL DEFAULT 0,
     sort_order                          INT             NOT NULL DEFAULT 0,
     description                         TEXT                NULL,
 

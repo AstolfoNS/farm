@@ -145,7 +145,7 @@ public class PlotAdminServiceImp implements PlotAdminService {
         entity.setSoilTypeId(soilTypeId);
         entity.setUnlockRequired(defaultBool(params.getUnlockRequired(), true));
         entity.setDefaultUsable(defaultBool(params.getDefaultUsable(), true));
-        entity.setDefaultUnlockExperienceRequired(Math.max(0L, params.getDefaultUnlockExperienceRequired() == null ? 0L : params.getDefaultUnlockExperienceRequired()));
+        entity.setDefaultPlotUnlockExperienceConfig(Math.max(0L, params.getDefaultPlotUnlockExperienceConfig() == null ? 0L : params.getDefaultPlotUnlockExperienceConfig()));
         entity.setSortOrder(params.getSortOrder() == null ? 0 : params.getSortOrder());
         entity.setDescription(safeString(params.getDescription()));
         touchForUpdate(entity);
@@ -498,7 +498,7 @@ public class PlotAdminServiceImp implements PlotAdminService {
         if (!Boolean.TRUE.equals(plotType.getUnlockRequired())) {
             return 0L;
         }
-        return Math.max(legacy, Math.max(0L, plotType.getDefaultUnlockExperienceRequired() == null ? 0L : plotType.getDefaultUnlockExperienceRequired()));
+        return Math.max(legacy, Math.max(0L, plotType.getDefaultPlotUnlockExperienceConfig() == null ? 0L : plotType.getDefaultPlotUnlockExperienceConfig()));
     }
 
     private long calculateLegacyUnlockRequiredExperience(short plotIndex) {
@@ -521,7 +521,7 @@ public class PlotAdminServiceImp implements PlotAdminService {
         vo.setSoilTypeName(safeString(soilNameMap.get(item.getSoilTypeId())));
         vo.setUnlockRequired(defaultBool(item.getUnlockRequired(), true));
         vo.setDefaultUsable(defaultBool(item.getDefaultUsable(), true));
-        vo.setDefaultUnlockExperienceRequired(Math.max(0L, item.getDefaultUnlockExperienceRequired() == null ? 0L : item.getDefaultUnlockExperienceRequired()));
+        vo.setDefaultPlotUnlockExperienceConfig(Math.max(0L, item.getDefaultPlotUnlockExperienceConfig() == null ? 0L : item.getDefaultPlotUnlockExperienceConfig()));
         vo.setSortOrder(item.getSortOrder() == null ? 0 : item.getSortOrder());
         vo.setDescription(safeString(item.getDescription()));
         return vo;

@@ -114,7 +114,7 @@ CREATE TABLE farm.plot_types
     soil_type_id                        BIGINT          NOT NULL,
     unlock_required                     BOOLEAN         NOT NULL DEFAULT true,
     default_usable                      BOOLEAN         NOT NULL DEFAULT true,
-    default_unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
+    default_plot_unlock_experience_config BIGINT        NOT NULL DEFAULT 0,
     sort_order                          INT             NOT NULL DEFAULT 0,
     description                         TEXT                NULL,
 
@@ -790,7 +790,7 @@ WHERE NOT EXISTS (SELECT 1 FROM farm.users WHERE username = 'sunquan' AND is_del
 INSERT INTO farm.plot_types
 (
     name, icon_url, soil_type_id, unlock_required, default_usable,
-    default_unlock_experience_required, sort_order, description,
+    default_plot_unlock_experience_config, sort_order, description,
     created_at, updated_at, created_by, updated_by, remark, status, is_deleted, opt_lock_version
 )
 SELECT
@@ -804,7 +804,7 @@ WHERE st.name = '黄土地' AND st.is_deleted = false
 INSERT INTO farm.plot_types
 (
     name, icon_url, soil_type_id, unlock_required, default_usable,
-    default_unlock_experience_required, sort_order, description,
+    default_plot_unlock_experience_config, sort_order, description,
     created_at, updated_at, created_by, updated_by, remark, status, is_deleted, opt_lock_version
 )
 SELECT
@@ -818,7 +818,7 @@ WHERE st.name = '黑土地' AND st.is_deleted = false
 INSERT INTO farm.plot_types
 (
     name, icon_url, soil_type_id, unlock_required, default_usable,
-    default_unlock_experience_required, sort_order, description,
+    default_plot_unlock_experience_config, sort_order, description,
     created_at, updated_at, created_by, updated_by, remark, status, is_deleted, opt_lock_version
 )
 SELECT
@@ -923,7 +923,7 @@ alloc_with_type AS (
         a.lock_reason,
         pt.soil_type_id,
         pt.unlock_required,
-        pt.default_unlock_experience_required
+        pt.default_plot_unlock_experience_config
     FROM alloc a
     LEFT JOIN farm.plot_types pt
         ON pt.id = a.default_plot_type_id
@@ -941,7 +941,7 @@ SELECT
     CASE
         WHEN gs.plot_index <= awt.unlocked_plot_count THEN 0
         WHEN COALESCE(awt.unlock_required, true) = false THEN 0
-        ELSE COALESCE(awt.default_unlock_experience_required, 0) + ((gs.plot_index - awt.unlocked_plot_count - 1) * 200)
+        ELSE COALESCE(awt.default_plot_unlock_experience_config, 0) + ((gs.plot_index - awt.unlocked_plot_count - 1) * 200)
     END AS unlock_experience_required,
     (gs.plot_index > awt.unlocked_plot_count) AS is_locked,
     CASE WHEN gs.plot_index <= awt.unlocked_plot_count THEN NOW() ELSE NULL END AS unlocked_at,
