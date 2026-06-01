@@ -142,6 +142,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
         final Long userId;
         final OffsetDateTime now;
         final long currentExperience;
+        final long currentCoin;
         final List<UserPlot> plots;
         final Map<Long, UserCrop> cropByPlotId;
 
@@ -149,6 +150,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
             this.userId = ServiceGuardUtils.requirePositive(rawUserId, BizErrorCode.PARAM_INVALID, "用户ID无效");
             User user = validateUser(this.userId);
             this.currentExperience = safeLong(user.getExperience());
+            this.currentCoin = safeLong(user.getCoin());
             this.now = OffsetDateTime.now();
             this.plots = userPlotDao.findByUserIdAndIsDeletedFalseOrderByPlotIndexAsc(this.userId);
             this.cropByPlotId = userCropDao.findByUserIdAndIsDeletedFalseOrderByIdAsc(this.userId)
@@ -567,15 +569,22 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
             SoilType soilType = soilTypeMap.get(plot.getSoilTypeId());
             plotVO.setSoilBitCode(soilType == null ? null : soilType.getBitCode());
             plotVO.setSoilName(soilType == null ? "" : gameplayCoreService.safeString(soilType.getName()));
+            plotVO.setSoilCoverImageUrl(soilType == null ? "" : gameplayCoreService.safeString(soilType.getCoverImageUrl()));
             PlotType plotType = plotTypeBySoilType.get(plot.getSoilTypeId());
             plotVO.setPlotTypeId(plotType == null ? null : plotType.getId());
             plotVO.setPlotTypeName(plotType == null ? "" : gameplayCoreService.safeString(plotType.getName()));
-            plotVO.setUnlockCostCoin(plotCostService.calculateUnlockCostCoin(plot.getPlotIndex()));
+            long unlockCostCoin = plotCostService.calculateUnlockCostCoin(plot.getPlotIndex());
+            plotVO.setUnlockCostCoin(unlockCostCoin);
             long unlockRequiredExperience = safeLong(plot.getUnlockExperienceRequired());
             boolean unlockableByExperience = ctx.currentExperience >= unlockRequiredExperience;
+            boolean unlockableByCoin = ctx.currentCoin >= unlockCostCoin;
             plotVO.setUnlockRequiredExperience(unlockRequiredExperience);
             plotVO.setUnlockableByExperience(unlockableByExperience);
-            plotVO.setCanUnlock(nextUnlockPlot != null && nextUnlockPlot.getId().equals(plot.getId()) && unlockableByExperience);
+            plotVO.setUnlockableByCoin(unlockableByCoin);
+            plotVO.setCanUnlock(nextUnlockPlot != null
+                    && nextUnlockPlot.getId().equals(plot.getId())
+                    && unlockableByExperience
+                    && unlockableByCoin);
 
             UserCrop crop = ctx.cropByPlotId.get(plot.getId());
             boolean hasCrop = crop != null && !isDeleted(crop);

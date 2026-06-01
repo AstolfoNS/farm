@@ -13,6 +13,9 @@
         left: 36,
         top: -86
     };
+    var STAGE_OFFSET_SCALE_X = 220 / 320;
+    var STAGE_OFFSET_SCALE_Y = 282 / 410;
+    var DEFAULT_SOIL_COVER = "/resources/imgs/domain/farm/components/soil-land.png";
     var ActionKit = window.FarmActionKit || null;
     var state = {
         active: false,
@@ -188,17 +191,19 @@
         if (plot && plot.crop && plot.crop.harvestable) {
             classes.push("is-harvestable");
         }
-        var soilName = String((plot && plot.soilName) || "");
-        if (soilName.indexOf("金") >= 0) {
-            classes.push("is-soil-gold");
-        } else if (soilName.indexOf("红") >= 0) {
-            classes.push("is-soil-red");
-        } else if (soilName.indexOf("黑") >= 0) {
-            classes.push("is-soil-black");
-        } else {
-            classes.push("is-soil-base");
-        }
+        classes.push("is-soil-base");
         return classes.join(" ");
+    }
+
+    function resolveSoilCoverImage(plot) {
+        var raw = $.trim((plot && plot.soilCoverImageUrl) ? String(plot.soilCoverImageUrl) : "");
+        if (!raw) {
+            return DEFAULT_SOIL_COVER;
+        }
+        if (raw.indexOf("http://") === 0 || raw.indexOf("https://") === 0 || raw.indexOf("/") === 0) {
+            return raw;
+        }
+        return "/" + raw;
     }
 
     function buildPlotHtml(plot) {
@@ -222,7 +227,8 @@
             cropLayer = "<img class='farm-crop-sprite' style='" + escapeAttr(resolveCropStyle(crop)) + "' src='" + escapeAttr(resolveCropImage(crop)) + "' alt='crop'>";
         }
 
-        return "<div id='farmPlot_" + safeId + "' class='" + buildPlotClasses(plot) + "' data-plot-id='" + safeId + "' style='left:" + pos.x + "px;top:" + pos.y + "px;'>" +
+        var plotStyle = "left:" + pos.x + "px;top:" + pos.y + "px;background-image:url('" + escapeAttr(resolveSoilCoverImage(plot)) + "');";
+        return "<div id='farmPlot_" + safeId + "' class='" + buildPlotClasses(plot) + "' data-plot-id='" + safeId + "' style='" + plotStyle + "'>" +
             "<div class='farm-plot-surface'></div>" +
             cropLayer +
             "<div class='farm-plot-content'>" +
@@ -263,8 +269,8 @@
         if (height <= 0) {
             height = 132;
         }
-        var left = cropAnchor.left + Math.round(offsetX);
-        var top = cropAnchor.top + Math.round(offsetY);
+        var left = cropAnchor.left + Math.round(offsetX * STAGE_OFFSET_SCALE_X);
+        var top = cropAnchor.top + Math.round(offsetY * STAGE_OFFSET_SCALE_Y);
         return "left:" + left + "px;top:" + top + "px;width:" + width + "px;height:" + height + "px;";
     }
 
@@ -1003,6 +1009,19 @@
         }
         if (plot.locked && plot.lockReason) {
             rows.push({label: "锁定原因", value: plot.lockReason});
+        }
+        if (plot.locked) {
+            rows.push({
+                label: "解锁条件",
+                value: "经验 " + asNumber(plot.unlockRequiredExperience, 0) + "，金币 " + asNumber(plot.unlockCostCoin, 0)
+            });
+            if (plot.unlockableByExperience === false) {
+                rows.push({label: "当前不可解锁", value: "经验不足"});
+            } else if (plot.unlockableByCoin === false) {
+                rows.push({label: "当前不可解锁", value: "金币不足"});
+            } else if (plot.canUnlock === false) {
+                rows.push({label: "当前不可解锁", value: "需先解锁前置地块"});
+            }
         }
         return rows;
     }
