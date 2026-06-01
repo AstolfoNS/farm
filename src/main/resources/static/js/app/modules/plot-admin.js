@@ -133,6 +133,43 @@
         return "<img src='" + escapeHtml(safe) + "' alt='' style='width:46px;height:46px;object-fit:cover;border:1px solid rgba(172,236,153,.64);background:rgba(0,62,0,.55)'>";
     }
 
+    function formField($form, name) {
+        var key = trimText(name);
+        if (!$form || $form.length <= 0 || !key) {
+            return $();
+        }
+        var selector = [
+            ".textbox-f[name='" + key + "']",
+            ".numberbox-f[name='" + key + "']",
+            ".combo-f[name='" + key + "']",
+            "input.easyui-textbox[name='" + key + "']",
+            "input.easyui-numberbox[name='" + key + "']",
+            "input.easyui-combobox[name='" + key + "']",
+            "textarea.easyui-textbox[name='" + key + "']"
+        ].join(",");
+        var $widgetInput = $form.find(selector).first();
+        if ($widgetInput.length > 0) {
+            return $widgetInput;
+        }
+        return $form.find("[name='" + key + "']").not(".textbox-value").first();
+    }
+
+    function soilField(name) {
+        return formField($("#plotSoilEditorForm"), name);
+    }
+
+    function typeField(name) {
+        return formField($("#plotTypeEditorForm"), name);
+    }
+
+    function policyField(name) {
+        return formField($("#plotPolicyEditorForm"), name);
+    }
+
+    function userAllocField(name) {
+        return formField($("#plotUserAllocationForm"), name);
+    }
+
     function safeResizeGrid(selector) {
         var $grid = $(selector);
         if ($grid.length <= 0) {
@@ -308,14 +345,14 @@
     function openSoilEditor(row) {
         var data = row || {};
         $("#plotSoilEditorForm").form("clear");
-        setTextboxValue($("#plotSoilEditorForm input[name='id']"), asNumber(data.id, 0));
-        setTextboxValue($("#plotSoilEditorForm input[name='name']"), data.name || "");
+        setTextboxValue(soilField("id"), asNumber(data.id, 0));
+        setTextboxValue(soilField("name"), data.name || "");
         setTextboxValue($("#plotSoilBitCodeDisplay"), data.id ? String(asNumber(data.bitCode, 0)) : "系统保存时自动分配");
-        setNumberboxValue($("#plotSoilEditorForm input[name='level']"), asNumber(data.level, 1));
-        setNumberboxValue($("#plotSoilEditorForm input[name='unlockExperienceRequired']"), asNumber(data.unlockExperienceRequired, 0));
-        setTextboxValue($("#plotSoilEditorForm input[name='growSpeedMultiplier']"), data.growSpeedMultiplier || "1.00");
+        setNumberboxValue(soilField("level"), asNumber(data.level, 1));
+        setNumberboxValue(soilField("unlockExperienceRequired"), asNumber(data.unlockExperienceRequired, 0));
+        setTextboxValue(soilField("growSpeedMultiplier"), data.growSpeedMultiplier || "1.00");
         setTextboxValue($("#plotSoilCoverImageUrl"), data.coverImageUrl || DEFAULT_SOIL_COVER);
-        setTextboxValue($("#plotSoilEditorForm input[name='description']"), data.description || "");
+        setTextboxValue(soilField("description"), data.description || "");
         previewSoilCover(data.coverImageUrl || DEFAULT_SOIL_COVER);
         $("#plotSoilEditorDialog").dialog("setTitle", data.id ? "编辑土壤类型" : "新增土壤类型").dialog("open");
     }
@@ -323,13 +360,13 @@
     function openTypeEditor(row) {
         var data = row || {};
         $("#plotTypeEditorForm").form("clear");
-        setTextboxValue($("#plotTypeEditorForm input[name='id']"), asNumber(data.id, 0));
-        setTextboxValue($("#plotTypeEditorForm input[name='name']"), data.name || "");
-        setTextboxValue($("#plotTypeEditorForm input[name='iconUrl']"), data.iconUrl || DEFAULT_PLOT_ICON);
+        setTextboxValue(typeField("id"), asNumber(data.id, 0));
+        setTextboxValue(typeField("name"), data.name || "");
+        setTextboxValue(typeField("iconUrl"), data.iconUrl || DEFAULT_PLOT_ICON);
         setTextboxValue($("#plotTypeCoverImageUrl"), data.coverImageUrl || data.iconUrl || DEFAULT_PLOT_COVER);
-        setNumberboxValue($("#plotTypeEditorForm input[name='defaultUnlockExperienceRequired']"), asNumber(data.defaultUnlockExperienceRequired, 0));
-        setNumberboxValue($("#plotTypeEditorForm input[name='sortOrder']"), asNumber(data.sortOrder, 0));
-        setTextboxValue($("#plotTypeEditorForm input[name='description']"), data.description || "");
+        setNumberboxValue(typeField("defaultUnlockExperienceRequired"), asNumber(data.defaultUnlockExperienceRequired, 0));
+        setNumberboxValue(typeField("sortOrder"), asNumber(data.sortOrder, 0));
+        setTextboxValue(typeField("description"), data.description || "");
         previewTypeCover(data.coverImageUrl || data.iconUrl || DEFAULT_PLOT_COVER);
         loadSoilOptionsForTypeForm(data.soilTypeId);
         try {
@@ -447,14 +484,14 @@
     function openPolicyEditor() {
         var row = state.currentPolicy || {};
         $("#plotPolicyEditorForm").form("clear");
-        setTextboxValue($("#plotPolicyEditorForm input[name='id']"), asNumber(row.id, 0));
-        setTextboxValue($("#plotPolicyEditorForm input[name='policyName']"), defaultText(row.policyName, "default-policy"));
-        setTextboxValue($("#plotPolicyEditorForm input[name='policyVersion']"), defaultText(row.policyVersion, "v1"));
-        setNumberboxValue($("#plotPolicyEditorForm input[name='defaultTotalPlotCount']"), asNumber(row.defaultTotalPlotCount, 6));
-        setNumberboxValue($("#plotPolicyEditorForm input[name='defaultUnlockedPlotCount']"), asNumber(row.defaultUnlockedPlotCount, 1));
-        setTextboxValue($("#plotPolicyEditorForm input[name='defaultLockRuleCode']"), defaultText(row.defaultLockRuleCode, "DEFAULT_LOCKED"));
-        setTextboxValue($("#plotPolicyEditorForm input[name='defaultLockReason']"), defaultText(row.defaultLockReason, "pending unlock"));
-        setTextboxValue($("#plotPolicyEditorForm input[name='allocationRuleJson']"), defaultText(row.allocationRuleJson, "{}"));
+        setTextboxValue(policyField("id"), asNumber(row.id, 0));
+        setTextboxValue(policyField("policyName"), defaultText(row.policyName, "default-policy"));
+        setTextboxValue(policyField("policyVersion"), defaultText(row.policyVersion, "v1"));
+        setNumberboxValue(policyField("defaultTotalPlotCount"), asNumber(row.defaultTotalPlotCount, 6));
+        setNumberboxValue(policyField("defaultUnlockedPlotCount"), asNumber(row.defaultUnlockedPlotCount, 1));
+        setTextboxValue(policyField("defaultLockRuleCode"), defaultText(row.defaultLockRuleCode, "DEFAULT_LOCKED"));
+        setTextboxValue(policyField("defaultLockReason"), defaultText(row.defaultLockReason, "pending unlock"));
+        setTextboxValue(policyField("allocationRuleJson"), defaultText(row.allocationRuleJson, "{}"));
         $("#plotPolicyPublishStatus").combobox("setValue", defaultText(row.publishStatus, "DRAFT"));
         $("#plotPolicyEffectiveScope").combobox("setValue", defaultText(row.effectiveScope, "NEW_USER_ONLY"));
         try {
@@ -485,15 +522,15 @@
             return;
         }
         $("#plotUserAllocationForm").form("clear");
-        setTextboxValue($("#plotUserAllocationForm input[name='id']"), asNumber(data.id, 0));
-        setTextboxValue($("#plotUserAllocationForm input[name='userId']"), asNumber(data.userId, 0));
+        setTextboxValue(userAllocField("id"), asNumber(data.id, 0));
+        setTextboxValue(userAllocField("userId"), asNumber(data.userId, 0));
         setTextboxValue($("#plotUserAllocUserName"), (data.username || "-") + " / " + (data.nickname || "-"));
         setTextboxValue($("#plotUserAllocCurrentUnlocked"), asNumber(data.currentUnlockedPlots, 0));
-        setNumberboxValue($("#plotUserAllocationForm input[name='totalPlotCount']"), asNumber(data.totalPlotCount, 1));
-        setNumberboxValue($("#plotUserAllocationForm input[name='unlockedPlotCount']"), asNumber(data.unlockedPlotCount, asNumber(data.currentUnlockedPlots, 0)));
-        setTextboxValue($("#plotUserAllocationForm input[name='lockRuleCode']"), defaultText(data.lockRuleCode, "DEFAULT_LOCKED"));
-        setTextboxValue($("#plotUserAllocationForm input[name='lockReason']"), defaultText(data.lockReason, "pending unlock"));
-        setTextboxValue($("#plotUserAllocationForm input[name='allocationRuleJson']"), defaultText(data.allocationRuleJson, "{}"));
+        setNumberboxValue(userAllocField("totalPlotCount"), asNumber(data.totalPlotCount, 1));
+        setNumberboxValue(userAllocField("unlockedPlotCount"), asNumber(data.unlockedPlotCount, asNumber(data.currentUnlockedPlots, 0)));
+        setTextboxValue(userAllocField("lockRuleCode"), defaultText(data.lockRuleCode, "DEFAULT_LOCKED"));
+        setTextboxValue(userAllocField("lockReason"), defaultText(data.lockReason, "pending unlock"));
+        setTextboxValue(userAllocField("allocationRuleJson"), defaultText(data.allocationRuleJson, "{}"));
         try {
             (data.active === false ? $("#plotUserAllocActiveSwitch").switchbutton("uncheck") : $("#plotUserAllocActiveSwitch").switchbutton("check"));
         } catch (ignoreUserActiveSwitch) {}
@@ -664,13 +701,13 @@
             return;
         }
         var payload = {
-            id: asNumber(getTextboxValue($("#plotSoilEditorForm input[name='id']"), "0"), 0) || null,
-            name: getTextboxValue($("#plotSoilEditorForm input[name='name']"), ""),
-            level: getNumberboxValue($("#plotSoilEditorForm input[name='level']"), 1),
-            unlockExperienceRequired: getNumberboxValue($("#plotSoilEditorForm input[name='unlockExperienceRequired']"), 0),
-            growSpeedMultiplier: getTextboxValue($("#plotSoilEditorForm input[name='growSpeedMultiplier']"), "1.00"),
+            id: asNumber(getTextboxValue(soilField("id"), "0"), 0) || null,
+            name: getTextboxValue(soilField("name"), ""),
+            level: getNumberboxValue(soilField("level"), 1),
+            unlockExperienceRequired: getNumberboxValue(soilField("unlockExperienceRequired"), 0),
+            growSpeedMultiplier: getTextboxValue(soilField("growSpeedMultiplier"), "1.00"),
             coverImageUrl: getTextboxValue($("#plotSoilCoverImageUrl"), DEFAULT_SOIL_COVER),
-            description: getTextboxValue($("#plotSoilEditorForm input[name='description']"), "")
+            description: getTextboxValue(soilField("description"), "")
         };
         window.FarmApi.plotSoilSave(payload, function (res) {
             if (!boolOk(res)) {
@@ -697,16 +734,16 @@
         } catch (ignoreSwitchGet) {}
 
         var payload = {
-            id: asNumber(getTextboxValue($("#plotTypeEditorForm input[name='id']"), "0"), 0) || null,
-            name: getTextboxValue($("#plotTypeEditorForm input[name='name']"), ""),
+            id: asNumber(getTextboxValue(typeField("id"), "0"), 0) || null,
+            name: getTextboxValue(typeField("name"), ""),
             soilTypeId: asNumber($("#plotTypeSoilTypeId").combobox("getValue"), 0),
-            iconUrl: getTextboxValue($("#plotTypeEditorForm input[name='iconUrl']"), DEFAULT_PLOT_ICON),
+            iconUrl: getTextboxValue(typeField("iconUrl"), DEFAULT_PLOT_ICON),
             coverImageUrl: getTextboxValue($("#plotTypeCoverImageUrl"), DEFAULT_PLOT_COVER),
             unlockRequired: unlockRequired,
             defaultUsable: defaultUsable,
-            defaultUnlockExperienceRequired: getNumberboxValue($("#plotTypeEditorForm input[name='defaultUnlockExperienceRequired']"), 0),
-            sortOrder: getNumberboxValue($("#plotTypeEditorForm input[name='sortOrder']"), 0),
-            description: getTextboxValue($("#plotTypeEditorForm input[name='description']"), "")
+            defaultUnlockExperienceRequired: getNumberboxValue(typeField("defaultUnlockExperienceRequired"), 0),
+            sortOrder: getNumberboxValue(typeField("sortOrder"), 0),
+            description: getTextboxValue(typeField("description"), "")
         };
         if (payload.soilTypeId <= 0) {
             alertMessage("请先选择关联土壤");
@@ -741,9 +778,9 @@
         } catch (ignorePolicySwitchGet) {}
 
         var payload = {
-            id: asNumber(getTextboxValue($("#plotPolicyEditorForm input[name='id']"), "0"), 0) || null,
-            policyName: getTextboxValue($("#plotPolicyEditorForm input[name='policyName']"), ""),
-            policyVersion: getTextboxValue($("#plotPolicyEditorForm input[name='policyVersion']"), "v1"),
+            id: asNumber(getTextboxValue(policyField("id"), "0"), 0) || null,
+            policyName: getTextboxValue(policyField("policyName"), ""),
+            policyVersion: getTextboxValue(policyField("policyVersion"), "v1"),
             defaultTotalPlotCount: total,
             defaultUnlockedPlotCount: unlocked,
             defaultLockedPlotCount: Math.max(total - unlocked, 0),
@@ -751,9 +788,9 @@
             publishStatus: trimText($("#plotPolicyPublishStatus").combobox("getValue")) || "DRAFT",
             effectiveScope: trimText($("#plotPolicyEffectiveScope").combobox("getValue")) || "NEW_USER_ONLY",
             active: active,
-            defaultLockRuleCode: getTextboxValue($("#plotPolicyEditorForm input[name='defaultLockRuleCode']"), "DEFAULT_LOCKED"),
-            defaultLockReason: getTextboxValue($("#plotPolicyEditorForm input[name='defaultLockReason']"), "pending unlock"),
-            allocationRuleJson: getTextboxValue($("#plotPolicyEditorForm input[name='allocationRuleJson']"), "{}")
+            defaultLockRuleCode: getTextboxValue(policyField("defaultLockRuleCode"), "DEFAULT_LOCKED"),
+            defaultLockReason: getTextboxValue(policyField("defaultLockReason"), "pending unlock"),
+            allocationRuleJson: getTextboxValue(policyField("allocationRuleJson"), "{}")
         };
         window.FarmApi.plotPolicySave(payload, function (res) {
             if (!boolOk(res)) {
@@ -802,9 +839,9 @@
         if (!$("#plotUserAllocationForm").form("validate")) {
             return;
         }
-        var userId = asNumber(getTextboxValue($("#plotUserAllocationForm input[name='userId']"), "0"), 0);
-        var total = getNumberboxValue($("#plotUserAllocationForm input[name='totalPlotCount']"), 1);
-        var unlocked = getNumberboxValue($("#plotUserAllocationForm input[name='unlockedPlotCount']"), 0);
+        var userId = asNumber(getTextboxValue(userAllocField("userId"), "0"), 0);
+        var total = getNumberboxValue(userAllocField("totalPlotCount"), 1);
+        var unlocked = getNumberboxValue(userAllocField("unlockedPlotCount"), 0);
         var currentUnlocked = asNumber(getTextboxValue($("#plotUserAllocCurrentUnlocked"), "0"), 0);
         if (unlocked > total) {
             alertMessage("配置已解锁不能大于配置总地块");
@@ -820,15 +857,15 @@
         } catch (ignoreUserActiveGet) {}
 
         var payload = {
-            id: asNumber(getTextboxValue($("#plotUserAllocationForm input[name='id']"), "0"), 0) || null,
+            id: asNumber(getTextboxValue(userAllocField("id"), "0"), 0) || null,
             userId: userId,
             totalPlotCount: total,
             unlockedPlotCount: unlocked,
             defaultPlotTypeId: asNumber($("#plotUserAllocDefaultPlotTypeId").combobox("getValue"), 0) || null,
             active: active,
-            lockRuleCode: getTextboxValue($("#plotUserAllocationForm input[name='lockRuleCode']"), "DEFAULT_LOCKED"),
-            lockReason: getTextboxValue($("#plotUserAllocationForm input[name='lockReason']"), "pending unlock"),
-            allocationRuleJson: getTextboxValue($("#plotUserAllocationForm input[name='allocationRuleJson']"), "{}")
+            lockRuleCode: getTextboxValue(userAllocField("lockRuleCode"), "DEFAULT_LOCKED"),
+            lockReason: getTextboxValue(userAllocField("lockReason"), "pending unlock"),
+            allocationRuleJson: getTextboxValue(userAllocField("allocationRuleJson"), "{}")
         };
         window.FarmApi.plotUserUpdate(payload, function (res) {
             if (!boolOk(res)) {
