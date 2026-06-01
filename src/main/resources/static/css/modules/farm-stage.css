@@ -451,6 +451,23 @@
     padding-top: 10px;
 }
 
+.farm-action-row.is-prompt {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 15px;
+}
+
+.farm-action-row.is-prompt-detail {
+    margin-top: -2px;
+    text-align: center;
+    color: #d8f7bc;
+    font-size: 13px;
+}
+
+.farm-action-buttons.is-prompt-actions {
+    justify-content: center;
+}
+
 .farm-seed-select {
     width: 100%;
 }

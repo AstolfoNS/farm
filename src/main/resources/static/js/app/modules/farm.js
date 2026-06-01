@@ -440,13 +440,13 @@
                 "</div>";
         };
         if (ActionKit && $.isFunction(ActionKit.ensureDialog)) {
-            ActionKit.ensureDialog("#farmActionDialog", builder, {width: 420, height: 310, title: "地块操作"});
+            ActionKit.ensureDialog("#farmActionDialog", builder, {width: 420, height: 310, title: "地块操作", cls: "farm-dialog-window farm-dialog-shell"});
             return;
         }
         if ($("#farmActionDialog").length <= 0) {
             $("body").append(builder());
         }
-        $("#farmActionDialog").dialog({width: 420, height: 310, modal: true, closed: true, title: "地块操作"});
+        $("#farmActionDialog").dialog({width: 420, height: 310, modal: true, closed: true, title: "地块操作", cls: "farm-dialog-window farm-dialog-shell"});
     }
 
     function ensureSeedDialog() {
@@ -457,13 +457,30 @@
                 "</div>";
         };
         if (ActionKit && $.isFunction(ActionKit.ensureDialog)) {
-            ActionKit.ensureDialog("#farmSeedDialog", builder, {width: 420, height: 220, title: "种植"});
+            ActionKit.ensureDialog("#farmSeedDialog", builder, {width: 420, height: 220, title: "种植", cls: "farm-dialog-window farm-dialog-shell"});
             return;
         }
         if ($("#farmSeedDialog").length <= 0) {
             $("body").append(builder());
         }
-        $("#farmSeedDialog").dialog({width: 420, height: 220, modal: true, closed: true, title: "种植"});
+        $("#farmSeedDialog").dialog({width: 420, height: 220, modal: true, closed: true, title: "种植", cls: "farm-dialog-window farm-dialog-shell"});
+    }
+
+    function ensurePromptDialog() {
+        var builder = function () {
+            return "<div id='farmPromptDialog' class='farm-action-dialog' style='display:none;'>" +
+                "<div id='farmPromptInfo'></div>" +
+                "<div id='farmPromptButtons' class='farm-action-buttons'></div>" +
+                "</div>";
+        };
+        if (ActionKit && $.isFunction(ActionKit.ensureDialog)) {
+            ActionKit.ensureDialog("#farmPromptDialog", builder, {width: 400, height: 220, title: "提示", cls: "farm-dialog-window farm-dialog-shell"});
+            return;
+        }
+        if ($("#farmPromptDialog").length <= 0) {
+            $("body").append(builder());
+        }
+        $("#farmPromptDialog").dialog({width: 400, height: 220, modal: true, closed: true, title: "提示", cls: "farm-dialog-window farm-dialog-shell"});
     }
 
     function renderDialogTemplate(options) {
@@ -611,6 +628,84 @@
         $(selector).dialog("close");
     }
 
+    function openPromptDialog(options) {
+        var opts = $.extend({
+            title: "提示",
+            message: "",
+            detail: "",
+            strong: false,
+            confirmText: "确定",
+            cancelText: "取消",
+            showCancel: false,
+            onConfirm: null,
+            onCancel: null
+        }, options || {});
+
+        ensurePromptDialog();
+        var rows = [{value: opts.message || "", strong: opts.strong === true, className: "is-prompt"}];
+        if (opts.detail) {
+            rows.push({value: opts.detail, className: "is-prompt-detail"});
+        }
+        var buttons = [
+            {action: "confirm", text: opts.confirmText || "确定", skin: "c1"}
+        ];
+        if (opts.showCancel) {
+            buttons.unshift({action: "cancel", text: opts.cancelText || "取消"});
+        }
+        renderDialogTemplate({
+            dialogSelector: "#farmPromptDialog",
+            title: opts.title || "提示",
+            infoSelector: "#farmPromptInfo",
+            rows: rows,
+            actionSelector: "#farmPromptButtons",
+            buttons: buttons
+        });
+        $("#farmPromptButtons").addClass("is-prompt-actions");
+
+        var handlers = {
+            confirm: function () {
+                closeDialog("#farmPromptDialog");
+                if ($.isFunction(opts.onConfirm)) {
+                    opts.onConfirm();
+                }
+            },
+            cancel: function () {
+                closeDialog("#farmPromptDialog");
+                if ($.isFunction(opts.onCancel)) {
+                    opts.onCancel();
+                }
+            }
+        };
+        if (ActionKit && $.isFunction(ActionKit.bindActionButtons)) {
+            ActionKit.bindActionButtons("#farmPromptButtons", handlers, ".farmPrompt");
+        } else {
+            $("#farmPromptButtons [data-action='confirm']").off("click.farmPrompt").on("click.farmPrompt", handlers.confirm);
+            $("#farmPromptButtons [data-action='cancel']").off("click.farmPrompt").on("click.farmPrompt", handlers.cancel);
+        }
+        $("#farmPromptDialog").dialog("open");
+        playSound("open");
+    }
+
+    function confirmAction(options) {
+        var opts = $.extend({
+            title: "确认操作",
+            message: "",
+            detail: "",
+            confirmText: "确认",
+            cancelText: "取消",
+            onConfirm: null
+        }, options || {});
+        openPromptDialog({
+            title: opts.title,
+            message: opts.message,
+            detail: opts.detail,
+            confirmText: opts.confirmText,
+            cancelText: opts.cancelText,
+            showCancel: true,
+            onConfirm: opts.onConfirm
+        });
+    }
+
     function runFarmAction(options) {
         var opts = $.extend({
             request: null,
@@ -620,41 +715,35 @@
             afterSuccess: null
         }, options || {});
 
-        if (ActionKit && $.isFunction(ActionKit.runAction)) {
-            ActionKit.runAction({
-                request: opts.request,
-                successMessage: opts.successMessage,
-                failMessage: opts.failMessage,
-                successSound: opts.successSound,
-                onSuccess: opts.afterSuccess
-            });
+        if (!$.isFunction(opts.request)) {
             return;
         }
 
         opts.request(function (res) {
             if (!FarmApi.isOk(res)) {
-                $.messager.alert("提示", (res && res.msg) ? res.msg : opts.failMessage);
-                playSound("error");
+                showActionError((res && res.msg) ? res.msg : opts.failMessage);
                 return;
             }
-            $.messager.show({title: "提示", msg: opts.successMessage, timeout: motion().actionFeedbackMs, showType: "slide"});
+            if (ActionKit && $.isFunction(ActionKit.toast)) {
+                ActionKit.toast(opts.successMessage || "操作成功", motion().actionFeedbackMs);
+            } else {
+                $.messager.show({title: "提示", msg: opts.successMessage || "操作成功", timeout: motion().actionFeedbackMs, showType: "slide"});
+            }
             playSound(opts.successSound);
             if ($.isFunction(opts.afterSuccess)) {
                 opts.afterSuccess(res);
             }
         }, function () {
-            $.messager.alert("提示", opts.failMessage);
-            playSound("error");
+            showActionError(opts.failMessage);
         });
     }
 
     function showActionError(message) {
-        if (ActionKit && $.isFunction(ActionKit.alertError)) {
-            ActionKit.alertError(message);
-            playSound("error");
-            return;
-        }
-        $.messager.alert("提示", message || "操作失败");
+        openPromptDialog({
+            title: "操作提示",
+            message: message || "操作失败",
+            confirmText: "我知道了"
+        });
         playSound("error");
     }
 
@@ -701,16 +790,22 @@
                 showActionError("土壤配置异常");
                 return;
             }
-            runFarmAction({
-                request: function (ok, fail) {
-                    FarmApi.plotExpand({userId: currentUserId(), soilTypeId: soilTypeId}, ok, fail);
-                },
-                successMessage: "扩地成功",
-                failMessage: "扩地失败，请稍后重试",
-                successSound: "click",
-                afterSuccess: function () {
-                    closeDialog("#farmActionDialog");
-                    postActionRefresh({actionType: "expand", tipText: "扩地成功"});
+            confirmAction({
+                title: "确认扩地",
+                message: "将使用默认土壤扩地，是否继续？",
+                onConfirm: function () {
+                    runFarmAction({
+                        request: function (ok, fail) {
+                            FarmApi.plotExpand({userId: currentUserId(), soilTypeId: soilTypeId}, ok, fail);
+                        },
+                        successMessage: "扩地成功",
+                        failMessage: "扩地失败，请稍后重试",
+                        successSound: "click",
+                        afterSuccess: function () {
+                            closeDialog("#farmActionDialog");
+                            postActionRefresh({actionType: "expand", tipText: "扩地成功"});
+                        }
+                    });
                 }
             });
         });
@@ -966,7 +1061,13 @@
                 return;
             }
             if (plot.crop && plot.crop.harvestable) {
-                executeHarvest(plot);
+                confirmAction({
+                    title: "确认收获",
+                    message: "当前作物已成熟，是否立即收获？",
+                    onConfirm: function () {
+                        executeHarvest(plot);
+                    }
+                });
                 return;
             }
             showActionError("当前后端未开放未成熟作物铲除接口，请先养护或等待收获");
