@@ -82,6 +82,39 @@
         return "<img src='" + escapeHtml(safe) + "' alt='' style='width:46px;height:46px;object-fit:cover;border:1px solid rgba(172,236,153,.64);background:rgba(0,62,0,.55)'>";
     }
 
+    function safeResizeGrid(selector) {
+        var $grid = $(selector);
+        if ($grid.length <= 0) {
+            return;
+        }
+        try {
+            $grid.datagrid("resize");
+        } catch (ignoreResizeError) {}
+    }
+
+    function resizeActiveTabGrid(tabName) {
+        var activeTab = tabName || state.tab || "soil";
+        if (activeTab === "type") {
+            safeResizeGrid("#plotAdminTypeGrid");
+            return;
+        }
+        if (activeTab === "user") {
+            safeResizeGrid("#plotAdminUserGrid");
+            return;
+        }
+        safeResizeGrid("#plotAdminSoilGrid");
+    }
+
+    function deferResizeActiveGrid(tabName) {
+        resizeActiveTabGrid(tabName);
+        setTimeout(function () {
+            resizeActiveTabGrid(tabName);
+        }, 80);
+        setTimeout(function () {
+            resizeActiveTabGrid(tabName);
+        }, 220);
+    }
+
     function switchTab(tabName) {
         state.tab = tabName;
         $(".plot-admin-tab").removeClass("is-active");
@@ -90,17 +123,20 @@
 
         if (tabName === "type") {
             $("#plotAdminTypePane").addClass("is-active");
+            deferResizeActiveGrid("type");
             refreshTypeGrid();
             return;
         }
         if (tabName === "user") {
             $("#plotAdminUserPane").addClass("is-active");
+            deferResizeActiveGrid("user");
             refreshPolicyBoard();
             refreshUserGrid();
             return;
         }
 
         $("#plotAdminSoilPane").addClass("is-active");
+        deferResizeActiveGrid("soil");
         refreshSoilGrid();
     }
 
@@ -972,6 +1008,9 @@
                 $("#plotAdminPanel").stop(true, true).css("display", "none").fadeIn(window.farmMotion().moduleEnterMs);
             }
             switchTab(state.tab || "soil");
+            setTimeout(function () {
+                deferResizeActiveGrid(state.tab || "soil");
+            }, 120);
             return;
         }
         if (window.FarmUi && $.isFunction(window.FarmUi.hidePanel)) {

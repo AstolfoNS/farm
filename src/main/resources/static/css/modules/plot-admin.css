@@ -1,5 +1,17 @@
 .plot-admin-panel {
     width: min(1220px, calc(100% - 20px));
+    height: min(720px, calc(100% - 28px));
+}
+
+#plotAdminPanel .home-panel-title {
+    height: 36px;
+    line-height: 36px;
+    font-size: 20px;
+}
+
+#plotAdminPanel .home-panel-body {
+    height: calc(100% - 36px);
+    padding: 10px;
 }
 
 .plot-admin-body {
@@ -59,6 +71,9 @@
 .plot-admin-grid-panel {
     flex: 1;
     min-height: 0;
+    min-height: 260px;
+    border: 1px solid rgba(121, 227, 101, 0.72);
+    background: rgba(0, 79, 0, 0.55);
 }
 
 .plot-admin-policy-board {
