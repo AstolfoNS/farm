@@ -61,6 +61,10 @@
     return isNaN(n) ? def || 0 : n;
   }
 
+  function fmtNum(value) {
+    return asNumber(value, 0);
+  }
+
   function normalizeActionType(actionType) {
     var raw = String(actionType || "").toLowerCase();
     if (
@@ -995,6 +999,7 @@
       {
         request: null,
         successMessage: "",
+        successMessageBuilder: null,
         failMessage: "操作失败，请稍后重试",
         successSound: "click",
         afterSuccess: null,
@@ -1012,15 +1017,16 @@
           showActionError(res && res.msg ? res.msg : opts.failMessage);
           return;
         }
+        var finalSuccessMessage = opts.successMessage || "操作成功";
+        if ($.isFunction(opts.successMessageBuilder)) {
+          finalSuccessMessage = opts.successMessageBuilder(res) || finalSuccessMessage;
+        }
         if (ActionKit && $.isFunction(ActionKit.toast)) {
-          ActionKit.toast(
-            opts.successMessage || "操作成功",
-            motion().actionFeedbackMs,
-          );
+          ActionKit.toast(finalSuccessMessage, motion().actionFeedbackMs);
         } else {
           $.messager.show({
             title: "提示",
-            msg: opts.successMessage || "操作成功",
+            msg: finalSuccessMessage,
             timeout: motion().actionFeedbackMs,
             showType: "slide",
           });
@@ -1134,6 +1140,19 @@
         );
       },
       successMessage: "养护完成",
+      successMessageBuilder: function (res) {
+        var data = (res && res.data) || {};
+        return (
+          "养护完成：除虫+" +
+          fmtNum(data.bugRemovedCount) +
+          "，经验+" +
+          fmtNum(data.experienceGain) +
+          "，积分+" +
+          fmtNum(data.scoreGain) +
+          "，金币+" +
+          fmtNum(data.coinGain)
+        );
+      },
       failMessage: "养护失败，请稍后重试",
       successSound: "care",
       afterSuccess: function () {
@@ -1161,6 +1180,20 @@
         );
       },
       successMessage: "收获成功",
+      successMessageBuilder: function (res) {
+        var data = (res && res.data) || {};
+        return (
+          "收获成功：果实+" +
+          fmtNum(data.harvestFruitNumber) +
+          "，经验+" +
+          fmtNum(data.experienceGain) +
+          "，积分+" +
+          fmtNum(data.scoreGain) +
+          (fmtNum(data.totalBugPenaltyFruit) > 0
+            ? "，虫损-" + fmtNum(data.totalBugPenaltyFruit)
+            : "")
+        );
+      },
       failMessage: "收获失败，请稍后重试",
       successSound: "harvest",
       afterSuccess: function () {

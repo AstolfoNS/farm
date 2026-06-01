@@ -817,6 +817,9 @@
             fruitLossPerBug: asNumber(row.fruitLossPerBug, 0),
             maxBugLimit: asNumber(row.maxBugLimit, 0),
             maxHarvestCount: asNumber(row.maxHarvestCount, 1),
+            bugKillExperienceReward: asNumber(row.bugKillExperienceReward, 0),
+            bugKillScoreReward: asNumber(row.bugKillScoreReward, 0),
+            bugKillCoinReward: asNumber(row.bugKillCoinReward, 0),
             coverImageUrl: row.coverImageUrl || "",
             description: row.description || ""
         });
@@ -922,6 +925,9 @@
             fruitLossPerBug: getNumberboxValue($form.find("input[name='fruitLossPerBug']").first(), 0),
             maxBugLimit: getNumberboxValue($form.find("input[name='maxBugLimit']").first(), 0),
             maxHarvestCount: getNumberboxValue($form.find("input[name='maxHarvestCount']").first(), 1),
+            bugKillExperienceReward: getNumberboxValue($form.find("input[name='bugKillExperienceReward']").first(), 0),
+            bugKillScoreReward: getNumberboxValue($form.find("input[name='bugKillScoreReward']").first(), 0),
+            bugKillCoinReward: getNumberboxValue($form.find("input[name='bugKillCoinReward']").first(), 0),
             coverImageUrl: getTextboxValue($("#seedTypeCoverImageUrl"), ""),
             description: getTextboxValue($form.find("input[name='description']").first(), "")
         };

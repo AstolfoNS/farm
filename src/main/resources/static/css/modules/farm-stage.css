@@ -203,6 +203,7 @@
 
 .farm-plot:hover {
     transform: translateY(-3px);
+    z-index: 7;
 }
 
 .farm-plot.is-soil-base {
@@ -271,6 +272,8 @@
     text-align: center;
     color: #fff7d2;
     display: none;
+    z-index: 8;
+    pointer-events: none;
 }
 
 .farm-plot:hover .farm-plot-content {
@@ -296,11 +299,12 @@
 
 .farm-bug-dot {
     position: absolute;
-    width: 16px;
-    height: 16px;
-    margin-left: -8px;
-    margin-top: -8px;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+    width: 28px;
+    height: 28px;
+    margin-left: -14px;
+    margin-top: -14px;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.58));
+    z-index: 6;
 }
 
 .farm-bug-dot img {
@@ -313,16 +317,17 @@
     position: absolute;
     right: 6px;
     top: 6px;
-    min-width: 22px;
-    height: 16px;
-    padding: 0 4px;
+    min-width: 26px;
+    height: 18px;
+    padding: 0 5px;
     border-radius: 10px;
-    font-size: 11px;
-    line-height: 16px;
+    font-size: 12px;
+    line-height: 18px;
     text-align: center;
     color: #fff;
     background: rgba(208, 40, 40, 0.9);
     border: 1px solid rgba(255, 178, 178, 0.8);
+    z-index: 7;
 }
 
 .farm-plot-title {
