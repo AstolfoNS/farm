@@ -13,6 +13,7 @@
         left: 36,
         top: -86
     };
+    var ActionKit = window.FarmActionKit || null;
     var state = {
         active: false,
         userId: 0,
@@ -40,6 +41,9 @@
     }
 
     function asNumber(value, def) {
+        if (ActionKit && $.isFunction(ActionKit.asNumber)) {
+            return ActionKit.asNumber(value, def);
+        }
         var n = Number(value);
         return isNaN(n) ? (def || 0) : n;
     }
@@ -62,6 +66,10 @@
     }
 
     function playSound(key) {
+        if (ActionKit && $.isFunction(ActionKit.playSound)) {
+            ActionKit.playSound(key);
+            return;
+        }
         if (window.FarmAudio && $.isFunction(window.FarmAudio.play)) {
             window.FarmAudio.play(key);
         }
@@ -425,42 +433,40 @@
     }
 
     function ensureActionDialog() {
-        if ($("#farmActionDialog").length > 0) {
+        var builder = function () {
+            return "<div id='farmActionDialog' class='farm-action-dialog' style='display:none;'>" +
+                "<div id='farmActionInfo'></div>" +
+                "<div id='farmActionButtons' class='farm-action-buttons'></div>" +
+                "</div>";
+        };
+        if (ActionKit && $.isFunction(ActionKit.ensureDialog)) {
+            ActionKit.ensureDialog("#farmActionDialog", builder, {width: 420, height: 310, title: "地块操作"});
             return;
         }
-        var html = "<div id='farmActionDialog' class='farm-action-dialog' style='display:none;'>" +
-            "<div id='farmActionInfo'></div>" +
-            "<div id='farmActionButtons' class='farm-action-buttons'></div>" +
-            "</div>";
-        $("body").append(html);
-        $("#farmActionDialog").dialog({
-            width: 420,
-            height: 310,
-            modal: true,
-            closed: true,
-            title: "地块操作"
-        });
+        if ($("#farmActionDialog").length <= 0) {
+            $("body").append(builder());
+        }
+        $("#farmActionDialog").dialog({width: 420, height: 310, modal: true, closed: true, title: "地块操作"});
     }
 
     function ensureSeedDialog() {
-        if ($("#farmSeedDialog").length > 0) {
+        var builder = function () {
+            return "<div id='farmSeedDialog' class='farm-action-dialog' style='display:none;'>" +
+                "<div class='farm-action-row'>选择种子</div>" +
+                "<div class='farm-action-row'><input id='farmSeedSelect' class='farm-seed-select'></div>" +
+                "<div class='farm-action-buttons'>" +
+                "<a id='farmSeedConfirmBtn' href='javascript:void(0)' class='easyui-linkbutton c1'>确认种植</a>" +
+                "</div>" +
+                "</div>";
+        };
+        if (ActionKit && $.isFunction(ActionKit.ensureDialog)) {
+            ActionKit.ensureDialog("#farmSeedDialog", builder, {width: 420, height: 220, title: "种植"});
             return;
         }
-        var html = "<div id='farmSeedDialog' class='farm-action-dialog' style='display:none;'>" +
-            "<div class='farm-action-row'>选择种子</div>" +
-            "<div class='farm-action-row'><input id='farmSeedSelect' class='farm-seed-select'></div>" +
-            "<div class='farm-action-buttons'>" +
-            "<a id='farmSeedConfirmBtn' href='javascript:void(0)' class='easyui-linkbutton c1'>确认种植</a>" +
-            "</div>" +
-            "</div>";
-        $("body").append(html);
-        $("#farmSeedDialog").dialog({
-            width: 420,
-            height: 220,
-            modal: true,
-            closed: true,
-            title: "种植"
-        });
+        if ($("#farmSeedDialog").length <= 0) {
+            $("body").append(builder());
+        }
+        $("#farmSeedDialog").dialog({width: 420, height: 220, modal: true, closed: true, title: "种植"});
     }
 
     function findPlot(plotId) {
@@ -551,20 +557,73 @@
         }, delayMs);
     }
 
-    function executeUnlock(plot) {
-        FarmApi.plotUnlock({userId: currentUserId(), plotId: plot.plotId}, function (res) {
+    function closeDialog(selector) {
+        if (ActionKit && $.isFunction(ActionKit.closeDialog)) {
+            ActionKit.closeDialog(selector);
+            return;
+        }
+        $(selector).dialog("close");
+    }
+
+    function runFarmAction(options) {
+        var opts = $.extend({
+            request: null,
+            successMessage: "",
+            failMessage: "操作失败，请稍后重试",
+            successSound: "click",
+            afterSuccess: null
+        }, options || {});
+
+        if (ActionKit && $.isFunction(ActionKit.runAction)) {
+            ActionKit.runAction({
+                request: opts.request,
+                successMessage: opts.successMessage,
+                failMessage: opts.failMessage,
+                successSound: opts.successSound,
+                onSuccess: opts.afterSuccess
+            });
+            return;
+        }
+
+        opts.request(function (res) {
             if (!FarmApi.isOk(res)) {
-                $.messager.alert("提示", (res && res.msg) ? res.msg : "解锁失败");
+                $.messager.alert("提示", (res && res.msg) ? res.msg : opts.failMessage);
                 playSound("error");
                 return;
             }
-            $.messager.show({title: "提示", msg: "地块解锁成功", timeout: motion().actionFeedbackMs, showType: "slide"});
-            playSound("click");
-            $("#farmActionDialog").dialog("close");
-            postActionRefresh({plotId: plot.plotId, actionType: "unlock", tipText: "解锁成功"});
+            $.messager.show({title: "提示", msg: opts.successMessage, timeout: motion().actionFeedbackMs, showType: "slide"});
+            playSound(opts.successSound);
+            if ($.isFunction(opts.afterSuccess)) {
+                opts.afterSuccess(res);
+            }
         }, function () {
-            $.messager.alert("提示", "解锁失败，请稍后重试");
+            $.messager.alert("提示", opts.failMessage);
             playSound("error");
+        });
+    }
+
+    function showActionError(message) {
+        if (ActionKit && $.isFunction(ActionKit.alertError)) {
+            ActionKit.alertError(message);
+            playSound("error");
+            return;
+        }
+        $.messager.alert("提示", message || "操作失败");
+        playSound("error");
+    }
+
+    function executeUnlock(plot) {
+        runFarmAction({
+            request: function (ok, fail) {
+                FarmApi.plotUnlock({userId: currentUserId(), plotId: plot.plotId}, ok, fail);
+            },
+            successMessage: "地块解锁成功",
+            failMessage: "解锁失败，请稍后重试",
+            successSound: "click",
+            afterSuccess: function () {
+                closeDialog("#farmActionDialog");
+                postActionRefresh({plotId: plot.plotId, actionType: "unlock", tipText: "解锁成功"});
+            }
         });
     }
 
@@ -588,68 +647,60 @@
     function executeExpand() {
         loadSoilOptions(function (soils) {
             if (!soils || soils.length === 0) {
-                $.messager.alert("提示", "暂无可用土壤类型");
-                playSound("error");
+                showActionError("暂无可用土壤类型");
                 return;
             }
             var soilTypeId = asNumber(soils[0].id, 0);
             if (soilTypeId <= 0) {
-                $.messager.alert("提示", "土壤配置异常");
-                playSound("error");
+                showActionError("土壤配置异常");
                 return;
             }
-            FarmApi.plotExpand({userId: currentUserId(), soilTypeId: soilTypeId}, function (res) {
-                if (!FarmApi.isOk(res)) {
-                    $.messager.alert("提示", (res && res.msg) ? res.msg : "扩地失败");
-                    playSound("error");
-                    return;
+            runFarmAction({
+                request: function (ok, fail) {
+                    FarmApi.plotExpand({userId: currentUserId(), soilTypeId: soilTypeId}, ok, fail);
+                },
+                successMessage: "扩地成功",
+                failMessage: "扩地失败，请稍后重试",
+                successSound: "click",
+                afterSuccess: function () {
+                    closeDialog("#farmActionDialog");
+                    postActionRefresh({actionType: "expand", tipText: "扩地成功"});
                 }
-                $.messager.show({title: "提示", msg: "扩地成功", timeout: motion().actionFeedbackMs, showType: "slide"});
-                playSound("click");
-                $("#farmActionDialog").dialog("close");
-                postActionRefresh({actionType: "expand", tipText: "扩地成功"});
-            }, function () {
-                $.messager.alert("提示", "扩地失败，请稍后重试");
-                playSound("error");
             });
         });
     }
 
     function executeCare(plot) {
-        FarmApi.care({userId: currentUserId(), plotId: plot.plotId}, function (res) {
-            if (!FarmApi.isOk(res)) {
-                $.messager.alert("提示", (res && res.msg) ? res.msg : "养护失败");
-                playSound("error");
-                return;
+        runFarmAction({
+            request: function (ok, fail) {
+                FarmApi.care({userId: currentUserId(), plotId: plot.plotId}, ok, fail);
+            },
+            successMessage: "养护完成",
+            failMessage: "养护失败，请稍后重试",
+            successSound: "care",
+            afterSuccess: function () {
+                closeDialog("#farmActionDialog");
+                postActionRefresh({plotId: plot.plotId, actionType: "care", tipText: "养护完成"});
             }
-            $.messager.show({title: "提示", msg: "养护完成", timeout: motion().actionFeedbackMs, showType: "slide"});
-            playSound("care");
-            $("#farmActionDialog").dialog("close");
-            postActionRefresh({plotId: plot.plotId, actionType: "care", tipText: "养护完成"});
-        }, function () {
-            $.messager.alert("提示", "养护失败，请稍后重试");
-            playSound("error");
         });
     }
 
     function executeHarvest(plot) {
-        FarmApi.harvest({
-            requestId: farmBuildRequestId("harvest"),
-            userId: currentUserId(),
-            plotId: plot.plotId
-        }, function (res) {
-            if (!FarmApi.isOk(res)) {
-                $.messager.alert("提示", (res && res.msg) ? res.msg : "收获失败");
-                playSound("error");
-                return;
+        runFarmAction({
+            request: function (ok, fail) {
+                FarmApi.harvest({
+                    requestId: farmBuildRequestId("harvest"),
+                    userId: currentUserId(),
+                    plotId: plot.plotId
+                }, ok, fail);
+            },
+            successMessage: "收获成功",
+            failMessage: "收获失败，请稍后重试",
+            successSound: "harvest",
+            afterSuccess: function () {
+                closeDialog("#farmActionDialog");
+                postActionRefresh({plotId: plot.plotId, actionType: "harvest", tipText: "收获成功"});
             }
-            $.messager.show({title: "提示", msg: "收获成功", timeout: motion().actionFeedbackMs, showType: "slide"});
-            playSound("harvest");
-            $("#farmActionDialog").dialog("close");
-            postActionRefresh({plotId: plot.plotId, actionType: "harvest", tipText: "收获成功"});
-        }, function () {
-            $.messager.alert("提示", "收获失败，请稍后重试");
-            playSound("error");
         });
     }
 
@@ -657,8 +708,7 @@
         ensureSeedDialog();
         FarmApi.myPlantingPanel(currentUserId(), function (res) {
             if (!(FarmApi.isOk(res) && res.data && $.isArray(res.data.seeds))) {
-                $.messager.alert("提示", "读取种子背包失败");
-                playSound("error");
+                showActionError("读取种子背包失败");
                 return;
             }
             var seeds = [];
@@ -672,8 +722,7 @@
                 }
             });
             if (seeds.length === 0) {
-                $.messager.alert("提示", "可种植的种子库存为空");
-                playSound("error");
+                showActionError("可种植的种子库存为空");
                 return;
             }
             $("#farmSeedSelect").combobox({
@@ -687,17 +736,15 @@
             $("#farmSeedDialog").dialog("open");
             playSound("open");
 
-            $("#farmSeedConfirmBtn").off("click").on("click", function () {
+            $("#farmSeedConfirmBtn").off("click.farmSeed").on("click.farmSeed", function () {
                 var seedTypeId = asNumber($("#farmSeedSelect").combobox("getValue"), 0);
                 if (seedTypeId <= 0) {
-                    $.messager.alert("提示", "请选择种子");
-                    playSound("error");
+                    showActionError("请选择种子");
                     return;
                 }
                 FarmApi.seedPlantablePlots(currentUserId(), seedTypeId, function (pRes) {
                     if (!(FarmApi.isOk(pRes) && pRes.data && $.isArray(pRes.data.plots))) {
-                        $.messager.alert("提示", "验证可种地块失败");
-                        playSound("error");
+                        showActionError("校验可种地块失败");
                         return;
                     }
                     var allowed = false;
@@ -709,38 +756,34 @@
                         return true;
                     });
                     if (!allowed) {
-                        $.messager.alert("提示", "当前地块不可种此种子");
-                        playSound("error");
+                        showActionError("当前地块不可种该种子");
                         return;
                     }
-                    FarmApi.plant({
-                        requestId: farmBuildRequestId("plant"),
-                        userId: currentUserId(),
-                        plotId: plot.plotId,
-                        seedTypeId: seedTypeId
-                    }, function (plantRes) {
-                        if (!FarmApi.isOk(plantRes)) {
-                            $.messager.alert("提示", (plantRes && plantRes.msg) ? plantRes.msg : "种植失败");
-                            playSound("error");
-                            return;
+
+                    runFarmAction({
+                        request: function (ok, fail) {
+                            FarmApi.plant({
+                                requestId: farmBuildRequestId("plant"),
+                                userId: currentUserId(),
+                                plotId: plot.plotId,
+                                seedTypeId: seedTypeId
+                            }, ok, fail);
+                        },
+                        successMessage: "种植成功",
+                        failMessage: "种植失败，请稍后重试",
+                        successSound: "plant",
+                        afterSuccess: function () {
+                            closeDialog("#farmSeedDialog");
+                            closeDialog("#farmActionDialog");
+                            postActionRefresh({plotId: plot.plotId, actionType: "plant", tipText: "种植成功"});
                         }
-                        $.messager.show({title: "提示", msg: "种植成功", timeout: motion().actionFeedbackMs, showType: "slide"});
-                        playSound("plant");
-                        $("#farmSeedDialog").dialog("close");
-                        $("#farmActionDialog").dialog("close");
-                        postActionRefresh({plotId: plot.plotId, actionType: "plant", tipText: "种植成功"});
-                    }, function () {
-                        $.messager.alert("提示", "种植失败，请稍后重试");
-                        playSound("error");
                     });
                 }, function () {
-                    $.messager.alert("提示", "验证可种地块失败");
-                    playSound("error");
+                    showActionError("校验可种地块失败");
                 });
             });
         }, function () {
-            $.messager.alert("提示", "读取种子背包失败");
-            playSound("error");
+            showActionError("读取种子背包失败");
         });
     }
 
@@ -784,24 +827,24 @@
         $("#farmActionInfo").html(lines.join(""));
         $("#farmActionButtons").html(buildActionButtons(plot));
         $("#farmActionButtons .easyui-linkbutton").linkbutton();
-        $("#farmActionButtons [data-action='unlock']").off("click").on("click", function () {
-            executeUnlock(plot);
-        });
-        $("#farmActionButtons [data-action='plant']").off("click").on("click", function () {
-            openSeedDialog(plot);
-        });
-        $("#farmActionButtons [data-action='care']").off("click").on("click", function () {
-            executeCare(plot);
-        });
-        $("#farmActionButtons [data-action='harvest']").off("click").on("click", function () {
-            executeHarvest(plot);
-        });
-        $("#farmActionButtons [data-action='expand']").off("click").on("click", function () {
-            executeExpand();
-        });
-        $("#farmActionButtons [data-action='refresh']").off("click").on("click", function () {
-            loadOverviewByUser(currentUserId(), true);
-        });
+
+        if (ActionKit && $.isFunction(ActionKit.bindActionButtons)) {
+            ActionKit.bindActionButtons("#farmActionButtons", {
+                unlock: function () { executeUnlock(plot); },
+                plant: function () { openSeedDialog(plot); },
+                care: function () { executeCare(plot); },
+                harvest: function () { executeHarvest(plot); },
+                expand: function () { executeExpand(); },
+                refresh: function () { loadOverviewByUser(currentUserId(), true); }
+            }, ".farmDialogAction");
+        } else {
+            $("#farmActionButtons [data-action='unlock']").off("click.farmDialogAction").on("click.farmDialogAction", function () { executeUnlock(plot); });
+            $("#farmActionButtons [data-action='plant']").off("click.farmDialogAction").on("click.farmDialogAction", function () { openSeedDialog(plot); });
+            $("#farmActionButtons [data-action='care']").off("click.farmDialogAction").on("click.farmDialogAction", function () { executeCare(plot); });
+            $("#farmActionButtons [data-action='harvest']").off("click.farmDialogAction").on("click.farmDialogAction", function () { executeHarvest(plot); });
+            $("#farmActionButtons [data-action='expand']").off("click.farmDialogAction").on("click.farmDialogAction", function () { executeExpand(); });
+            $("#farmActionButtons [data-action='refresh']").off("click.farmDialogAction").on("click.farmDialogAction", function () { loadOverviewByUser(currentUserId(), true); });
+        }
 
         $("#farmActionDialog").dialog("open");
     }
@@ -818,13 +861,11 @@
         }
         if (mode === "plant") {
             if (plot.locked) {
-                $.messager.alert("提示", "该地块尚未解锁，请先在查看模式中解锁");
-                playSound("error");
+                showActionError("该地块尚未解锁，请先在查看模式中解锁");
                 return;
             }
             if (plot.hasCrop) {
-                $.messager.alert("提示", "该地块已有作物，无法播种");
-                playSound("error");
+                showActionError("该地块已有作物，无法播种");
                 return;
             }
             openSeedDialog(plot);
@@ -832,13 +873,11 @@
         }
         if (mode === "care") {
             if (plot.locked || !plot.hasCrop) {
-                $.messager.alert("提示", "该地块暂无可杀虫作物");
-                playSound("error");
+                showActionError("该地块暂无可养护作物");
                 return;
             }
             if (!(plot.crop && plot.crop.canCare)) {
-                $.messager.alert("提示", "当前作物没有虫害，不需要杀虫");
-                playSound("error");
+                showActionError("当前作物没有虫害，不需要杀虫");
                 return;
             }
             executeCare(plot);
@@ -846,16 +885,14 @@
         }
         if (mode === "clean") {
             if (plot.locked || !plot.hasCrop) {
-                $.messager.alert("提示", "该地块暂无可铲除作物");
-                playSound("error");
+                showActionError("该地块暂无可铲除作物");
                 return;
             }
             if (plot.crop && plot.crop.harvestable) {
                 executeHarvest(plot);
                 return;
             }
-            $.messager.alert("提示", "当前后端未开放未成熟作物铲除接口，请先养护或等待收获");
-            playSound("error");
+            showActionError("当前后端未开放未成熟作物铲除接口，请先养护或等待收获");
             return;
         }
         openPlotActionDialog(plotId);
