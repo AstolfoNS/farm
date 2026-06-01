@@ -11,7 +11,7 @@
     };
     var cropAnchor = {
         left: 36,
-        top: -124
+        top: -86
     };
     var STAGE_OFFSET_SCALE_X = 220 / 320;
     var STAGE_OFFSET_SCALE_Y = 282 / 410;
