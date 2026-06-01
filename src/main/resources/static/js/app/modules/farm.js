@@ -15,7 +15,7 @@
     };
     var STAGE_OFFSET_SCALE_X = 220 / 320;
     var STAGE_OFFSET_SCALE_Y = 282 / 410;
-    var DEFAULT_SOIL_COVER = "/resources/imgs/domain/farm/components/soil-land.png";
+    var DEFAULT_SOIL_COVER = "/oss/defaults/soil/soil-default.png";
     var ActionKit = window.FarmActionKit || null;
     var state = {
         active: false,
@@ -1209,3 +1209,4 @@
         onRealtimeStatus("idle");
     });
 })(window, window.jQuery);
+
