@@ -139,6 +139,12 @@
             return $();
         }
         var selector = [
+            ".textbox-f[textboxname='" + key + "']",
+            ".textbox-f[textboxName='" + key + "']",
+            ".numberbox-f[numberboxname='" + key + "']",
+            ".numberbox-f[numberboxName='" + key + "']",
+            ".combo-f[comboname='" + key + "']",
+            ".combo-f[comboName='" + key + "']",
             ".textbox-f[name='" + key + "']",
             ".numberbox-f[name='" + key + "']",
             ".combo-f[name='" + key + "']",
@@ -151,7 +157,7 @@
         if ($widgetInput.length > 0) {
             return $widgetInput;
         }
-        return $form.find("[name='" + key + "']").not(".textbox-value").first();
+        return $form.find("[name='" + key + "']").not(".textbox-value,.spinner-value").first();
     }
 
     function soilField(name) {
