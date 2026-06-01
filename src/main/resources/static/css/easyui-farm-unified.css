@@ -37,6 +37,14 @@ body > div.messager-window.window {
     background: linear-gradient(180deg, rgba(0, 123, 0, 0.97), rgba(0, 94, 0, 0.97)) !important;
     outline: 0 !important;
     box-shadow: 0 0 0 1px rgba(0, 73, 0, 0.9) inset, 0 8px 16px rgba(0, 0, 0, 0.36) !important;
+    /* Keep alert/confirm prompts centered in viewport even under browser zoom. */
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+    transform: translate(-50%, -50%);
 }
 
 body > div.messager-tip.window {
