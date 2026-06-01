@@ -410,23 +410,23 @@
     function onRealtimeStatus(status) {
         state.wsStatus = status || "idle";
         if (state.wsStatus === "connected") {
-            setWsStatusUI("实时同步: 已连接", "is-connected");
+            setWsStatusUI("农场状态: 实时更新中", "is-connected");
             stopPolling();
             return;
         }
         if (state.wsStatus === "connecting" || state.wsStatus === "reconnecting") {
-            setWsStatusUI("实时同步: 连接中", "is-connecting");
+            setWsStatusUI("农场状态: 更新连接中", "is-connecting");
             if (fallbackEnabled()) {
                 startPolling();
             }
             return;
         }
         if (state.wsStatus === "closed" || state.wsStatus === "error") {
-            setWsStatusUI("实时同步: 已切换自动刷新", "is-disconnected");
+            setWsStatusUI("农场状态: 自动刷新中", "is-disconnected");
             startPolling();
             return;
         }
-        setWsStatusUI("实时同步: 待连接", "is-idle");
+        setWsStatusUI("农场状态: 待命", "is-idle");
         if (state.wsStatus === "idle" || state.wsStatus === "stopped") {
             startPolling();
         }
@@ -452,11 +452,8 @@
     function ensureSeedDialog() {
         var builder = function () {
             return "<div id='farmSeedDialog' class='farm-action-dialog' style='display:none;'>" +
-                "<div class='farm-action-row'>选择种子</div>" +
-                "<div class='farm-action-row'><input id='farmSeedSelect' class='farm-seed-select'></div>" +
-                "<div class='farm-action-buttons'>" +
-                "<a id='farmSeedConfirmBtn' href='javascript:void(0)' class='easyui-linkbutton c1'>确认种植</a>" +
-                "</div>" +
+                "<div id='farmSeedInfo'></div>" +
+                "<div id='farmSeedButtons' class='farm-action-buttons'></div>" +
                 "</div>";
         };
         if (ActionKit && $.isFunction(ActionKit.ensureDialog)) {
@@ -467,6 +464,55 @@
             $("body").append(builder());
         }
         $("#farmSeedDialog").dialog({width: 420, height: 220, modal: true, closed: true, title: "种植"});
+    }
+
+    function renderDialogTemplate(options) {
+        var opts = $.extend({
+            dialogSelector: "",
+            title: "",
+            infoSelector: "",
+            rows: [],
+            actionSelector: "",
+            buttons: []
+        }, options || {});
+
+        if (ActionKit && $.isFunction(ActionKit.renderDialogTemplate)) {
+            ActionKit.renderDialogTemplate(opts);
+            return;
+        }
+
+        if (opts.dialogSelector && opts.title) {
+            $(opts.dialogSelector).dialog("setTitle", opts.title);
+        }
+        var html = [];
+        $.each(opts.rows || [], function (_, row) {
+            if (!row) {
+                return true;
+            }
+            var content = row.html != null
+                ? String(row.html)
+                : (row.label ? (escapeHtml(row.label) + ": " + escapeHtml(row.value)) : escapeHtml(row.value));
+            if (row.strong === true) {
+                content = "<strong>" + content + "</strong>";
+            }
+            var rowClass = "farm-action-row" + (row.className ? (" " + row.className) : "");
+            html.push("<div class='" + rowClass + "'>" + content + "</div>");
+            return true;
+        });
+        $(opts.infoSelector).html(html.join(""));
+
+        var buttonHtml = [];
+        $.each(opts.buttons || [], function (_, btn) {
+            if (!btn || btn.visible === false || !btn.action || !btn.text) {
+                return true;
+            }
+            var className = "easyui-linkbutton" + (btn.skin ? (" " + btn.skin) : "");
+            var attrs = btn.id ? (" id='" + btn.id + "'") : "";
+            buttonHtml.push("<a href='javascript:void(0)' class='" + className + "' data-action='" + btn.action + "'" + attrs + ">" + escapeHtml(btn.text) + "</a>");
+            return true;
+        });
+        $(opts.actionSelector).html(buttonHtml.join(""));
+        $(opts.actionSelector + " .easyui-linkbutton").linkbutton();
     }
 
     function findPlot(plotId) {
@@ -706,6 +752,20 @@
 
     function openSeedDialog(plot) {
         ensureSeedDialog();
+        renderDialogTemplate({
+            dialogSelector: "#farmSeedDialog",
+            title: "种植",
+            infoSelector: "#farmSeedInfo",
+            rows: [
+                {value: "选择种子", strong: true},
+                {html: "<input id='farmSeedSelect' class='farm-seed-select'>"}
+            ],
+            actionSelector: "#farmSeedButtons",
+            buttons: [
+                {action: "confirm-seed", text: "确认种植", skin: "c1", id: "farmSeedConfirmBtn"}
+            ]
+        });
+
         FarmApi.myPlantingPanel(currentUserId(), function (res) {
             if (!(FarmApi.isOk(res) && res.data && $.isArray(res.data.seeds))) {
                 showActionError("读取种子背包失败");
@@ -736,7 +796,7 @@
             $("#farmSeedDialog").dialog("open");
             playSound("open");
 
-            $("#farmSeedConfirmBtn").off("click.farmSeed").on("click.farmSeed", function () {
+            var onConfirmPlant = function () {
                 var seedTypeId = asNumber($("#farmSeedSelect").combobox("getValue"), 0);
                 if (seedTypeId <= 0) {
                     showActionError("请选择种子");
@@ -781,29 +841,53 @@
                 }, function () {
                     showActionError("校验可种地块失败");
                 });
-            });
+            };
+            if (ActionKit && $.isFunction(ActionKit.bindActionButtons)) {
+                ActionKit.bindActionButtons("#farmSeedButtons", {"confirm-seed": onConfirmPlant}, ".farmSeed");
+            } else {
+                $("#farmSeedButtons [data-action='confirm-seed']").off("click.farmSeed").on("click.farmSeed", function () {
+                    onConfirmPlant();
+                });
+            }
         }, function () {
             showActionError("读取种子背包失败");
         });
     }
 
-    function buildActionButtons(plot) {
-        var html = [];
+    function buildPlotActionButtons(plot) {
+        var buttons = [];
         if (plot.locked && plot.canUnlock) {
-            html.push("<a href='javascript:void(0)' class='easyui-linkbutton c1' data-action='unlock'>解锁地块</a>");
+            buttons.push({action: "unlock", text: "解锁地块", skin: "c1"});
         }
         if (!plot.locked && !plot.hasCrop) {
-            html.push("<a href='javascript:void(0)' class='easyui-linkbutton c1' data-action='plant'>种植</a>");
+            buttons.push({action: "plant", text: "种植", skin: "c1"});
         }
         if (!plot.locked && plot.hasCrop && plot.crop && plot.crop.canCare) {
-            html.push("<a href='javascript:void(0)' class='easyui-linkbutton c1' data-action='care'>养护除虫</a>");
+            buttons.push({action: "care", text: "养护除虫", skin: "c1"});
         }
         if (!plot.locked && plot.hasCrop && plot.crop && plot.crop.harvestable) {
-            html.push("<a href='javascript:void(0)' class='easyui-linkbutton c1' data-action='harvest'>收获</a>");
+            buttons.push({action: "harvest", text: "收获", skin: "c1"});
         }
-        html.push("<a href='javascript:void(0)' class='easyui-linkbutton' data-action='expand'>扩地(默认土壤)</a>");
-        html.push("<a href='javascript:void(0)' class='easyui-linkbutton' data-action='refresh'>刷新</a>");
-        return html.join("");
+        buttons.push({action: "expand", text: "扩地(默认土壤)"});
+        buttons.push({action: "refresh", text: "刷新"});
+        return buttons;
+    }
+
+    function buildPlotActionRows(plot) {
+        var crop = plot.crop || {};
+        var rows = [
+            {value: "地块#" + (plot.plotIndex == null ? "-" : plot.plotIndex), strong: true},
+            {label: "状态", value: (plot.locked ? "未解锁" : "已解锁")},
+            {label: "土壤", value: (plot.soilName || "-")},
+            {label: "作物", value: (plot.hasCrop ? (crop.seedTypeName || "已种植") : "空地")}
+        ];
+        if (plot.hasCrop) {
+            rows.push({label: "详情", value: cropStatusText(crop) + "，虫子 " + asNumber(crop.bugCount, 0)});
+        }
+        if (plot.locked && plot.lockReason) {
+            rows.push({label: "锁定原因", value: plot.lockReason});
+        }
+        return rows;
     }
 
     function openPlotActionDialog(plotId) {
@@ -812,21 +896,14 @@
             return;
         }
         ensureActionDialog();
-        var crop = plot.crop || {};
-        var lines = [];
-        lines.push("<div class='farm-action-row'><strong>地块#" + escapeHtml(plot.plotIndex) + "</strong></div>");
-        lines.push("<div class='farm-action-row'>状态: " + escapeHtml(plot.locked ? "未解锁" : "已解锁") + "</div>");
-        lines.push("<div class='farm-action-row'>土壤: " + escapeHtml(plot.soilName || "-") + "</div>");
-        lines.push("<div class='farm-action-row'>作物: " + escapeHtml(plot.hasCrop ? (crop.seedTypeName || "已种植") : "空地") + "</div>");
-        if (plot.hasCrop) {
-            lines.push("<div class='farm-action-row'>详情: " + escapeHtml(cropStatusText(crop)) + "，虫子 " + escapeHtml(asNumber(crop.bugCount, 0)) + "</div>");
-        }
-        if (plot.locked && plot.lockReason) {
-            lines.push("<div class='farm-action-row'>锁定原因: " + escapeHtml(plot.lockReason) + "</div>");
-        }
-        $("#farmActionInfo").html(lines.join(""));
-        $("#farmActionButtons").html(buildActionButtons(plot));
-        $("#farmActionButtons .easyui-linkbutton").linkbutton();
+        renderDialogTemplate({
+            dialogSelector: "#farmActionDialog",
+            title: "地块操作",
+            infoSelector: "#farmActionInfo",
+            rows: buildPlotActionRows(plot),
+            actionSelector: "#farmActionButtons",
+            buttons: buildPlotActionButtons(plot)
+        });
 
         if (ActionKit && $.isFunction(ActionKit.bindActionButtons)) {
             ActionKit.bindActionButtons("#farmActionButtons", {

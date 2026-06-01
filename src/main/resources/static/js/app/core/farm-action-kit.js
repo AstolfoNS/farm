@@ -8,6 +8,10 @@
         return isNaN(n) ? (def || 0) : n;
     }
 
+    function escapeHtml(text) {
+        return $("<div/>").text(text == null ? "" : String(text)).html();
+    }
+
     function playSound(key) {
         if (window.FarmAudio && $.isFunction(window.FarmAudio.play)) {
             window.FarmAudio.play(key);
@@ -60,6 +64,87 @@
         });
     }
 
+    function buildInfoRows(rows, rowClass) {
+        var cls = rowClass || "farm-action-row";
+        var result = [];
+        $.each(rows || [], function (_, row) {
+            if (!row) {
+                return true;
+            }
+            var content = "";
+            if (row.html != null) {
+                content = String(row.html);
+            } else {
+                var label = row.label ? String(row.label) : "";
+                var value = row.value == null ? "" : String(row.value);
+                content = label ? (escapeHtml(label) + ": " + escapeHtml(value)) : escapeHtml(value);
+            }
+            if (row.strong === true) {
+                content = "<strong>" + content + "</strong>";
+            }
+            var rowCls = cls + (row.className ? (" " + String(row.className)) : "");
+            result.push("<div class='" + rowCls + "'>" + content + "</div>");
+            return true;
+        });
+        return result.join("");
+    }
+
+    function renderInfoRows(containerSelector, rows, rowClass) {
+        $(containerSelector).html(buildInfoRows(rows, rowClass));
+    }
+
+    function buildActionButtons(buttons) {
+        var html = [];
+        $.each(buttons || [], function (_, btn) {
+            if (!btn || btn.visible === false || !btn.action || !btn.text) {
+                return true;
+            }
+            var skin = btn.skin ? String(btn.skin) : "";
+            var className = "easyui-linkbutton" + (skin ? (" " + skin) : "");
+            var attrs = [];
+            if (btn.id) {
+                attrs.push("id='" + String(btn.id) + "'");
+            }
+            if (btn.title) {
+                attrs.push("title='" + escapeHtml(btn.title) + "'");
+            }
+            html.push("<a href='javascript:void(0)' class='" + className + "' data-action='" + String(btn.action) + "' " + attrs.join(" ") + ">" + escapeHtml(btn.text) + "</a>");
+            return true;
+        });
+        return html.join("");
+    }
+
+    function renderActionButtons(containerSelector, buttons) {
+        var $container = $(containerSelector);
+        $container.html(buildActionButtons(buttons));
+        $container.find(".easyui-linkbutton").linkbutton();
+    }
+
+    function renderDialogTemplate(options) {
+        var opts = $.extend({
+            dialogSelector: "",
+            title: "",
+            infoSelector: "",
+            rows: [],
+            rowClass: "farm-action-row",
+            actionSelector: "",
+            buttons: []
+        }, options || {});
+
+        if (opts.dialogSelector && opts.title) {
+            var $dialog = $(opts.dialogSelector);
+            if ($dialog.length > 0 && $.isFunction($dialog.dialog)) {
+                $dialog.dialog("setTitle", opts.title);
+            }
+        }
+        if (opts.infoSelector) {
+            renderInfoRows(opts.infoSelector, opts.rows, opts.rowClass);
+        }
+        if (opts.actionSelector) {
+            renderActionButtons(opts.actionSelector, opts.buttons);
+        }
+    }
+
     function runAction(options) {
         var opts = $.extend({
             request: null,
@@ -103,13 +188,18 @@
 
     window.FarmActionKit = {
         asNumber: asNumber,
+        escapeHtml: escapeHtml,
         playSound: playSound,
         toast: toast,
         alertError: alertError,
         ensureDialog: ensureDialog,
         closeDialog: closeDialog,
         bindActionButtons: bindActionButtons,
+        buildInfoRows: buildInfoRows,
+        renderInfoRows: renderInfoRows,
+        buildActionButtons: buildActionButtons,
+        renderActionButtons: renderActionButtons,
+        renderDialogTemplate: renderDialogTemplate,
         runAction: runAction
     };
 })(window, window.jQuery);
-
