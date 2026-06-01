@@ -14,6 +14,9 @@
         if ($.isArray(data.rows)) {
             return data.rows;
         }
+        if ($.isArray(data.list)) {
+            return data.list;
+        }
         return [];
     }
 

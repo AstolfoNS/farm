@@ -1,0 +1,48 @@
+.farm-admin-upload-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.farm-admin-upload-input-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.farm-admin-upload-input-wrap .textbox {
+    flex: 1;
+    min-width: 0;
+}
+
+.farm-admin-upload-preview-wrap {
+    width: 68px;
+    color: #e8ffd8;
+    text-align: center;
+    font-size: 12px;
+}
+
+.farm-admin-upload-preview {
+    margin: 0 auto 4px;
+    width: 58px;
+    height: 58px;
+    object-fit: cover;
+    border: 1px solid rgba(198, 255, 175, 0.92);
+    box-shadow: 0 0 0 1px rgba(3, 90, 3, 0.68) inset;
+    background: rgba(0, 70, 0, 0.62);
+}
+
+.farm-admin-form-full-field {
+    white-space: normal;
+}
+
+.farm-admin-form-full-field .textbox,
+.farm-admin-form-full-field .combo {
+    width: 100% !important;
+}
+
+.farm-admin-form-full-field .textbox .textbox-text {
+    width: 100% !important;
+}

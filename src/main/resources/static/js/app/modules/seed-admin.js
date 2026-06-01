@@ -1,5 +1,6 @@
 ﻿(function (window, $) {
     var FarmSeedAdminModule = {};
+    var Admin = window.FarmAdmin || {};
     var state = {
         active: false,
         initialized: false,
@@ -32,6 +33,9 @@
     }
 
     function asNumber(value, def) {
+        if ($.isFunction(Admin.asNumber)) {
+            return Admin.asNumber(value, def);
+        }
         if (window.FarmUi && $.isFunction(window.FarmUi.asNumber)) {
             return window.FarmUi.asNumber(value, def);
         }
@@ -44,6 +48,10 @@
     }
 
     function showMessage(msg) {
+        if ($.isFunction(Admin.toast)) {
+            Admin.toast(msg || "操作成功", "消息");
+            return;
+        }
         $.messager.show({
             title: "消息",
             msg: msg || "操作成功",
@@ -53,6 +61,10 @@
     }
 
     function alertMessage(msg) {
+        if ($.isFunction(Admin.alertError)) {
+            Admin.alertError(msg || "操作失败");
+            return;
+        }
         $.messager.alert("提示", msg || "操作失败");
     }
 
@@ -61,6 +73,9 @@
     }
 
     function listFromPageData(data) {
+        if ($.isFunction(Admin.listFromPageData)) {
+            return Admin.listFromPageData(data);
+        }
         if (window.FarmGrid && $.isFunction(window.FarmGrid.listFromPageData)) {
             return window.FarmGrid.listFromPageData(data);
         }
@@ -524,6 +539,10 @@
         if (!$field || $field.length <= 0) {
             return;
         }
+        if ($.isFunction(Admin.setTextboxValue)) {
+            Admin.setTextboxValue($field, value);
+            return;
+        }
         var safe = value == null ? "" : String(value);
         try {
             if (!$field.data("textbox")) {
@@ -539,6 +558,9 @@
         if (!$field || $field.length <= 0) {
             return def || "";
         }
+        if ($.isFunction(Admin.getTextboxValue)) {
+            return Admin.getTextboxValue($field, def);
+        }
         try {
             if (!$field.data("textbox")) {
                 $field.textbox();
@@ -552,6 +574,9 @@
     function getNumberboxValue($field, def) {
         if (!$field || $field.length <= 0) {
             return asNumber(def, 0);
+        }
+        if ($.isFunction(Admin.getNumberboxValue)) {
+            return Admin.getNumberboxValue($field, def);
         }
         try {
             if (!$field.data("numberbox")) {
@@ -691,20 +716,61 @@
     }
 
     function bindUploadPickerEvents() {
+        if ($.isFunction(Admin.bindUploadPicker)) {
+            Admin.bindUploadPicker({
+                namespace: ".seedAdminUploadTypeCover",
+                buttonSelector: "#seedTypeUploadCoverBtn",
+                fileSelector: "#seedTypeCoverFile",
+                category: "seed-cover",
+                onSuccess: function (url, payload, raw) {
+                    setTextboxValue($("#seedTypeCoverImageUrl"), url);
+                    previewSeedTypeCover(url);
+                    showMessage((raw && raw.msg) || "上传成功");
+                },
+                onError: function (msg) {
+                    alertMessage(msg || "上传失败，请稍后重试");
+                }
+            });
+            Admin.bindUploadPicker({
+                namespace: ".seedAdminUploadStage",
+                buttonSelector: "#seedStageUploadImageBtn",
+                fileSelector: "#seedStageImageFile",
+                category: "seed-stage",
+                onSuccess: function (url, payload, raw) {
+                    var normalized = normalizeAssetUrl(url);
+                    setTextboxValue($("#seedStageAssetUrl"), normalized);
+                    previewImageFromUrl(normalized);
+                    showMessage((raw && raw.msg) || "上传成功");
+                },
+                onError: function (msg) {
+                    alertMessage(msg || "上传失败，请稍后重试");
+                }
+            });
+            return;
+        }
+
         $(document)
             .off("click.seedAdminUpload", "#seedTypeUploadCoverBtn")
             .on("click.seedAdminUpload", "#seedTypeUploadCoverBtn", function () {
                 var $file = $("#seedTypeCoverFile");
-                $file.val("");
-                $file.trigger("click");
+                var input = $file.get(0);
+                if (!input) {
+                    return;
+                }
+                input.value = "";
+                input.click();
             });
 
         $(document)
             .off("click.seedAdminUpload", "#seedStageUploadImageBtn")
             .on("click.seedAdminUpload", "#seedStageUploadImageBtn", function () {
                 var $file = $("#seedStageImageFile");
-                $file.val("");
-                $file.trigger("click");
+                var input = $file.get(0);
+                if (!input) {
+                    return;
+                }
+                input.value = "";
+                input.click();
             });
 
         $(document)
@@ -880,10 +946,17 @@
             alertMessage("请先选择要删除的种子类型");
             return;
         }
+        if ($.isFunction(Admin.confirm)) {
+            Admin.confirm("确认删除种子类型【" + (row.name || "") + "】吗？", doDeleteSeedType);
+            return;
+        }
         $.messager.confirm("确认", "确认删除种子类型【" + (row.name || "") + "】吗？", function (ok) {
-            if (!ok) {
-                return;
+            if (ok) {
+                doDeleteSeedType();
             }
+        });
+
+        function doDeleteSeedType() {
             FarmApi.seedTypeDelete({id: asNumber(row.id, 0)}, function (res) {
                 if (!boolOk(res)) {
                     alertMessage((res && res.msg) || "删除失败");
@@ -900,7 +973,7 @@
             }, function () {
                 alertMessage("删除失败，请稍后重试");
             });
-        });
+        }
     }
 
     function fillSeedStageForm(row) {
@@ -1007,10 +1080,17 @@
             alertMessage("请先选择要删除的阶段");
             return;
         }
+        if ($.isFunction(Admin.confirm)) {
+            Admin.confirm("确认删除阶段 #" + asNumber(row.stageIndex, 0) + " 吗？", doDeleteSeedStage);
+            return;
+        }
         $.messager.confirm("确认", "确认删除阶段 #" + asNumber(row.stageIndex, 0) + " 吗？", function (ok) {
-            if (!ok) {
-                return;
+            if (ok) {
+                doDeleteSeedStage();
             }
+        });
+
+        function doDeleteSeedStage() {
             FarmApi.seedStageDelete({id: asNumber(row.id, 0)}, function (res) {
                 if (!boolOk(res)) {
                     alertMessage((res && res.msg) || "删除失败");
@@ -1022,10 +1102,27 @@
             }, function () {
                 alertMessage("删除失败，请稍后重试");
             });
-        });
+        }
     }
 
     function uploadFile($fileInput, category, onSuccess) {
+        if ($.isFunction(Admin.uploadFile)) {
+            Admin.uploadFile({
+                fileInput: $fileInput,
+                category: category,
+                onSuccess: function (url, payload, raw) {
+                    var normalizedUrl = normalizeAssetUrl(url);
+                    if ($.isFunction(onSuccess)) {
+                        onSuccess(normalizedUrl, payload, raw);
+                    }
+                    showMessage((raw && raw.msg) || "上传成功");
+                },
+                onError: function (msg) {
+                    alertMessage(msg || "上传失败，请稍后重试");
+                }
+            });
+            return;
+        }
         var files = $fileInput.prop("files");
         if (!files || files.length <= 0) {
             return;
@@ -1291,4 +1388,5 @@
         window.FarmCore.registerSetActiveModule("seed-admin", FarmSeedAdminModule, {refreshMethod: "refresh"});
     }
 })(window, window.jQuery);
+
 

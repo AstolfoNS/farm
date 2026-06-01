@@ -1,5 +1,6 @@
 (function (window, $) {
     var FarmPlotAdminModule = {};
+    var Admin = window.FarmAdmin || {};
     var state = {
         active: false,
         inited: false,
@@ -16,15 +17,24 @@
     var DEFAULT_PLOT_ICON = "/oss/defaults/plot/plot-icon-default.png";
 
     function asNumber(value, def) {
+        if ($.isFunction(Admin.asNumber)) {
+            return Admin.asNumber(value, def);
+        }
         var n = Number(value);
         return isNaN(n) ? (def || 0) : n;
     }
 
     function boolOk(res) {
+        if ($.isFunction(Admin.boolOk)) {
+            return Admin.boolOk(res);
+        }
         return window.FarmApi && $.isFunction(window.FarmApi.isOk) && window.FarmApi.isOk(res);
     }
 
     function trimText(value) {
+        if ($.isFunction(Admin.trimText)) {
+            return Admin.trimText(value);
+        }
         return $.trim(value == null ? "" : String(value));
     }
 
@@ -34,6 +44,9 @@
     }
 
     function normalizePageData(res) {
+        if ($.isFunction(Admin.normalizePageResult)) {
+            return Admin.normalizePageResult(res);
+        }
         var data = (boolOk(res) && res && res.data) ? res.data : {};
         var rows = [];
         if ($.isArray(data.records)) {
@@ -54,14 +67,26 @@
     }
 
     function showMessage(msg) {
+        if ($.isFunction(Admin.toast)) {
+            Admin.toast(msg || "操作成功");
+            return;
+        }
         $.messager.show({title: "提示", msg: msg || "操作成功", timeout: 1300, showType: "slide"});
     }
 
     function alertMessage(msg) {
+        if ($.isFunction(Admin.alertError)) {
+            Admin.alertError(msg || "操作失败");
+            return;
+        }
         $.messager.alert("提示", msg || "操作失败");
     }
 
     function setTextboxValue($el, value) {
+        if ($.isFunction(Admin.setTextboxValue)) {
+            Admin.setTextboxValue($el, value);
+            return;
+        }
         try {
             $el.textbox("setValue", value == null ? "" : value);
         } catch (ignoreTextboxSet) {
@@ -70,6 +95,9 @@
     }
 
     function getTextboxValue($el, fallback) {
+        if ($.isFunction(Admin.getTextboxValue)) {
+            return Admin.getTextboxValue($el, fallback);
+        }
         try {
             return trimText($el.textbox("getValue"));
         } catch (ignoreTextboxGet) {
@@ -78,6 +106,10 @@
     }
 
     function setNumberboxValue($el, value) {
+        if ($.isFunction(Admin.setNumberboxValue)) {
+            Admin.setNumberboxValue($el, value);
+            return;
+        }
         try {
             $el.numberbox("setValue", value == null ? "" : value);
         } catch (ignoreNumberSet) {
@@ -86,6 +118,9 @@
     }
 
     function getNumberboxValue($el, fallback) {
+        if ($.isFunction(Admin.getNumberboxValue)) {
+            return Admin.getNumberboxValue($el, fallback);
+        }
         try {
             return asNumber($el.numberbox("getValue"), fallback || 0);
         } catch (ignoreNumberGet) {
@@ -376,6 +411,23 @@
     }
 
     function uploadFile($fileInput, category, onSuccess, onComplete) {
+        if ($.isFunction(Admin.uploadFile)) {
+            Admin.uploadFile({
+                fileInput: $fileInput,
+                category: category,
+                onSuccess: function (url, payload, raw) {
+                    if ($.isFunction(onSuccess)) {
+                        onSuccess(url, payload, raw);
+                    }
+                    showMessage((raw && raw.msg) || "上传成功");
+                },
+                onError: function (msg) {
+                    alertMessage(msg || "上传失败");
+                },
+                onComplete: onComplete
+            });
+            return;
+        }
         var files = $fileInput.prop("files");
         if (!files || files.length <= 0) {
             if ($.isFunction(onComplete)) {
@@ -427,20 +479,60 @@
     }
 
     function bindUploadPickerEvents() {
+        if ($.isFunction(Admin.bindUploadPicker)) {
+            Admin.bindUploadPicker({
+                namespace: ".plotAdminUploadSoil",
+                buttonSelector: "#plotSoilUploadCoverBtn",
+                fileSelector: "#plotSoilCoverFile",
+                category: "soil-cover",
+                onSuccess: function (url, payload, raw) {
+                    setTextboxValue($("#plotSoilCoverImageUrl"), url);
+                    previewSoilCover(url);
+                    showMessage((raw && raw.msg) || "上传成功");
+                },
+                onError: function (msg) {
+                    alertMessage(msg || "上传失败，请稍后重试");
+                }
+            });
+            Admin.bindUploadPicker({
+                namespace: ".plotAdminUploadType",
+                buttonSelector: "#plotTypeUploadCoverBtn",
+                fileSelector: "#plotTypeCoverFile",
+                category: "plot-cover",
+                onSuccess: function (url, payload, raw) {
+                    setTextboxValue($("#plotTypeCoverImageUrl"), url);
+                    previewTypeCover(url);
+                    showMessage((raw && raw.msg) || "上传成功");
+                },
+                onError: function (msg) {
+                    alertMessage(msg || "上传失败，请稍后重试");
+                }
+            });
+            return;
+        }
+
         $(document)
             .off("click.plotAdminUpload", "#plotSoilUploadCoverBtn")
             .on("click.plotAdminUpload", "#plotSoilUploadCoverBtn", function () {
                 var $file = $("#plotSoilCoverFile");
-                $file.val("");
-                $file.trigger("click");
+                var input = $file.get(0);
+                if (!input) {
+                    return;
+                }
+                input.value = "";
+                input.click();
             });
 
         $(document)
             .off("click.plotAdminUpload", "#plotTypeUploadCoverBtn")
             .on("click.plotAdminUpload", "#plotTypeUploadCoverBtn", function () {
                 var $file = $("#plotTypeCoverFile");
-                $file.val("");
-                $file.trigger("click");
+                var input = $file.get(0);
+                if (!input) {
+                    return;
+                }
+                input.value = "";
+                input.click();
             });
 
         $(document)
@@ -577,10 +669,17 @@
             alertMessage("当前策略不存在，无法激活");
             return;
         }
+        if ($.isFunction(Admin.confirm)) {
+            Admin.confirm("确认激活当前策略吗？激活后仅对新用户生效。", doActivatePolicy);
+            return;
+        }
         $.messager.confirm("确认", "确认激活当前策略吗？激活后仅对新用户生效。", function (ok) {
-            if (!ok) {
-                return;
+            if (ok) {
+                doActivatePolicy();
             }
+        });
+
+        function doActivatePolicy() {
             window.FarmApi.plotPolicyActivate({id: policyId}, function (res) {
                 if (!boolOk(res)) {
                     alertMessage((res && res.msg) || "激活策略失败");
@@ -591,7 +690,7 @@
             }, function () {
                 alertMessage("激活策略失败，请稍后重试");
             });
-        });
+        }
     }
 
     function saveUserAllocation() {
@@ -645,10 +744,17 @@
             alertMessage("请先选择要删除的土壤类型");
             return;
         }
+        if ($.isFunction(Admin.confirm)) {
+            Admin.confirm("确认删除土壤类型【" + escapeHtml(row.name || "") + "】吗？", doDeleteSoil);
+            return;
+        }
         $.messager.confirm("确认", "确认删除土壤类型【" + escapeHtml(row.name || "") + "】吗？", function (ok) {
-            if (!ok) {
-                return;
+            if (ok) {
+                doDeleteSoil();
             }
+        });
+
+        function doDeleteSoil() {
             window.FarmApi.plotSoilDelete({id: asNumber(row.id, 0)}, function (res) {
                 if (!boolOk(res)) {
                     alertMessage((res && res.msg) || "删除失败");
@@ -659,7 +765,7 @@
             }, function () {
                 alertMessage("删除失败，请稍后重试");
             });
-        });
+        }
     }
 
     function deleteType() {
@@ -668,10 +774,17 @@
             alertMessage("请先选择要删除的地块类型");
             return;
         }
+        if ($.isFunction(Admin.confirm)) {
+            Admin.confirm("确认删除地块类型【" + escapeHtml(row.name || "") + "】吗？", doDeleteType);
+            return;
+        }
         $.messager.confirm("确认", "确认删除地块类型【" + escapeHtml(row.name || "") + "】吗？", function (ok) {
-            if (!ok) {
-                return;
+            if (ok) {
+                doDeleteType();
             }
+        });
+
+        function doDeleteType() {
             window.FarmApi.plotTypeDelete({id: asNumber(row.id, 0)}, function (res) {
                 if (!boolOk(res)) {
                     alertMessage((res && res.msg) || "删除失败");
@@ -682,7 +795,7 @@
             }, function () {
                 alertMessage("删除失败，请稍后重试");
             });
-        });
+        }
     }
 
     function bindEvents() {

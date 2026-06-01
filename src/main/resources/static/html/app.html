@@ -13,10 +13,11 @@
     <link rel="stylesheet" type="text/css" href="/css/theme-farm.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/home-shell.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/admin-grid.css">
+    <link rel="stylesheet" type="text/css" href="/css/modules/admin-shared.css?v=20260601-1">
     <link rel="stylesheet" type="text/css" href="/css/modules/farm-stage.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/shop-panel.css?v=20260531-9">
     <link rel="stylesheet" type="text/css" href="/css/modules/store-panel.css?v=20260531-2">
-    <link rel="stylesheet" type="text/css" href="/css/modules/plot-admin.css?v=20260601-2">
+    <link rel="stylesheet" type="text/css" href="/css/modules/plot-admin.css?v=20260601-3">
     <link rel="stylesheet" type="text/css" href="/css/modules/user-admin.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/seed-admin.css">
     <script src="/js/easyui/jquery.min.js"></script>
@@ -27,16 +28,17 @@
     <script src="/js/app/core/state.js"></script>
     <script src="/js/app/core/helpers.js"></script>
     <script src="/js/app/core/framework.js"></script>
-    <script src="/js/app/core/grid.js"></script>
+    <script src="/js/app/core/grid.js?v=20260601-1"></script>
+    <script src="/js/app/core/admin-kit.js?v=20260601-1"></script>
     <script src="/js/app/core/api.js"></script>
     <script src="/js/app/core/ws.js"></script>
     <script src="/js/app/core/audio.js"></script>
     <script src="/js/app/modules/farm.js"></script>
     <script src="/js/app/modules/shop.js"></script>
     <script src="/js/app/modules/store.js"></script>
-    <script src="/js/app/modules/plot-admin.js?v=20260601-2"></script>
+    <script src="/js/app/modules/plot-admin.js?v=20260601-3"></script>
     <script src="/js/app/modules/user-admin.js"></script>
-    <script src="/js/app/modules/seed-admin.js"></script>
+    <script src="/js/app/modules/seed-admin.js?v=20260601-1"></script>
     <script src="/js/app/modules/home.js"></script>
 </head>
 <body class="farm-body">
@@ -354,14 +356,14 @@
                     </tr>
                     <tr>
                         <td>图片URL</td>
-                        <td colspan="3" class="plot-admin-full-field">
-                            <div class="plot-admin-cover-row">
-                                <div class="plot-admin-cover-input-wrap">
+                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field">
+                            <div class="plot-admin-cover-row farm-admin-upload-row">
+                                <div class="plot-admin-cover-input-wrap farm-admin-upload-input-wrap">
                                     <input id="plotSoilCoverImageUrl" name="coverImageUrl" class="easyui-textbox plot-admin-full-input">
                                     <a id="plotSoilUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
                                 </div>
-                                <div class="plot-admin-cover-preview-wrap">
-                                    <img id="plotSoilCoverPreview" class="plot-admin-cover-preview" src="/oss/defaults/soil/soil-default.png" alt="土壤预览">
+                                <div class="plot-admin-cover-preview-wrap farm-admin-upload-preview-wrap">
+                                    <img id="plotSoilCoverPreview" class="plot-admin-cover-preview farm-admin-upload-preview" src="/oss/defaults/soil/soil-default.png" alt="土壤预览">
                                     <span>预览</span>
                                 </div>
                             </div>
@@ -369,7 +371,7 @@
                     </tr>
                     <tr>
                         <td>描述</td>
-                        <td colspan="3" class="plot-admin-full-field"><input name="description" class="easyui-textbox plot-admin-description-input" style="height:86px" data-options="multiline:true"></td>
+                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field"><input name="description" class="easyui-textbox plot-admin-description-input" style="height:86px" data-options="multiline:true"></td>
                     </tr>
                 </table>
                 <input id="plotSoilCoverFile" type="file" accept="image/*" style="display:none">
@@ -405,18 +407,18 @@
                     </tr>
                     <tr>
                         <td>图标URL</td>
-                        <td colspan="3" class="plot-admin-full-field"><input name="iconUrl" class="easyui-textbox plot-admin-full-input"></td>
+                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field"><input name="iconUrl" class="easyui-textbox plot-admin-full-input"></td>
                     </tr>
                     <tr>
                         <td>封面URL</td>
-                        <td colspan="3" class="plot-admin-full-field">
-                            <div class="plot-admin-cover-row">
-                                <div class="plot-admin-cover-input-wrap">
+                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field">
+                            <div class="plot-admin-cover-row farm-admin-upload-row">
+                                <div class="plot-admin-cover-input-wrap farm-admin-upload-input-wrap">
                                     <input id="plotTypeCoverImageUrl" name="coverImageUrl" class="easyui-textbox plot-admin-full-input">
                                     <a id="plotTypeUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
                                 </div>
-                                <div class="plot-admin-cover-preview-wrap">
-                                    <img id="plotTypeCoverPreview" class="plot-admin-cover-preview" src="/oss/defaults/plot/plot-cover-default.png" alt="地块预览">
+                                <div class="plot-admin-cover-preview-wrap farm-admin-upload-preview-wrap">
+                                    <img id="plotTypeCoverPreview" class="plot-admin-cover-preview farm-admin-upload-preview" src="/oss/defaults/plot/plot-cover-default.png" alt="地块预览">
                                     <span>预览</span>
                                 </div>
                             </div>
@@ -424,7 +426,7 @@
                     </tr>
                     <tr>
                         <td>描述</td>
-                        <td colspan="3" class="plot-admin-full-field"><input name="description" class="easyui-textbox plot-admin-description-input" style="height:86px" data-options="multiline:true"></td>
+                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field"><input name="description" class="easyui-textbox plot-admin-description-input" style="height:86px" data-options="multiline:true"></td>
                     </tr>
                 </table>
                 <input id="plotTypeCoverFile" type="file" accept="image/*" style="display:none">
@@ -472,7 +474,7 @@
                     </tr>
                     <tr>
                         <td>分配规则JSON</td>
-                        <td colspan="3" class="plot-admin-full-field">
+                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field">
                             <input name="allocationRuleJson" class="easyui-textbox plot-admin-description-input" style="height:98px" data-options="multiline:true">
                         </td>
                     </tr>
@@ -516,7 +518,7 @@
                     </tr>
                     <tr>
                         <td>分配规则JSON</td>
-                        <td colspan="3" class="plot-admin-full-field">
+                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field">
                             <input name="allocationRuleJson" class="easyui-textbox plot-admin-description-input" style="height:98px" data-options="multiline:true">
                         </td>
                     </tr>
@@ -570,7 +572,7 @@
                     </tr>
                     <tr>
                         <td>可种土壤</td>
-                        <td colspan="3" class="seed-admin-full-field"><input id="seedTypeSoilIds" name="soilTypeIds" class="easyui-combobox seed-admin-full-input"></td>
+                        <td colspan="3" class="seed-admin-full-field farm-admin-form-full-field"><input id="seedTypeSoilIds" name="soilTypeIds" class="easyui-combobox seed-admin-full-input"></td>
                     </tr>
                     <tr>
                         <td>等级</td>
@@ -610,14 +612,14 @@
                     </tr>
                     <tr>
                         <td>封面图</td>
-                        <td colspan="3" class="seed-admin-full-field">
-                            <div class="seed-type-cover-row">
-                                <div class="seed-type-cover-input-wrap">
+                        <td colspan="3" class="seed-admin-full-field farm-admin-form-full-field">
+                            <div class="seed-type-cover-row farm-admin-upload-row">
+                                <div class="seed-type-cover-input-wrap farm-admin-upload-input-wrap">
                                     <input id="seedTypeCoverImageUrl" name="coverImageUrl" class="easyui-textbox seed-admin-full-input">
                                     <a id="seedTypeUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
                                 </div>
-                                <div class="seed-type-cover-preview-wrap">
-                                    <img id="seedTypeCoverPreview" class="seed-admin-cover-preview" src="/oss/defaults/seed/seed-cover-default.png" alt="封面预览">
+                                <div class="seed-type-cover-preview-wrap farm-admin-upload-preview-wrap">
+                                    <img id="seedTypeCoverPreview" class="seed-admin-cover-preview farm-admin-upload-preview" src="/oss/defaults/seed/seed-cover-default.png" alt="封面预览">
                                     <span>预览</span>
                                 </div>
                             </div>
@@ -625,7 +627,7 @@
                     </tr>
                     <tr>
                         <td>描述</td>
-                        <td colspan="3" class="seed-admin-full-field"><input name="description" class="easyui-textbox seed-admin-description-input" style="height:86px" data-options="multiline:true"></td>
+                        <td colspan="3" class="seed-admin-full-field farm-admin-form-full-field"><input name="description" class="easyui-textbox seed-admin-description-input" style="height:86px" data-options="multiline:true"></td>
                     </tr>
                 </table>
                 <input id="seedTypeCoverFile" type="file" accept="image/*" style="display:none">
@@ -668,7 +670,7 @@
                     </tr>
                     <tr>
                         <td>资源URL</td>
-                        <td colspan="3" class="seed-admin-full-field">
+                        <td colspan="3" class="seed-admin-full-field farm-admin-form-full-field">
                             <div class="seed-stage-asset-row">
                                 <div class="seed-stage-asset-input-wrap">
                                     <input id="seedStageAssetUrl" name="assetUrl" class="easyui-textbox seed-admin-full-input">

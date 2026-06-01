@@ -90,7 +90,6 @@
 
 .plot-admin-grid-panel {
     flex: 1;
-    min-height: 0;
     min-height: 260px;
     border: 1px solid rgba(121, 227, 101, 0.72);
     background: rgba(0, 79, 0, 0.55);
