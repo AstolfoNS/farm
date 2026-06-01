@@ -882,6 +882,16 @@
     $(selector).dialog("close");
   }
 
+  function openAndCenterDialog(selector) {
+    var $dialog = $(selector);
+    $dialog.dialog("open");
+    window.setTimeout(function () {
+      try {
+        $dialog.dialog("center");
+      } catch (ignoreCenterError) {}
+    }, 0);
+  }
+
   function openPromptDialog(options) {
     var opts = $.extend(
       {
@@ -953,7 +963,7 @@
         .off("click.farmPrompt")
         .on("click.farmPrompt", handlers.cancel);
     }
-    $("#farmPromptDialog").dialog("open");
+    openAndCenterDialog("#farmPromptDialog");
     playSound("open");
   }
 
@@ -1245,7 +1255,7 @@
           data: seeds,
         });
         $("#farmSeedSelect").combobox("setValue", seeds[0].seedTypeId);
-        $("#farmSeedDialog").dialog("open");
+        openAndCenterDialog("#farmSeedDialog");
         playSound("open");
 
         var onConfirmPlant = function () {
@@ -1478,7 +1488,7 @@
         });
     }
 
-    $("#farmActionDialog").dialog("open");
+    openAndCenterDialog("#farmActionDialog");
   }
 
   function applyToolOnPlot(plotId) {

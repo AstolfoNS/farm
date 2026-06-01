@@ -35,11 +35,38 @@
         if ($(selector).length <= 0 && $.isFunction(htmlBuilder)) {
             $("body").append(htmlBuilder());
         }
-        $(selector).dialog($.extend({
+        var userOptions = options || {};
+        var userOnOpen = userOptions.onOpen;
+        var userOnResize = userOptions.onResize;
+        var mergedOptions = $.extend({
             modal: true,
             closed: true,
             resizable: false
-        }, options || {}));
+        }, userOptions);
+
+        mergedOptions.onOpen = function () {
+            if ($.isFunction(userOnOpen)) {
+                userOnOpen.apply(this, arguments);
+            }
+            var $dialog = $(selector);
+            window.setTimeout(function () {
+                try {
+                    $dialog.dialog("center");
+                } catch (ignoreCenterError) {}
+            }, 0);
+        };
+
+        mergedOptions.onResize = function () {
+            if ($.isFunction(userOnResize)) {
+                userOnResize.apply(this, arguments);
+            }
+            var $dialog = $(selector);
+            try {
+                $dialog.dialog("center");
+            } catch (ignoreCenterError) {}
+        };
+
+        $(selector).dialog(mergedOptions);
         return $(selector);
     }
 
