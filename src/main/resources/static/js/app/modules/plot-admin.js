@@ -33,6 +33,22 @@
         return safe.length > 0 ? safe : (fallback || "");
     }
 
+    function normalizePageData(res) {
+        var data = (boolOk(res) && res && res.data) ? res.data : {};
+        var rows = [];
+        if ($.isArray(data.records)) {
+            rows = data.records;
+        } else if ($.isArray(data.rows)) {
+            rows = data.rows;
+        } else if ($.isArray(data.list)) {
+            rows = data.list;
+        }
+        return {
+            total: asNumber(data.total, rows.length),
+            rows: rows
+        };
+    }
+
     function escapeHtml(text) {
         return $("<div/>").text(text == null ? "" : String(text)).html();
     }
@@ -796,6 +812,9 @@
         $("#plotAdminSoilGrid").datagrid({
             fit: true,
             border: false,
+            fitColumns: true,
+            striped: true,
+            nowrap: false,
             singleSelect: true,
             pagination: true,
             rownumbers: true,
@@ -805,11 +824,7 @@
                     rows: asNumber(param.rows, state.soilQuery.rows),
                     name: trimText(param.name)
                 }, function (res) {
-                    var pageData = (boolOk(res) && res.data) ? res.data : {total: 0, records: []};
-                    success({
-                        total: asNumber(pageData.total, 0),
-                        rows: $.isArray(pageData.records) ? pageData.records : []
-                    });
+                    success(normalizePageData(res));
                 }, function () {
                     if ($.isFunction(error)) {
                         error.apply(this, arguments);
@@ -822,14 +837,14 @@
                 name: state.soilQuery.name
             },
             columns: [[
-                {field: "id", title: "ID", width: 56},
+                {field: "id", title: "ID", width: 52, align: "center"},
                 {field: "name", title: "土壤名称", width: 110},
-                {field: "bitCode", title: "bitCode", width: 78},
-                {field: "level", title: "等级", width: 66},
-                {field: "unlockExperienceRequired", title: "解锁经验", width: 94},
-                {field: "growSpeedMultiplier", title: "成长倍率", width: 86},
-                {field: "coverImageUrl", title: "图片", width: 62, formatter: function (v) { return renderCover(v, DEFAULT_SOIL_COVER); }},
-                {field: "description", title: "描述", width: 240}
+                {field: "bitCode", title: "bitCode", width: 72, align: "center"},
+                {field: "level", title: "等级", width: 56, align: "center"},
+                {field: "unlockExperienceRequired", title: "解锁经验", width: 86, align: "right"},
+                {field: "growSpeedMultiplier", title: "成长倍率", width: 80, align: "center"},
+                {field: "coverImageUrl", title: "图片", width: 66, align: "center", formatter: function (v) { return renderCover(v, DEFAULT_SOIL_COVER); }},
+                {field: "description", title: "描述", width: 250}
             ]],
             onLoadSuccess: function () {
                 var pager = $("#plotAdminSoilGrid").datagrid("getPager");
@@ -848,6 +863,9 @@
         $("#plotAdminTypeGrid").datagrid({
             fit: true,
             border: false,
+            fitColumns: true,
+            striped: true,
+            nowrap: false,
             singleSelect: true,
             pagination: true,
             rownumbers: true,
@@ -857,11 +875,7 @@
                     rows: asNumber(param.rows, state.typeQuery.rows),
                     name: trimText(param.name)
                 }, function (res) {
-                    var pageData = (boolOk(res) && res.data) ? res.data : {total: 0, records: []};
-                    success({
-                        total: asNumber(pageData.total, 0),
-                        rows: $.isArray(pageData.records) ? pageData.records : []
-                    });
+                    success(normalizePageData(res));
                 }, function () {
                     if ($.isFunction(error)) {
                         error.apply(this, arguments);
@@ -874,15 +888,15 @@
                 name: state.typeQuery.name
             },
             columns: [[
-                {field: "id", title: "ID", width: 56},
+                {field: "id", title: "ID", width: 52, align: "center"},
                 {field: "name", title: "地块类型", width: 110},
                 {field: "soilTypeName", title: "关联土壤", width: 98},
-                {field: "unlockRequired", title: "需解锁", width: 70, formatter: function (v) { return v ? "是" : "否"; }},
-                {field: "defaultUsable", title: "默认可用", width: 82, formatter: function (v) { return v ? "是" : "否"; }},
-                {field: "defaultUnlockExperienceRequired", title: "默认经验", width: 92},
-                {field: "sortOrder", title: "排序", width: 66},
-                {field: "coverImageUrl", title: "封面", width: 62, formatter: function (v) { return renderCover(v, DEFAULT_PLOT_COVER); }},
-                {field: "description", title: "描述", width: 220}
+                {field: "unlockRequired", title: "需解锁", width: 66, align: "center", formatter: function (v) { return v ? "是" : "否"; }},
+                {field: "defaultUsable", title: "默认可用", width: 74, align: "center", formatter: function (v) { return v ? "是" : "否"; }},
+                {field: "defaultUnlockExperienceRequired", title: "默认经验", width: 84, align: "right"},
+                {field: "sortOrder", title: "排序", width: 56, align: "center"},
+                {field: "coverImageUrl", title: "封面", width: 66, align: "center", formatter: function (v) { return renderCover(v, DEFAULT_PLOT_COVER); }},
+                {field: "description", title: "描述", width: 225}
             ]],
             onLoadSuccess: function () {
                 var pager = $("#plotAdminTypeGrid").datagrid("getPager");
@@ -901,6 +915,8 @@
         $("#plotAdminUserGrid").datagrid({
             fit: true,
             border: false,
+            striped: true,
+            nowrap: false,
             singleSelect: true,
             pagination: true,
             rownumbers: true,
@@ -910,11 +926,7 @@
                     rows: asNumber(param.rows, state.userQuery.rows),
                     username: trimText(param.username)
                 }, function (res) {
-                    var pageData = (boolOk(res) && res.data) ? res.data : {total: 0, records: []};
-                    success({
-                        total: asNumber(pageData.total, 0),
-                        rows: $.isArray(pageData.records) ? pageData.records : []
-                    });
+                    success(normalizePageData(res));
                 }, function () {
                     if ($.isFunction(error)) {
                         error.apply(this, arguments);
@@ -927,13 +939,13 @@
                 username: state.userQuery.username
             },
             columns: [[
-                {field: "userId", title: "用户ID", width: 76},
+                {field: "userId", title: "用户ID", width: 76, align: "center"},
                 {field: "username", title: "用户名", width: 110},
                 {field: "nickname", title: "昵称", width: 110},
-                {field: "currentTotalPlots", title: "当前总地块", width: 92},
-                {field: "currentUnlockedPlots", title: "当前已解锁", width: 92},
-                {field: "totalPlotCount", title: "配置总地块", width: 92},
-                {field: "unlockedPlotCount", title: "配置已解锁", width: 96},
+                {field: "currentTotalPlots", title: "当前总地块", width: 92, align: "center"},
+                {field: "currentUnlockedPlots", title: "当前已解锁", width: 92, align: "center"},
+                {field: "totalPlotCount", title: "配置总地块", width: 92, align: "center"},
+                {field: "unlockedPlotCount", title: "配置已解锁", width: 96, align: "center"},
                 {field: "defaultPlotTypeName", title: "默认地块类型", width: 112}
             ]],
             onDblClickRow: function (index, row) {
