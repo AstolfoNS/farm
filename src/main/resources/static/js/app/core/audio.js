@@ -4,7 +4,7 @@
     var state = {
         effectEnabled: true,
         effectVolume: 0.8,
-        bgmEnabled: false,
+        bgmEnabled: true,
         bgmVolume: 0.6,
         bgmUrl: "",
         bgmEffectiveUrl: "",
@@ -155,7 +155,7 @@
             var obj = JSON.parse(raw);
             state.effectEnabled = !(obj && obj.effectEnabled === false);
             state.effectVolume = clampVolume(obj && obj.effectVolume, state.effectVolume);
-            state.bgmEnabled = !!(obj && obj.bgmEnabled === true);
+            state.bgmEnabled = !(obj && obj.bgmEnabled === false);
             state.bgmVolume = clampVolume(obj && obj.bgmVolume, state.bgmVolume);
         } catch (e) {
         }
@@ -196,7 +196,7 @@
         var source = data || {};
         state.effectEnabled = !(source.effectEnabled === false);
         state.effectVolume = clampVolume(source.effectVolume, state.effectVolume);
-        state.bgmEnabled = !!(source.bgmEnabled === true);
+        state.bgmEnabled = !(source.bgmEnabled === false);
         state.bgmVolume = clampVolume(source.bgmVolume, state.bgmVolume);
     }
 

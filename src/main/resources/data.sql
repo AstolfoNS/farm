@@ -819,6 +819,7 @@ WHERE NOT EXISTS (
       AND sgs.is_deleted = false
 );
 
+
 -- 6) 用户初始化数据（幂等）
 INSERT INTO farm.users
 (
@@ -828,7 +829,7 @@ INSERT INTO farm.users
 )
 SELECT
     'liubei', '刘备', '123456', 'liubei@farm.local', '/oss/defaults/avatar/default-avatar.png',
-    2000, 575, 4090, '{"audio":{"effectEnable":true,"effectVolume":0.8,"bgmEnable":false,"bgmVolume":0.6}}'::jsonb,
+    2000, 575, 4090, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'::jsonb,
     NOW(), NOW(), 0, 0, 'init user', 1, false, 0
 WHERE NOT EXISTS (SELECT 1 FROM farm.users WHERE username = 'liubei' AND is_deleted = false);
 
@@ -840,7 +841,7 @@ INSERT INTO farm.users
 )
 SELECT
     'caocao', '曹操', '123456', 'caocao@farm.local', '/oss/defaults/avatar/default-avatar.png',
-    1800, 420, 2600, '{"audio":{"effectEnable":true,"effectVolume":0.8,"bgmEnable":false,"bgmVolume":0.6}}'::jsonb,
+    1800, 420, 2600, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'::jsonb,
     NOW(), NOW(), 0, 0, 'init user', 1, false, 0
 WHERE NOT EXISTS (SELECT 1 FROM farm.users WHERE username = 'caocao' AND is_deleted = false);
 
@@ -852,7 +853,7 @@ INSERT INTO farm.users
 )
 SELECT
     'sunquan', '孙权', '123456', 'sunquan@farm.local', '/oss/defaults/avatar/default-avatar.png',
-    1600, 360, 2100, '{"audio":{"effectEnable":true,"effectVolume":0.8,"bgmEnable":false,"bgmVolume":0.6}}'::jsonb,
+    1600, 360, 2100, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'::jsonb,
     NOW(), NOW(), 0, 0, 'init user', 1, false, 0
 WHERE NOT EXISTS (SELECT 1 FROM farm.users WHERE username = 'sunquan' AND is_deleted = false);
 
@@ -1359,7 +1360,7 @@ SET nickname = cfg.nickname,
     experience = cfg.experience,
     score = cfg.score,
     coin = cfg.coin,
-    preferences_json = '{"audio":{"effectEnable":true,"effectVolume":0.8,"bgmEnable":false,"bgmVolume":0.6}}'::jsonb,
+    preferences_json = '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'::jsonb,
     updated_at = NOW(),
     updated_by = 0,
     is_deleted = false,
@@ -1375,7 +1376,7 @@ INSERT INTO farm.users
 )
 SELECT
     cfg.username, cfg.nickname, '123456', cfg.email, '/oss/defaults/avatar/default-avatar.png',
-    cfg.experience, cfg.score, cfg.coin, '{"audio":{"effectEnable":true,"effectVolume":0.8,"bgmEnable":false,"bgmVolume":0.6}}'::jsonb,
+    cfg.experience, cfg.score, cfg.coin, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'::jsonb,
     NOW(), NOW(), 0, 0, 'enhanced init user', 1, false, 0
 FROM (
     VALUES

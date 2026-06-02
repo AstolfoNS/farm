@@ -50,7 +50,7 @@ import java.util.stream.IntStream;
 @Service
 public class UserServiceImp implements UserService {
 
-    private static final String DEFAULT_PREFERENCES_JSON = "{\"audio\":{\"effectEnabled\":true,\"effectVolume\":0.8,\"bgmEnabled\":false,\"bgmVolume\":0.6}}";
+    private static final String DEFAULT_PREFERENCES_JSON = "{\"audio\":{\"effectEnabled\":true,\"effectVolume\":0.8,\"bgmEnabled\":true,\"bgmVolume\":0.6}}";
 
     private final UserDao userDao;
 
@@ -338,7 +338,7 @@ public class UserServiceImp implements UserService {
         vo.setLoggedIn(false);
         vo.setEffectEnabled(true);
         vo.setEffectVolume(0.8);
-        vo.setBgmEnabled(false);
+        vo.setBgmEnabled(true);
         vo.setBgmVolume(0.6);
         vo.setPreferencesJson(DEFAULT_PREFERENCES_JSON);
         return vo;
@@ -353,7 +353,7 @@ public class UserServiceImp implements UserService {
         vo.setLoggedIn(true);
         vo.setEffectEnabled(audio.path("effectEnabled").asBoolean(true));
         vo.setEffectVolume(clampVolume(audio.path("effectVolume").asDouble(0.8)));
-        vo.setBgmEnabled(audio.path("bgmEnabled").asBoolean(false));
+        vo.setBgmEnabled(audio.path("bgmEnabled").asBoolean(true));
         vo.setBgmVolume(clampVolume(audio.path("bgmVolume").asDouble(0.6)));
         vo.setPreferencesJson(root.toString());
         return vo;
@@ -390,7 +390,7 @@ public class UserServiceImp implements UserService {
             ObjectNode audio = fallback.putObject("audio");
             audio.put("effectEnabled", true);
             audio.put("effectVolume", 0.8);
-            audio.put("bgmEnabled", false);
+            audio.put("bgmEnabled", true);
             audio.put("bgmVolume", 0.6);
             return fallback;
         }
