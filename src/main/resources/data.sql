@@ -651,6 +651,10 @@ INSERT INTO farm.asset_defaults (asset_key, asset_url, description)
 SELECT 'plotIcon', '/oss/defaults/plot/plot-icon-default.png', '地块图标默认图'
 WHERE NOT EXISTS (SELECT 1 FROM farm.asset_defaults WHERE asset_key = 'plotIcon' AND is_deleted = false);
 
+INSERT INTO farm.asset_defaults (asset_key, asset_url, description)
+SELECT 'bgm', '/resources/sounds/bgm/Must%20Work%20to%20Eat.wav', '默认背景音乐'
+WHERE NOT EXISTS (SELECT 1 FROM farm.asset_defaults WHERE asset_key = 'bgm' AND is_deleted = false);
+
 -- 1) 种子品质字典
 INSERT INTO farm.seed_qualities (name, description)
 SELECT '普通', '普通品质种子'
@@ -1902,4 +1906,3 @@ WHERE sgs.seed_type_id = sm.id
       WHERE vs.seed_name = sm.name
         AND vs.stage_index = sgs.stage_index
   );
-

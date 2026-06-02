@@ -9,7 +9,8 @@
             seedStage: "",
             soilCover: "",
             plotCover: "",
-            plotIcon: ""
+            plotIcon: "",
+            bgm: ""
         },
         currentUser: null,
         currentModule: "home",

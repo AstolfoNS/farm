@@ -7,6 +7,7 @@
         bgmEnabled: false,
         bgmVolume: 0.6,
         bgmUrl: "",
+        bgmEffectiveUrl: "",
         bgmAudio: null
     };
     var STORAGE_KEY = "farm_audio_settings_v1";
@@ -57,6 +58,17 @@
         return audio;
     }
 
+    function resolveDefaultBgmUrl() {
+        if (!window.farmDefaultAsset || !$.isFunction(window.farmDefaultAsset)) {
+            return "";
+        }
+        return $.trim(window.farmDefaultAsset("bgm") || "");
+    }
+
+    function resolveEffectiveBgmUrl() {
+        return $.trim(state.bgmUrl || "") || resolveDefaultBgmUrl();
+    }
+
     function ensureAudio(key) {
         if (cache[key]) {
             return cache[key];
@@ -69,17 +81,28 @@
     }
 
     function ensureBgmAudio() {
-        if (!state.bgmUrl) {
+        var effectiveUrl = resolveEffectiveBgmUrl();
+        if (!effectiveUrl) {
+            state.bgmEffectiveUrl = "";
+            if (state.bgmAudio) {
+                state.bgmAudio.pause();
+                state.bgmAudio = null;
+            }
             return null;
         }
+        if (state.bgmAudio && state.bgmEffectiveUrl !== effectiveUrl) {
+            state.bgmAudio.pause();
+            state.bgmAudio = null;
+        }
         if (!state.bgmAudio) {
-            var audio = safeCreateAudio(state.bgmUrl);
+            var audio = safeCreateAudio(effectiveUrl);
             if (!audio) {
                 return null;
             }
             audio.loop = true;
             audio.volume = state.bgmVolume;
             state.bgmAudio = audio;
+            state.bgmEffectiveUrl = effectiveUrl;
         }
         return state.bgmAudio;
     }
@@ -283,6 +306,7 @@
 
     FarmAudio.setBgmUrl = function (url) {
         state.bgmUrl = $.trim(url || "");
+        state.bgmEffectiveUrl = "";
         if (state.bgmAudio) {
             state.bgmAudio.pause();
             state.bgmAudio = null;
