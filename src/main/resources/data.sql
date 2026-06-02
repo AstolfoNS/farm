@@ -819,7 +819,7 @@ WHERE NOT EXISTS (
       AND sgs.is_deleted = false
 );
 
-
+DELETE FROM farm.users WHERE true;
 -- 6) 用户初始化数据（幂等）
 INSERT INTO farm.users
 (

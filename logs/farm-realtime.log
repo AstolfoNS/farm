@@ -1,0 +1,199 @@
+2026-06-02 00:08:07.071 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=aa041e68-ab93-dfec-9323-aa6c3adb7547
+2026-06-02 00:12:25.084 DEBUG [Thread-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=aa041e68-ab93-dfec-9323-aa6c3adb7547, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 00:12:28.785 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=da964a5d-9e71-86b5-b096-d85a2577c699
+2026-06-02 00:12:33.728 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=da964a5d-9e71-86b5-b096-d85a2577c699, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 00:18:07.207 DEBUG [http-nio-8080-exec-7] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=8f4a797b-8d20-9998-67a1-8240222c4df8
+2026-06-02 00:26:51.573 DEBUG [http-nio-8080-exec-3] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=8f4a797b-8d20-9998-67a1-8240222c4df8, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 00:26:52.430 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=3e974a7a-03f0-a8b6-3a66-933792f0ebc2
+2026-06-02 00:37:20.313 DEBUG [Thread-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=3e974a7a-03f0-a8b6-3a66-933792f0ebc2, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 00:37:29.598 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=b3bf0394-66f5-09c1-72df-84ae77fe3dec
+2026-06-02 00:49:56.501 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=b3bf0394-66f5-09c1-72df-84ae77fe3dec, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 00:50:10.435 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=c9aeb71d-5564-d286-c594-80b2a889cf47
+2026-06-02 00:50:25.157 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=c9aeb71d-5564-d286-c594-80b2a889cf47, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 00:50:33.032 DEBUG [http-nio-8080-exec-10] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=8512bdb9-83f8-9960-73c5-2836161da4ae
+2026-06-02 00:55:34.537 DEBUG [Thread-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=8512bdb9-83f8-9960-73c5-2836161da4ae, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 00:55:40.440 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=3812c93d-c81b-90dc-890a-4e16bc5aaebf
+2026-06-02 00:58:21.818 DEBUG [http-nio-8080-exec-6] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=3812c93d-c81b-90dc-890a-4e16bc5aaebf, reason=CloseStatus[code=1000, reason=null]
+2026-06-02 01:04:39.264 DEBUG [http-nio-8080-exec-9] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=6d14222f-b6d6-a381-2886-c4d6df6b09e3
+2026-06-02 01:07:06.633 DEBUG [http-nio-8080-exec-3] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=6d14222f-b6d6-a381-2886-c4d6df6b09e3, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:07:07.586 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=25b948fb-2f17-26f1-926b-f8e641aefd12
+2026-06-02 01:08:29.244 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=25b948fb-2f17-26f1-926b-f8e641aefd12, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 01:08:38.570 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=5fd66227-c99c-ad8f-1c04-5b23b6c57566
+2026-06-02 01:08:41.365 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=5fd66227-c99c-ad8f-1c04-5b23b6c57566, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:08:44.511 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=345d195a-a657-ebb7-fa77-4409531c2e53
+2026-06-02 01:10:06.939 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=345d195a-a657-ebb7-fa77-4409531c2e53, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:10:07.727 DEBUG [http-nio-8080-exec-10] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=76509984-0882-1ff4-b057-01edd6b6f8ae
+2026-06-02 01:10:18.729 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=76509984-0882-1ff4-b057-01edd6b6f8ae, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 01:10:27.692 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=de853cac-4389-d4e1-f13c-5b73a12761e7
+2026-06-02 01:11:45.214 DEBUG [http-nio-8080-exec-6] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=de853cac-4389-d4e1-f13c-5b73a12761e7, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:11:48.176 DEBUG [http-nio-8080-exec-9] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=82e9d43e-e090-ce46-3de0-e276e8844346
+2026-06-02 01:12:04.695 DEBUG [http-nio-8080-exec-3] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=82e9d43e-e090-ce46-3de0-e276e8844346, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:12:05.476 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=4f896dfa-c0e4-1a68-93d9-38e1e5fba7b5
+2026-06-02 01:12:12.658 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=4f896dfa-c0e4-1a68-93d9-38e1e5fba7b5, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 01:12:22.150 DEBUG [http-nio-8080-exec-3] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=56def968-ad5a-8d57-88fb-68177bb5cb7c
+2026-06-02 01:12:22.612 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=56def968-ad5a-8d57-88fb-68177bb5cb7c, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:12:25.316 DEBUG [http-nio-8080-exec-4] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=7a650336-fb9e-8e1b-d91b-616611a218ae
+2026-06-02 01:12:48.842 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=7a650336-fb9e-8e1b-d91b-616611a218ae, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 01:12:58.207 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=8f8bd8c9-0679-9b52-d1e1-817d7d07b3bc
+2026-06-02 01:12:58.558 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=8f8bd8c9-0679-9b52-d1e1-817d7d07b3bc, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:13:04.004 DEBUG [http-nio-8080-exec-8] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=af2b2187-5ab2-1157-5564-777c00536da2
+2026-06-02 01:13:21.833 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=af2b2187-5ab2-1157-5564-777c00536da2, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 01:13:31.217 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=f72506f6-ed1a-c53b-e32f-46075de5501b
+2026-06-02 01:13:37.340 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=f72506f6-ed1a-c53b-e32f-46075de5501b, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:13:40.373 DEBUG [http-nio-8080-exec-10] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=3928162d-9d79-9569-11ce-b800e475dd61
+2026-06-02 01:14:02.112 DEBUG [http-nio-8080-exec-8] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=3928162d-9d79-9569-11ce-b800e475dd61, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:14:03.226 DEBUG [http-nio-8080-exec-4] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=424b93c4-a30c-0144-65b4-5d476d14c0f3
+2026-06-02 01:14:07.512 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=424b93c4-a30c-0144-65b4-5d476d14c0f3, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 01:14:16.803 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=84e340ef-8f9f-3a61-928d-10e18f7f027e
+2026-06-02 01:14:18.095 DEBUG [http-nio-8080-exec-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=84e340ef-8f9f-3a61-928d-10e18f7f027e, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:14:23.464 DEBUG [http-nio-8080-exec-10] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=58c9e1fb-9786-e9b9-2099-0c5f3795cf1c
+2026-06-02 01:14:26.427 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=58c9e1fb-9786-e9b9-2099-0c5f3795cf1c, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:14:27.379 DEBUG [http-nio-8080-exec-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=da41b893-e50d-4891-d363-8e78a72151b1
+2026-06-02 01:14:49.653 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=da41b893-e50d-4891-d363-8e78a72151b1, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 01:14:59.894 DEBUG [http-nio-8080-exec-4] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=04ff40e8-7c2b-0153-fcfc-3f2f9003872e
+2026-06-02 01:14:59.898 DEBUG [http-nio-8080-exec-4] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=04ff40e8-7c2b-0153-fcfc-3f2f9003872e, reason=CloseStatus[code=1011, reason=null]
+2026-06-02 01:15:03.009 DEBUG [http-nio-8080-exec-6] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=9df9084e-b992-dfa4-038d-abeefee95845
+2026-06-02 01:15:17.753 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=9df9084e-b992-dfa4-038d-abeefee95845, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 01:15:26.429 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=0517911d-9aa1-bba1-f68d-13019778ebba
+2026-06-02 01:15:31.519 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=0517911d-9aa1-bba1-f68d-13019778ebba, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 01:15:35.602 DEBUG [http-nio-8080-exec-8] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=8a388141-0877-b457-a422-13a135a9c510
+2026-06-02 01:28:05.963 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=8a388141-0877-b457-a422-13a135a9c510, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 02:01:44.457 DEBUG [http-nio-8080-exec-4] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=890acaad-a3d2-35fb-2c7a-6083d3c6f2e7
+2026-06-02 10:12:08.419 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=890acaad-a3d2-35fb-2c7a-6083d3c6f2e7, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 10:12:21.523 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=c9f31669-c786-d5e6-6960-3a3b2d0432f9
+2026-06-02 10:12:25.378 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=c9f31669-c786-d5e6-6960-3a3b2d0432f9, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 10:12:28.596 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=20e61e5e-bddf-7e32-1887-bab29c5a31eb
+2026-06-02 11:00:09.874 DEBUG [Thread-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=20e61e5e-bddf-7e32-1887-bab29c5a31eb, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:06:05.031 WARN  [http-nio-8080-exec-10] c.j.farm.service.imp.FarmRealtimePushServiceImp - 实时推送失败，userId=1
+org.springframework.dao.InvalidDataAccessResourceUsageException: JDBC exception executing SQL [select st1_0.id,st1_0.bug_kill_coin_reward,st1_0.bug_kill_experience_reward,st1_0.bug_kill_score_reward,st1_0.cover_image_url,st1_0.created_at,st1_0.created_by,st1_0.description,st1_0.enable_soil_type_bits,st1_0.fruit_loss_per_bug,st1_0.fruit_price,st1_0.harvest_experience,st1_0.harvest_fruit_number,st1_0.harvest_score,st1_0.harvest_stage_index,st1_0.is_deleted,st1_0.level,st1_0.max_bug_limit,st1_0.max_harvest_count,st1_0.name,st1_0.opt_lock_version,st1_0.price,st1_0.regrow_stage_index,st1_0.remark,st1_0.seed_quality_id,st1_0.status,st1_0.unlock_experience_required,st1_0.updated_at,st1_0.updated_by from farm.seed_types st1_0 where not(st1_0.is_deleted) order by st1_0.id] [ERROR: column st1_0.harvest_stage_index does not exist
+  位置：322] [n/a]; SQL [n/a]
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.convertHibernateAccessException(HibernateJpaDialect.java:277)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.translateExceptionIfPossible(HibernateJpaDialect.java:241)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.translateExceptionIfPossible(AbstractEntityManagerFactoryBean.java:560)
+	at org.springframework.dao.support.ChainedPersistenceExceptionTranslator.translateExceptionIfPossible(ChainedPersistenceExceptionTranslator.java:61)
+	at org.springframework.dao.support.DataAccessUtils.translateIfNecessary(DataAccessUtils.java:343)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:160)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.data.jpa.repository.support.CrudMethodMetadataPostProcessor$CrudMethodMetadataPopulatingMethodInterceptor.invoke(CrudMethodMetadataPostProcessor.java:136)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:223)
+	at jdk.proxy5/jdk.proxy5.$Proxy214.findByIsDeletedFalseOrderByIdAsc(Unknown Source)
+	at cn.jxufe.farm.service.imp.CropLifecycleServiceImp.getSeedTypeMap(CropLifecycleServiceImp.java:882)
+	at cn.jxufe.farm.service.imp.CropLifecycleServiceImp.myFarmOverview(CropLifecycleServiceImp.java:563)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:723)
+	at cn.jxufe.farm.service.imp.CropLifecycleServiceImp$$SpringCGLIB$$0.myFarmOverview(<generated>)
+	at cn.jxufe.farm.service.imp.FarmRealtimePushServiceImp.buildOverview(FarmRealtimePushServiceImp.java:119)
+	at cn.jxufe.farm.service.imp.FarmRealtimePushServiceImp.pushOverviewToUser(FarmRealtimePushServiceImp.java:79)
+	at cn.jxufe.farm.service.imp.FarmRealtimePushServiceImp.registerSession(FarmRealtimePushServiceImp.java:47)
+	at cn.jxufe.farm.websocket.WebsocketHandler.afterConnectionEstablished(WebsocketHandler.java:31)
+	at org.springframework.web.socket.handler.WebSocketHandlerDecorator.afterConnectionEstablished(WebSocketHandlerDecorator.java:70)
+	at org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator.afterConnectionEstablished(LoggingWebSocketHandlerDecorator.java:48)
+	at org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator.afterConnectionEstablished(ExceptionWebSocketHandlerDecorator.java:48)
+	at org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter.onOpen(StandardWebSocketHandlerAdapter.java:103)
+	at org.apache.tomcat.websocket.server.WsHttpUpgradeHandler.init(WsHttpUpgradeHandler.java:131)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:947)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: org.hibernate.exception.SQLGrammarException: JDBC exception executing SQL [select st1_0.id,st1_0.bug_kill_coin_reward,st1_0.bug_kill_experience_reward,st1_0.bug_kill_score_reward,st1_0.cover_image_url,st1_0.created_at,st1_0.created_by,st1_0.description,st1_0.enable_soil_type_bits,st1_0.fruit_loss_per_bug,st1_0.fruit_price,st1_0.harvest_experience,st1_0.harvest_fruit_number,st1_0.harvest_score,st1_0.harvest_stage_index,st1_0.is_deleted,st1_0.level,st1_0.max_bug_limit,st1_0.max_harvest_count,st1_0.name,st1_0.opt_lock_version,st1_0.price,st1_0.regrow_stage_index,st1_0.remark,st1_0.seed_quality_id,st1_0.status,st1_0.unlock_experience_required,st1_0.updated_at,st1_0.updated_by from farm.seed_types st1_0 where not(st1_0.is_deleted) order by st1_0.id] [ERROR: column st1_0.harvest_stage_index does not exist
+  位置：322] [n/a]
+	at org.hibernate.exception.internal.SQLStateConversionDelegate.convert(SQLStateConversionDelegate.java:91)
+	at org.hibernate.exception.internal.StandardSQLExceptionConverter.convert(StandardSQLExceptionConverter.java:58)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:108)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:94)
+	at org.hibernate.sql.results.jdbc.internal.DeferredResultSetAccess.executeQuery(DeferredResultSetAccess.java:265)
+	at org.hibernate.sql.results.jdbc.internal.DeferredResultSetAccess.getResultSet(DeferredResultSetAccess.java:167)
+	at org.hibernate.sql.results.jdbc.internal.JdbcValuesResultSetImpl.advanceNext(JdbcValuesResultSetImpl.java:218)
+	at org.hibernate.sql.results.jdbc.internal.JdbcValuesResultSetImpl.processNext(JdbcValuesResultSetImpl.java:98)
+	at org.hibernate.sql.results.jdbc.internal.AbstractJdbcValues.next(AbstractJdbcValues.java:19)
+	at org.hibernate.sql.results.internal.RowProcessingStateStandardImpl.next(RowProcessingStateStandardImpl.java:66)
+	at org.hibernate.sql.results.spi.ListResultsConsumer.consume(ListResultsConsumer.java:202)
+	at org.hibernate.sql.results.spi.ListResultsConsumer.consume(ListResultsConsumer.java:33)
+	at org.hibernate.sql.exec.internal.JdbcSelectExecutorStandardImpl.doExecuteQuery(JdbcSelectExecutorStandardImpl.java:209)
+	at org.hibernate.sql.exec.internal.JdbcSelectExecutorStandardImpl.executeQuery(JdbcSelectExecutorStandardImpl.java:83)
+	at org.hibernate.sql.exec.spi.JdbcSelectExecutor.list(JdbcSelectExecutor.java:76)
+	at org.hibernate.sql.exec.spi.JdbcSelectExecutor.list(JdbcSelectExecutor.java:65)
+	at org.hibernate.query.sqm.internal.ConcreteSqmSelectQueryPlan.lambda$new$2(ConcreteSqmSelectQueryPlan.java:137)
+	at org.hibernate.query.sqm.internal.ConcreteSqmSelectQueryPlan.withCacheableSqmInterpretation(ConcreteSqmSelectQueryPlan.java:362)
+	at org.hibernate.query.sqm.internal.ConcreteSqmSelectQueryPlan.performList(ConcreteSqmSelectQueryPlan.java:303)
+	at org.hibernate.query.sqm.internal.QuerySqmImpl.doList(QuerySqmImpl.java:509)
+	at org.hibernate.query.spi.AbstractSelectionQuery.list(AbstractSelectionQuery.java:427)
+	at org.hibernate.query.Query.getResultList(Query.java:120)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.orm.jpa.SharedEntityManagerCreator$DeferredQueryInvocationHandler.invoke(SharedEntityManagerCreator.java:419)
+	at jdk.proxy5/jdk.proxy5.$Proxy228.getResultList(Unknown Source)
+	at org.springframework.data.jpa.repository.query.JpaQueryExecution$CollectionExecution.doExecute(JpaQueryExecution.java:130)
+	at org.springframework.data.jpa.repository.query.JpaQueryExecution.execute(JpaQueryExecution.java:93)
+	at org.springframework.data.jpa.repository.query.AbstractJpaQuery.doExecute(AbstractJpaQuery.java:152)
+	at org.springframework.data.jpa.repository.query.AbstractJpaQuery.execute(AbstractJpaQuery.java:140)
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.doInvoke(RepositoryMethodInvoker.java:170)
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke(RepositoryMethodInvoker.java:158)
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.doInvoke(QueryExecutorMethodInterceptor.java:170)
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.invoke(QueryExecutorMethodInterceptor.java:149)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.data.projection.DefaultMethodInvokingMethodInterceptor.invoke(DefaultMethodInvokingMethodInterceptor.java:69)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:380)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:138)
+	... 28 common frames omitted
+Caused by: org.postgresql.util.PSQLException: ERROR: column st1_0.harvest_stage_index does not exist
+  位置：322
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733)
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420)
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372)
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434)
+	at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:194)
+	at org.postgresql.jdbc.PgPreparedStatement.executeQuery(PgPreparedStatement.java:137)
+	at com.alibaba.druid.pool.DruidPooledPreparedStatement.executeQuery(DruidPooledPreparedStatement.java:213)
+	at org.hibernate.sql.results.jdbc.internal.DeferredResultSetAccess.executeQuery(DeferredResultSetAccess.java:246)
+	... 64 common frames omitted
+2026-06-02 11:06:05.031 DEBUG [http-nio-8080-exec-10] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=4e7ef6c2-9088-d3d2-e60e-bec38fabe5d3
+2026-06-02 11:06:57.758 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=4e7ef6c2-9088-d3d2-e60e-bec38fabe5d3, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:08:34.514 DEBUG [http-nio-8080-exec-8] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=74ec4ab3-48ac-ba41-956d-560e8d955552
+2026-06-02 11:10:16.938 DEBUG [Thread-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=74ec4ab3-48ac-ba41-956d-560e8d955552, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:10:21.075 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=a21a6579-e331-b4e0-8d23-66ceee457916
+2026-06-02 11:10:23.217 DEBUG [http-nio-8080-exec-6] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=a21a6579-e331-b4e0-8d23-66ceee457916, reason=CloseStatus[code=1000, reason=null]
+2026-06-02 11:10:42.018 DEBUG [http-nio-8080-exec-7] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=d383e875-2d16-205b-25bb-daeb3a53f212
+2026-06-02 11:17:18.591 DEBUG [http-nio-8080-exec-10] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=d383e875-2d16-205b-25bb-daeb3a53f212, reason=CloseStatus[code=1000, reason=null]
+2026-06-02 11:17:18.919 DEBUG [http-nio-8080-exec-8] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=2, sessionId=95010062-6bb5-8cc1-f780-085043d4a218
+2026-06-02 11:17:20.078 DEBUG [http-nio-8080-exec-6] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=2, sessionId=5a991a40-932d-e93b-bfac-888d3f296531
+2026-06-02 11:17:36.976 DEBUG [http-nio-8080-exec-7] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=2, sessionId=5a991a40-932d-e93b-bfac-888d3f296531, reason=CloseStatus[code=1000, reason=null]
+2026-06-02 11:17:37.331 DEBUG [http-nio-8080-exec-10] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=7dee72a1-fe81-50e8-f84c-bb4096a842e4
+2026-06-02 11:17:38.335 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=87500dfc-5bc6-b6d7-c6c8-096bfcc4a747
+2026-06-02 11:19:55.402 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=87500dfc-5bc6-b6d7-c6c8-096bfcc4a747, reason=CloseStatus[code=1000, reason=null]
+2026-06-02 11:19:55.742 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=2, sessionId=ade991b7-e684-49e6-161c-b57fc2006c68
+2026-06-02 11:19:56.968 DEBUG [http-nio-8080-exec-4] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=2, sessionId=9dd1bc59-dad3-b39c-0332-09d8694215f3
+2026-06-02 11:22:03.229 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=2, sessionId=95010062-6bb5-8cc1-f780-085043d4a218, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:22:03.229 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=2, sessionId=9dd1bc59-dad3-b39c-0332-09d8694215f3, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:22:03.231 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=7dee72a1-fe81-50e8-f84c-bb4096a842e4, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:22:03.231 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=2, sessionId=ade991b7-e684-49e6-161c-b57fc2006c68, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:22:12.414 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=2, sessionId=73bfeb9d-1c1b-3db8-932b-a5800da7b97e
+2026-06-02 11:22:19.745 DEBUG [http-nio-8080-exec-6] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=2, sessionId=73bfeb9d-1c1b-3db8-932b-a5800da7b97e, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 11:22:24.577 DEBUG [http-nio-8080-exec-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=2ae32bb2-b87c-cd18-d0b9-daa54d4c0d42
+2026-06-02 11:22:44.041 DEBUG [http-nio-8080-exec-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=2ae32bb2-b87c-cd18-d0b9-daa54d4c0d42, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 11:22:44.886 DEBUG [http-nio-8080-exec-3] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=33206400-f527-eb40-7454-fc2af592f3d1
+2026-06-02 11:25:13.176 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=33206400-f527-eb40-7454-fc2af592f3d1, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:25:26.156 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=d675fce3-0e85-0a4e-e249-ddab68a3bcd6
+2026-06-02 11:25:26.577 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=d675fce3-0e85-0a4e-e249-ddab68a3bcd6, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 11:25:29.954 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=873bf65f-6883-1c7c-6daf-94cdd3b6056f
+2026-06-02 11:31:15.200 DEBUG [http-nio-8080-exec-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=873bf65f-6883-1c7c-6daf-94cdd3b6056f, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 11:31:16.137 DEBUG [http-nio-8080-exec-8] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=83eab219-876e-d1e2-bf8d-cb55d3877db5
+2026-06-02 11:34:35.235 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=83eab219-876e-d1e2-bf8d-cb55d3877db5, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:34:50.272 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=1ceefd10-885a-933a-27fb-55bec47189d8
+2026-06-02 11:35:33.332 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=1ceefd10-885a-933a-27fb-55bec47189d8, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 11:44:39.033 DEBUG [http-nio-8080-exec-8] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=a0f815f6-3f01-57ce-523a-e2e580039fcd
+2026-06-02 11:44:56.287 DEBUG [http-nio-8080-exec-9] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=a0f815f6-3f01-57ce-523a-e2e580039fcd, reason=CloseStatus[code=1001, reason=null]
+2026-06-02 12:05:17.378 DEBUG [http-nio-8080-exec-9] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=e8df082a-a217-b4c9-8591-38cdb2c2c099
+2026-06-02 12:06:39.121 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=e8df082a-a217-b4c9-8591-38cdb2c2c099, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-02 12:19:36.555 DEBUG [http-nio-8080-exec-7] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=e1be8aef-c2c3-18b8-c940-4a8654946f11
+2026-06-02 12:24:43.690 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=e1be8aef-c2c3-18b8-c940-4a8654946f11, reason=CloseStatus[code=1001, reason=The web application is stopping]
