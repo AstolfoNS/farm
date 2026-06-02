@@ -25,6 +25,31 @@
         return isNaN(n) ? (def || 0) : n;
     }
 
+    function trimText(value) {
+        return $.trim(value == null ? "" : String(value));
+    }
+
+    function buildSellSuccessMessage(data) {
+        var payload = data || {};
+        var seedName = trimText(payload.seedName) || "果实";
+        var sellQuantity = asNumber(payload.sellQuantity, 0);
+        var totalIncomeCoin = asNumber(payload.totalIncomeCoin, 0);
+        var afterCoin = asNumber(payload.afterCoin, 0);
+        var afterFruitQuantity = asNumber(payload.afterFruitQuantity, 0);
+        return "出售已完成：" + seedName + " x " + sellQuantity +
+            "。\n本次获得金币 " + totalIncomeCoin +
+            "，当前金币 " + afterCoin +
+            "，剩余果实库存 " + afterFruitQuantity + "。";
+    }
+
+    function buildSellFailMessage(seedName, quantity, reason) {
+        var safeName = trimText(seedName) || "\u679c\u5b9e";
+        var qty = asNumber(quantity, 0);
+        var detail = trimText(reason) || "\u8bf7\u68c0\u67e5\u5f53\u524d\u7528\u6237\u3001\u53ef\u552e\u6570\u91cf\u4e0e\u540e\u7aef\u6821\u9a8c\u7ed3\u679c";
+        return "\u51fa\u552e\u672a\u5b8c\u6210\uff1a" + safeName + " x " + qty +
+            "\u3002\n\u5931\u8d25\u539f\u56e0\uff1a" + detail + "\u3002";
+    }
+
     function currentUserId() {
         if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.currentUserId)) {
             return asNumber(window.FarmHomeBridge.currentUserId(), 0);
@@ -279,6 +304,7 @@
     function submitSell() {
         var uid = currentUserId();
         var seedTypeId = asNumber($("#storeSellDialog").data("seedTypeId"), 0);
+        var seedName = trimText($("#storeSellSeedLabel").text().replace(/^.*?:\s*/, "").replace(/\s*\(.*\)$/, ""));
         var quantity = asNumber($("#storeSellQty").numberbox("getValue"), 0);
         var maxQty = asNumber($("#storeSellDialog").data("maxQty"), 0);
         if (uid <= 0 || seedTypeId <= 0 || quantity <= 0 || quantity > maxQty) {
@@ -292,17 +318,22 @@
             quantity: quantity
         }, function (res) {
             if (!FarmApi.isOk(res)) {
-                $.messager.alert("提示", (res && res.msg) ? res.msg : "出售失败");
+                $.messager.alert("提示", buildSellFailMessage(seedName, quantity, res && res.msg));
                 return;
             }
             $("#storeSellDialog").dialog("close");
-            $.messager.show({title: "提示", msg: "出售成功", timeout: motion().actionFeedbackMs, showType: "slide"});
+            $.messager.show({
+                title: "提示",
+                msg: buildSellSuccessMessage(res && res.data),
+                timeout: motion().actionFeedbackMs,
+                showType: "slide"
+            });
             if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.refreshCurUser)) {
                 window.FarmHomeBridge.refreshCurUser();
             }
             reload();
-        }, function () {
-            $.messager.alert("提示", "出售失败，请稍后重试");
+                }, function () {
+            $.messager.alert("提示", buildSellFailMessage(seedName, quantity, ""));
         });
     }
 

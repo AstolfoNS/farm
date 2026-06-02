@@ -27,10 +27,10 @@
     selectedTool: "inspect",
   };
   var toolTitleMap = {
-    inspect: "查看",
-    plant: "播种",
-    harvest: "收获",
-    clean: "铲除",
+    inspect: "鏌ョ湅",
+    plant: "鎾",
+    harvest: "鏀惰幏",
+    clean: "閾查櫎",
     care: "杀虫",
   };
 
@@ -61,6 +61,114 @@
 
   function fmtNum(value) {
     return asNumber(value, 0);
+  }
+  function buildUnlockSuccessMessage(res) {
+    var data = (res && res.data) || {};
+    return (
+      "地块解锁已完成：第 " +
+      fmtNum(data.plotIndex) +
+      " 块地已开放。\n消耗金币 " +
+      fmtNum(data.unlockCostCoin) +
+      "，当前金币 " +
+      fmtNum(data.afterCoin) +
+      "，已解锁地块 " +
+      fmtNum(data.unlockedPlots) +
+      "/" +
+      fmtNum(data.totalPlots) +
+      "。"
+    );
+  }
+
+  function buildExpandSuccessMessage(res) {
+    var data = (res && res.data) || {};
+    return (
+      "扩地已完成：新增第 " +
+      fmtNum(data.plotIndex) +
+      " 块地，土壤为 " +
+      String(data.soilName || "默认土壤") +
+      "。\n消耗金币 " +
+      fmtNum(data.expandCostCoin) +
+      "，当前金币 " +
+      fmtNum(data.afterCoin) +
+      "，当前地块总数 " +
+      fmtNum(data.totalPlots) +
+      "。"
+    );
+  }
+
+  function buildCareSuccessMessage(res) {
+    var data = (res && res.data) || {};
+    return (
+      "养护已完成：清除虫害 " +
+      fmtNum(data.bugRemovedCount) +
+      " 只，剩余虫害 " +
+      fmtNum(data.bugCountAfter) +
+      "。\n获得经验 " +
+      fmtNum(data.experienceGain) +
+      "，积分 " +
+      fmtNum(data.scoreGain) +
+      "，金币 " +
+      fmtNum(data.coinGain) +
+      "；当前金币 " +
+      fmtNum(data.currentCoin) +
+      "。"
+    );
+  }
+
+  function buildHarvestSuccessMessage(res) {
+    var data = (res && res.data) || {};
+    return (
+      "收获已完成：获得果实 " +
+      fmtNum(data.harvestFruitNumber) +
+      "，当前果实库存 " +
+      fmtNum(data.totalFruitQuantity) +
+      "。\n获得经验 " +
+      fmtNum(data.experienceGain) +
+      "，积分 " +
+      fmtNum(data.scoreGain) +
+      (fmtNum(data.totalBugPenaltyFruit) > 0
+        ? "；本次虫损 " + fmtNum(data.totalBugPenaltyFruit)
+        : "") +
+      "；当前经验 " +
+      fmtNum(data.currentExperience) +
+      "。"
+    );
+  }
+
+  function buildClearSuccessMessage(res) {
+    var data = (res && res.data) || {};
+    return (
+      "铲除已完成：已清空当前作物。\n铲除前阶段 " +
+      fmtNum(data.stageIndexBefore) +
+      "，虫害数量 " +
+      fmtNum(data.bugCountBefore) +
+      "；当前地块已恢复为空地，可继续播种。"
+    );
+  }
+
+  function buildPlantSuccessMessage(res) {
+    var data = (res && res.data) || {};
+    return (
+      "播种已完成：作物已进入第 " +
+      fmtNum(data.currentStageIndex) +
+      " 阶段。\n该种子剩余库存 " +
+      fmtNum(data.remainSeedQuantity) +
+      "，当前地块后续将按生长阶段自动推进。"
+    );
+  }
+
+  function plotLabel(plot) {
+    return "第 " + fmtNum(plot && plot.plotIndex) + " 块地";
+  }
+
+  function cropLabel(plot) {
+    var crop = plot && plot.crop ? plot.crop : {};
+    return String(crop.seedTypeName || "当前作物");
+  }
+
+  function buildFarmActionFailMessage(actionLabel, plot, reason) {
+    var detail = String(reason || "").trim() || "\u8bf7\u68c0\u67e5\u5f53\u524d\u72b6\u6001\u4e0e\u540e\u7aef\u6821\u9a8c\u7ed3\u679c";
+    return actionLabel + "\u672a\u5b8c\u6210\uff1a" + plotLabel(plot) + "\uff0c\u76ee\u6807\u4f5c\u7269 " + cropLabel(plot) + "\u3002\n\u5931\u8d25\u539f\u56e0\uff1a" + detail + "\u3002";
   }
 
   function normalizeActionType(actionType) {
@@ -105,7 +213,7 @@
 
   function toolLabel(toolName) {
     var key = String(toolName || "").toLowerCase();
-    return toolTitleMap[key] || "查看";
+    return toolTitleMap[key] || "鏌ョ湅";
   }
 
   function defaultSoilCover() {
@@ -272,13 +380,13 @@
     var cropLayer = "";
     var bugOverlay = "";
     if (plot.locked) {
-      badges.push("<span class='farm-plot-badge lock'>锁</span>");
+      badges.push("<span class='farm-plot-badge lock'>閿?/span>");
     }
     if (crop && asNumber(crop.bugCount, 0) > 0) {
       bugOverlay = buildBugOverlay(plot, crop);
     }
     if (crop && crop.harvestable) {
-      badges.push("<span class='farm-plot-badge harvest'>熟</span>");
+      badges.push("<span class='farm-plot-badge harvest'>鐔?/span>");
     }
     if (!plot.locked && plot.hasCrop && crop) {
       cropLayer =
@@ -584,23 +692,23 @@
   function onRealtimeStatus(status) {
     state.wsStatus = status || "idle";
     if (state.wsStatus === "connected") {
-      setWsStatusUI("农场状态: 实时更新中", "is-connected");
+      setWsStatusUI("农场状态：实时更新中", "is-connected");
       stopPolling();
       return;
     }
     if (state.wsStatus === "connecting" || state.wsStatus === "reconnecting") {
-      setWsStatusUI("农场状态: 更新连接中", "is-connecting");
+      setWsStatusUI("农场状态：连接中", "is-connecting");
       if (fallbackEnabled()) {
         startPolling();
       }
       return;
     }
     if (state.wsStatus === "closed" || state.wsStatus === "error") {
-      setWsStatusUI("农场状态: 自动刷新中", "is-disconnected");
+      setWsStatusUI("农场状态：自动刷新中", "is-disconnected");
       startPolling();
       return;
     }
-    setWsStatusUI("农场状态: 待命", "is-idle");
+    setWsStatusUI("农场状态：待命", "is-idle");
     if (state.wsStatus === "idle" || state.wsStatus === "stopped") {
       startPolling();
     }
@@ -619,7 +727,7 @@
       ActionKit.ensureDialog("#farmActionDialog", builder, {
         width: 420,
         height: 310,
-        title: "地块操作",
+        title: "鍦板潡鎿嶄綔",
         cls: "farm-dialog-window farm-dialog-shell",
       });
       return;
@@ -632,7 +740,7 @@
       height: 310,
       modal: true,
       closed: true,
-      title: "地块操作",
+      title: "鍦板潡鎿嶄綔",
       cls: "farm-dialog-window farm-dialog-shell",
     });
   }
@@ -650,7 +758,7 @@
       ActionKit.ensureDialog("#farmSeedDialog", builder, {
         width: 420,
         height: 220,
-        title: "种植",
+        title: "绉嶆",
         cls: "farm-dialog-window farm-dialog-shell",
       });
       return;
@@ -663,7 +771,7 @@
       height: 220,
       modal: true,
       closed: true,
-      title: "种植",
+      title: "绉嶆",
       cls: "farm-dialog-window farm-dialog-shell",
     });
   }
@@ -681,7 +789,7 @@
       ActionKit.ensureDialog("#farmPromptDialog", builder, {
         width: 400,
         height: 220,
-        title: "提示",
+        title: "鎻愮ず",
         cls: "farm-dialog-window farm-dialog-shell",
       });
       return;
@@ -694,7 +802,7 @@
       height: 220,
       modal: true,
       closed: true,
-      title: "提示",
+      title: "鎻愮ず",
       cls: "farm-dialog-window farm-dialog-shell",
     });
   }
@@ -810,7 +918,7 @@
     }
     var left = parsePixel($plot.css("left"), 0) + 82;
     var top = parsePixel($plot.css("top"), 0) - 24;
-    var safeText = escapeHtml(tipText || "操作成功");
+    var safeText = escapeHtml(tipText || "鎿嶄綔鎴愬姛");
     var $tip = $(
       "<div class='farm-plot-float-tip type-" +
         safeActionType +
@@ -834,7 +942,7 @@
     if ($bar.length === 0) {
       return;
     }
-    var safeText = escapeHtml(tipText || "操作成功");
+    var safeText = escapeHtml(tipText || "鎿嶄綔鎴愬姛");
     var $tip = $(
       "<div class='farm-plot-float-tip type-" +
         safeActionType +
@@ -894,12 +1002,12 @@
   function openPromptDialog(options) {
     var opts = $.extend(
       {
-        title: "提示",
+        title: "鎻愮ず",
         message: "",
         detail: "",
         strong: false,
-        confirmText: "确定",
-        cancelText: "取消",
+        confirmText: "纭畾",
+        cancelText: "鍙栨秷",
         showCancel: false,
         onConfirm: null,
         onCancel: null,
@@ -919,14 +1027,14 @@
       rows.push({ value: opts.detail, className: "is-prompt-detail" });
     }
     var buttons = [
-      { action: "confirm", text: opts.confirmText || "确定", skin: "c1" },
+      { action: "confirm", text: opts.confirmText || "纭畾", skin: "c1" },
     ];
     if (opts.showCancel) {
-      buttons.unshift({ action: "cancel", text: opts.cancelText || "取消" });
+      buttons.unshift({ action: "cancel", text: opts.cancelText || "鍙栨秷" });
     }
     renderDialogTemplate({
       dialogSelector: "#farmPromptDialog",
-      title: opts.title || "提示",
+      title: opts.title || "鎻愮ず",
       infoSelector: "#farmPromptInfo",
       rows: rows,
       actionSelector: "#farmPromptButtons",
@@ -969,11 +1077,11 @@
   function confirmAction(options) {
     var opts = $.extend(
       {
-        title: "确认操作",
+        title: "纭鎿嶄綔",
         message: "",
         detail: "",
-        confirmText: "确认",
-        cancelText: "取消",
+        confirmText: "纭",
+        cancelText: "鍙栨秷",
         onConfirm: null,
       },
       options || {},
@@ -996,6 +1104,7 @@
         successMessage: "",
         successMessageBuilder: null,
         failMessage: "操作失败，请稍后重试",
+        failMessageBuilder: null,
         successSound: "click",
         afterSuccess: null,
       },
@@ -1009,10 +1118,14 @@
     opts.request(
       function (res) {
         if (!FarmApi.isOk(res)) {
-          showActionError(res && res.msg ? res.msg : opts.failMessage);
+          var failText = res && res.msg ? res.msg : opts.failMessage;
+          if ($.isFunction(opts.failMessageBuilder)) {
+            failText = opts.failMessageBuilder(res) || failText;
+          }
+          showActionError(failText);
           return;
         }
-        var finalSuccessMessage = opts.successMessage || "操作成功";
+        var finalSuccessMessage = opts.successMessage || "鎿嶄綔鎴愬姛";
         if ($.isFunction(opts.successMessageBuilder)) {
           finalSuccessMessage = opts.successMessageBuilder(res) || finalSuccessMessage;
         }
@@ -1020,7 +1133,7 @@
           ActionKit.toast(finalSuccessMessage, motion().actionFeedbackMs);
         } else {
           $.messager.show({
-            title: "提示",
+            title: "鎻愮ず",
             msg: finalSuccessMessage,
             timeout: motion().actionFeedbackMs,
             showType: "slide",
@@ -1032,16 +1145,20 @@
         }
       },
       function () {
-        showActionError(opts.failMessage);
+        var failText = opts.failMessage;
+        if ($.isFunction(opts.failMessageBuilder)) {
+          failText = opts.failMessageBuilder(null) || failText;
+        }
+        showActionError(failText);
       },
     );
   }
 
   function showActionError(message) {
     openPromptDialog({
-      title: "操作提示",
-      message: message || "操作失败",
-      confirmText: "我知道了",
+      title: "鎿嶄綔鎻愮ず",
+      message: message || "鎿嶄綔澶辫触",
+      confirmText: "鎴戠煡閬撲簡",
     });
     playSound("error");
   }
@@ -1055,15 +1172,19 @@
           fail,
         );
       },
-      successMessage: "地块解锁成功",
-      failMessage: "解锁失败，请稍后重试",
+      successMessage: "鍦板潡瑙ｉ攣鎴愬姛",
+      successMessageBuilder: buildUnlockSuccessMessage,
+      failMessageBuilder: function (res) {
+        return buildFarmActionFailMessage("解锁", plot, res && res.msg);
+      },
+      failMessage: "瑙ｉ攣澶辫触锛岃绋嶅悗閲嶈瘯",
       successSound: "click",
       afterSuccess: function () {
         closeDialog("#farmActionDialog");
         postActionRefresh({
           plotId: plot.plotId,
           actionType: "unlock",
-          tipText: "解锁成功",
+          tipText: "瑙ｉ攣鎴愬姛",
         });
       },
     });
@@ -1092,12 +1213,12 @@
   function executeExpand() {
     loadSoilOptions(function (soils) {
       if (!soils || soils.length === 0) {
-        showActionError("暂无可用土壤类型");
+        showActionError("鏆傛棤鍙敤鍦熷￥绫诲瀷");
         return;
       }
       var soilTypeId = asNumber(soils[0].id, 0);
       if (soilTypeId <= 0) {
-        showActionError("土壤配置异常");
+        showActionError("鍦熷￥閰嶇疆寮傚父");
         return;
       }
       confirmAction({
@@ -1112,12 +1233,16 @@
                 fail,
               );
             },
-            successMessage: "扩地成功",
-            failMessage: "扩地失败，请稍后重试",
+            successMessage: "鎵╁湴鎴愬姛",
+            successMessageBuilder: buildExpandSuccessMessage,
+            failMessageBuilder: function (res) {
+              return buildFarmActionFailMessage("扩地", { plotIndex: 0, crop: { seedTypeName: soils[0] && soils[0].name ? soils[0].name : "默认土壤" } }, res && res.msg);
+            },
+            failMessage: "鎵╁湴澶辫触锛岃绋嶅悗閲嶈瘯",
             successSound: "click",
             afterSuccess: function () {
               closeDialog("#farmActionDialog");
-              postActionRefresh({ actionType: "expand", tipText: "扩地成功" });
+              postActionRefresh({ actionType: "expand", tipText: "鎵╁湴鎴愬姛" });
             },
           });
         },
@@ -1134,28 +1259,19 @@
           fail,
         );
       },
-      successMessage: "养护完成",
-      successMessageBuilder: function (res) {
-        var data = (res && res.data) || {};
-        return (
-          "养护完成：除虫+" +
-          fmtNum(data.bugRemovedCount) +
-          "，经验+" +
-          fmtNum(data.experienceGain) +
-          "，积分+" +
-          fmtNum(data.scoreGain) +
-          "，金币+" +
-          fmtNum(data.coinGain)
-        );
+      successMessage: "鍏绘姢瀹屾垚",
+      successMessageBuilder: buildCareSuccessMessage,
+      failMessageBuilder: function (res) {
+        return buildFarmActionFailMessage("养护", plot, res && res.msg);
       },
-      failMessage: "养护失败，请稍后重试",
+      failMessage: "鍏绘姢澶辫触锛岃绋嶅悗閲嶈瘯",
       successSound: "care",
       afterSuccess: function () {
         closeDialog("#farmActionDialog");
         postActionRefresh({
           plotId: plot.plotId,
           actionType: "care",
-          tipText: "养护完成",
+          tipText: "鍏绘姢瀹屾垚",
         });
       },
     });
@@ -1174,29 +1290,19 @@
           fail,
         );
       },
-      successMessage: "收获成功",
-      successMessageBuilder: function (res) {
-        var data = (res && res.data) || {};
-        return (
-          "收获成功：果实+" +
-          fmtNum(data.harvestFruitNumber) +
-          "，经验+" +
-          fmtNum(data.experienceGain) +
-          "，积分+" +
-          fmtNum(data.scoreGain) +
-          (fmtNum(data.totalBugPenaltyFruit) > 0
-            ? "，虫损-" + fmtNum(data.totalBugPenaltyFruit)
-            : "")
-        );
+      successMessage: "鏀惰幏鎴愬姛",
+      successMessageBuilder: buildHarvestSuccessMessage,
+      failMessageBuilder: function (res) {
+        return buildFarmActionFailMessage("收获", plot, res && res.msg);
       },
-      failMessage: "收获失败，请稍后重试",
+      failMessage: "鏀惰幏澶辫触锛岃绋嶅悗閲嶈瘯",
       successSound: "harvest",
       afterSuccess: function () {
         closeDialog("#farmActionDialog");
         postActionRefresh({
           plotId: plot.plotId,
           actionType: "harvest",
-          tipText: "收获成功",
+          tipText: "鏀惰幏鎴愬姛",
         });
       },
     });
@@ -1215,15 +1321,19 @@
           fail,
         );
       },
-      successMessage: "铲除成功",
-      failMessage: "铲除失败，请稍后重试",
+      successMessage: "閾查櫎鎴愬姛",
+      successMessageBuilder: buildClearSuccessMessage,
+      failMessageBuilder: function (res) {
+        return buildFarmActionFailMessage("铲除", plot, res && res.msg);
+      },
+      failMessage: "閾查櫎澶辫触锛岃绋嶅悗閲嶈瘯",
       successSound: "clean",
       afterSuccess: function () {
         closeDialog("#farmActionDialog");
         postActionRefresh({
           plotId: plot.plotId,
           actionType: "clean",
-          tipText: "铲除成功",
+          tipText: "閾查櫎鎴愬姛",
         });
       },
     });
@@ -1233,17 +1343,17 @@
     ensureSeedDialog();
     renderDialogTemplate({
       dialogSelector: "#farmSeedDialog",
-      title: "种植",
+      title: "绉嶆",
       infoSelector: "#farmSeedInfo",
       rows: [
-        { value: "选择种子", strong: true },
+        { value: "閫夋嫨绉嶅瓙", strong: true },
         { html: "<input id='farmSeedSelect' class='farm-seed-select'>" },
       ],
       actionSelector: "#farmSeedButtons",
       buttons: [
         {
           action: "confirm-seed",
-          text: "确认种植",
+          text: "纭绉嶆",
           skin: "c1",
           id: "farmSeedConfirmBtn",
         },
@@ -1254,7 +1364,7 @@
       currentUserId(),
       function (res) {
         if (!(FarmApi.isOk(res) && res.data && $.isArray(res.data.seeds))) {
-          showActionError("读取种子背包失败");
+          showActionError("璇诲彇绉嶅瓙鑳屽寘澶辫触");
           return;
         }
         var seeds = [];
@@ -1264,15 +1374,15 @@
             seeds.push({
               seedTypeId: item.seedTypeId,
               text:
-                (item.seedTypeName || "种子#" + item.seedTypeId) +
-                " (可用 " +
+                (item.seedTypeName || "绉嶅瓙#" + item.seedTypeId) +
+                " (鍙敤 " +
                 available +
                 ")",
             });
           }
         });
         if (seeds.length === 0) {
-          showActionError("可种植的种子库存为空");
+          showActionError("鍙妞嶇殑绉嶅瓙搴撳瓨涓虹┖");
           return;
         }
         $("#farmSeedSelect").combobox({
@@ -1292,7 +1402,7 @@
             0,
           );
           if (seedTypeId <= 0) {
-            showActionError("请选择种子");
+            showActionError("璇烽€夋嫨绉嶅瓙");
             return;
           }
           FarmApi.seedPlantablePlots(
@@ -1302,7 +1412,7 @@
               if (
                 !(FarmApi.isOk(pRes) && pRes.data && $.isArray(pRes.data.plots))
               ) {
-                showActionError("校验可种地块失败");
+                showActionError("鏍￠獙鍙鍦板潡澶辫触");
                 return;
               }
               var allowed = false;
@@ -1314,7 +1424,7 @@
                 return true;
               });
               if (!allowed) {
-                showActionError("当前地块不可种该种子");
+                showActionError("褰撳墠鍦板潡涓嶅彲绉嶈绉嶅瓙");
                 return;
               }
 
@@ -1331,8 +1441,12 @@
                     fail,
                   );
                 },
-                successMessage: "种植成功",
-                failMessage: "种植失败，请稍后重试",
+                successMessage: "绉嶆鎴愬姛",
+                successMessageBuilder: buildPlantSuccessMessage,
+                failMessageBuilder: function (res) {
+                  return buildFarmActionFailMessage("播种", plot, res && res.msg);
+                },
+                failMessage: "绉嶆澶辫触锛岃绋嶅悗閲嶈瘯",
                 successSound: "plant",
                 afterSuccess: function () {
                   closeDialog("#farmSeedDialog");
@@ -1340,13 +1454,13 @@
                   postActionRefresh({
                     plotId: plot.plotId,
                     actionType: "plant",
-                    tipText: "种植成功",
+                    tipText: "绉嶆鎴愬姛",
                   });
                 },
               });
             },
             function () {
-              showActionError("校验可种地块失败");
+              showActionError("鏍￠獙鍙鍦板潡澶辫触");
             },
           );
         };
@@ -1365,7 +1479,7 @@
         }
       },
       function () {
-        showActionError("读取种子背包失败");
+        showActionError("璇诲彇绉嶅瓙鑳屽寘澶辫触");
       },
     );
   }
@@ -1373,22 +1487,22 @@
   function buildPlotActionButtons(plot) {
     var buttons = [];
     if (plot.locked && plot.canUnlock) {
-      buttons.push({ action: "unlock", text: "解锁地块", skin: "c1" });
+      buttons.push({ action: "unlock", text: "瑙ｉ攣鍦板潡", skin: "c1" });
     }
     if (!plot.locked && !plot.hasCrop) {
-      buttons.push({ action: "plant", text: "种植", skin: "c1" });
+      buttons.push({ action: "plant", text: "绉嶆", skin: "c1" });
     }
     if (!plot.locked && plot.hasCrop && plot.crop && plot.crop.canCare) {
-      buttons.push({ action: "care", text: "养护除虫", skin: "c1" });
+      buttons.push({ action: "care", text: "鍏绘姢闄よ櫕", skin: "c1" });
     }
     if (!plot.locked && plot.hasCrop && plot.crop && plot.crop.harvestable) {
-      buttons.push({ action: "harvest", text: "收获", skin: "c1" });
+      buttons.push({ action: "harvest", text: "鏀惰幏", skin: "c1" });
     }
     if (!plot.locked && plot.hasCrop && plot.crop && !plot.crop.harvestable) {
-      buttons.push({ action: "clear", text: "铲除作物", skin: "c5" });
+      buttons.push({ action: "clear", text: "閾查櫎浣滅墿", skin: "c5" });
     }
-    buttons.push({ action: "expand", text: "扩地(默认土壤)" });
-    buttons.push({ action: "refresh", text: "刷新" });
+    buttons.push({ action: "expand", text: "鎵╁湴(榛樿鍦熷￥)" });
+    buttons.push({ action: "refresh", text: "鍒锋柊" });
     return buttons;
   }
 
@@ -1408,8 +1522,8 @@
     ];
     if (plot.hasCrop) {
       rows.push({
-        label: "详情",
-        value: cropStatusText(crop) + "，虫子 " + asNumber(crop.bugCount, 0),
+        label: "璇︽儏",
+        value: cropStatusText(crop) + "锛岃櫕瀛?" + asNumber(crop.bugCount, 0),
       });
     }
     if (plot.locked && plot.lockReason) {
@@ -1443,7 +1557,7 @@
     ensureActionDialog();
     renderDialogTemplate({
       dialogSelector: "#farmActionDialog",
-      title: "地块操作",
+      title: "鍦板潡鎿嶄綔",
       infoSelector: "#farmActionInfo",
       rows: buildPlotActionRows(plot),
       actionSelector: "#farmActionButtons",
@@ -1531,11 +1645,11 @@
     }
     if (mode === "plant") {
       if (plot.locked) {
-        showActionError("该地块尚未解锁，请先在查看模式中解锁");
+        showActionError("该地块尚未解锁，请先在查看模式中完成解锁。");
         return;
       }
       if (plot.hasCrop) {
-        showActionError("该地块已有作物，无法播种");
+        showActionError("该地块已有作物，当前不能继续播种。");
         return;
       }
       openSeedDialog(plot);
@@ -1543,11 +1657,11 @@
     }
     if (mode === "care") {
       if (plot.locked || !plot.hasCrop) {
-        showActionError("该地块暂无可养护作物");
+        showActionError("该地块当前没有可养护的作物。");
         return;
       }
       if (!(plot.crop && plot.crop.canCare)) {
-        showActionError("当前作物没有虫害，不需要杀虫");
+        showActionError("当前作物没有虫害，不需要执行杀虫。");
         return;
       }
       executeCare(plot);
@@ -1555,11 +1669,11 @@
     }
     if (mode === "harvest") {
       if (plot.locked || !plot.hasCrop) {
-        showActionError("该地块暂无可收获作物");
+        showActionError("该地块当前没有可收获的作物。");
         return;
       }
       if (!(plot.crop && plot.crop.harvestable)) {
-        showActionError("当前作物尚未成熟，无法收获");
+        showActionError("当前作物尚未成熟，暂时不能收获。");
         return;
       }
       executeHarvest(plot);
@@ -1567,19 +1681,19 @@
     }
     if (mode === "clean") {
       if (plot.locked || !plot.hasCrop) {
-        showActionError("该地块暂无可铲除作物");
+        showActionError("该地块当前没有可铲除的作物。");
         return;
       }
       confirmAction({
         title: "确认铲除",
         message:
           plot.crop && plot.crop.harvestable
-            ? "该作物已成熟，确认直接铲除吗？"
+            ? "该作物已经成熟，确认直接铲除吗？"
             : "该作物尚未成熟，确认直接铲除吗？",
         detail:
           "铲除后不会获得果实、经验与积分。" +
           (plot.crop && plot.crop.harvestable
-            ? "建议使用“收获”工具先收获。"
+            ? "建议先使用“收获”工具完成收获。"
             : ""),
         onConfirm: function () {
           executeClear(plot);
@@ -1683,3 +1797,4 @@
     onRealtimeStatus("idle");
   });
 })(window, window.jQuery);
+

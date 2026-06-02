@@ -37,6 +37,58 @@
         return (window.farmDefaultAsset && window.farmDefaultAsset("avatar")) || "";
     }
 
+    function trimText(value) {
+        return $.trim(value == null ? "" : String(value));
+    }
+
+    function displayUserName(row) {
+        var data = row || {};
+        var nickname = trimText(data.nickname);
+        var username = trimText(data.username);
+        if (nickname && username) {
+            return nickname + "[" + username + "]";
+        }
+        return nickname || username || "当前用户";
+    }
+
+    function buildUserSaveMessage(res, row) {
+        var data = (res && res.data) || row || {};
+        return "用户资料已保存：" + displayUserName(data) +
+            "。\n经验 " + asNumber(data.experience, 0) +
+            "，积分 " + asNumber(data.score, 0) +
+            "，金币 " + asNumber(data.coin, 0) +
+            "，列表与顶部当前用户信息会同步刷新。";
+    }
+
+    function buildUserDeleteMessage(row) {
+        return "用户已删除：" + displayUserName(row) +
+            "。\n该记录会从当前列表移除；如果它正是当前选中用户，请重新选择新的当前用户。";
+    }
+
+    function buildAvatarUploadMessage(res, row) {
+        var data = (res && res.data) || {};
+        var filePath = trimText(data.relativePath || data.path || "");
+        return "头像上传已完成：" + displayUserName(row) +
+            "。\n文件路径已回填到当前编辑行" +
+            (filePath ? "，资源路径为 " + filePath : "") +
+            "，请继续点击“保存数据”以正式写入用户资料。";
+    }
+
+    function buildUserSaveFailMessage(res, row) {
+        var reason = trimText(res && res.msg) || "\u540e\u7aef\u672a\u8fd4\u56de\u660e\u786e\u9519\u8bef";
+        return "\u7528\u6237\u8d44\u6599\u672a\u4fdd\u5b58\uff1a" + displayUserName(row) + "\u3002\n\u5931\u8d25\u539f\u56e0\uff1a" + reason + "\u3002";
+    }
+
+    function buildUserDeleteFailMessage(res, row) {
+        var reason = trimText(res && res.msg) || "\u540e\u7aef\u672a\u8fd4\u56de\u660e\u786e\u9519\u8bef";
+        return "\u7528\u6237\u5220\u9664\u672a\u5b8c\u6210\uff1a" + displayUserName(row) + "\u3002\n\u5931\u8d25\u539f\u56e0\uff1a" + reason + "\u3002";
+    }
+
+    function buildAvatarUploadFailMessage(res, row) {
+        var reason = trimText(res && res.msg) || "\u6587\u4ef6\u4e0a\u4f20\u6216 URL \u56de\u586b\u672a\u901a\u8fc7\u6821\u9a8c";
+        return "\u5934\u50cf\u4e0a\u4f20\u672a\u5b8c\u6210\uff1a" + displayUserName(row) + "\u3002\n\u5931\u8d25\u539f\u56e0\uff1a" + reason + "\u3002";
+    }
+
     function statCell(icon, value) {
         return "<span class='user-admin-stat-cell'>" +
             "<img src='" + escapeHtml(icon) + "' alt=''>" +
@@ -49,8 +101,8 @@
     }
 
     function renderOps(index) {
-        return "<a href='javascript:void(0)' class='user-admin-op upload' data-action='upload' data-index='" + index + "'>上传头像</a>" +
-            "<a href='javascript:void(0)' class='user-admin-op save' data-action='save' data-index='" + index + "'>保存数据</a>";
+        return "<a href='javascript:void(0)' class='user-admin-op upload' data-action='upload' data-index='" + index + "'>涓婁紶澶村儚</a>" +
+            "<a href='javascript:void(0)' class='user-admin-op save' data-action='save' data-index='" + index + "'>淇濆瓨鏁版嵁</a>";
     }
 
     function pagePayload(param) {
@@ -101,19 +153,26 @@
         state.editIndex = -1;
     }
 
-    function showMessage(res) {
+    function showMessage(res, options) {
+        var opts = options || {};
         var ok = FarmApi.isOk(res);
         var text = (res && res.msg) ? res.msg : (ok ? "操作成功" : "操作失败");
+        if (ok && $.isFunction(opts.successBuilder)) {
+            text = opts.successBuilder(res) || text;
+        }
+        if (!ok && $.isFunction(opts.failBuilder)) {
+            text = opts.failBuilder(res) || text;
+        }
         if (ok) {
             $.messager.show({
-                title: "消息",
+                title: opts.successTitle || "提示",
                 msg: text,
                 timeout: motion().actionFeedbackMs,
                 showType: "slide"
             });
             return;
         }
-        $.messager.alert("提示", text);
+        $.messager.alert(opts.failTitle || "提示", text);
     }
 
     function reload() {
@@ -163,17 +222,24 @@
             }
             return;
         }
-        $.messager.confirm("确认", "确认删除当前用户吗？", function (ok) {
+        $.messager.confirm("纭", "纭鍒犻櫎褰撳墠鐢ㄦ埛鍚楋紵", function (ok) {
             if (!ok) {
                 return;
             }
             FarmApi.userAdminDelete({id: row.id}, function (res) {
-                showMessage(res);
+                showMessage(res, {
+                    successBuilder: function () {
+                        return buildUserDeleteMessage(row);
+                    },
+                    failBuilder: function (response) {
+                        return buildUserDeleteFailMessage(response, row);
+                    }
+                });
                 if (FarmApi.isOk(res)) {
                     reload();
                 }
-            }, function () {
-                $.messager.alert("错误", "删除失败，请稍后重试");
+                    }, function () {
+                $.messager.alert("提示", buildUserDeleteFailMessage(null, row));
             });
         });
     }
@@ -201,7 +267,14 @@
             avatarPath: row.avatarPath || ""
         };
         FarmApi.userAdminSave(payload, function (res) {
-            showMessage(res);
+            showMessage(res, {
+                successBuilder: function (response) {
+                    return buildUserSaveMessage(response, row);
+                },
+                failBuilder: function (response) {
+                    return buildUserSaveFailMessage(response, row);
+                }
+            });
             if (!FarmApi.isOk(res)) {
                 return;
             }
@@ -212,8 +285,8 @@
             if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.reloadUserOptions)) {
                 window.FarmHomeBridge.reloadUserOptions();
             }
-        }, function () {
-            $.messager.alert("错误", "保存失败，请稍后重试");
+                }, function () {
+            $.messager.alert("提示", buildUserSaveFailMessage(null, row));
         });
     }
 
@@ -245,11 +318,11 @@
 
     function uploadAvatar() {
         if (state.uploadRowIndex < 0) {
-            $.messager.show({title: "提示", msg: "请先选择要上传头像的用户", timeout: motion().actionFeedbackMs, showType: "slide"});
+            $.messager.show({title: "鎻愮ず", msg: "璇峰厛閫夋嫨瑕佷笂浼犲ご鍍忕殑鐢ㄦ埛", timeout: motion().actionFeedbackMs, showType: "slide"});
             return;
         }
         if (!$("#userAvatarFile").val()) {
-            $.messager.show({title: "提示", msg: "请选择需要上传的头像文件", timeout: motion().actionFeedbackMs, showType: "slide"});
+            $.messager.show({title: "鎻愮ず", msg: "璇烽€夋嫨闇€瑕佷笂浼犵殑澶村儚鏂囦欢", timeout: motion().actionFeedbackMs, showType: "slide"});
             return;
         }
         var formData = new FormData($("#userAvatarUploadForm")[0]);
@@ -261,7 +334,16 @@
             contentType: false,
             dataType: "json",
             success: function (res) {
-                showMessage(res);
+                var rows = $("#userAdminGrid").datagrid("getRows");
+                var currentRow = rows[state.uploadRowIndex] || null;
+                showMessage(res, {
+                    successBuilder: function (response) {
+                        return buildAvatarUploadMessage(response, currentRow);
+                    },
+                    failBuilder: function (response) {
+                        return buildAvatarUploadFailMessage(response, currentRow);
+                    }
+                });
                 if (!FarmApi.isOk(res) || !res.data) {
                     return;
                 }
@@ -271,7 +353,9 @@
                 $("#userAvatarUploadDialog").dialog("close");
             },
             error: function () {
-                $.messager.show({title: "错误", msg: "上传失败，请稍后重试", timeout: motion().actionFeedbackMs, showType: "slide"});
+                var rows = $("#userAdminGrid").datagrid("getRows");
+                var currentRow = rows[state.uploadRowIndex] || null;
+                $.messager.show({title: "提示", msg: buildAvatarUploadFailMessage(null, currentRow), timeout: motion().actionFeedbackMs, showType: "slide"});
             },
             complete: function () {
                 $("#userAvatarFile").val("");
@@ -513,3 +597,4 @@
         window.FarmCore.registerSetActiveModule("user-manage", FarmUserAdminModule, {refreshMethod: "reload"});
     }
 })(window, window.jQuery);
+
