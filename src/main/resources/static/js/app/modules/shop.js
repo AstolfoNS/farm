@@ -43,6 +43,32 @@
         return $.trim(value == null ? "" : String(value));
     }
 
+    function buildBuySuccessMessage(data) {
+        var payload = data || {};
+        var seedName = trimText(payload.seedName) || "种子";
+        var buyQuantity = asNumber(payload.buyQuantity, 0);
+        var totalCostCoin = asNumber(payload.totalCostCoin, 0);
+        var afterCoin = asNumber(payload.afterCoin, 0);
+        var afterSeedQuantity = asNumber(payload.afterSeedQuantity, 0);
+        return "购买已完成：" + seedName + " x " + buyQuantity +
+            "。\n已扣除金币 " + totalCostCoin +
+            "，当前金币 " + afterCoin +
+            "，该种子库存已更新为 " + afterSeedQuantity + "。";
+    }
+
+    function buildSellSuccessMessage(data) {
+        var payload = data || {};
+        var seedName = trimText(payload.seedName) || "果实";
+        var sellQuantity = asNumber(payload.sellQuantity, 0);
+        var totalIncomeCoin = asNumber(payload.totalIncomeCoin, 0);
+        var afterCoin = asNumber(payload.afterCoin, 0);
+        var afterFruitQuantity = asNumber(payload.afterFruitQuantity, 0);
+        return "出售已完成：" + seedName + " x " + sellQuantity +
+            "。\n本次获得金币 " + totalIncomeCoin +
+            "，当前金币 " + afterCoin +
+            "，剩余果实库存 " + afterFruitQuantity + "。";
+    }
+
     function currentUserId() {
         if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.currentUserId)) {
             return asNumber(window.FarmHomeBridge.currentUserId(), 0);
@@ -597,7 +623,12 @@
                 return;
             }
             $("#shopBuyDialog").dialog("close");
-            $.messager.show({title: "提示", msg: "购买成功", timeout: motion().actionFeedbackMs, showType: "slide"});
+            $.messager.show({
+                title: "提示",
+                msg: buildBuySuccessMessage(res && res.data),
+                timeout: motion().actionFeedbackMs,
+                showType: "slide"
+            });
             playSound("buy");
             if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.refreshCurUser)) {
                 window.FarmHomeBridge.refreshCurUser();
@@ -632,7 +663,12 @@
                 return;
             }
             $("#shopSellDialog").dialog("close");
-            $.messager.show({title: "提示", msg: "出售成功", timeout: motion().actionFeedbackMs, showType: "slide"});
+            $.messager.show({
+                title: "提示",
+                msg: buildSellSuccessMessage(res && res.data),
+                timeout: motion().actionFeedbackMs,
+                showType: "slide"
+            });
             playSound("sell");
             if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.refreshCurUser)) {
                 window.FarmHomeBridge.refreshCurUser();
