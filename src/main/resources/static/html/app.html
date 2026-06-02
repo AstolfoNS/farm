@@ -582,14 +582,20 @@
                     <tr>
                         <td>等级</td>
                         <td><input name="level" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                        <td>收获阶段</td>
+                        <td><input name="harvestStageIndex" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                    </tr>
+                    <tr>
+                        <td>最大收获次数</td>
+                        <td><input name="maxHarvestCount" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
                         <td>再生阶段</td>
                         <td><input name="regrowStageIndex" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
                     </tr>
                     <tr>
                         <td>解锁经验</td>
                         <td><input name="unlockExperienceRequired" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">exp</span></td>
-                        <td>说明</td>
-                        <td class="seed-admin-cell-tip">种子商店会展示全部种子，经验不足时仅禁用购买。</td>
+                        <td>阶段约束</td>
+                        <td class="seed-admin-cell-tip">最终阶段必须配置为“枯萎”，并且收获阶段序号必须大于再生阶段。</td>
                     </tr>
                     <tr>
                         <td>种子价格</td>
@@ -612,8 +618,8 @@
                     <tr>
                         <td>虫子上限</td>
                         <td><input name="maxBugLimit" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
-                        <td>最大收获次数</td>
-                        <td><input name="maxHarvestCount" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                        <td>说明</td>
+                        <td class="seed-admin-cell-tip">虫子数达到上限后，作物会直接跳转到最后的枯萎阶段。</td>
                     </tr>
                     <tr>
                         <td>杀虫经验</td>

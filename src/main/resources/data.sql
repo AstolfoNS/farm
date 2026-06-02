@@ -314,6 +314,7 @@ CREATE TABLE farm.seed_types
     max_bug_limit               SMALLINT        NOT NULL DEFAULT 0,
     max_harvest_count           SMALLINT        NOT NULL DEFAULT 1,
     regrow_stage_index          SMALLINT            NULL, -- 【优化】多次收获作物，收获后退回的阶段索引
+    harvest_stage_index         SMALLINT            NULL, -- 收获阶段索引，最后一阶段保留为枯萎阶段
 
     -- 经济数值配置
     price                       BIGINT          NOT NULL DEFAULT 0,
@@ -1661,4 +1662,244 @@ WHERE NOT EXISTS (
       AND us.seed_type_id = r.seed_type_id
       AND us.is_deleted = false
 );
+
+-- 11.8 Seed stage harvest/wither model alignment
+INSERT INTO farm.asset_defaults (asset_key, asset_url, description)
+SELECT 'seedStageWithered', '/oss/defaults/seed/seed-stage-withered-default.png', '种子枯萎阶段默认图'
+WHERE NOT EXISTS (SELECT 1 FROM farm.asset_defaults WHERE asset_key = 'seedStageWithered' AND is_deleted = false);
+
+INSERT INTO farm.growth_stages (name, description)
+SELECT '枯萎', '作物虫害超限或错过收获窗口后的最终阶段'
+WHERE NOT EXISTS (SELECT 1 FROM farm.growth_stages WHERE name = '枯萎' AND is_deleted = false);
+
+WITH seed_cfg AS (
+    SELECT * FROM (VALUES
+        ('草莓', 1::smallint, 6::smallint, NULL::smallint),
+        ('茄子', 1::smallint, 6::smallint, NULL::smallint),
+        ('玉米', 1::smallint, 5::smallint, NULL::smallint),
+        ('蓝莓', 4::smallint, 7::smallint, 5::smallint),
+        ('南瓜', 1::smallint, 6::smallint, NULL::smallint),
+        ('辣椒', 2::smallint, 6::smallint, 4::smallint),
+        ('水稻', 2::smallint, 5::smallint, 3::smallint)
+    ) AS t(name, max_harvest_count, harvest_stage_index, regrow_stage_index)
+)
+UPDATE farm.seed_types st
+SET max_harvest_count = cfg.max_harvest_count,
+    harvest_stage_index = cfg.harvest_stage_index,
+    regrow_stage_index = cfg.regrow_stage_index,
+    updated_at = NOW(),
+    updated_by = 0
+FROM seed_cfg cfg
+WHERE st.name = cfg.name
+  AND st.is_deleted = false;
+
+WITH stage_dict AS (
+    SELECT id, name FROM farm.growth_stages WHERE is_deleted = false
+),
+seed_dict AS (
+    SELECT id, name FROM farm.seed_types
+    WHERE is_deleted = false
+      AND name IN ('草莓', '茄子', '玉米', '蓝莓', '南瓜', '辣椒', '水稻')
+),
+cfg AS (
+    SELECT * FROM (VALUES
+        ('草莓', '种子',   1::smallint, 25::int, 0.0080::numeric(5,4),  92::int, 120::int, 58::int, 162::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '发芽',   2::smallint, 30::int, 0.0140::numeric(5,4),  95::int, 126::int, 56::int, 156::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '开花',   3::smallint, 35::int, 0.0200::numeric(5,4), 102::int, 132::int, 52::int, 150::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '结果',   4::smallint, 40::int, 0.0260::numeric(5,4), 108::int, 138::int, 48::int, 145::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '成熟',   5::smallint, 35::int, 0.0180::numeric(5,4), 112::int, 142::int, 46::int, 140::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '枯萎',   6::smallint,  0::int, 0.0000::numeric(5,4), 112::int, 142::int, 46::int, 140::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+
+        ('茄子', '种子',   1::smallint, 30::int, 0.0100::numeric(5,4),  94::int, 122::int, 57::int, 160::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '发芽',   2::smallint, 35::int, 0.0160::numeric(5,4),  98::int, 128::int, 54::int, 154::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '生长期', 3::smallint, 45::int, 0.0240::numeric(5,4), 104::int, 136::int, 50::int, 148::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '结果',   4::smallint, 50::int, 0.0300::numeric(5,4), 110::int, 142::int, 46::int, 142::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '成熟',   5::smallint, 42::int, 0.0220::numeric(5,4), 114::int, 146::int, 44::int, 138::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '枯萎',   6::smallint,  0::int, 0.0000::numeric(5,4), 114::int, 146::int, 44::int, 138::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+
+        ('玉米', '种子',   1::smallint, 40::int, 0.0100::numeric(5,4),  94::int, 124::int, 56::int, 160::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('玉米', '幼苗',   2::smallint, 55::int, 0.0180::numeric(5,4), 102::int, 136::int, 51::int, 150::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('玉米', '生长期', 3::smallint, 70::int, 0.0280::numeric(5,4), 110::int, 148::int, 46::int, 140::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('玉米', '成熟',   4::smallint, 60::int, 0.0220::numeric(5,4), 118::int, 156::int, 40::int, 130::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('玉米', '枯萎',   5::smallint,  0::int, 0.0000::numeric(5,4), 118::int, 156::int, 40::int, 130::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+
+        ('蓝莓', '种子',   1::smallint, 35::int, 0.0100::numeric(5,4),  86::int, 116::int, 62::int, 166::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '发芽',   2::smallint, 40::int, 0.0160::numeric(5,4),  90::int, 122::int, 60::int, 160::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '幼苗',   3::smallint, 50::int, 0.0240::numeric(5,4),  96::int, 128::int, 56::int, 154::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '生长期', 4::smallint, 55::int, 0.0300::numeric(5,4), 104::int, 136::int, 52::int, 148::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '开花',   5::smallint, 60::int, 0.0340::numeric(5,4), 110::int, 142::int, 49::int, 142::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '成熟',   6::smallint, 50::int, 0.0220::numeric(5,4), 114::int, 146::int, 46::int, 138::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '枯萎',   7::smallint,  0::int, 0.0000::numeric(5,4), 114::int, 146::int, 46::int, 138::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+
+        ('南瓜', '种子',   1::smallint, 30::int, 0.0090::numeric(5,4),  98::int, 122::int, 54::int, 158::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '发芽',   2::smallint, 35::int, 0.0140::numeric(5,4), 102::int, 126::int, 52::int, 154::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '幼苗',   3::smallint, 45::int, 0.0200::numeric(5,4), 110::int, 136::int, 48::int, 148::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '生长期', 4::smallint, 65::int, 0.0300::numeric(5,4), 120::int, 150::int, 42::int, 136::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '成熟',   5::smallint, 55::int, 0.0240::numeric(5,4), 126::int, 156::int, 38::int, 132::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '枯萎',   6::smallint,  0::int, 0.0000::numeric(5,4), 126::int, 156::int, 38::int, 132::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+
+        ('辣椒', '种子',   1::smallint, 28::int, 0.0100::numeric(5,4),  90::int, 118::int, 60::int, 164::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '发芽',   2::smallint, 32::int, 0.0180::numeric(5,4),  94::int, 124::int, 57::int, 158::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '生长期', 3::smallint, 42::int, 0.0260::numeric(5,4), 100::int, 132::int, 54::int, 152::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '开花',   4::smallint, 50::int, 0.0320::numeric(5,4), 106::int, 138::int, 50::int, 146::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '成熟',   5::smallint, 45::int, 0.0240::numeric(5,4), 110::int, 144::int, 48::int, 142::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '枯萎',   6::smallint,  0::int, 0.0000::numeric(5,4), 110::int, 144::int, 48::int, 142::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+
+        ('水稻', '种子',   1::smallint, 22::int, 0.0060::numeric(5,4),  88::int, 114::int, 61::int, 167::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('水稻', '幼苗',   2::smallint, 30::int, 0.0120::numeric(5,4),  94::int, 122::int, 58::int, 160::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('水稻', '生长期', 3::smallint, 45::int, 0.0180::numeric(5,4),  98::int, 130::int, 55::int, 154::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('水稻', '成熟',   4::smallint, 38::int, 0.0150::numeric(5,4), 102::int, 136::int, 52::int, 148::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('水稻', '枯萎',   5::smallint,  0::int, 0.0000::numeric(5,4), 102::int, 136::int, 52::int, 148::int, '/oss/defaults/seed/seed-stage-withered-default.png')
+    ) AS t(seed_name, stage_name, stage_index, duration_seconds, bug_probability, width, height, offset_x, offset_y, asset_url)
+),
+resolved AS (
+    SELECT
+        sd.id AS seed_type_id,
+        gd.id AS growth_stage_id,
+        cfg.stage_index,
+        cfg.duration_seconds,
+        cfg.bug_probability,
+        cfg.width,
+        cfg.height,
+        cfg.offset_x,
+        cfg.offset_y,
+        cfg.asset_url
+    FROM cfg
+    JOIN seed_dict sd ON sd.name = cfg.seed_name
+    JOIN stage_dict gd ON gd.name = cfg.stage_name
+)
+UPDATE farm.seed_growth_stages sgs
+SET growth_stage_id = r.growth_stage_id,
+    duration_seconds = r.duration_seconds,
+    bug_probability = r.bug_probability,
+    width = r.width,
+    height = r.height,
+    offset_x = r.offset_x,
+    offset_y = r.offset_y,
+    asset_url = r.asset_url,
+    updated_at = NOW(),
+    updated_by = 0,
+    is_deleted = false,
+    status = 1
+FROM resolved r
+WHERE sgs.seed_type_id = r.seed_type_id
+  AND sgs.stage_index = r.stage_index;
+
+WITH stage_dict AS (
+    SELECT id, name FROM farm.growth_stages WHERE is_deleted = false
+),
+seed_dict AS (
+    SELECT id, name FROM farm.seed_types
+    WHERE is_deleted = false
+      AND name IN ('草莓', '茄子', '玉米', '蓝莓', '南瓜', '辣椒', '水稻')
+),
+cfg AS (
+    SELECT * FROM (VALUES
+        ('草莓', '种子',   1::smallint, 25::int, 0.0080::numeric(5,4),  92::int, 120::int, 58::int, 162::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '发芽',   2::smallint, 30::int, 0.0140::numeric(5,4),  95::int, 126::int, 56::int, 156::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '开花',   3::smallint, 35::int, 0.0200::numeric(5,4), 102::int, 132::int, 52::int, 150::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '结果',   4::smallint, 40::int, 0.0260::numeric(5,4), 108::int, 138::int, 48::int, 145::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '成熟',   5::smallint, 35::int, 0.0180::numeric(5,4), 112::int, 142::int, 46::int, 140::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('草莓', '枯萎',   6::smallint,  0::int, 0.0000::numeric(5,4), 112::int, 142::int, 46::int, 140::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+        ('茄子', '种子',   1::smallint, 30::int, 0.0100::numeric(5,4),  94::int, 122::int, 57::int, 160::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '发芽',   2::smallint, 35::int, 0.0160::numeric(5,4),  98::int, 128::int, 54::int, 154::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '生长期', 3::smallint, 45::int, 0.0240::numeric(5,4), 104::int, 136::int, 50::int, 148::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '结果',   4::smallint, 50::int, 0.0300::numeric(5,4), 110::int, 142::int, 46::int, 142::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '成熟',   5::smallint, 42::int, 0.0220::numeric(5,4), 114::int, 146::int, 44::int, 138::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('茄子', '枯萎',   6::smallint,  0::int, 0.0000::numeric(5,4), 114::int, 146::int, 44::int, 138::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+        ('玉米', '种子',   1::smallint, 40::int, 0.0100::numeric(5,4),  94::int, 124::int, 56::int, 160::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('玉米', '幼苗',   2::smallint, 55::int, 0.0180::numeric(5,4), 102::int, 136::int, 51::int, 150::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('玉米', '生长期', 3::smallint, 70::int, 0.0280::numeric(5,4), 110::int, 148::int, 46::int, 140::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('玉米', '成熟',   4::smallint, 60::int, 0.0220::numeric(5,4), 118::int, 156::int, 40::int, 130::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('玉米', '枯萎',   5::smallint,  0::int, 0.0000::numeric(5,4), 118::int, 156::int, 40::int, 130::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+        ('蓝莓', '种子',   1::smallint, 35::int, 0.0100::numeric(5,4),  86::int, 116::int, 62::int, 166::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '发芽',   2::smallint, 40::int, 0.0160::numeric(5,4),  90::int, 122::int, 60::int, 160::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '幼苗',   3::smallint, 50::int, 0.0240::numeric(5,4),  96::int, 128::int, 56::int, 154::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '生长期', 4::smallint, 55::int, 0.0300::numeric(5,4), 104::int, 136::int, 52::int, 148::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '开花',   5::smallint, 60::int, 0.0340::numeric(5,4), 110::int, 142::int, 49::int, 142::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '成熟',   6::smallint, 50::int, 0.0220::numeric(5,4), 114::int, 146::int, 46::int, 138::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('蓝莓', '枯萎',   7::smallint,  0::int, 0.0000::numeric(5,4), 114::int, 146::int, 46::int, 138::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+        ('南瓜', '种子',   1::smallint, 30::int, 0.0090::numeric(5,4),  98::int, 122::int, 54::int, 158::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '发芽',   2::smallint, 35::int, 0.0140::numeric(5,4), 102::int, 126::int, 52::int, 154::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '幼苗',   3::smallint, 45::int, 0.0200::numeric(5,4), 110::int, 136::int, 48::int, 148::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '生长期', 4::smallint, 65::int, 0.0300::numeric(5,4), 120::int, 150::int, 42::int, 136::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '成熟',   5::smallint, 55::int, 0.0240::numeric(5,4), 126::int, 156::int, 38::int, 132::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('南瓜', '枯萎',   6::smallint,  0::int, 0.0000::numeric(5,4), 126::int, 156::int, 38::int, 132::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+        ('辣椒', '种子',   1::smallint, 28::int, 0.0100::numeric(5,4),  90::int, 118::int, 60::int, 164::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '发芽',   2::smallint, 32::int, 0.0180::numeric(5,4),  94::int, 124::int, 57::int, 158::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '生长期', 3::smallint, 42::int, 0.0260::numeric(5,4), 100::int, 132::int, 54::int, 152::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '开花',   4::smallint, 50::int, 0.0320::numeric(5,4), 106::int, 138::int, 50::int, 146::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '成熟',   5::smallint, 45::int, 0.0240::numeric(5,4), 110::int, 144::int, 48::int, 142::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('辣椒', '枯萎',   6::smallint,  0::int, 0.0000::numeric(5,4), 110::int, 144::int, 48::int, 142::int, '/oss/defaults/seed/seed-stage-withered-default.png'),
+        ('水稻', '种子',   1::smallint, 22::int, 0.0060::numeric(5,4),  88::int, 114::int, 61::int, 167::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('水稻', '幼苗',   2::smallint, 30::int, 0.0120::numeric(5,4),  94::int, 122::int, 58::int, 160::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('水稻', '生长期', 3::smallint, 45::int, 0.0180::numeric(5,4),  98::int, 130::int, 55::int, 154::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('水稻', '成熟',   4::smallint, 38::int, 0.0150::numeric(5,4), 102::int, 136::int, 52::int, 148::int, '/oss/defaults/seed/seed-stage-default.png'),
+        ('水稻', '枯萎',   5::smallint,  0::int, 0.0000::numeric(5,4), 102::int, 136::int, 52::int, 148::int, '/oss/defaults/seed/seed-stage-withered-default.png')
+    ) AS t(seed_name, stage_name, stage_index, duration_seconds, bug_probability, width, height, offset_x, offset_y, asset_url)
+),
+resolved AS (
+    SELECT
+        sd.id AS seed_type_id,
+        gd.id AS growth_stage_id,
+        cfg.stage_index,
+        cfg.duration_seconds,
+        cfg.bug_probability,
+        cfg.width,
+        cfg.height,
+        cfg.offset_x,
+        cfg.offset_y,
+        cfg.asset_url
+    FROM cfg
+    JOIN seed_dict sd ON sd.name = cfg.seed_name
+    JOIN stage_dict gd ON gd.name = cfg.stage_name
+)
+INSERT INTO farm.seed_growth_stages
+(
+    seed_type_id, growth_stage_id, stage_index, duration_seconds, asset_url, bug_probability,
+    width, height, offset_x, offset_y,
+    created_at, updated_at, created_by, updated_by, remark, status, is_deleted, opt_lock_version
+)
+SELECT
+    r.seed_type_id, r.growth_stage_id, r.stage_index, r.duration_seconds, r.asset_url, r.bug_probability,
+    r.width, r.height, r.offset_x, r.offset_y,
+    NOW(), NOW(), 0, 0, 'stage model aligned with explicit harvest/wither', 1, false, 0
+FROM resolved r
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM farm.seed_growth_stages sgs
+    WHERE sgs.seed_type_id = r.seed_type_id
+      AND sgs.stage_index = r.stage_index
+      AND sgs.is_deleted = false
+);
+
+WITH valid_stage AS (
+    SELECT * FROM (VALUES
+        ('草莓', 1::smallint), ('草莓', 2), ('草莓', 3), ('草莓', 4), ('草莓', 5), ('草莓', 6),
+        ('茄子', 1), ('茄子', 2), ('茄子', 3), ('茄子', 4), ('茄子', 5), ('茄子', 6),
+        ('玉米', 1), ('玉米', 2), ('玉米', 3), ('玉米', 4), ('玉米', 5),
+        ('蓝莓', 1), ('蓝莓', 2), ('蓝莓', 3), ('蓝莓', 4), ('蓝莓', 5), ('蓝莓', 6), ('蓝莓', 7),
+        ('南瓜', 1), ('南瓜', 2), ('南瓜', 3), ('南瓜', 4), ('南瓜', 5), ('南瓜', 6),
+        ('辣椒', 1), ('辣椒', 2), ('辣椒', 3), ('辣椒', 4), ('辣椒', 5), ('辣椒', 6),
+        ('水稻', 1), ('水稻', 2), ('水稻', 3), ('水稻', 4), ('水稻', 5)
+    ) AS t(seed_name, stage_index)
+),
+seed_map AS (
+    SELECT id, name FROM farm.seed_types WHERE is_deleted = false
+)
+UPDATE farm.seed_growth_stages sgs
+SET is_deleted = true,
+    updated_at = NOW(),
+    updated_by = 0,
+    remark = 'retired by explicit harvest/wither stage alignment'
+FROM seed_map sm
+WHERE sgs.seed_type_id = sm.id
+  AND sm.name IN ('草莓', '茄子', '玉米', '蓝莓', '南瓜', '辣椒', '水稻')
+  AND sgs.is_deleted = false
+  AND NOT EXISTS (
+      SELECT 1
+      FROM valid_stage vs
+      WHERE vs.seed_name = sm.name
+        AND vs.stage_index = sgs.stage_index
+  );
 

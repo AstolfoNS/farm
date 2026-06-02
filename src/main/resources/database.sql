@@ -314,6 +314,7 @@ CREATE TABLE farm.seed_types
     max_bug_limit               SMALLINT        NOT NULL DEFAULT 0,
     max_harvest_count           SMALLINT        NOT NULL DEFAULT 1,
     regrow_stage_index          SMALLINT            NULL, -- 【优化】多次收获作物，收获后退回的阶段索引
+    harvest_stage_index         SMALLINT            NULL, -- 收获阶段索引，最后一阶段保留为枯萎阶段
 
     -- 经济数值配置
     price                       BIGINT          NOT NULL DEFAULT 0,

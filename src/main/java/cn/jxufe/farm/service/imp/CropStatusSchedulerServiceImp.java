@@ -16,6 +16,7 @@ import cn.jxufe.farm.entity.UserPlot;
 import cn.jxufe.farm.service.CropStatusSchedulerService;
 import cn.jxufe.farm.service.FarmRealtimePushService;
 import cn.jxufe.farm.service.GameplayCoreService;
+import cn.jxufe.farm.service.support.SeedStageRuleSupport;
 import jakarta.annotation.PreDestroy;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -223,8 +224,9 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
         for (UserCrop crop : partition) {
             Short runtimeStatus = calculateGrowStatus(crop, now);
             StageEvolutionResult stageEvolution = evolveStageAndBug(crop, context, runtimeStatus, now);
+            Short resolvedRuntimeStatus = stageEvolution.runtimeStatus == null ? runtimeStatus : stageEvolution.runtimeStatus;
 
-            boolean statusChanged = runtimeStatus != null && !runtimeStatus.equals(crop.getGrowStatus());
+            boolean statusChanged = resolvedRuntimeStatus != null && !resolvedRuntimeStatus.equals(crop.getGrowStatus());
             boolean stageChanged = stageEvolution.changedStage;
             boolean bugChanged = stageEvolution.changedBug;
 
@@ -234,11 +236,12 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
 
             CropRuntimeChange change = new CropRuntimeChange();
             change.cropId = crop.getId();
-            change.runtimeStatus = runtimeStatus;
+            change.runtimeStatus = resolvedRuntimeStatus;
             change.nextStageIndex = stageEvolution.nextStageIndex;
             change.nextStageStartedAt = stageEvolution.nextStageStartedAt;
             change.nextBugCount = stageEvolution.nextBugCount;
             change.lastBugAt = stageEvolution.lastBugAt;
+            change.nextExpectedWitheredAt = stageEvolution.nextExpectedWitheredAt;
             change.changedStage = stageChanged;
             change.changedBug = bugChanged;
             change.bugAddedCount = stageEvolution.bugAddedCount;
@@ -263,11 +266,15 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
         result.lastBugAt = crop.getLastBugAt();
         result.bugAddedCount = 0;
         result.enteredStages = List.of();
+        result.runtimeStatus = runtimeStatus;
+        result.nextExpectedWitheredAt = crop.getExpectedWitheredAt();
 
         List<SeedGrowthStage> stages = context.stageBySeedTypeId.get(crop.getSeedTypeId());
         if (stages == null || stages.isEmpty()) {
             return result;
         }
+        SeedType seedType = context.seedTypeById.get(crop.getSeedTypeId());
+        SeedStageRuleSupport.ResolvedStageRule stageRule = SeedStageRuleSupport.resolve(seedType, stages);
 
         short currentStageIndex = normalizeStageIndex(stages, crop.getCurrentStageIndex());
         int currentPos = findStagePos(stages, currentStageIndex);
@@ -301,24 +308,20 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
             enteredStages.add(nextStageIndex);
         }
 
-        boolean forcedAdvance = false;
-        if ((CropStatus.isRipe(runtimeStatus) || CropStatus.isWithered(runtimeStatus)) && pos < stages.size() - 1) {
-            while (pos < stages.size() - 1) {
-                pos++;
-                nextStageIndex = stages.get(pos).getStageIndex();
-                enteredStages.add(nextStageIndex);
+        if (CropStatus.isWithered(runtimeStatus)) {
+            nextStageIndex = stageRule.witherStageIndex();
+            if (nextStageIndex != currentStageIndex) {
+                cursor = now;
             }
-            forcedAdvance = true;
         }
 
         result.nextStageIndex = nextStageIndex;
         result.nextStageStartedAt = nextStageIndex == currentStageIndex
                 ? stageStartAt
-                : (forcedAdvance ? now : cursor);
+                : cursor;
         result.changedStage = nextStageIndex != currentStageIndex;
         result.enteredStages = new ArrayList<>(enteredStages);
 
-        SeedType seedType = context.seedTypeById.get(crop.getSeedTypeId());
         short maxBugLimit = seedType == null ? (short) 0 : safeShort(seedType.getMaxBugLimit());
         short currentBugCount = safeShort(crop.getBugCount());
         short nextBugCount = currentBugCount;
@@ -349,6 +352,20 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
         result.changedBug = nextBugCount != currentBugCount;
         if (result.changedBug && nextBugCount > currentBugCount) {
             result.lastBugAt = now;
+        }
+        if (maxBugLimit > 0 && nextBugCount >= maxBugLimit) {
+            result.runtimeStatus = CropStatus.WITHERED.getCode();
+            result.nextStageIndex = stageRule.witherStageIndex();
+            result.nextStageStartedAt = now;
+            result.changedStage = result.nextStageIndex != currentStageIndex;
+            result.nextExpectedWitheredAt = now;
+        }
+        if (CropStatus.isWithered(result.runtimeStatus)) {
+            result.nextStageIndex = stageRule.witherStageIndex();
+            result.changedStage = result.nextStageIndex != currentStageIndex;
+            if (result.nextExpectedWitheredAt == null) {
+                result.nextExpectedWitheredAt = now;
+            }
         }
         return result;
     }
@@ -388,6 +405,10 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
                 crop.setLastBugAt(change.lastBugAt);
                 touched = true;
             }
+            if (change.nextExpectedWitheredAt != null && !change.nextExpectedWitheredAt.equals(crop.getExpectedWitheredAt())) {
+                crop.setExpectedWitheredAt(change.nextExpectedWitheredAt);
+                touched = true;
+            }
 
             if (touched) {
                 gameplayCoreService.touchForUpdate(crop, crop.getUserId(), now);
@@ -416,7 +437,7 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
         if (crop == null) {
             return null;
         }
-        if (crop.getExpectedWitheredAt() != null && now.isAfter(crop.getExpectedWitheredAt())) {
+        if (crop.getExpectedWitheredAt() != null && !now.isBefore(crop.getExpectedWitheredAt())) {
             return CropStatus.WITHERED.getCode();
         }
         if (crop.getExpectedRipeAt() != null && !now.isBefore(crop.getExpectedRipeAt())) {
@@ -552,6 +573,7 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
         private Short runtimeStatus;
         private Short nextStageIndex;
         private OffsetDateTime nextStageStartedAt;
+        private OffsetDateTime nextExpectedWitheredAt;
         private Short nextBugCount;
         private OffsetDateTime lastBugAt;
         private boolean changedStage;
@@ -562,8 +584,10 @@ public class CropStatusSchedulerServiceImp implements CropStatusSchedulerService
     }
 
     private static class StageEvolutionResult {
+        private Short runtimeStatus;
         private Short nextStageIndex;
         private OffsetDateTime nextStageStartedAt;
+        private OffsetDateTime nextExpectedWitheredAt;
         private Short nextBugCount;
         private OffsetDateTime lastBugAt;
         private boolean changedStage;

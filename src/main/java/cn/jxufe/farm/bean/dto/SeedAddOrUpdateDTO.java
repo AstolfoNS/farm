@@ -28,6 +28,7 @@ public class SeedAddOrUpdateDTO implements Serializable {
     private Short maxBugLimit;
     private Short maxHarvestCount;
     private Short regrowStageIndex;
+    private Short harvestStageIndex;
     private Long price;
     private Long buyPrice;
     private Long harvestExperience;

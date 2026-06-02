@@ -36,6 +36,7 @@ public enum BizErrorCode {
     SEED_GROWTH_STAGE_NOT_CONFIGURED("SEED_GROWTH_STAGE_NOT_CONFIGURED", "种子生长阶段未配置"),
     SEED_STAGE_SEQUENCE_INVALID("SEED_STAGE_SEQUENCE_INVALID", "种子阶段序号不连续"),
     SEED_REGROW_STAGE_INVALID("SEED_REGROW_STAGE_INVALID", "种子再生阶段配置无效"),
+    SEED_HARVEST_STAGE_INVALID("SEED_HARVEST_STAGE_INVALID", "种子收获阶段配置无效"),
     SEED_ASSET_URL_INVALID("SEED_ASSET_URL_INVALID", "种子阶段资源路径不合法"),
     SEED_STAGE_LAYOUT_INVALID("SEED_STAGE_LAYOUT_INVALID", "种子阶段定位尺寸配置不合法"),
     SEED_TYPE_IN_USE("SEED_TYPE_IN_USE", "种子类型正在被使用，禁止删除"),
@@ -72,5 +73,4 @@ public enum BizErrorCode {
         this.code = code;
         this.defaultMessage = defaultMessage;
     }
-
 }

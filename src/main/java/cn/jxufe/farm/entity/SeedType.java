@@ -43,6 +43,9 @@ public class SeedType extends BaseEntity {
     @Column(name = "regrow_stage_index")
     private Short regrowStageIndex;
 
+    @Column(name = "harvest_stage_index")
+    private Short harvestStageIndex;
+
     @Column(name = "price", nullable = false)
     private Long price;
 

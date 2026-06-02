@@ -20,6 +20,7 @@ public class SeedGridVO implements Serializable {
     private Short maxBugLimit;
     private Short maxHarvestCount;
     private Short regrowStageIndex;
+    private Short harvestStageIndex;
     private Long price;
     private Long harvestExperience;
     private Integer harvestFruitNumber;

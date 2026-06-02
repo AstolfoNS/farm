@@ -29,6 +29,7 @@ import cn.jxufe.farm.common.constants.AssetDefaultKeys;
 import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.exception.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
+import cn.jxufe.farm.dao.GrowthStageDao;
 import cn.jxufe.farm.dao.SeedGrowthStageDao;
 import cn.jxufe.farm.dao.SeedTypeDao;
 import cn.jxufe.farm.dao.UserDao;
@@ -36,6 +37,7 @@ import cn.jxufe.farm.dao.UserCropDao;
 import cn.jxufe.farm.dao.UserFruitDao;
 import cn.jxufe.farm.dao.UserInventoryFlowDao;
 import cn.jxufe.farm.dao.UserSeedDao;
+import cn.jxufe.farm.entity.GrowthStage;
 import cn.jxufe.farm.entity.SeedGrowthStage;
 import cn.jxufe.farm.entity.SeedType;
 import cn.jxufe.farm.entity.User;
@@ -66,6 +68,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
 
     private final SeedService delegate;
     private final SeedTypeDao seedTypeDao;
+    private final GrowthStageDao growthStageDao;
     private final UserDao userDao;
     private final SeedGrowthStageDao seedGrowthStageDao;
     private final UserSeedDao userSeedDao;
@@ -77,6 +80,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     public SeedServiceGuardedDecorator(
             @Qualifier("seedServiceImp") SeedService delegate,
             SeedTypeDao seedTypeDao,
+            GrowthStageDao growthStageDao,
             UserDao userDao,
             SeedGrowthStageDao seedGrowthStageDao,
             UserSeedDao userSeedDao,
@@ -87,6 +91,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     ) {
         this.delegate = delegate;
         this.seedTypeDao = seedTypeDao;
+        this.growthStageDao = growthStageDao;
         this.userDao = userDao;
         this.seedGrowthStageDao = seedGrowthStageDao;
         this.userSeedDao = userSeedDao;
@@ -140,7 +145,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     @Override
     public PageResult<SeedInventoryItemVO> pageSeedInventory(SeedInventoryQueryDTO query) {
         if (query == null || query.getUserId() == null || query.getUserId() <= 0) {
-            throw new ServiceException(BizErrorCode.PARAM_INVALID, "用户ID无效");
+            throw new ServiceException(BizErrorCode.PARAM_INVALID, "鐢ㄦ埛ID鏃犳晥");
         }
         userDao.findByIdAndIsDeletedFalse(query.getUserId())
                 .orElseThrow(() -> new ServiceException(BizErrorCode.USER_NOT_FOUND, "用户不存在"));
@@ -205,10 +210,11 @@ public class SeedServiceGuardedDecorator implements SeedService {
                     ? normalizeUnlockExperienceRequired(null, seedType.getLevel())
                     : normalizeUnlockExperienceRequired(params.getUnlockExperienceRequired(), seedType.getLevel());
             seedType.setUnlockExperienceRequired(unlockRequired);
+            seedType.setHarvestStageIndex(normalizeStagePointer(params == null ? null : params.getHarvestStageIndex()));
+            seedType.setRegrowStageIndex(normalizeRegrowPointer(params));
             seedTypeDao.save(seedType);
         }
-        validateStageSequenceAndRegrow(seedTypeId);
-        validateRegrowStageIndex(seedTypeId, params == null ? null : params.getRegrowStageIndex());
+        validateStageRules(seedTypeId, true);
         return seedTypeId;
     }
 
@@ -217,7 +223,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     public void removeSeedType(IdDTO params) {
         Long seedTypeId = params == null ? null : params.getId();
         if (seedTypeId == null || seedTypeId <= 0) {
-            throw new ServiceException(BizErrorCode.PARAM_INVALID, "种子类型ID无效");
+            throw new ServiceException(BizErrorCode.PARAM_INVALID, "绉嶅瓙绫诲瀷ID鏃犳晥");
         }
         ensureSeedTypeNotReferenced(seedTypeId);
         delegate.removeSeedType(params);
@@ -255,7 +261,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
         validateStageLayout(params);
         delegate.saveSeedStage(params);
         Long seedTypeId = params == null ? null : params.getSeedTypeId();
-        validateStageSequenceAndRegrow(seedTypeId);
+        validateStageRules(seedTypeId, false);
     }
 
     @Override
@@ -263,7 +269,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     public void removeSeedStage(IdDTO params) {
         Long stageId = params == null ? null : params.getId();
         if (stageId == null || stageId <= 0) {
-            throw new ServiceException(BizErrorCode.PARAM_INVALID, "阶段ID无效");
+            throw new ServiceException(BizErrorCode.PARAM_INVALID, "闃舵ID鏃犳晥");
         }
         SeedGrowthStage target = seedGrowthStageDao.findByIdAndIsDeletedFalse(stageId)
                 .orElseThrow(() -> new ServiceException(BizErrorCode.SEED_STAGE_NOT_FOUND, "种子阶段配置不存在"));
@@ -274,11 +280,11 @@ public class SeedServiceGuardedDecorator implements SeedService {
                 .max(Short::compareTo)
                 .orElse((short) 0);
         if (!target.getStageIndex().equals(maxStageIndex)) {
-            throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "只能删除最后一个阶段，避免阶段序号断档");
+            throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "鍙兘鍒犻櫎鏈€鍚庝竴涓樁娈碉紝閬垮厤闃舵搴忓彿鏂。");
         }
 
         delegate.removeSeedStage(params);
-        validateStageSequenceAndRegrow(target.getSeedTypeId());
+        validateStageRules(target.getSeedTypeId(), false);
     }
 
     private void ensureSeedTypeNotReferenced(Long seedTypeId) {
@@ -291,9 +297,9 @@ public class SeedServiceGuardedDecorator implements SeedService {
         }
     }
 
-    private void validateStageSequenceAndRegrow(Long seedTypeId) {
+    private void validateStageRules(Long seedTypeId, boolean requireCompleteConfig) {
         if (seedTypeId == null || seedTypeId <= 0) {
-            throw new ServiceException(BizErrorCode.PARAM_INVALID, "种子类型ID无效");
+            throw new ServiceException(BizErrorCode.PARAM_INVALID, "绉嶅瓙绫诲瀷ID鏃犳晥");
         }
         List<SeedGrowthStage> stages = seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(seedTypeId);
         if (stages.isEmpty()) {
@@ -301,19 +307,57 @@ public class SeedServiceGuardedDecorator implements SeedService {
         }
         short expect = 1;
         Set<Short> stageIndexSet = new HashSet<>();
+        Map<Long, String> growthStageNameMap = buildGrowthStageNameMap();
+        short lastStageIndex = 0;
+        short witherStageCount = 0;
+        Short witherStageIndex = null;
         for (SeedGrowthStage stage : stages) {
             short actual = stage.getStageIndex() == null ? 0 : stage.getStageIndex();
             if (actual != expect) {
-                throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "阶段序号必须连续为 1..N");
+                throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "闃舵搴忓彿蹇呴』杩炵画涓?1..N");
             }
             stageIndexSet.add(actual);
+            lastStageIndex = actual;
+            String growthStageName = safeString(growthStageNameMap.get(stage.getGrowthStageId())).trim();
+            if ("枯萎".equals(growthStageName)) {
+                witherStageCount++;
+                witherStageIndex = actual;
+            }
             expect++;
+        }
+        if (witherStageCount > 1) {
+            throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "同一种子只能配置一个枯萎阶段");
+        }
+        if (witherStageIndex != null && witherStageIndex != lastStageIndex) {
+            throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "枯萎阶段必须位于最后一阶段");
         }
         SeedType seedType = seedTypeDao.findByIdAndIsDeletedFalse(seedTypeId)
                 .orElseThrow(() -> new ServiceException(BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在"));
-        Short regrow = seedType.getRegrowStageIndex();
-        if (regrow != null && !stageIndexSet.contains(regrow)) {
-            throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段必须存在于该种子的阶段集合中");
+        Short harvest = normalizeStagePointer(seedType.getHarvestStageIndex());
+        Short regrow = normalizeStagePointer(seedType.getRegrowStageIndex());
+        if (!requireCompleteConfig) {
+            validateOptionalStagePointers(stageIndexSet, lastStageIndex, witherStageIndex, harvest, regrow);
+            return;
+        }
+        if (witherStageIndex == null) {
+            throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "请为该种子补充最后一个“枯萎”阶段");
+        }
+        if (harvest == null || !stageIndexSet.contains(harvest)) {
+            throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须存在于该种子的阶段集合中");
+        }
+        if (harvest >= witherStageIndex) {
+            throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须早于最后的枯萎阶段");
+        }
+        short maxHarvestCount = normalizeMaxHarvestCount(seedType.getMaxHarvestCount());
+        if (maxHarvestCount > 1) {
+            if (regrow == null || !stageIndexSet.contains(regrow)) {
+                throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "多次收获作物必须配置存在的再生阶段");
+            }
+            if (regrow >= harvest) {
+                throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "收获阶段序号必须大于再生阶段序号");
+            }
+        } else if (regrow != null && stageIndexSet.contains(regrow) && regrow >= harvest) {
+            throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段序号必须小于收获阶段序号");
         }
     }
 
@@ -329,6 +373,8 @@ public class SeedServiceGuardedDecorator implements SeedService {
                 row.setCoverImageUrl(normalizeSeedCoverUrl(row.getCoverImageUrl()));
                 SeedType seedType = seedTypeMap.get(row.getId());
                 row.setUnlockExperienceRequired(resolveUnlockExperienceRequired(seedType));
+                row.setHarvestStageIndex(seedType == null ? null : seedType.getHarvestStageIndex());
+                row.setRegrowStageIndex(seedType == null ? null : seedType.getRegrowStageIndex());
             }
         }
     }
@@ -497,23 +543,8 @@ public class SeedServiceGuardedDecorator implements SeedService {
         if (userExperience < unlockRequired) {
             throw new ServiceException(
                     BizErrorCode.EXPERIENCE_NOT_ENOUGH,
-                    "经验不足，尚未解锁该种子。需要经验: " + unlockRequired + "，当前经验: " + userExperience
+                    "缁忛獙涓嶈冻锛屽皻鏈В閿佽绉嶅瓙銆傞渶瑕佺粡楠? " + unlockRequired + "锛屽綋鍓嶇粡楠? " + userExperience
             );
-        }
-    }
-
-    private void validateRegrowStageIndex(Long seedTypeId, Short regrowStageIndex) {
-        if (seedTypeId == null || seedTypeId <= 0 || regrowStageIndex == null) {
-            return;
-        }
-        if (regrowStageIndex <= 0) {
-            throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段必须大于0");
-        }
-        boolean exists = seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(seedTypeId).stream()
-                .map(SeedGrowthStage::getStageIndex)
-                .anyMatch(idx -> idx != null && idx.equals(regrowStageIndex));
-        if (!exists) {
-            throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段必须存在于该种子的阶段集合中");
         }
     }
 
@@ -530,27 +561,67 @@ public class SeedServiceGuardedDecorator implements SeedService {
 
     private void validateStageLayout(SeedStageAddOrUpdateDTO params) {
         if (params == null) {
-            throw new ServiceException(BizErrorCode.PARAM_INVALID, "请求参数不能为空");
+            throw new ServiceException(BizErrorCode.PARAM_INVALID, "璇锋眰鍙傛暟涓嶈兘涓虹┖");
         }
         int width = params.getWidth() == null ? 0 : params.getWidth();
         int height = params.getHeight() == null ? 0 : params.getHeight();
         int offsetX = params.getOffsetX() == null ? 0 : params.getOffsetX();
         int offsetY = params.getOffsetY() == null ? 0 : params.getOffsetY();
         if (width < STAGE_WIDTH_MIN || width > STAGE_WIDTH_MAX) {
-            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "width超出允许范围");
+            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "width瓒呭嚭鍏佽鑼冨洿");
         }
         if (height < STAGE_HEIGHT_MIN || height > STAGE_HEIGHT_MAX) {
-            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "height超出允许范围");
+            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "height瓒呭嚭鍏佽鑼冨洿");
         }
         if (offsetX < STAGE_OFFSET_MIN || offsetX > STAGE_OFFSET_MAX) {
-            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "offsetX超出允许范围");
+            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "offsetX瓒呭嚭鍏佽鑼冨洿");
         }
         if (offsetY < STAGE_OFFSET_MIN || offsetY > STAGE_OFFSET_MAX) {
-            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "offsetY超出允许范围");
+            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "offsetY瓒呭嚭鍏佽鑼冨洿");
         }
         BigDecimal probability = params.getBugProbability() != null ? params.getBugProbability() : params.getPestProbability();
         if (probability != null && (probability.compareTo(BigDecimal.ZERO) < 0 || probability.compareTo(BigDecimal.ONE) > 0)) {
-            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "虫害概率必须在0到1之间");
+            throw new ServiceException(BizErrorCode.SEED_STAGE_LAYOUT_INVALID, "铏姒傜巼蹇呴』鍦?鍒?涔嬮棿");
         }
     }
+
+    private Map<Long, String> buildGrowthStageNameMap() {
+        return growthStageDao.findByIsDeletedFalseOrderByIdAsc().stream()
+                .collect(Collectors.toMap(GrowthStage::getId, item -> safeString(item.getName())));
+    }
+
+    private void validateOptionalStagePointers(Set<Short> stageIndexSet, short lastStageIndex, Short witherStageIndex, Short harvest, Short regrow) {
+        if (harvest != null && stageIndexSet.contains(harvest)) {
+            if (witherStageIndex != null && harvest >= witherStageIndex) {
+                throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须早于枯萎阶段");
+            }
+            if (harvest >= lastStageIndex) {
+                throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段不能落在最后一阶段");
+            }
+        }
+        if (regrow != null && harvest != null && stageIndexSet.contains(regrow) && stageIndexSet.contains(harvest) && regrow >= harvest) {
+            throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段序号必须小于收获阶段序号");
+        }
+    }
+
+    private Short normalizeStagePointer(Short value) {
+        return value == null || value <= 0 ? null : value;
+    }
+
+    private Short normalizeRegrowPointer(SeedAddOrUpdateDTO params) {
+        if (params == null) {
+            return null;
+        }
+        short maxHarvestCount = normalizeMaxHarvestCount(params.getMaxHarvestCount());
+        if (maxHarvestCount <= 1) {
+            return null;
+        }
+        return normalizeStagePointer(params.getRegrowStageIndex());
+    }
+
+    private short normalizeMaxHarvestCount(Short value) {
+        return value == null || value <= 0 ? (short) 1 : value;
+    }
 }
+
+
