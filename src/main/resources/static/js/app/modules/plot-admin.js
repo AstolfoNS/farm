@@ -432,20 +432,6 @@
                     alertMessage(msg || "上传失败，请稍后重试");
                 }
             });
-            Admin.bindUploadPicker({
-                namespace: ".plotAdminUploadType",
-                buttonSelector: "#plotTypeUploadCoverBtn",
-                fileSelector: "#plotTypeCoverFile",
-                category: "plot-cover",
-                onSuccess: function (url, payload, raw) {
-                    setTextboxValue($("#plotTypeCoverImageUrl"), url);
-                    previewTypeCover(url);
-                    showMessage((raw && raw.msg) || "上传成功");
-                },
-                onError: function (msg) {
-                    alertMessage(msg || "上传失败，请稍后重试");
-                }
-            });
             return;
         }
 
@@ -453,18 +439,6 @@
             .off("click.plotAdminUpload", "#plotSoilUploadCoverBtn")
             .on("click.plotAdminUpload", "#plotSoilUploadCoverBtn", function () {
                 var $file = $("#plotSoilCoverFile");
-                var input = $file.get(0);
-                if (!input) {
-                    return;
-                }
-                input.value = "";
-                input.click();
-            });
-
-        $(document)
-            .off("click.plotAdminUpload", "#plotTypeUploadCoverBtn")
-            .on("click.plotAdminUpload", "#plotTypeUploadCoverBtn", function () {
-                var $file = $("#plotTypeCoverFile");
                 var input = $file.get(0);
                 if (!input) {
                     return;
@@ -482,14 +456,6 @@
                 });
             });
 
-        $(document)
-            .off("change.plotAdminUpload", "#plotTypeCoverFile")
-            .on("change.plotAdminUpload", "#plotTypeCoverFile", function () {
-                uploadFile($(this), "plot-cover", function (url) {
-                    setTextboxValue($("#plotTypeCoverImageUrl"), url);
-                    previewTypeCover(url);
-                });
-            });
     }
 
     function saveSoil() {
@@ -688,10 +654,6 @@
             .on("change.plotAdmin blur.plotAdmin input.plotAdmin", function () {
                 previewSoilCover(getTextboxValue($("#plotSoilCoverImageUrl"), defaultSoilCover()));
             });
-        $("#plotTypeCoverImageUrl").textbox("textbox").off("change.plotAdmin blur.plotAdmin input.plotAdmin")
-            .on("change.plotAdmin blur.plotAdmin input.plotAdmin", function () {
-                previewTypeCover(getTextboxValue($("#plotTypeCoverImageUrl"), defaultPlotCover()));
-            });
     }
 
     function initSoilGrid() {
@@ -779,7 +741,7 @@
         if (state.inited) {
             return;
         }
-        $("#plotAdminSoilName, #plotAdminTypeName, #plotAdminUserName, #plotUserAllocUserName, #plotUserAllocCurrentUnlocked, #plotSoilBitCodeDisplay").textbox();
+        $("#plotAdminSoilName, #plotSoilBitCodeDisplay").textbox();
         $(".plot-admin-toolbar .easyui-linkbutton, .plot-admin-dialog-actions .easyui-linkbutton").linkbutton();
         initSoilGrid();
         initDialogs();
