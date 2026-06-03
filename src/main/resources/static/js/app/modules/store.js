@@ -43,11 +43,11 @@
     }
 
     function buildSellFailMessage(seedName, quantity, reason) {
-        var safeName = trimText(seedName) || "\u679c\u5b9e";
+        var safeName = trimText(seedName) || "果实";
         var qty = asNumber(quantity, 0);
-        var detail = trimText(reason) || "\u8bf7\u68c0\u67e5\u5f53\u524d\u7528\u6237\u3001\u53ef\u552e\u6570\u91cf\u4e0e\u540e\u7aef\u6821\u9a8c\u7ed3\u679c";
-        return "\u51fa\u552e\u672a\u5b8c\u6210\uff1a" + safeName + " x " + qty +
-            "\u3002\n\u5931\u8d25\u539f\u56e0\uff1a" + detail + "\u3002";
+        var detail = trimText(reason) || "请检查当前用户、可售数量与后端校验结果";
+        return "出售未完成：" + safeName + " x " + qty +
+            "。\n失败原因：" + detail + "。";
     }
 
     function currentUserId() {
@@ -332,7 +332,7 @@
                 window.FarmHomeBridge.refreshCurUser();
             }
             reload();
-                }, function () {
+        }, function () {
             $.messager.alert("提示", buildSellFailMessage(seedName, quantity, ""));
         });
     }
