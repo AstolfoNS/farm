@@ -139,7 +139,10 @@ CREATE TABLE farm.plot_policies
     id                              BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
     policy_name                     VARCHAR(128)    NOT NULL,
+    policy_version                  VARCHAR(64)         NULL DEFAULT 'v1',
     active                          BOOLEAN         NOT NULL DEFAULT true,
+    effective_scope                 VARCHAR(32)         NULL DEFAULT 'NEW_USER_ONLY',
+    publish_status                  VARCHAR(32)         NULL DEFAULT 'DRAFT',
     default_total_plot_count        SMALLINT        NOT NULL,
     default_unlocked_plot_count     SMALLINT        NOT NULL,
     default_locked_plot_count       SMALLINT        NOT NULL,
@@ -198,12 +201,14 @@ CREATE TABLE farm.seed_types
     seed_quality_id             BIGINT          NOT NULL,
     enable_soil_type_bits       BIGINT          NOT NULL,
     level                       SMALLINT        NOT NULL,
+    unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
     description                 TEXT                NULL,
 
     -- 机制与事件配置
     max_bug_limit               SMALLINT        NOT NULL DEFAULT 0,
     max_harvest_count           SMALLINT        NOT NULL DEFAULT 1,
     regrow_stage_index          SMALLINT            NULL, -- 【优化】多次收获作物，收获后退回的阶段索引
+    harvest_stage_index         SMALLINT            NULL, -- 可收获的阶段索引
 
     -- 经济数值配置
     price                       BIGINT          NOT NULL DEFAULT 0,
@@ -760,3 +765,4 @@ ON CONFLICT (user_id, seed_type_id) WHERE is_deleted = false DO UPDATE SET
                                                                            quantity = EXCLUDED.quantity, updated_at = NOW();
 
 COMMIT;
+
