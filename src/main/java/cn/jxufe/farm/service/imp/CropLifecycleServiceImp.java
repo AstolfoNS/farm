@@ -103,7 +103,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
     }
 
     /* =========================================================
-     *  Context Helpers (濠电姷鏁搁崑鐐哄垂閻㈠憡鍋嬮柟鐐灱閺嬪秹骞栧ǎ顒€濡介柣鎾冲€婚埀顒€绠嶉崕閬嶅箯鐎ｎ€絾绻濆顓犲幗闂侀潧顭堥崕閬嶎敂椤忓牊鐓熸俊銈傚亾闁汇倕娲ㄧ划?
+     *  Context Helpers
      * ========================================================= */
 
     private void requireNotNull(Object params) {
@@ -111,7 +111,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
     }
 
     /**
-     * 闂傚倷绶氬濠氭⒔閸曨偒鐔嗘俊顖欒閻掍粙鏌ㄩ悢鍝勑㈢紒鐘哄亹閳ь剙绠嶉崕杈┾偓姘煎枤缁瑦绻濋崒妤侇潔闂佺懓澧介鎻掝潖濡ゅ啰纾兼俊銈傚亾闁硅櫕锚椤曪綁顢楅崟顐ゅ€炴俊鐐差儏濞寸兘鎮伴妷褏纾介柛灞剧懆閸忓矂鏌涢悩鑼ょ紒顔规櫇閳ь剚绋掗敋缂佸墎鍋ら弻娑㈠即閵娿儱绠洪梺绋匡功閸嬨倝寮诲☉妯滄梹鎷呴崷顓фК婵犵數濮崑鎾绘煙缂併垹鏋涢梺瑁ゅ€栨穱濠囧Χ閸曨厼濡介梺璇″灡閻熴儵婀侀梺鎸庣箓濡盯鎯岀仦鍓х闁割偆鍠庨悘瀵糕偓瑙勬穿缂嶄礁鐣烽幒鎴旀婵炲棙鍔﹂崯鈧梻鍌欑閹碱偆绮欓崟顓熷床婵犻潧顑嗛崑妯荤箾閸℃ɑ灏潻婵囩箾鏉堝墽鎮奸柛搴涘€濆瀹犵疀濞戞瑧鍘甸梺鍦檸閸犳寮柆宥嗙厽婵°倐鍋撻悗娑掓櫊閵嗗啴濡疯濞岊亪鏌ｉ幋鏃€娅呭ù婊勫劤闇夐柨婵嗘噺閸熺偤鏌涢弴銏㈢暫闁哄本绋栭ˇ铏亜閵娿儲顥㈤柟顔ㄥ嫭鍎熼柕蹇婃櫆椤旀棃鏌ｈ箛鏇炰哗闁稿鍔欓幃鐑藉閻樺棗缍婇弫鎰板幢濞嗘垹鍘掑┑鐘媰閸愨晛浠村Δ鐘靛仦閹瑰洭鐛崶顒夋晢闁逞屽墰瀵?
+     * 封装单次作物操作所需的用户、地块和作物上下文，并在构造阶段完成基础校验。
      */
     private class CropActionContext {
         final Long userId;
@@ -137,7 +137,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
     }
 
     /**
-     * 闂傚倷绀侀幉锟犲礉閺嶎偄鍨濋悘鐐缎掗弨锕傛煃瑜滈崜鐔煎箖瀹勬壋鏋庨煫鍥ㄦ濡偛鈹戦悙鑼憼閽冭京绱掔€ｎ亶妲圭紒缁樼箖閹峰懘鎼圭憴鍕殻闂傚倷绀侀幖顐﹀磹缁嬫５褰掑礋椤撶噥娼熼梺瑙勵問閸犳氨澹曟總鍛婄厽闁哄倸鐏濋。铏亜韫囨挸鑸规い顓℃硶閹瑰嫰宕崟鍏哥磻闂備浇顕栭崰鏍晝椤忓嫮鏆︽慨姗嗗劦閺冨牆绀嬮柍瑙勫劤娴滈箖鏌涢幇鍏哥胺婵炲矈浜弻锟犲炊閳轰絿鐐裁归悩宕囥€掔紒杈ㄥ浮椤㈡洟濡堕崶褏顐奸梺姹囧焺閸ㄩ亶骞愰崘鑼殾闁挎繂顦伴弲鏌ユ煕閵夛絽濡块柡鍡欏█濮婄儤娼幏灞藉帯婵犫拃鍕垫當闁伙絽鐏氶幏鍛存儌閸濄儳鐓戦梻浣告啞濞诧箓宕戦崟顖ょ稏闁挎繂顦痪褔鏌ｉ幇顒傛憼闁诲浚鍠氱槐鎺撴綇閵娧勫櫚闂佽鍠曠划娆愪繆閹间焦鏅濋柍褜鍓熼幃锟犲即閵忥紕鍘搁悗骞垮劚缁绘帞寮ч埀顒勬⒑缂佹鈯曢柣鐔叉櫆娣囧﹦鈧稒蓱婵挳鏌ｉ悢鐓庝喊婵☆偅顨婂缁樻媴閻熸壆绁风紓浣虹帛閸ㄥ潡骞冮敓鐘虫櫖闁告洦鍓欓悵鏉款渻閵堝骸浜介柛姗€绠栭幃鐑藉閵堝棛鍘搁梺鍛婃处閸樼厧鐡梻浣圭湽閸斿孩绻涢埀顒勬煛?
+     * 封装农场视图渲染所需的地块、作物、阶段和用户资产上下文。
      */
     private class FarmViewContext {
         final Long userId;
@@ -723,7 +723,7 @@ public class CropLifecycleServiceImp implements CropLifecycleService {
     /* =========================================================
      *  Private Core Logic Helpers
      * ========================================================= */
-    // ... 婵犵數鍋為崹鍫曞箰閹间緡鏁勯柛鈩冪☉閽冪喖鏌ｉ弮鍌氬付缂佺姰鍎甸弻宥堫檨闁告挾鍠庨锝夊垂椤愩垻绐為柣蹇曞仜婢т粙寮?private validateUser, saveHarvestFailLog, isSoilIncompatible 缂傚倸鍊烽悞锔剧矙閹次诲洦瀵奸弶鎴ｆ憰闂佺粯鏌ㄩ惃婵嬪几閺嶎厽鐓涢柛銉㈡櫅娴狅妇绱撳鍛棞閼挎劙鏌涢妷锝呭缂佺姵鐗犻幃妤呭垂椤愶絺鎷圭紓浣割儏閿曪箓鍩€椤掑﹦绉靛ù婊勭矒璺柛娑樼摠閻撶喖鏌曟繛鍨姎妞ゅ繆鏅犻弻锝夊Χ閸涱収浼冮梺?...
+    // Core helper methods for user, plot, crop, stage and reward validation live below.
 
     private User validateUser(Long userId) {
         return ServiceGuardUtils.requirePresent(userDao.findByIdAndIsDeletedFalse(userId), BizErrorCode.USER_NOT_FOUND, "User not found");

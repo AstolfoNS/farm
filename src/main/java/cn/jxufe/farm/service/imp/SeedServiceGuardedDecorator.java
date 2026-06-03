@@ -223,7 +223,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     public void removeSeedType(IdDTO params) {
         Long seedTypeId = params == null ? null : params.getId();
         if (seedTypeId == null || seedTypeId <= 0) {
-            throw new ServiceException(BizErrorCode.PARAM_INVALID, "绉嶅瓙绫诲瀷ID鏃犳晥");
+            throw new ServiceException(BizErrorCode.PARAM_INVALID, "种子类型ID无效");
         }
         ensureSeedTypeNotReferenced(seedTypeId);
         delegate.removeSeedType(params);
@@ -299,7 +299,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
 
     private void validateStageRules(Long seedTypeId, boolean requireCompleteConfig) {
         if (seedTypeId == null || seedTypeId <= 0) {
-            throw new ServiceException(BizErrorCode.PARAM_INVALID, "绉嶅瓙绫诲瀷ID鏃犳晥");
+            throw new ServiceException(BizErrorCode.PARAM_INVALID, "种子类型ID无效");
         }
         List<SeedGrowthStage> stages = seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(seedTypeId);
         if (stages.isEmpty()) {
@@ -314,7 +314,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
         for (SeedGrowthStage stage : stages) {
             short actual = stage.getStageIndex() == null ? 0 : stage.getStageIndex();
             if (actual != expect) {
-                throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "闃舵搴忓彿蹇呴』杩炵画涓?1..N");
+                throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "阶段序号必须连续为 1..N");
             }
             stageIndexSet.add(actual);
             lastStageIndex = actual;
@@ -543,7 +543,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
         if (userExperience < unlockRequired) {
             throw new ServiceException(
                     BizErrorCode.EXPERIENCE_NOT_ENOUGH,
-                    "缁忛獙涓嶈冻锛屽皻鏈В閿佽绉嶅瓙銆傞渶瑕佺粡楠? " + unlockRequired + "锛屽綋鍓嶇粡楠? " + userExperience
+                    "经验不足，尚未解锁该种子。需要经验 " + unlockRequired + "，当前经验 " + userExperience
             );
         }
     }
