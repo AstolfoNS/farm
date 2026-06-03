@@ -7,10 +7,9 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class UserPlotAllocationApplyDTO implements Serializable {
+public class PlotExpandOptionsQueryDTO implements Serializable {
 
-    @NotNull(message = "userId不能为空")
-    @Positive(message = "userId必须大于0")
+    @NotNull(message = "用户ID不能为空")
+    @Positive(message = "用户ID必须大于0")
     private Long userId;
 }
-

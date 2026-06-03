@@ -17,8 +17,6 @@ public class GameplayPolicyProperties {
 
         private Unlock unlock = new Unlock();
 
-        private Expand expand = new Expand();
-
         private DefaultInit defaults = new DefaultInit();
 
     }
@@ -36,18 +34,6 @@ public class GameplayPolicyProperties {
         private long baseRequiredExperience = 100L;
 
         private long requiredExperienceStep = 100L;
-
-    }
-
-    @Setter
-    @Getter
-    public static class Expand {
-
-        private int freePlotCountLimit = 3;
-
-        private long baseCostCoin = 100L;
-
-        private long costStepCoin = 50L;
 
     }
 

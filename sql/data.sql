@@ -24,10 +24,10 @@ INSERT INTO farm.seed_qualities (name, description) VALUES
 ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
 
 -- 2) 土地类型字典 (集成最终版数据)
-INSERT INTO farm.soil_types (name, bit_code, cover_image_url, level, unlock_experience_required, grow_speed_multiplier, description) VALUES
-                                                                                                                                         ('黄土地', 1, '/oss/defaults/soil/soil-land-default.png', 1, 0, 1.00, '基础土地，适配多数作物'),
-                                                                                                                                         ('黑土地', 2, '/oss/defaults/soil/soil-land-black-default.png', 2, 500, 0.90, '生长速度更快的改良土地'),
-                                                                                                                                         ('金土地', 4, '/oss/defaults/soil/soil-land-gold-default.png', 3, 2000, 0.80, '高级土地，适配高等级作物')
+INSERT INTO farm.soil_types (name, bit_code, cover_image_url, level, unlock_experience_required, grow_speed_multiplier, expand_cost_coin, description) VALUES
+                                                                                                                                         ('黄土地', 1, '/oss/defaults/soil/soil-land-default.png', 1, 0, 1.00, 0, '基础土地，适配多数作物'),
+                                                                                                                                         ('黑土地', 2, '/oss/defaults/soil/soil-land-black-default.png', 2, 500, 0.90, 1500, '生长速度更快的改良土地'),
+                                                                                                                                         ('金土地', 4, '/oss/defaults/soil/soil-land-gold-default.png', 3, 2000, 0.80, 5000, '高级土地，适配高等级作物')
 ON CONFLICT (bit_code) WHERE is_deleted = false DO UPDATE SET
                                                               cover_image_url = EXCLUDED.cover_image_url, updated_at = NOW();
 
@@ -176,48 +176,20 @@ ON CONFLICT (username) WHERE is_deleted = false DO UPDATE SET
                                                               nickname = EXCLUDED.nickname, email = EXCLUDED.email, experience = EXCLUDED.experience,
                                                               score = EXCLUDED.score, coin = EXCLUDED.coin, updated_at = NOW();
 
--- 7) 地块类型与全局策略初始化
-INSERT INTO farm.plot_types (name, icon_url, soil_type_id, unlock_required, default_usable, default_plot_unlock_experience_config, sort_order, description)
-SELECT '普通耕地', '', st.id, false, true, 0, 1, '默认可用地块类型' FROM farm.soil_types st WHERE st.name = '黄土地' AND st.is_deleted = false
-ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
+-- 7) 全局策略初始化
+INSERT INTO farm.plot_policies (policy_name, active, default_total_plot_count, default_unlocked_plot_count, default_locked_plot_count)
+VALUES ('default-policy-v1', true, 6, 2, 4)
+ON CONFLICT DO NOTHING;
 
-INSERT INTO farm.plot_types (name, icon_url, soil_type_id, unlock_required, default_usable, default_plot_unlock_experience_config, sort_order, description)
-SELECT '改良耕地', '', st.id, true, true, 500, 2, '中级地块类型，需要解锁' FROM farm.soil_types st WHERE st.name = '黑土地' AND st.is_deleted = false
-ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
-
-INSERT INTO farm.plot_types (name, icon_url, soil_type_id, unlock_required, default_usable, default_plot_unlock_experience_config, sort_order, description)
-SELECT '高级耕地', '', st.id, true, false, 2000, 3, '高级地块类型，偏后期解锁' FROM farm.soil_types st WHERE st.name = '金土地' AND st.is_deleted = false
-ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
-
-WITH default_plot_type AS (SELECT id FROM farm.plot_types WHERE name = '普通耕地' AND is_deleted = false LIMIT 1)
-INSERT INTO farm.plot_policies (policy_name, active, default_total_plot_count, default_unlocked_plot_count, default_locked_plot_count, default_plot_type_id, allocation_rule_json)
-SELECT 'default-policy-v1', true, 6, 2, 4, dpt.id, jsonb_build_object(COALESCE(dpt.id::text, 'default'), jsonb_build_object('total', 6, 'locked', 4))
-FROM default_plot_type dpt
-WHERE NOT EXISTS (SELECT 1 FROM farm.plot_policies WHERE policy_name = 'default-policy-v1' AND is_deleted = false);
-
--- 8) 用户地块分配策略 (整合增强补丁)
-WITH cfg (username, total_count, unlocked_count) AS (
-    VALUES
-        ('liubei',  10::smallint, 4::smallint),
-        ('caocao',   8::smallint, 3::smallint),
-        ('sunquan',  7::smallint, 2::smallint),
-        ('zhaoyun',  6::smallint, 2::smallint),
-        ('huatuo',   5::smallint, 1::smallint)
-),
-     default_plot_type AS (SELECT id FROM farm.plot_types WHERE name = '普通耕地' AND is_deleted = false LIMIT 1)
-INSERT INTO farm.user_plot_allocations (user_id, active, total_plot_count, unlocked_plot_count, locked_plot_count, default_plot_type_id, lock_rule_code, lock_reason, allocation_rule_json, applied_at)
-SELECT u.id, true, cfg.total_count, cfg.unlocked_count, cfg.total_count - cfg.unlocked_count, dpt.id, 'EXP_REQUIRED', '经验不足，待解锁', jsonb_build_object('default', jsonb_build_object('total', cfg.total_count, 'locked', cfg.total_count - cfg.unlocked_count)), NOW()
-FROM cfg
-         JOIN farm.users u ON u.username = cfg.username AND u.is_deleted = false
-         CROSS JOIN default_plot_type dpt
-ON CONFLICT (user_id) WHERE is_deleted = false DO UPDATE SET
-                                                             total_plot_count = EXCLUDED.total_plot_count, unlocked_plot_count = EXCLUDED.unlocked_plot_count,
-                                                             locked_plot_count = EXCLUDED.locked_plot_count, allocation_rule_json = EXCLUDED.allocation_rule_json, applied_at = NOW(), updated_at = NOW();
-
--- 9) 用户地块实例网格化 (按补丁版分配同步)
+-- 8) 用户地块实例网格化
 WITH alloc AS (
-    SELECT user_id, total_plot_count::int, unlocked_plot_count::int
-    FROM farm.user_plot_allocations WHERE active = true AND is_deleted = false
+    SELECT
+        u.id AS user_id,
+        COALESCE(pp.default_total_plot_count, 6)::int AS total_plot_count,
+        COALESCE(pp.default_unlocked_plot_count, 2)::int AS unlocked_plot_count
+    FROM farm.users u
+    LEFT JOIN farm.plot_policies pp ON pp.active = true AND pp.is_deleted = false
+    WHERE u.is_deleted = false
 ),
      soil_map AS (
          SELECT
@@ -247,13 +219,20 @@ ON CONFLICT (user_id, plot_index) WHERE is_deleted = false DO UPDATE SET
                                                                          lock_reason = EXCLUDED.lock_reason, updated_at = NOW();
 
 -- 超额地块安全软删除
-WITH alloc AS (SELECT user_id, total_plot_count FROM farm.user_plot_allocations WHERE active = true AND is_deleted = false)
+WITH alloc AS (
+    SELECT
+        u.id AS user_id,
+        COALESCE(pp.default_total_plot_count, 6)::int AS total_plot_count
+    FROM farm.users u
+    LEFT JOIN farm.plot_policies pp ON pp.active = true AND pp.is_deleted = false
+    WHERE u.is_deleted = false
+)
 UPDATE farm.user_plots up
 SET is_deleted = true, updated_at = NOW(), remark = 'auto-retired by allocation sync'
 FROM alloc a
 WHERE up.user_id = a.user_id AND up.plot_index > a.total_plot_count AND up.is_deleted = false;
 
--- 10) 用户种子背包初始化
+-- 9) 用户种子背包初始化
 WITH cfg (username, seed_name, quantity) AS (
     VALUES
         ('liubei',  '草莓', 28::bigint), ('liubei',  '蓝莓', 12::bigint), ('liubei',  '玉米', 20::bigint), ('liubei',  '南瓜', 14::bigint), ('liubei',  '辣椒', 16::bigint), ('liubei',  '水稻', 24::bigint),

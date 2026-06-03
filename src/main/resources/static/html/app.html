@@ -136,6 +136,10 @@
                     <img src="/resources/imgs/domain/farm/actions/action-clean-bug.png" alt="杀虫">
                     <span>杀虫</span>
                 </a>
+                <a id="farmExpandBtn" href="javascript:void(0)" class="farm-tool-btn farm-toolbar-action-btn" title="扩地">
+                    <img src="/resources/imgs/app/menu/land-manage.png" alt="扩地">
+                    <span>扩地</span>
+                </a>
                 <div id="farmToolHint" class="farm-tool-hint">当前工具：查看（点击地块打开操作窗）</div>
             </div>
             <div id="farmIsoContainer" class="farm-iso-container"></div>
@@ -265,8 +269,7 @@
             <div class="home-panel-body plot-admin-body">
                 <div class="plot-admin-tabs">
                     <a id="plotAdminTabSoil" href="javascript:void(0)" class="plot-admin-tab is-active" data-tab="soil">土壤类型管理</a>
-                    <a id="plotAdminTabType" href="javascript:void(0)" class="plot-admin-tab" data-tab="type">地块类型管理</a>
-                    <a id="plotAdminTabUser" href="javascript:void(0)" class="plot-admin-tab" data-tab="user">用户土地配置</a>
+                    <a id="plotAdminTabPolicy" href="javascript:void(0)" class="plot-admin-tab" data-tab="policy">全局策略配置</a>
                 </div>
 
                 <div id="plotAdminSoilPane" class="plot-admin-pane is-active">
@@ -285,53 +288,27 @@
                     </div>
                 </div>
 
-                <div id="plotAdminTypePane" class="plot-admin-pane">
-                    <div id="plotAdminTypeToolbar" class="plot-admin-toolbar farm-admin-toolbar">
-                        <label class="plot-admin-toolbar-label" for="plotAdminTypeName">地块类型:</label>
-                        <input id="plotAdminTypeName" class="easyui-textbox" style="width:180px">
-                        <a id="plotAdminTypeSearchBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
-                        <a id="plotAdminTypeResetBtn" href="javascript:void(0)" class="easyui-linkbutton">重置</a>
-                        <a id="plotAdminTypeAddBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-add'">新增地块类型</a>
-                        <a id="plotAdminTypeEditBtn" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑地块类型</a>
-                        <a id="plotAdminTypeDeleteBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">删除地块类型</a>
-                    </div>
-                    <div class="plot-admin-grid-title farm-admin-grid-title">地块类型清单</div>
-                    <div class="plot-admin-grid-panel farm-admin-grid-panel">
-                        <table id="plotAdminTypeGrid"></table>
-                    </div>
-                </div>
-
-                <div id="plotAdminUserPane" class="plot-admin-pane">
-                    <div id="plotAdminUserToolbar" class="plot-admin-toolbar farm-admin-toolbar">
-                        <label class="plot-admin-toolbar-label" for="plotAdminUserName">用户:</label>
-                        <input id="plotAdminUserName" class="easyui-textbox" style="width:180px">
-                        <a id="plotAdminUserSearchBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-search'">查询</a>
-                        <a id="plotAdminUserResetBtn" href="javascript:void(0)" class="easyui-linkbutton">重置</a>
-                        <a id="plotAdminUserEditBtn" href="javascript:void(0)" class="easyui-linkbutton c4" data-options="iconCls:'icon-edit'">编辑用户配置</a>
-                        <a id="plotAdminPolicyRefreshBtn" href="javascript:void(0)" class="easyui-linkbutton c1">刷新策略</a>
-                        <a id="plotAdminPolicyEditBtn" href="javascript:void(0)" class="easyui-linkbutton c2">编辑策略</a>
-                        <a id="plotAdminPolicyActivateBtn" href="javascript:void(0)" class="easyui-linkbutton c3">激活策略</a>
-                    </div>
-                    <div class="plot-admin-policy-board">
-                        <div class="plot-admin-policy-title">当前全局策略</div>
-                        <div class="plot-admin-policy-row">
-                            <span>策略: <em id="plotAdminPolicyName">-</em></span>
-                            <span>版本: <em id="plotAdminPolicyVersion">-</em></span>
-                            <span>状态: <em id="plotAdminPolicyStatus">-</em></span>
-                            <span>生效范围: <em id="plotAdminPolicyScope">-</em></span>
+                <div id=”plotAdminPolicyPane” class=”plot-admin-pane”>
+                    <div class=”plot-admin-policy-board”>
+                        <div class=”plot-admin-policy-title”>当前全局策略</div>
+                        <div class=”plot-admin-policy-row”>
+                            <span>策略: <em id=”plotAdminPolicyName”>-</em></span>
+                            <span>版本: <em id=”plotAdminPolicyVersion”>-</em></span>
+                            <span>状态: <em id=”plotAdminPolicyStatus”>-</em></span>
+                            <span>生效范围: <em id=”plotAdminPolicyScope”>-</em></span>
                         </div>
-                        <div class="plot-admin-policy-row">
-                            <span>总地块: <em id="plotAdminPolicyTotal">0</em></span>
-                            <span>已解锁: <em id="plotAdminPolicyUnlocked">0</em></span>
-                            <span>锁定: <em id="plotAdminPolicyLocked">0</em></span>
-                            <span>默认类型: <em id="plotAdminPolicyDefaultType">-</em></span>
+                        <div class=”plot-admin-policy-row”>
+                            <span>总地块: <em id=”plotAdminPolicyTotal”>0</em></span>
+                            <span>已解锁: <em id=”plotAdminPolicyUnlocked”>0</em></span>
+                            <span>锁定: <em id=”plotAdminPolicyLocked”>0</em></span>
                         </div>
                     </div>
-                    <div class="plot-admin-grid-title farm-admin-grid-title">用户土地配置</div>
-                    <div class="plot-admin-grid-panel farm-admin-grid-panel">
-                        <table id="plotAdminUserGrid"></table>
+                    <div class=”plot-admin-policy-toolbar” style=”margin-top:12px”>
+                        <a id=”plotAdminPolicyRefreshBtn” href=”javascript:void(0)” class=”easyui-linkbutton c1”>刷新策略</a>
+                        <a id=”plotAdminPolicyEditBtn” href=”javascript:void(0)” class=”easyui-linkbutton c2”>编辑策略</a>
+                        <a id=”plotAdminPolicyActivateBtn” href=”javascript:void(0)” class=”easyui-linkbutton c3”>激活策略</a>
                     </div>
-                    <div class="plot-admin-tip">提示：策略激活只对新用户生效。单用户配置编辑禁止回滚“当前已解锁地块数”。</div>
+                    <div class=”plot-admin-tip” style=”margin-top:10px”>提示：策略激活只对新用户生效，所有用户统一使用全局策略配置。</div>
                 </div>
             </div>
         </section>
@@ -352,6 +329,10 @@
                         <td><input name="level" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
                         <td>土壤解锁经验</td>
                         <td><input name="unlockExperienceRequired" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">exp</span></td>
+                    </tr>
+                    <tr>
+                        <td>扩地金币成本</td>
+                        <td><input name="expandCostCoin" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">金币</span></td>
                     </tr>
                     <tr>
                         <td>成长倍率</td>
@@ -387,63 +368,8 @@
             </div>
         </div>
 
-        <div id="plotTypeEditorDialog" class="easyui-dialog plot-admin-dialog farm-dialog-shell" title="编辑地块类型"
-             style="width:860px;height:452px;padding:8px" closed="true" modal="true" resizable="false">
-            <form id="plotTypeEditorForm" method="post">
-                <input type="hidden" name="id" value="0">
-                <table class="plot-admin-form-table farm-dialog-form">
-                    <tr>
-                        <td>地块类型</td>
-                        <td><input name="name" class="easyui-textbox" style="width:220px" required="true"></td>
-                        <td>关联土壤</td>
-                        <td><input id="plotTypeSoilTypeId" name="soilTypeId" class="easyui-combobox" style="width:220px" required="true"></td>
-                    </tr>
-                    <tr>
-                        <td>地块解锁经验配置值(默认)</td>
-                        <td><input name="defaultPlotUnlockExperienceConfig" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">exp</span></td>
-                        <td>排序</td>
-                        <td><input name="sortOrder" class="easyui-numberbox" data-options="precision:0" style="width:220px"></td>
-                    </tr>
-                    <tr>
-                        <td>需要解锁</td>
-                        <td><input id="plotTypeUnlockRequired" name="unlockRequired" class="easyui-switchbutton" data-options="onText:'是',offText:'否'"></td>
-                        <td>默认可用</td>
-                        <td><input id="plotTypeDefaultUsable" name="defaultUsable" class="easyui-switchbutton" data-options="onText:'是',offText:'否'"></td>
-                    </tr>
-                    <tr>
-                        <td>图标URL</td>
-                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field"><input name="iconUrl" class="easyui-textbox plot-admin-full-input"></td>
-                    </tr>
-                    <tr>
-                        <td>封面URL</td>
-                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field">
-                            <div class="plot-admin-cover-row farm-admin-upload-row">
-                                <div class="plot-admin-cover-input-wrap farm-admin-upload-input-wrap">
-                                    <input id="plotTypeCoverImageUrl" name="coverImageUrl" class="easyui-textbox plot-admin-full-input">
-                                    <a id="plotTypeUploadCoverBtn" href="javascript:void(0)" class="easyui-linkbutton c2">上传图片</a>
-                                </div>
-                                <div class="plot-admin-cover-preview-wrap farm-admin-upload-preview-wrap">
-                                    <img id="plotTypeCoverPreview" class="plot-admin-cover-preview farm-admin-upload-preview" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="地块预览">
-                                    <span>预览</span>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>描述</td>
-                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field"><input name="description" class="easyui-textbox plot-admin-description-input" style="height:86px" data-options="multiline:true"></td>
-                    </tr>
-                </table>
-                <input id="plotTypeCoverFile" type="file" accept="image/*" style="display:none">
-            </form>
-            <div class="plot-admin-dialog-actions farm-dialog-actions">
-                <a id="plotTypeSaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存</a>
-                <a id="plotTypeCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
-            </div>
-        </div>
-
         <div id="plotPolicyEditorDialog" class="easyui-dialog plot-admin-dialog farm-dialog-shell" title="编辑全局策略"
-             style="width:860px;height:452px;padding:8px" closed="true" modal="true" resizable="false">
+             style="width:760px;height:380px;padding:8px" closed="true" modal="true" resizable="false">
             <form id="plotPolicyEditorForm" method="post">
                 <input type="hidden" name="id" value="0">
                 <table class="plot-admin-form-table farm-dialog-form">
@@ -460,16 +386,16 @@
                         <td><input name="defaultUnlockedPlotCount" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px" required="true"></td>
                     </tr>
                     <tr>
-                        <td>默认地块类型</td>
-                        <td><input id="plotPolicyDefaultPlotTypeId" name="defaultPlotTypeId" class="easyui-combobox" style="width:220px"></td>
                         <td>发布状态</td>
                         <td><input id="plotPolicyPublishStatus" name="publishStatus" class="easyui-combobox" style="width:220px"></td>
-                    </tr>
-                    <tr>
                         <td>生效范围</td>
                         <td><input id="plotPolicyEffectiveScope" name="effectiveScope" class="easyui-combobox" style="width:220px"></td>
+                    </tr>
+                    <tr>
                         <td>默认激活</td>
                         <td><input id="plotPolicyActiveSwitch" name="active" class="easyui-switchbutton" data-options="onText:'是',offText:'否'"></td>
+                        <td></td>
+                        <td></td>
                     </tr>
                     <tr>
                         <td>锁定规则</td>
@@ -477,61 +403,11 @@
                         <td>锁定说明</td>
                         <td><input name="defaultLockReason" class="easyui-textbox" style="width:220px"></td>
                     </tr>
-                    <tr>
-                        <td>分配规则JSON</td>
-                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field">
-                            <input name="allocationRuleJson" class="easyui-textbox plot-admin-description-input" style="height:98px" data-options="multiline:true">
-                        </td>
-                    </tr>
                 </table>
             </form>
             <div class="plot-admin-dialog-actions farm-dialog-actions">
                 <a id="plotPolicySaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存策略</a>
                 <a id="plotPolicyCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
-            </div>
-        </div>
-
-        <div id="plotUserAllocationDialog" class="easyui-dialog plot-admin-dialog farm-dialog-shell" title="编辑用户土地配置"
-             style="width:860px;height:440px;padding:8px" closed="true" modal="true" resizable="false">
-            <form id="plotUserAllocationForm" method="post">
-                <input type="hidden" name="id" value="0">
-                <input type="hidden" name="userId" value="0">
-                <table class="plot-admin-form-table farm-dialog-form">
-                    <tr>
-                        <td>用户</td>
-                        <td><input id="plotUserAllocUserName" class="easyui-textbox" style="width:220px" readonly="readonly"></td>
-                        <td>当前已解锁</td>
-                        <td><input id="plotUserAllocCurrentUnlocked" class="easyui-textbox" style="width:220px" readonly="readonly"></td>
-                    </tr>
-                    <tr>
-                        <td>配置总地块</td>
-                        <td><input name="totalPlotCount" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px" required="true"></td>
-                        <td>配置已解锁</td>
-                        <td><input name="unlockedPlotCount" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px" required="true"></td>
-                    </tr>
-                    <tr>
-                        <td>默认地块类型</td>
-                        <td><input id="plotUserAllocDefaultPlotTypeId" name="defaultPlotTypeId" class="easyui-combobox" style="width:220px"></td>
-                        <td>启用配置</td>
-                        <td><input id="plotUserAllocActiveSwitch" name="active" class="easyui-switchbutton" data-options="onText:'是',offText:'否'"></td>
-                    </tr>
-                    <tr>
-                        <td>锁定规则</td>
-                        <td><input name="lockRuleCode" class="easyui-textbox" style="width:220px"></td>
-                        <td>锁定说明</td>
-                        <td><input name="lockReason" class="easyui-textbox" style="width:220px"></td>
-                    </tr>
-                    <tr>
-                        <td>分配规则JSON</td>
-                        <td colspan="3" class="plot-admin-full-field farm-admin-form-full-field">
-                            <input name="allocationRuleJson" class="easyui-textbox plot-admin-description-input" style="height:98px" data-options="multiline:true">
-                        </td>
-                    </tr>
-                </table>
-            </form>
-            <div class="plot-admin-dialog-actions farm-dialog-actions">
-                <a id="plotUserAllocSaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存用户配置</a>
-                <a id="plotUserAllocCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
             </div>
         </div>
 

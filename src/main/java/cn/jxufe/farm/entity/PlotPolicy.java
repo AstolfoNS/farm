@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnTransformer;
 
 @Getter
 @Setter
@@ -38,16 +37,9 @@ public class PlotPolicy extends BaseEntity {
     @Column(name = "default_locked_plot_count", nullable = false)
     private Short defaultLockedPlotCount;
 
-    @Column(name = "default_plot_type_id")
-    private Long defaultPlotTypeId;
-
     @Column(name = "default_lock_rule_code", nullable = false, length = 64)
     private String defaultLockRuleCode;
 
     @Column(name = "default_lock_reason", nullable = false, length = 255)
     private String defaultLockReason;
-
-    @Column(name = "allocation_rule_json", nullable = false, columnDefinition = "jsonb")
-    @ColumnTransformer(write = "?::jsonb")
-    private String allocationRuleJson;
 }

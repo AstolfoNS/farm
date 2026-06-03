@@ -13,6 +13,7 @@ public class SoilTypeGridVO implements Serializable {
     private String coverImageUrl;
     private Short level;
     private Long unlockExperienceRequired;
+    private Long expandCostCoin;
     private String growSpeedMultiplier;
     private String description;
 }

@@ -33,6 +33,9 @@ public class SoilType extends BaseEntity {
     @Column(name = "grow_speed_multiplier", nullable = false, precision = 5, scale = 2)
     private BigDecimal growSpeedMultiplier;
 
+    @Column(name = "expand_cost_coin", nullable = false)
+    private Long expandCostCoin;
+
     @Column(name = "description")
     private String description;
 }

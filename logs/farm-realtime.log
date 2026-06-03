@@ -1,2 +1,8 @@
 2026-06-03 01:47:30.697 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=46837f07-b6e6-4924-0f35-64f26328c9ec
 2026-06-03 01:49:35.660 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=46837f07-b6e6-4924-0f35-64f26328c9ec, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-03 15:39:42.898 DEBUG [http-nio-8080-exec-2] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=d761d902-e933-6ed2-27e8-1ad8852ab4c8
+2026-06-03 15:45:47.397 DEBUG [SpringApplicationShutdownHook] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=d761d902-e933-6ed2-27e8-1ad8852ab4c8, reason=CloseStatus[code=1001, reason=The web application is stopping]
+2026-06-03 15:45:57.292 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=1873bd9e-05ee-fa08-3ea3-bc21af22bedb
+2026-06-03 15:45:59.298 DEBUG [http-nio-8080-exec-5] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=1873bd9e-05ee-fa08-3ea3-bc21af22bedb, reason=CloseStatus[code=1001, reason=null]
+2026-06-03 15:46:03.609 DEBUG [http-nio-8080-exec-4] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 建立连接，userId=1, sessionId=e623a763-c777-2bd8-3a89-0c5ad2120d75
+2026-06-03 15:49:53.801 DEBUG [http-nio-8080-exec-1] cn.jxufe.farm.websocket.WebsocketHandler - WebSocket 连接关闭，userId=1, sessionId=e623a763-c777-2bd8-3a89-0c5ad2120d75, reason=CloseStatus[code=1001, reason=null]

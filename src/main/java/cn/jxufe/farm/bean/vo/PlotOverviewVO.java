@@ -15,8 +15,6 @@ public class PlotOverviewVO implements Serializable {
     private String lockReason;
     private String lockSource;
     private String lockRuleCode;
-    private Long plotTypeId;
-    private String plotTypeName;
     private Long soilTypeId;
     private Integer soilBitCode;
     private String soilName;

@@ -6,7 +6,6 @@ public final class PlotRuleConstants {
     }
 
     public static final String LOCK_SOURCE_GLOBAL_POLICY = "GLOBAL_POLICY";
-    public static final String LOCK_SOURCE_USER_ALLOCATION = "USER_ALLOCATION";
     public static final String LOCK_SOURCE_SYSTEM = "SYSTEM";
 
     public static final String LOCK_RULE_DEFAULT_LOCKED = "DEFAULT_LOCKED";

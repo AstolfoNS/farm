@@ -1,9 +1,11 @@
 package cn.jxufe.farm.service.imp;
 
 import cn.jxufe.farm.bean.dto.PlotExpandDTO;
+import cn.jxufe.farm.bean.dto.PlotExpandOptionsQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotStatusQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotTradeQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotUnlockDTO;
+import cn.jxufe.farm.bean.vo.PlotExpandOptionsVO;
 import cn.jxufe.farm.bean.vo.PlotExpandResultVO;
 import cn.jxufe.farm.bean.vo.PlotStatusVO;
 import cn.jxufe.farm.bean.vo.PlotTradeBizTypeOptionVO;
@@ -35,6 +37,11 @@ public class PlotGameplayServiceImp implements PlotGameplayService {
     @Override
     public PlotExpandResultVO expandPlot(PlotExpandDTO params) {
         return gameplayService.expandPlot(params);
+    }
+
+    @Override
+    public PlotExpandOptionsVO listPlotExpandOptions(PlotExpandOptionsQueryDTO params) {
+        return gameplayService.listPlotExpandOptions(params);
     }
 
     @Override

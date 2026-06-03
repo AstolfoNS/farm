@@ -3,16 +3,10 @@ package cn.jxufe.farm.controller;
 import cn.jxufe.farm.bean.dto.IdDTO;
 import cn.jxufe.farm.bean.dto.PlotPolicyActivateDTO;
 import cn.jxufe.farm.bean.dto.PlotPolicySaveDTO;
-import cn.jxufe.farm.bean.dto.PlotTypeQueryDTO;
-import cn.jxufe.farm.bean.dto.PlotTypeSaveDTO;
 import cn.jxufe.farm.bean.dto.SoilTypeQueryDTO;
 import cn.jxufe.farm.bean.dto.SoilTypeSaveDTO;
-import cn.jxufe.farm.bean.dto.UserPlotAllocationQueryDTO;
-import cn.jxufe.farm.bean.dto.UserPlotAllocationUpdateDTO;
 import cn.jxufe.farm.bean.vo.PlotPolicyVO;
-import cn.jxufe.farm.bean.vo.PlotTypeGridVO;
 import cn.jxufe.farm.bean.vo.SoilTypeGridVO;
-import cn.jxufe.farm.bean.vo.UserPlotAllocationGridVO;
 import cn.jxufe.farm.common.apis.R;
 import cn.jxufe.farm.common.pages.PageResult;
 import cn.jxufe.farm.service.PlotPhase1Service;
@@ -56,27 +50,6 @@ public class PlotController {
         return R.ok();
     }
 
-    @PostMapping(value = "/type/page", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public R<PageResult<PlotTypeGridVO>> pagePlotTypes(@Valid @RequestBody(required = false) PlotTypeQueryDTO query) {
-        return R.ok(plotPhase1Service.pagePlotTypes(query));
-    }
-
-    @PostMapping(value = "/type/get", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public R<PlotTypeGridVO> getPlotType(@Valid @RequestBody IdDTO params) {
-        return R.ok(plotPhase1Service.getPlotType(params));
-    }
-
-    @PostMapping(value = "/type/save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public R<Long> savePlotType(@Valid @RequestBody PlotTypeSaveDTO params) {
-        return R.ok(plotPhase1Service.savePlotType(params));
-    }
-
-    @PostMapping(value = "/type/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public R<Void> removePlotType(@Valid @RequestBody IdDTO params) {
-        plotPhase1Service.removePlotType(params);
-        return R.ok();
-    }
-
     @PostMapping(value = "/policy/current", consumes = MediaType.APPLICATION_JSON_VALUE)
     public R<PlotPolicyVO> currentPolicy(@RequestBody(required = false) Object ignored) {
         return R.ok(plotPhase1Service.currentPolicy());
@@ -90,15 +63,5 @@ public class PlotController {
     @PostMapping(value = "/policy/activate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public R<Long> activatePolicy(@Valid @RequestBody PlotPolicyActivateDTO params) {
         return R.ok(plotPhase1Service.activatePolicy(params));
-    }
-
-    @PostMapping(value = "/user/page", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public R<PageResult<UserPlotAllocationGridVO>> pageUserAllocations(@Valid @RequestBody(required = false) UserPlotAllocationQueryDTO query) {
-        return R.ok(plotPhase1Service.pageUserAllocations(query));
-    }
-
-    @PostMapping(value = "/user/update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public R<Long> updateUserAllocation(@Valid @RequestBody UserPlotAllocationUpdateDTO params) {
-        return R.ok(plotPhase1Service.updateUserAllocation(params));
     }
 }

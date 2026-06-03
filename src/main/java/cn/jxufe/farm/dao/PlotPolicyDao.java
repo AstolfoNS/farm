@@ -15,6 +15,4 @@ public interface PlotPolicyDao extends JpaRepository<PlotPolicy, Long> {
     Optional<PlotPolicy> findFirstByActiveTrueAndIsDeletedFalseOrderByIdAsc();
 
     List<PlotPolicy> findByIsDeletedFalseOrderByIdAsc();
-
-    boolean existsByDefaultPlotTypeIdAndIsDeletedFalse(Long defaultPlotTypeId);
 }

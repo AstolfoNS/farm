@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import cn.jxufe.farm.bean.dto.IdDTO;
 import cn.jxufe.farm.bean.dto.PageQueryDTO;
 import cn.jxufe.farm.bean.dto.SetCurUserDTO;
-import cn.jxufe.farm.bean.dto.UserPlotAllocationApplyDTO;
+import cn.jxufe.farm.dao.PlotPolicyDao;
+import cn.jxufe.farm.entity.PlotPolicy;
 import cn.jxufe.farm.bean.dto.UserAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.UserAvatarUpdateDTO;
 import cn.jxufe.farm.bean.dto.UserSettingsUpdateDTO;
@@ -30,7 +31,7 @@ import cn.jxufe.farm.entity.SoilType;
 import cn.jxufe.farm.entity.User;
 import cn.jxufe.farm.entity.UserPlot;
 import cn.jxufe.farm.service.FileService;
-import cn.jxufe.farm.service.PlotAdminService;
+
 import cn.jxufe.farm.service.UserService;
 import cn.jxufe.farm.service.support.AssetDefaultProvider;
 import jakarta.servlet.http.HttpSession;
@@ -64,7 +65,7 @@ public class UserServiceImp implements UserService {
 
     private final GameplayPolicyProperties gameplayPolicyProperties;
     private final ObjectMapper objectMapper;
-    private final PlotAdminService plotAdminService;
+    private final PlotPolicyDao plotPolicyDao;
     private final AssetDefaultProvider assetDefaultProvider;
 
     public UserServiceImp(
@@ -75,7 +76,7 @@ public class UserServiceImp implements UserService {
             LocalFileStorageProperties fileStorageProperties,
             GameplayPolicyProperties gameplayPolicyProperties,
             ObjectMapper objectMapper,
-            PlotAdminService plotAdminService,
+            PlotPolicyDao plotPolicyDao,
             AssetDefaultProvider assetDefaultProvider
     ) {
         this.userDao = userDao;
@@ -85,7 +86,7 @@ public class UserServiceImp implements UserService {
         this.fileStorageProperties = fileStorageProperties;
         this.gameplayPolicyProperties = gameplayPolicyProperties;
         this.objectMapper = objectMapper;
-        this.plotAdminService = plotAdminService;
+        this.plotPolicyDao = plotPolicyDao;
         this.assetDefaultProvider = assetDefaultProvider;
     }
 
@@ -441,21 +442,19 @@ public class UserServiceImp implements UserService {
         if (userId == null || userId <= 0) return;
         if (!userPlotDao.findByUserIdAndIsDeletedFalseOrderByPlotIndexAsc(userId).isEmpty()) return;
 
-        try {
-            UserPlotAllocationApplyDTO applyDTO = new UserPlotAllocationApplyDTO();
-            applyDTO.setUserId(userId);
-            plotAdminService.applyUserPlotAllocation(applyDTO);
-            return;
-        } catch (Exception ignored) {
-            // 回退旧逻辑，保证新用户仍可初始化地块
-        }
-
         List<SoilType> soils = soilTypeDao.findByIsDeletedFalseOrderByIdAsc();
         long defaultSoilTypeId = soils.isEmpty() ? 1L : soils.getFirst().getId();
         OffsetDateTime now = OffsetDateTime.now();
 
-        short totalPlotCount = (short) Math.max(1, gameplayPolicyProperties.getPlot().getDefaults().getTotalPlotCount());
-        short unlockedPlotCount = (short) Math.clamp(gameplayPolicyProperties.getPlot().getDefaults().getUnlockedPlotCount(), 1, totalPlotCount);
+        // Read PlotPolicy for counts, fall back to GameplayPolicyProperties
+        PlotPolicy activePolicy = plotPolicyDao.findFirstByActiveTrueAndIsDeletedFalseOrderByIdAsc().orElse(null);
+        short totalPlotCount = (short) Math.max(1,
+            activePolicy != null ? activePolicy.getDefaultTotalPlotCount()
+                : gameplayPolicyProperties.getPlot().getDefaults().getTotalPlotCount());
+        short unlockedPlotCount = (short) Math.clamp(
+            activePolicy != null ? activePolicy.getDefaultUnlockedPlotCount()
+                : gameplayPolicyProperties.getPlot().getDefaults().getUnlockedPlotCount(),
+            1, totalPlotCount);
 
         List<UserPlot> initPlots = IntStream.rangeClosed(1, totalPlotCount)
                 .mapToObj(index -> {

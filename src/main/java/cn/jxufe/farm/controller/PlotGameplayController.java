@@ -1,9 +1,11 @@
 package cn.jxufe.farm.controller;
 
 import cn.jxufe.farm.bean.dto.PlotExpandDTO;
+import cn.jxufe.farm.bean.dto.PlotExpandOptionsQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotStatusQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotTradeQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotUnlockDTO;
+import cn.jxufe.farm.bean.vo.PlotExpandOptionsVO;
 import cn.jxufe.farm.bean.vo.PlotExpandResultVO;
 import cn.jxufe.farm.bean.vo.PlotStatusVO;
 import cn.jxufe.farm.bean.vo.PlotTradeBizTypeOptionVO;
@@ -42,6 +44,11 @@ public class PlotGameplayController {
     @PostMapping(value = "/plot/expand", produces = MediaType.APPLICATION_JSON_VALUE)
     public R<PlotExpandResultVO> expandPlot(@Valid @RequestBody PlotExpandDTO params) {
         return R.ok(plotGameplayService.expandPlot(params));
+    }
+
+    @PostMapping(value = "/plot/expand/options", produces = MediaType.APPLICATION_JSON_VALUE)
+    public R<PlotExpandOptionsVO> listExpandOptions(@Valid @RequestBody PlotExpandOptionsQueryDTO params) {
+        return R.ok(plotGameplayService.listPlotExpandOptions(params));
     }
 
     @PostMapping(value = "/plot/status", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -21,6 +21,8 @@ public class SoilTypeSaveDTO implements Serializable {
 
     private Long unlockExperienceRequired;
 
+    private Long expandCostCoin;
+
     private String growSpeedMultiplier;
 
     private String description;

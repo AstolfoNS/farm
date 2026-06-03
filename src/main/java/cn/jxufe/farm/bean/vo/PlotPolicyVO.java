@@ -16,9 +16,6 @@ public class PlotPolicyVO implements Serializable {
     private Short defaultTotalPlotCount;
     private Short defaultUnlockedPlotCount;
     private Short defaultLockedPlotCount;
-    private Long defaultPlotTypeId;
-    private String defaultPlotTypeName;
     private String defaultLockRuleCode;
     private String defaultLockReason;
-    private String allocationRuleJson;
 }

@@ -8,6 +8,7 @@ import cn.jxufe.farm.bean.dto.MyFarmOverviewDTO;
 import cn.jxufe.farm.bean.dto.MyPlantingPanelDTO;
 import cn.jxufe.farm.bean.dto.PlantCropDTO;
 import cn.jxufe.farm.bean.dto.PlotExpandDTO;
+import cn.jxufe.farm.bean.dto.PlotExpandOptionsQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotStatusQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotTradeQueryDTO;
 import cn.jxufe.farm.bean.dto.PlotUnlockDTO;
@@ -19,6 +20,7 @@ import cn.jxufe.farm.bean.vo.HarvestResultVO;
 import cn.jxufe.farm.bean.vo.MyFarmOverviewVO;
 import cn.jxufe.farm.bean.vo.MyPlantingPanelVO;
 import cn.jxufe.farm.bean.vo.PlantResultVO;
+import cn.jxufe.farm.bean.vo.PlotExpandOptionsVO;
 import cn.jxufe.farm.bean.vo.PlotExpandResultVO;
 import cn.jxufe.farm.bean.vo.PlotStatusVO;
 import cn.jxufe.farm.bean.vo.PlotTradeBizTypeOptionVO;
@@ -172,6 +174,11 @@ public class GameplayServiceImp implements GameplayService {
     @Transactional
     public PlotExpandResultVO expandPlot(PlotExpandDTO params) {
         return plotManagementService.expandPlot(params);
+    }
+
+    @Override
+    public PlotExpandOptionsVO listPlotExpandOptions(PlotExpandOptionsQueryDTO params) {
+        return plotManagementService.listPlotExpandOptions(params);
     }
 
     @Override

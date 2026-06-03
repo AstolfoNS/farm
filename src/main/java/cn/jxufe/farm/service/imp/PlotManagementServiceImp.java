@@ -68,11 +68,13 @@ public class PlotManagementServiceImp implements PlotManagementService {
         final Long userId;
         final OffsetDateTime now;
         final long currentExperience;
+        final long currentCoin;
 
         UserActionContext(Long rawUserId) {
             this.userId = ServiceGuardUtils.requirePositive(rawUserId, BizErrorCode.PARAM_INVALID, "用户ID无效");
             User user = validateUserExists();
             this.currentExperience = gameplayCoreService.safeLong(user.getExperience());
+            this.currentCoin = gameplayCoreService.safeLong(user.getCoin());
             this.now = OffsetDateTime.now();
         }
 
@@ -180,7 +182,7 @@ public class PlotManagementServiceImp implements PlotManagementService {
         List<UserPlot> currentPlots = userPlotDao.findByUserIdAndIsDeletedFalseOrderByPlotIndexAsc(ctx.userId);
         int currentTotalPlots = currentPlots.size();
 
-        long expandCostCoin = calculateExpandCostCoin(currentTotalPlots);
+        long expandCostCoin = soilType.getExpandCostCoin() != null ? soilType.getExpandCostCoin() : 0L;
         ctx.deductCoin(expandCostCoin);
         long afterCoin = ctx.getLatestCoin();
         long beforeCoin = afterCoin + expandCostCoin;
@@ -197,9 +199,9 @@ public class PlotManagementServiceImp implements PlotManagementService {
         newPlot.setSoilTypeId(soilType.getId());
         newPlot.setPlotIndex(nextPlotIndex);
         newPlot.setUnlockExperienceRequired(calculatePlotUnlockRequiredExperience(nextPlotIndex));
-        newPlot.setIsLocked(false);
-        newPlot.setUnlockedAt(ctx.now);
-        newPlot.setLockReason(null);
+        newPlot.setIsLocked(true);
+        newPlot.setUnlockedAt(null);
+        newPlot.setLockReason("待解锁");
         UserPlot savedPlot = userPlotDao.save(newPlot);
 
         if (expandCostCoin > 0) {
@@ -211,7 +213,7 @@ public class PlotManagementServiceImp implements PlotManagementService {
         }
 
         int totalPlots = currentTotalPlots + 1;
-        int unlockedPlots = (int) currentPlots.stream().filter(this::isUnlocked).count() + 1; // Existing unlocked + new one
+        int unlockedPlots = (int) currentPlots.stream().filter(this::isUnlocked).count();
 
         PlotExpandResultVO result = new PlotExpandResultVO();
         result.setUserId(ctx.userId);
@@ -227,6 +229,42 @@ public class PlotManagementServiceImp implements PlotManagementService {
         result.setTotalPlots(totalPlots);
         result.setUnlockedPlots(unlockedPlots);
         result.setLockedPlots(totalPlots - unlockedPlots);
+        return result;
+    }
+
+    @Override
+    public PlotExpandOptionsVO listPlotExpandOptions(PlotExpandOptionsQueryDTO params) {
+        ServiceGuardUtils.requireNotNull(params, BizErrorCode.PARAM_INVALID, "请求参数不能为空");
+        UserActionContext ctx = new UserActionContext(params.getUserId());
+
+        List<UserPlot> currentPlots = userPlotDao.findByUserIdAndIsDeletedFalseOrderByPlotIndexAsc(ctx.userId);
+        int currentTotalPlots = currentPlots.size();
+        short nextPlotIndex = currentPlots.stream()
+                .map(UserPlot::getPlotIndex)
+                .max(Short::compareTo)
+                .map(val -> (short) (val + 1))
+                .orElse((short) 1);
+
+        List<PlotExpandOptionVO> options = soilTypeDao.findByIsDeletedFalseOrderByIdAsc().stream()
+                .map(item -> buildPlotExpandOption(item, ctx))
+                .collect(Collectors.toList());
+
+        // For summary, use the cheapest available expand cost
+        long minExpandCostCoin = options.stream()
+                .map(PlotExpandOptionVO::getExpandCostCoin)
+                .filter(cost -> cost != null)
+                .mapToLong(Long::longValue)
+                .min()
+                .orElse(0L);
+
+        PlotExpandOptionsVO result = new PlotExpandOptionsVO();
+        result.setUserId(ctx.userId);
+        result.setCurrentExperience(ctx.currentExperience);
+        result.setCurrentCoin(ctx.currentCoin);
+        result.setCurrentTotalPlots(currentTotalPlots);
+        result.setNextPlotIndex(nextPlotIndex);
+        result.setExpandCostCoin(minExpandCostCoin);
+        result.setOptions(options);
         return result;
     }
 
@@ -333,13 +371,6 @@ public class PlotManagementServiceImp implements PlotManagementService {
      *  Private Utility Helpers
      * ========================================================= */
 
-    private long calculateExpandCostCoin(int currentTotalPlots) {
-        int freeLimit = gameplayPolicyProperties.getPlot().getExpand().getFreePlotCountLimit();
-        if (currentTotalPlots < freeLimit) return 0L;
-        return gameplayPolicyProperties.getPlot().getExpand().getBaseCostCoin()
-                + (currentTotalPlots - freeLimit) * gameplayPolicyProperties.getPlot().getExpand().getCostStepCoin();
-    }
-
     private long calculatePlotUnlockRequiredExperience(short plotIndex) {
         short initialUnlocked = gameplayPolicyProperties.getPlot().getDefaults().getUnlockedPlotCount();
         if (plotIndex <= initialUnlocked) {
@@ -349,6 +380,27 @@ public class PlotManagementServiceImp implements PlotManagementService {
         long step = gameplayPolicyProperties.getPlot().getUnlock().getRequiredExperienceStep();
         long stepTimes = Math.max(0, plotIndex - initialUnlocked - 1);
         return Math.max(0L, base + stepTimes * step);
+    }
+
+    private PlotExpandOptionVO buildPlotExpandOption(SoilType soilType, UserActionContext ctx) {
+        long expandCostCoin = soilType.getExpandCostCoin() != null ? soilType.getExpandCostCoin() : 0L;
+        long unlockExperienceRequired = gameplayCoreService.safeLong(soilType.getUnlockExperienceRequired());
+        boolean unlockableByExperience = ctx.currentExperience >= unlockExperienceRequired;
+        boolean unlockableByCoin = ctx.currentCoin >= expandCostCoin;
+
+        PlotExpandOptionVO option = new PlotExpandOptionVO();
+        option.setSoilTypeId(soilType.getId());
+        option.setSoilName(gameplayCoreService.safeString(soilType.getName()));
+        option.setSoilBitCode(soilType.getBitCode());
+        option.setSoilLevel(soilType.getLevel());
+        option.setCoverImageUrl(gameplayCoreService.safeString(soilType.getCoverImageUrl()));
+        option.setDescription(gameplayCoreService.safeString(soilType.getDescription()));
+        option.setUnlockExperienceRequired(unlockExperienceRequired);
+        option.setExpandCostCoin(expandCostCoin);
+        option.setUnlockableByExperience(unlockableByExperience);
+        option.setUnlockableByCoin(unlockableByCoin);
+        option.setExpandable(unlockableByExperience && unlockableByCoin);
+        return option;
     }
 
     private UserPlot findNextLockedPlot(Long userId) {

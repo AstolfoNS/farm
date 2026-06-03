@@ -60,10 +60,6 @@ farm:
           free-plot-index-limit: ${PLOT_UNLOCK_FREE_INDEX_LIMIT:3}
           base-cost-coin: ${PLOT_UNLOCK_BASE_COST_COIN:80}
           cost-step-coin: ${PLOT_UNLOCK_COST_STEP_COIN:40}
-        expand:
-          free-plot-count-limit: ${PLOT_EXPAND_FREE_COUNT_LIMIT:3}
-          base-cost-coin: ${PLOT_EXPAND_BASE_COST_COIN:100}
-          cost-step-coin: ${PLOT_EXPAND_COST_STEP_COIN:50}
         defaults:
           total-plot-count: ${PLOT_DEFAULT_TOTAL_COUNT:6}
           unlocked-plot-count: ${PLOT_DEFAULT_UNLOCKED_COUNT:1}

@@ -31,11 +31,7 @@ public class PlotPolicySaveDTO implements Serializable {
     @Min(value = 0, message = "defaultLockedPlotCount must be >= 0")
     private Integer defaultLockedPlotCount;
 
-    private Long defaultPlotTypeId;
-
     private String defaultLockRuleCode;
 
     private String defaultLockReason;
-
-    private String allocationRuleJson;
 }
