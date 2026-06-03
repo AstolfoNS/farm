@@ -44,7 +44,33 @@ CREATE UNIQUE INDEX uk_users_email_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 2. 种子品质表
+-- 2. 默认资源配置表
+-- ==========================================
+CREATE TABLE farm.asset_defaults
+(
+    id                          BIGINT              NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    asset_key                   VARCHAR(128)        NOT NULL,
+    asset_url                   VARCHAR(1024)       NOT NULL,
+    description                 TEXT                    NULL,
+
+    created_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT                  NULL,
+    updated_by                  BIGINT                  NULL,
+    remark                      TEXT                    NULL,
+
+    status                      SMALLINT            NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN             NOT NULL DEFAULT false,
+    opt_lock_version            INT                 NOT NULL DEFAULT 0
+);
+COMMENT ON TABLE farm.asset_defaults IS '默认资源配置表';
+CREATE UNIQUE INDEX uk_asset_defaults_key_active
+    ON farm.asset_defaults(asset_key)
+    WHERE is_deleted = false;
+
+-- ==========================================
+-- 3. 种子品质表
 -- ==========================================
 CREATE TABLE farm.seed_qualities
 (
@@ -69,7 +95,7 @@ CREATE UNIQUE INDEX uk_seed_qualities_name_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 3. 土壤类型表
+-- 4. 土壤类型表
 -- ==========================================
 CREATE TABLE farm.soil_types
 (
@@ -103,7 +129,7 @@ CREATE UNIQUE INDEX uk_soil_types_name_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 4. 地块全局策略表
+-- 5. 地块全局策略表
 -- ==========================================
 CREATE TABLE farm.plot_policies
 (
@@ -133,7 +159,7 @@ CREATE INDEX idx_plot_policies_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 5. 生长阶段类型字典表
+-- 6. 生长阶段类型字典表
 -- ==========================================
 CREATE TABLE farm.growth_stages
 (
@@ -158,7 +184,7 @@ CREATE UNIQUE INDEX uk_growth_stages_name_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 6. 种子类型配置表
+-- 7. 种子类型配置表
 -- ==========================================
 CREATE TABLE farm.seed_types
 (
@@ -203,7 +229,7 @@ CREATE UNIQUE INDEX uk_seed_types_name_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 7. 种子生长过程配置表
+-- 8. 种子生长过程配置表
 -- ==========================================
 CREATE TABLE farm.seed_growth_stages
 (
@@ -238,7 +264,7 @@ CREATE UNIQUE INDEX uk_seed_growth_stage_index
     WHERE is_deleted = false;
 
 -- ==========================================
--- 8. 用户种子背包表
+-- 9. 用户种子背包表
 -- ==========================================
 CREATE TABLE farm.user_seeds
 (
@@ -265,7 +291,7 @@ CREATE UNIQUE INDEX uk_user_seeds_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 9. 用户地块表
+-- 10. 用户地块表
 -- ==========================================
 CREATE TABLE farm.user_plots
 (
@@ -295,7 +321,7 @@ CREATE UNIQUE INDEX uk_user_plot_index
     WHERE is_deleted = false;
 
 -- ==========================================
--- 10. 用户种植作物表
+-- 11. 用户种植作物表
 -- ==========================================
 CREATE TABLE farm.user_crops
 (
@@ -335,7 +361,7 @@ CREATE UNIQUE INDEX uk_plot_active_crop
     WHERE is_deleted = false;
 
 -- ==========================================
--- 11. 用户果实仓库表
+-- 12. 用户果实仓库表
 -- ==========================================
 CREATE TABLE farm.user_fruits
 (
@@ -362,7 +388,7 @@ CREATE UNIQUE INDEX uk_user_fruits_active
     WHERE is_deleted = false;
 
 -- ==========================================
--- 12. 用户资产流水表
+-- 13. 用户资产流水表
 -- ==========================================
 CREATE TABLE farm.user_asset_flows
 (
@@ -392,7 +418,7 @@ CREATE TABLE farm.user_asset_flows
 COMMENT ON TABLE farm.user_asset_flows IS '用户资产流水表';
 
 -- ==========================================
--- 13. 用户库存流水表
+-- 14. 用户库存流水表
 -- ==========================================
 CREATE TABLE farm.user_inventory_flows
 (
@@ -425,7 +451,7 @@ CREATE TABLE farm.user_inventory_flows
 COMMENT ON TABLE farm.user_inventory_flows IS '用户库存流水表';
 
 -- ==========================================
--- 14. 作物行为日志表
+-- 15. 作物行为日志表
 -- ==========================================
 CREATE TABLE farm.user_crop_action_logs
 (
@@ -453,7 +479,7 @@ CREATE TABLE farm.user_crop_action_logs
 COMMENT ON TABLE farm.user_crop_action_logs IS '作物行为日志表';
 
 -- ==========================================
--- 15. 请求幂等记录表
+-- 16. 请求幂等记录表
 -- ==========================================
 CREATE TABLE farm.request_idempotencies
 (

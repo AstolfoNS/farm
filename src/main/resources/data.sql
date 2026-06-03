@@ -1,480 +1,510 @@
 -- ==========================================
 -- 初始化 Schema 与 扩展
 -- ==========================================
+
 BEGIN;
 
 DROP SCHEMA IF EXISTS farm CASCADE;
-CREATE SCHEMA farm;
+CREATE SCHEMA IF NOT EXISTS farm;
 
 CREATE EXTENSION IF NOT EXISTS citext;
 
--- ==========================================
--- DDL 表结构定义（保持原样，无任何修改）
--- ==========================================
 
--- 0. 默认资源配置表
-CREATE TABLE farm.asset_defaults
-(
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    asset_key VARCHAR(128) NOT NULL,
-    asset_url VARCHAR(1024) NOT NULL DEFAULT '',
-    description TEXT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
-);
-COMMENT ON TABLE farm.asset_defaults IS '默认资源路径配置表';
-CREATE UNIQUE INDEX uk_asset_defaults_key_active ON farm.asset_defaults(asset_key) WHERE is_deleted = false;
 
+-- ==========================================
 -- 1. 用户信息表
+-- ==========================================
 CREATE TABLE farm.users
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    username citext NOT NULL,
-    nickname VARCHAR(500) NOT NULL,
-    password_hash VARCHAR(500) NOT NULL,
-    email citext NOT NULL,
-    avatar_url VARCHAR(1024) NOT NULL DEFAULT '',
-    experience BIGINT NOT NULL DEFAULT 0,
-    score BIGINT NOT NULL DEFAULT 0,
-    coin BIGINT NOT NULL DEFAULT 0,
-    preferences_json JSONB NOT NULL DEFAULT '{}'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT              NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    username                    citext              NOT NULL,
+    nickname                    VARCHAR(500)        NOT NULL,
+    password_hash               VARCHAR(500)        NOT NULL,
+    email                       citext              NOT NULL,
+    avatar_url                  VARCHAR(1024)       NOT NULL DEFAULT '',
+    experience                  BIGINT              NOT NULL DEFAULT 0,
+    score                       BIGINT              NOT NULL DEFAULT 0,
+    coin                        BIGINT              NOT NULL DEFAULT 0,
+    preferences_json            JSONB               NOT NULL DEFAULT '{}'::jsonb,
+
+    created_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT                  NULL,
+    updated_by                  BIGINT                  NULL,
+    remark                      TEXT                    NULL,
+
+    status                      SMALLINT            NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN             NOT NULL DEFAULT false,
+    opt_lock_version            INT                 NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.users IS '用户信息表';
-CREATE UNIQUE INDEX uk_users_username_active ON farm.users (username) WHERE is_deleted = false;
-CREATE UNIQUE INDEX uk_users_email_active ON farm.users (email) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_users_username_active
+    ON farm.users (username)
+    WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_users_email_active
+    ON farm.users (email)
+    WHERE is_deleted = false;
 
--- 2. 种子品质表
-CREATE TABLE farm.seed_qualities (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(500) NOT NULL,
-    description TEXT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+-- ==========================================
+-- 2. 默认资源配置表
+-- ==========================================
+CREATE TABLE farm.asset_defaults
+(
+    id                          BIGINT              NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    asset_key                   VARCHAR(128)        NOT NULL,
+    asset_url                   VARCHAR(1024)       NOT NULL,
+    description                 TEXT                    NULL,
+
+    created_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT                  NULL,
+    updated_by                  BIGINT                  NULL,
+    remark                      TEXT                    NULL,
+
+    status                      SMALLINT            NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN             NOT NULL DEFAULT false,
+    opt_lock_version            INT                 NOT NULL DEFAULT 0
+);
+COMMENT ON TABLE farm.asset_defaults IS '默认资源配置表';
+CREATE UNIQUE INDEX uk_asset_defaults_key_active
+    ON farm.asset_defaults(asset_key)
+    WHERE is_deleted = false;
+
+-- ==========================================
+-- 3. 种子品质表
+-- ==========================================
+CREATE TABLE farm.seed_qualities
+(
+    id                          BIGINT              NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    name                        VARCHAR(500)        NOT NULL,
+    description                 TEXT                    NULL,
+
+    created_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT                  NULL,
+    updated_by                  BIGINT                  NULL,
+    remark                      TEXT                    NULL,
+
+    status                      SMALLINT            NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN             NOT NULL DEFAULT false,
+    opt_lock_version            INT                 NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.seed_qualities IS '种子品质表';
-CREATE UNIQUE INDEX uk_seed_qualities_name_active ON farm.seed_qualities (name) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_seed_qualities_name_active
+    ON farm.seed_qualities (name)
+    WHERE is_deleted = false;
 
--- 3. 土壤类型表
+-- ==========================================
+-- 4. 土壤类型表
+-- ==========================================
 CREATE TABLE farm.soil_types
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(500) NOT NULL,
-    bit_code INT NOT NULL,
-    cover_image_url VARCHAR(1024) NOT NULL DEFAULT '',
-    level SMALLINT NOT NULL,
-    unlock_experience_required BIGINT NOT NULL DEFAULT 0,
-    grow_speed_multiplier NUMERIC(5, 2) NOT NULL DEFAULT 1.00,
-    description TEXT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    name                        VARCHAR(500)    NOT NULL,
+    bit_code                    INT             NOT NULL,
+    cover_image_url             VARCHAR(1024)   NOT NULL DEFAULT '',
+    level                       SMALLINT        NOT NULL,
+    unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
+    grow_speed_multiplier       NUMERIC(5, 2)   NOT NULL DEFAULT 1.00,
+    expand_cost_coin            BIGINT          NOT NULL DEFAULT 0,
+    description                 TEXT                NULL,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.soil_types IS '土壤类型表';
-CREATE UNIQUE INDEX uk_soil_types_bit_code_active ON farm.soil_types(bit_code) WHERE is_deleted = false;
-CREATE UNIQUE INDEX uk_soil_types_name_active ON farm.soil_types(name) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_soil_types_bit_code_active
+    ON farm.soil_types(bit_code)
+    WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_soil_types_name_active
+    ON farm.soil_types(name)
+    WHERE is_deleted = false;
 
--- 4. 地块类型表
-CREATE TABLE farm.plot_types
-(
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(128) NOT NULL,
-    icon_url VARCHAR(1024) NOT NULL DEFAULT '',
-    cover_image_url VARCHAR(1024) NOT NULL DEFAULT '',
-    soil_type_id BIGINT NOT NULL,
-    unlock_required BOOLEAN NOT NULL DEFAULT true,
-    default_usable BOOLEAN NOT NULL DEFAULT true,
-    default_plot_unlock_experience_config BIGINT NOT NULL DEFAULT 0,
-    sort_order INT NOT NULL DEFAULT 0,
-    description TEXT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
-);
-COMMENT ON TABLE farm.plot_types IS '地块类型表';
-CREATE UNIQUE INDEX uk_plot_types_name_active ON farm.plot_types(name) WHERE is_deleted = false;
-CREATE INDEX idx_plot_types_soil_type_active ON farm.plot_types(soil_type_id) WHERE is_deleted = false;
-
+-- ==========================================
 -- 5. 地块全局策略表
+-- ==========================================
 CREATE TABLE farm.plot_policies
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    policy_name VARCHAR(128) NOT NULL,
-    policy_version VARCHAR(64) NULL DEFAULT 'v1',
-    active BOOLEAN NOT NULL DEFAULT true,
-    effective_scope VARCHAR(32) NULL DEFAULT 'NEW_USER_ONLY',
-    publish_status VARCHAR(32) NULL DEFAULT 'DRAFT',
-    default_total_plot_count SMALLINT NOT NULL,
-    default_unlocked_plot_count SMALLINT NOT NULL,
-    default_locked_plot_count SMALLINT NOT NULL,
-    default_plot_type_id BIGINT NULL,
-    default_lock_rule_code VARCHAR(64) NOT NULL DEFAULT 'DEFAULT_LOCKED',
-    default_lock_reason VARCHAR(255) NOT NULL DEFAULT '待解锁',
-    allocation_rule_json JSONB NOT NULL DEFAULT '{}'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                              BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    policy_name                     VARCHAR(128)    NOT NULL,
+    active                          BOOLEAN         NOT NULL DEFAULT true,
+    default_total_plot_count        SMALLINT        NOT NULL,
+    default_unlocked_plot_count     SMALLINT        NOT NULL,
+    default_locked_plot_count       SMALLINT        NOT NULL,
+    default_lock_rule_code          VARCHAR(64)     NOT NULL DEFAULT 'DEFAULT_LOCKED',
+    default_lock_reason             VARCHAR(255)    NOT NULL DEFAULT '待解锁',
+
+    created_at                      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                      BIGINT              NULL,
+    updated_by                      BIGINT              NULL,
+    remark                          TEXT                NULL,
+
+    status                          SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                      BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version                INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.plot_policies IS '地块全局策略表';
-CREATE INDEX idx_plot_policies_active ON farm.plot_policies(active) WHERE is_deleted = false;
-CREATE INDEX idx_plot_policies_publish_status_active ON farm.plot_policies(publish_status, active) WHERE is_deleted = false;
+CREATE INDEX idx_plot_policies_active
+    ON farm.plot_policies(active)
+    WHERE is_deleted = false;
 
--- 6. 地块策略应用日志表
-CREATE TABLE farm.plot_policy_apply_logs
-(
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    policy_id BIGINT NOT NULL,
-    applied_scope VARCHAR(32) NOT NULL DEFAULT 'MANUAL_APPLY',
-    target_user_count INT NOT NULL DEFAULT 0,
-    success_user_count INT NOT NULL DEFAULT 0,
-    failed_user_count INT NOT NULL DEFAULT 0,
-    request_payload_json JSONB NOT NULL DEFAULT '{}'::jsonb,
-    result_snapshot_json JSONB NOT NULL DEFAULT '{}'::jsonb,
-    applied_by BIGINT NULL,
-    applied_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
-);
-COMMENT ON TABLE farm.plot_policy_apply_logs IS '地块策略应用日志表';
-CREATE INDEX idx_plot_policy_apply_logs_policy_active ON farm.plot_policy_apply_logs(policy_id, applied_at DESC) WHERE is_deleted = false;
-
--- 7. 用户地块分配策略表
-CREATE TABLE farm.user_plot_allocations
-(
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    active BOOLEAN NOT NULL DEFAULT true,
-    total_plot_count SMALLINT NOT NULL,
-    unlocked_plot_count SMALLINT NOT NULL,
-    locked_plot_count SMALLINT NOT NULL,
-    default_plot_type_id BIGINT NULL,
-    lock_rule_code VARCHAR(64) NOT NULL DEFAULT 'DEFAULT_LOCKED',
-    lock_reason VARCHAR(255) NOT NULL DEFAULT '待解锁',
-    allocation_rule_json JSONB NOT NULL DEFAULT '{}'::jsonb,
-    applied_at TIMESTAMPTZ NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
-);
-COMMENT ON TABLE farm.user_plot_allocations IS '用户地块分配策略表';
-CREATE UNIQUE INDEX uk_user_plot_allocations_user_active ON farm.user_plot_allocations(user_id) WHERE is_deleted = false;
-CREATE INDEX idx_user_plot_allocations_active ON farm.user_plot_allocations(active) WHERE is_deleted = false;
-
--- 8. 生长阶段类型字典表
+-- ==========================================
+-- 6. 生长阶段类型字典表
+-- ==========================================
 CREATE TABLE farm.growth_stages
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(500) NOT NULL,
-    description TEXT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    name                        VARCHAR(500)    NOT NULL,
+    description                 TEXT                NULL,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.growth_stages IS '生长阶段类型字典表';
-CREATE UNIQUE INDEX uk_growth_stages_name_active ON farm.growth_stages(name) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_growth_stages_name_active
+    ON farm.growth_stages(name)
+    WHERE is_deleted = false;
 
--- 9. 种子类型配置表
+-- ==========================================
+-- 7. 种子类型配置表
+-- ==========================================
 CREATE TABLE farm.seed_types
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(500) NOT NULL,
-    cover_image_url VARCHAR(1024) NOT NULL DEFAULT '',
-    seed_quality_id BIGINT NOT NULL,
-    enable_soil_type_bits BIGINT NOT NULL,
-    level SMALLINT NOT NULL,
-    unlock_experience_required BIGINT NOT NULL DEFAULT 0,
-    description TEXT NULL,
-    max_bug_limit SMALLINT NOT NULL DEFAULT 0,
-    max_harvest_count SMALLINT NOT NULL DEFAULT 1,
-    regrow_stage_index SMALLINT NULL,
-    harvest_stage_index SMALLINT NULL,
-    price BIGINT NOT NULL DEFAULT 0,
-    harvest_experience BIGINT NOT NULL DEFAULT 0,
-    harvest_fruit_number INT NOT NULL DEFAULT 0,
-    fruit_loss_per_bug INT NOT NULL DEFAULT 1,
-    bug_kill_coin_reward BIGINT NOT NULL DEFAULT 0,
-    bug_kill_experience_reward BIGINT NOT NULL DEFAULT 0,
-    bug_kill_score_reward BIGINT NOT NULL DEFAULT 0,
-    harvest_score BIGINT NOT NULL DEFAULT 0,
-    fruit_price BIGINT NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    name                        VARCHAR(500)    NOT NULL,
+    cover_image_url             VARCHAR(1024)   NOT NULL DEFAULT '',
+    seed_quality_id             BIGINT          NOT NULL,
+    enable_soil_type_bits       BIGINT          NOT NULL,
+    level                       SMALLINT        NOT NULL,
+    description                 TEXT                NULL,
+
+    -- 机制与事件配置
+    max_bug_limit               SMALLINT        NOT NULL DEFAULT 0,
+    max_harvest_count           SMALLINT        NOT NULL DEFAULT 1,
+    regrow_stage_index          SMALLINT            NULL, -- 【优化】多次收获作物，收获后退回的阶段索引
+
+    -- 经济数值配置
+    price                       BIGINT          NOT NULL DEFAULT 0,
+    harvest_experience          BIGINT          NOT NULL DEFAULT 0,
+    harvest_fruit_number        INT             NOT NULL DEFAULT 0,
+    fruit_loss_per_bug          INT             NOT NULL DEFAULT 1,
+    bug_kill_coin_reward        BIGINT          NOT NULL DEFAULT 0,
+    bug_kill_experience_reward  BIGINT          NOT NULL DEFAULT 0,
+    bug_kill_score_reward       BIGINT          NOT NULL DEFAULT 0,
+    harvest_score               BIGINT          NOT NULL DEFAULT 0,
+    fruit_price                 BIGINT          NOT NULL DEFAULT 0,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.seed_types IS '种子类型配置表';
-CREATE UNIQUE INDEX uk_seed_types_name_active ON farm.seed_types (name) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_seed_types_name_active
+    ON farm.seed_types (name)
+    WHERE is_deleted = false;
 
--- 10. 种子生长过程配置表
+-- ==========================================
+-- 8. 种子生长过程配置表
+-- ==========================================
 CREATE TABLE farm.seed_growth_stages
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    seed_type_id BIGINT NOT NULL,
-    growth_stage_id BIGINT NOT NULL,
-    stage_index SMALLINT NOT NULL,
-    duration_seconds INT NOT NULL,
-    asset_url VARCHAR(1024) NOT NULL DEFAULT '',
-    bug_probability NUMERIC(5, 4) NOT NULL DEFAULT 0.0000,
-    width INT NOT NULL DEFAULT 0,
-    height INT NOT NULL DEFAULT 0,
-    offset_x INT NOT NULL DEFAULT 0,
-    offset_y INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    seed_type_id                BIGINT          NOT NULL,
+    growth_stage_id             BIGINT          NOT NULL,
+
+    stage_index                 SMALLINT        NOT NULL,
+    duration_seconds            INT             NOT NULL,
+    asset_url                   VARCHAR(1024)       NULL,
+    bug_probability             NUMERIC(5, 4)   NOT NULL DEFAULT 0.0000,
+
+    width                       INT             NOT NULL DEFAULT 0,
+    height                      INT             NOT NULL DEFAULT 0,
+    offset_x                    INT             NOT NULL DEFAULT 0,
+    offset_y                    INT             NOT NULL DEFAULT 0,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.seed_growth_stages IS '种子生长过程配置表';
-CREATE UNIQUE INDEX uk_seed_growth_stage_index ON farm.seed_growth_stages(seed_type_id, stage_index) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_seed_growth_stage_index
+    ON farm.seed_growth_stages(seed_type_id, stage_index)
+    WHERE is_deleted = false;
 
--- 11. 用户种子背包表
+-- ==========================================
+-- 9. 用户种子背包表
+-- ==========================================
 CREATE TABLE farm.user_seeds
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    seed_type_id BIGINT NOT NULL,
-    quantity BIGINT NOT NULL DEFAULT 0,
-    frozen_quantity BIGINT NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id                     BIGINT          NOT NULL,
+    seed_type_id                BIGINT          NOT NULL,
+    quantity                    BIGINT          NOT NULL DEFAULT 0,
+    frozen_quantity             BIGINT          NOT NULL DEFAULT 0, -- 预留：交易/加工/批量操作时冻结库存
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.user_seeds IS '用户种子背包表';
-CREATE UNIQUE INDEX uk_user_seeds_active ON farm.user_seeds(user_id, seed_type_id) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_user_seeds_active
+    ON farm.user_seeds(user_id, seed_type_id)
+    WHERE is_deleted = false;
 
--- 12. 用户地块表
+-- ==========================================
+-- 10. 用户地块表
+-- ==========================================
 CREATE TABLE farm.user_plots
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    soil_type_id BIGINT NOT NULL,
-    plot_index SMALLINT NOT NULL,
-    unlock_experience_required BIGINT NOT NULL DEFAULT 0,
-    is_locked BOOLEAN NOT NULL DEFAULT false,
-    unlocked_at TIMESTAMPTZ NULL,
-    lock_reason VARCHAR(255) NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id                     BIGINT          NOT NULL,
+    soil_type_id                BIGINT          NOT NULL,
+    plot_index                  SMALLINT        NOT NULL,
+    unlock_experience_required  BIGINT          NOT NULL DEFAULT 0,
+    is_locked                   BOOLEAN         NOT NULL DEFAULT false,
+    unlocked_at                 TIMESTAMPTZ         NULL,
+    lock_reason                 VARCHAR(255)        NULL,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.user_plots IS '用户地块表';
-CREATE UNIQUE INDEX uk_user_plot_index ON farm.user_plots(user_id, plot_index) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_user_plot_index
+    ON farm.user_plots(user_id, plot_index)
+    WHERE is_deleted = false;
 
--- 13. 用户种植作物表
+-- ==========================================
+-- 11. 用户种植作物表
+-- ==========================================
 CREATE TABLE farm.user_crops
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    plot_id BIGINT NOT NULL,
-    seed_type_id BIGINT NOT NULL,
-    planted_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    stage_started_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_harvest_at TIMESTAMPTZ NULL,
-    matured_at TIMESTAMPTZ NULL,
-    withered_at TIMESTAMPTZ NULL,
-    expected_ripe_at TIMESTAMPTZ NULL,
-    expected_withered_at TIMESTAMPTZ NULL,
-    harvest_count SMALLINT NOT NULL DEFAULT 0,
-    current_stage_index SMALLINT NOT NULL DEFAULT 1,
-    grow_status SMALLINT NOT NULL DEFAULT 1,
-    bug_count SMALLINT NOT NULL DEFAULT 0,
-    last_bug_at TIMESTAMPTZ NULL,
-    last_care_at TIMESTAMPTZ NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id                     BIGINT          NOT NULL,
+    plot_id                     BIGINT          NOT NULL,
+    seed_type_id                BIGINT          NOT NULL,
+
+    planted_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    stage_started_at            TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_harvest_at             TIMESTAMPTZ         NULL,
+    matured_at                  TIMESTAMPTZ         NULL,
+    withered_at                 TIMESTAMPTZ         NULL,
+    expected_ripe_at            TIMESTAMPTZ         NULL,
+    expected_withered_at        TIMESTAMPTZ         NULL,
+    harvest_count               SMALLINT        NOT NULL DEFAULT 0,
+    current_stage_index         SMALLINT        NOT NULL DEFAULT 1,
+    grow_status                 SMALLINT        NOT NULL DEFAULT 1, -- 1:生长中, 2:成熟待收, 3:已枯萎
+    bug_count                   SMALLINT        NOT NULL DEFAULT 0,
+    last_bug_at                 TIMESTAMPTZ         NULL,
+    last_care_at                TIMESTAMPTZ         NULL,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.user_crops IS '用户种植作物表';
-CREATE UNIQUE INDEX uk_plot_active_crop ON farm.user_crops(plot_id) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_plot_active_crop
+    ON farm.user_crops(plot_id)
+    WHERE is_deleted = false;
 
--- 14. 用户果实仓库表
+-- ==========================================
+-- 12. 用户果实仓库表
+-- ==========================================
 CREATE TABLE farm.user_fruits
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    seed_type_id BIGINT NOT NULL,
-    quantity BIGINT NOT NULL DEFAULT 0,
-    frozen_quantity BIGINT NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id                     BIGINT          NOT NULL,
+    seed_type_id                BIGINT          NOT NULL, -- 指代该种子产出的果实
+    quantity                    BIGINT          NOT NULL DEFAULT 0,
+    frozen_quantity             BIGINT          NOT NULL DEFAULT 0, -- 预留：交易/加工/批量操作时冻结库存
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.user_fruits IS '用户果实仓库表';
-CREATE UNIQUE INDEX uk_user_fruits_active ON farm.user_fruits(user_id, seed_type_id) WHERE is_deleted = false;
+CREATE UNIQUE INDEX uk_user_fruits_active
+    ON farm.user_fruits(user_id, seed_type_id)
+    WHERE is_deleted = false;
 
--- 15. 用户资产流水表
+-- ==========================================
+-- 13. 用户资产流水表
+-- ==========================================
 CREATE TABLE farm.user_asset_flows
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    asset_type VARCHAR(32) NOT NULL,
-    operation_type VARCHAR(32) NOT NULL,
-    change_amount BIGINT NOT NULL,
-    before_amount BIGINT NOT NULL DEFAULT 0,
-    after_amount BIGINT NOT NULL DEFAULT 0,
-    biz_type VARCHAR(64) NOT NULL DEFAULT '',
-    biz_id VARCHAR(128) NULL,
-    occurred_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ext_data JSONB NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id                     BIGINT          NOT NULL,
+    asset_type                  VARCHAR(32)     NOT NULL, -- COIN / SCORE / EXPERIENCE
+    operation_type              VARCHAR(32)     NOT NULL, -- INCOME / EXPENSE / ADJUST
+    change_amount               BIGINT          NOT NULL,
+    before_amount               BIGINT          NOT NULL DEFAULT 0,
+    after_amount                BIGINT          NOT NULL DEFAULT 0,
+    biz_type                    VARCHAR(64)     NOT NULL DEFAULT '', -- HARVEST / BUY_SEED / SELL_FRUIT / ADMIN
+    biz_id                      VARCHAR(128)        NULL,
+    occurred_at                 TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ext_data                    JSONB               NULL,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.user_asset_flows IS '用户资产流水表';
 
--- 16. 用户库存流水表
+-- ==========================================
+-- 14. 用户库存流水表
+-- ==========================================
 CREATE TABLE farm.user_inventory_flows
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    item_type VARCHAR(32) NOT NULL,
-    seed_type_id BIGINT NOT NULL,
-    operation_type VARCHAR(32) NOT NULL,
-    change_amount BIGINT NOT NULL,
-    before_amount BIGINT NOT NULL DEFAULT 0,
-    after_amount BIGINT NOT NULL DEFAULT 0,
-    before_frozen_amount BIGINT NOT NULL DEFAULT 0,
-    after_frozen_amount BIGINT NOT NULL DEFAULT 0,
-    biz_type VARCHAR(64) NOT NULL DEFAULT '',
-    biz_id VARCHAR(128) NULL,
-    occurred_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ext_data JSONB NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id                     BIGINT          NOT NULL,
+    item_type                   VARCHAR(32)     NOT NULL, -- SEED / FRUIT
+    seed_type_id                BIGINT          NOT NULL,
+    operation_type              VARCHAR(32)     NOT NULL, -- INCOME / EXPENSE / FREEZE / UNFREEZE / ADJUST
+    change_amount               BIGINT          NOT NULL,
+    before_amount               BIGINT          NOT NULL DEFAULT 0,
+    after_amount                BIGINT          NOT NULL DEFAULT 0,
+    before_frozen_amount        BIGINT          NOT NULL DEFAULT 0,
+    after_frozen_amount         BIGINT          NOT NULL DEFAULT 0,
+    biz_type                    VARCHAR(64)     NOT NULL DEFAULT '', -- HARVEST / BUY_SEED / SELL_FRUIT / ADMIN
+    biz_id                      VARCHAR(128)        NULL,
+    occurred_at                 TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ext_data                    JSONB               NULL,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.user_inventory_flows IS '用户库存流水表';
 
--- 17. 作物行为日志表
+-- ==========================================
+-- 15. 作物行为日志表
+-- ==========================================
 CREATE TABLE farm.user_crop_action_logs
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    plot_id BIGINT NOT NULL,
-    crop_id BIGINT NULL,
-    seed_type_id BIGINT NULL,
-    action_type VARCHAR(32) NOT NULL,
-    action_result VARCHAR(32) NOT NULL DEFAULT 'SUCCESS',
-    action_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    action_snapshot JSONB NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id                     BIGINT          NOT NULL,
+    plot_id                     BIGINT          NOT NULL,
+    crop_id                     BIGINT              NULL,
+    seed_type_id                BIGINT              NULL,
+    action_type                 VARCHAR(32)     NOT NULL, -- PLANT / HARVEST / REMOVE_BUG / CLEAR / WITHER
+    action_result               VARCHAR(32)     NOT NULL DEFAULT 'SUCCESS', -- SUCCESS / FAIL
+    action_at                   TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    action_snapshot             JSONB               NULL,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.user_crop_action_logs IS '作物行为日志表';
 
--- 18. 请求幂等记录表
+-- ==========================================
+-- 16. 请求幂等记录表
+-- ==========================================
 CREATE TABLE farm.request_idempotencies
 (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    biz_type VARCHAR(64) NOT NULL,
-    request_id VARCHAR(128) NOT NULL,
-    process_status VARCHAR(16) NOT NULL DEFAULT 'PROCESSING',
-    response_payload JSONB NULL,
-    error_message VARCHAR(500) NULL,
-    finished_at TIMESTAMPTZ NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT NULL,
-    updated_by BIGINT NULL,
-    remark TEXT NULL,
-    status SMALLINT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT false,
-    opt_lock_version INT NOT NULL DEFAULT 0
+    id                          BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id                     BIGINT          NOT NULL,
+    biz_type                    VARCHAR(64)     NOT NULL, -- BUY_SEED / SELL_FRUIT / PLANT / HARVEST
+    request_id                  VARCHAR(128)    NOT NULL,
+    process_status              VARCHAR(16)     NOT NULL DEFAULT 'PROCESSING', -- PROCESSING / SUCCESS / FAILED
+    response_payload            JSONB               NULL,
+    error_message               VARCHAR(500)        NULL,
+    finished_at                 TIMESTAMPTZ         NULL,
+
+    created_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by                  BIGINT              NULL,
+    updated_by                  BIGINT              NULL,
+    remark                      TEXT                NULL,
+
+    status                      SMALLINT        NOT NULL DEFAULT 1,
+    is_deleted                  BOOLEAN         NOT NULL DEFAULT false,
+    opt_lock_version            INT             NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE farm.request_idempotencies IS '请求幂等记录表';
 
@@ -485,42 +515,42 @@ COMMENT ON TABLE farm.request_idempotencies IS '请求幂等记录表';
 
 -- 0) 默认资源路径 (合并基础与最终版)
 INSERT INTO farm.asset_defaults (asset_key, asset_url, description) VALUES
-    ('avatar', '/oss/defaults/avatar/default-avatar.png', '用户头像默认图'),
-    ('seedCover', '/oss/defaults/seed/seed-cover-default.png', '种子封面默认图'),
-    ('seedStage', '/oss/defaults/seed/seed-stage-default.png', '种子阶段默认图'),
-    ('soilCover', '/oss/defaults/soil/soil-default.png', '土壤默认图'),
-    ('plotCover', '/oss/defaults/plot/plot-cover-default.png', '地块封面默认图'),
-    ('plotIcon', '/oss/defaults/plot/plot-icon-default.png', '地块图标默认图'),
-    ('bgm', '/resources/sounds/bgm/Must%20Work%20to%20Eat.wav', '默认背景音乐'),
-    ('seedStageWithered', '/oss/defaults/seed/seed-stage-withered-default.png', '种子枯萎阶段默认图')
+                                                                        ('avatar', '/oss/defaults/avatar/default-avatar.png', '用户头像默认图'),
+                                                                        ('seedCover', '/oss/defaults/seed/seed-cover-default.png', '种子封面默认图'),
+                                                                        ('seedStage', '/oss/defaults/seed/seed-stage-default.png', '种子阶段默认图'),
+                                                                        ('soilCover', '/oss/defaults/soil/soil-default.png', '土壤默认图'),
+                                                                        ('plotCover', '/oss/defaults/plot/plot-cover-default.png', '地块封面默认图'),
+                                                                        ('plotIcon', '/oss/defaults/plot/plot-icon-default.png', '地块图标默认图'),
+                                                                        ('bgm', '/resources/sounds/bgm/Must%20Work%20to%20Eat.wav', '默认背景音乐'),
+                                                                        ('seedStageWithered', '/oss/defaults/seed/seed-stage-withered-default.png', '种子枯萎阶段默认图')
 ON CONFLICT (asset_key) WHERE is_deleted = false DO UPDATE SET
-    asset_url = EXCLUDED.asset_url, description = EXCLUDED.description;
+                                                               asset_url = EXCLUDED.asset_url, description = EXCLUDED.description;
 
 -- 1) 种子品质字典
 INSERT INTO farm.seed_qualities (name, description) VALUES
-    ('普通', '普通品质种子'),
-    ('优质', '优质品质种子'),
-    ('稀有', '稀有品质种子')
+                                                        ('普通', '普通品质种子'),
+                                                        ('优质', '优质品质种子'),
+                                                        ('稀有', '稀有品质种子')
 ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
 
 -- 2) 土地类型字典 (集成最终版数据)
-INSERT INTO farm.soil_types (name, bit_code, cover_image_url, level, unlock_experience_required, grow_speed_multiplier, description) VALUES
-    ('黄土地', 1, '/oss/defaults/soil/soil-land-default.png', 1, 0, 1.00, '基础土地，适配多数作物'),
-    ('黑土地', 2, '/oss/defaults/soil/soil-land-black-default.png', 2, 500, 0.90, '生长速度更快的改良土地'),
-    ('金土地', 4, '/oss/defaults/soil/soil-land-gold-default.png', 3, 2000, 0.80, '高级土地，适配高等级作物')
+INSERT INTO farm.soil_types (name, bit_code, cover_image_url, level, unlock_experience_required, grow_speed_multiplier, expand_cost_coin, description) VALUES
+                                                                                                                                                           ('黄土地', 1, '/oss/defaults/soil/soil-land-default.png', 1, 0, 1.00, 0, '基础土地，适配多数作物'),
+                                                                                                                                                           ('黑土地', 2, '/oss/defaults/soil/soil-land-black-default.png', 2, 500, 0.90, 1500, '生长速度更快的改良土地'),
+                                                                                                                                                           ('金土地', 4, '/oss/defaults/soil/soil-land-gold-default.png', 3, 2000, 0.80, 5000, '高级土地，适配高等级作物')
 ON CONFLICT (bit_code) WHERE is_deleted = false DO UPDATE SET
-    cover_image_url = EXCLUDED.cover_image_url, updated_at = NOW();
+                                                              cover_image_url = EXCLUDED.cover_image_url, updated_at = NOW();
 
 -- 3) 生长阶段字典 (合并全量阶段)
 INSERT INTO farm.growth_stages (name, description) VALUES
-    ('种子', '播种后的初始阶段'),
-    ('发芽', '发芽阶段'),
-    ('幼苗', '发芽后的幼苗期'),
-    ('生长期', '快速生长阶段'),
-    ('开花', '开花授粉阶段'),
-    ('结果', '开花后结果阶段'),
-    ('成熟', '可收获阶段'),
-    ('枯萎', '作物虫害超限或错过收获窗口后的最终阶段')
+                                                       ('种子', '播种后的初始阶段'),
+                                                       ('发芽', '发芽阶段'),
+                                                       ('幼苗', '发芽后的幼苗期'),
+                                                       ('生长期', '快速生长阶段'),
+                                                       ('开花', '开花授粉阶段'),
+                                                       ('结果', '开花后结果阶段'),
+                                                       ('成熟', '可收获阶段'),
+                                                       ('枯萎', '作物虫害超限或错过收获窗口后的最终阶段')
 ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
 
 -- 4) 种子类型配置 (整合基础+增强补丁的全量字段配置)
@@ -555,15 +585,15 @@ SELECT
 FROM seed_data d
          JOIN farm.seed_qualities q ON q.name = d.quality_name AND q.is_deleted = false
 ON CONFLICT (name) WHERE is_deleted = false DO UPDATE SET
-    seed_quality_id = EXCLUDED.seed_quality_id, enable_soil_type_bits = EXCLUDED.enable_soil_type_bits,
-    level = EXCLUDED.level, description = EXCLUDED.description, max_bug_limit = EXCLUDED.max_bug_limit,
-    max_harvest_count = EXCLUDED.max_harvest_count, regrow_stage_index = EXCLUDED.regrow_stage_index,
-    harvest_stage_index = EXCLUDED.harvest_stage_index, price = EXCLUDED.price,
-    harvest_experience = EXCLUDED.harvest_experience, harvest_fruit_number = EXCLUDED.harvest_fruit_number,
-    fruit_loss_per_bug = EXCLUDED.fruit_loss_per_bug, bug_kill_coin_reward = EXCLUDED.bug_kill_coin_reward,
-    bug_kill_experience_reward = EXCLUDED.bug_kill_experience_reward, bug_kill_score_reward = EXCLUDED.bug_kill_score_reward,
-    fruit_price = EXCLUDED.fruit_price, harvest_score = EXCLUDED.harvest_score,
-    unlock_experience_required = EXCLUDED.unlock_experience_required, updated_at = NOW();
+                                                          seed_quality_id = EXCLUDED.seed_quality_id, enable_soil_type_bits = EXCLUDED.enable_soil_type_bits,
+                                                          level = EXCLUDED.level, description = EXCLUDED.description, max_bug_limit = EXCLUDED.max_bug_limit,
+                                                          max_harvest_count = EXCLUDED.max_harvest_count, regrow_stage_index = EXCLUDED.regrow_stage_index,
+                                                          harvest_stage_index = EXCLUDED.harvest_stage_index, price = EXCLUDED.price,
+                                                          harvest_experience = EXCLUDED.harvest_experience, harvest_fruit_number = EXCLUDED.harvest_fruit_number,
+                                                          fruit_loss_per_bug = EXCLUDED.fruit_loss_per_bug, bug_kill_coin_reward = EXCLUDED.bug_kill_coin_reward,
+                                                          bug_kill_experience_reward = EXCLUDED.bug_kill_experience_reward, bug_kill_score_reward = EXCLUDED.bug_kill_score_reward,
+                                                          fruit_price = EXCLUDED.fruit_price, harvest_score = EXCLUDED.harvest_score,
+                                                          unlock_experience_required = EXCLUDED.unlock_experience_required, updated_at = NOW();
 
 -- 5) 种子生长阶段配置 (直接应用最终带枯萎的补丁阶段)
 WITH stage_data (seed_name, stage_name, stage_idx, dur_sec, bug_prob, w, h, ox, oy, asset) AS (
@@ -618,9 +648,9 @@ FROM stage_data d
          JOIN farm.seed_types sd ON sd.name = d.seed_name AND sd.is_deleted = false
          JOIN farm.growth_stages gd ON gd.name = d.stage_name AND gd.is_deleted = false
 ON CONFLICT (seed_type_id, stage_index) WHERE is_deleted = false DO UPDATE SET
-    growth_stage_id = EXCLUDED.growth_stage_id, duration_seconds = EXCLUDED.duration_seconds,
-    asset_url = EXCLUDED.asset_url, bug_probability = EXCLUDED.bug_probability,
-    width = EXCLUDED.width, height = EXCLUDED.height, offset_x = EXCLUDED.offset_x, offset_y = EXCLUDED.offset_y, updated_at = NOW();
+                                                                               growth_stage_id = EXCLUDED.growth_stage_id, duration_seconds = EXCLUDED.duration_seconds,
+                                                                               asset_url = EXCLUDED.asset_url, bug_probability = EXCLUDED.bug_probability,
+                                                                               width = EXCLUDED.width, height = EXCLUDED.height, offset_x = EXCLUDED.offset_x, offset_y = EXCLUDED.offset_y, updated_at = NOW();
 
 -- 软删除作废的阶段 (幂等处理，保留有效阶段即可)
 WITH valid_stages (seed_name, max_idx) AS (
@@ -647,57 +677,29 @@ WHERE sgs.seed_type_id = ms.seed_type_id
 
 -- 6) 用户初始化数据 (整合包含增强补丁的全量用户信息)
 INSERT INTO farm.users (username, nickname, password_hash, email, avatar_url, experience, score, coin, preferences_json) VALUES
-    ('liubei',  '刘备', '123456', 'liubei@farm.local', '/oss/defaults/avatar/default-avatar.png', 2400, 820, 5600, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
-    ('caocao',  '曹操', '123456', 'caocao@farm.local', '/oss/defaults/avatar/default-avatar.png', 2100, 700, 4900, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
-    ('sunquan', '孙权', '123456', 'sunquan@farm.local', '/oss/defaults/avatar/default-avatar.png', 1750, 540, 3600, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
-    ('zhaoyun', '赵云', '123456', 'zhaoyun@farm.local', '/oss/defaults/avatar/default-avatar.png', 1450, 430, 2800, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
-    ('huatuo',  '华佗', '123456', 'huatuo@farm.local', '/oss/defaults/avatar/default-avatar.png', 900,  260, 1800, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}')
+                                                                                                                             ('liubei',  '刘备', '123456', 'liubei@farm.local', '/oss/defaults/avatar/default-avatar.png', 2400, 820, 5600, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
+                                                                                                                             ('caocao',  '曹操', '123456', 'caocao@farm.local', '/oss/defaults/avatar/default-avatar.png', 2100, 700, 4900, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
+                                                                                                                             ('sunquan', '孙权', '123456', 'sunquan@farm.local', '/oss/defaults/avatar/default-avatar.png', 1750, 540, 3600, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
+                                                                                                                             ('zhaoyun', '赵云', '123456', 'zhaoyun@farm.local', '/oss/defaults/avatar/default-avatar.png', 1450, 430, 2800, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
+                                                                                                                             ('huatuo',  '华佗', '123456', 'huatuo@farm.local', '/oss/defaults/avatar/default-avatar.png', 900,  260, 1800, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}')
 ON CONFLICT (username) WHERE is_deleted = false DO UPDATE SET
-    nickname = EXCLUDED.nickname, email = EXCLUDED.email, experience = EXCLUDED.experience,
-    score = EXCLUDED.score, coin = EXCLUDED.coin, updated_at = NOW();
+                                                              nickname = EXCLUDED.nickname, email = EXCLUDED.email, experience = EXCLUDED.experience,
+                                                              score = EXCLUDED.score, coin = EXCLUDED.coin, updated_at = NOW();
 
--- 7) 地块类型与全局策略初始化
-INSERT INTO farm.plot_types (name, icon_url, soil_type_id, unlock_required, default_usable, default_plot_unlock_experience_config, sort_order, description)
-SELECT '普通耕地', '', st.id, false, true, 0, 1, '默认可用地块类型' FROM farm.soil_types st WHERE st.name = '黄土地' AND st.is_deleted = false
-ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
+-- 7) 全局策略初始化
+INSERT INTO farm.plot_policies (policy_name, active, default_total_plot_count, default_unlocked_plot_count, default_locked_plot_count)
+VALUES ('default-policy-v1', true, 6, 2, 4)
+ON CONFLICT DO NOTHING;
 
-INSERT INTO farm.plot_types (name, icon_url, soil_type_id, unlock_required, default_usable, default_plot_unlock_experience_config, sort_order, description)
-SELECT '改良耕地', '', st.id, true, true, 500, 2, '中级地块类型，需要解锁' FROM farm.soil_types st WHERE st.name = '黑土地' AND st.is_deleted = false
-ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
-
-INSERT INTO farm.plot_types (name, icon_url, soil_type_id, unlock_required, default_usable, default_plot_unlock_experience_config, sort_order, description)
-SELECT '高级耕地', '', st.id, true, false, 2000, 3, '高级地块类型，偏后期解锁' FROM farm.soil_types st WHERE st.name = '金土地' AND st.is_deleted = false
-ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
-
-WITH default_plot_type AS (SELECT id FROM farm.plot_types WHERE name = '普通耕地' AND is_deleted = false LIMIT 1)
-INSERT INTO farm.plot_policies (policy_name, active, default_total_plot_count, default_unlocked_plot_count, default_locked_plot_count, default_plot_type_id, allocation_rule_json)
-SELECT 'default-policy-v1', true, 6, 2, 4, dpt.id, jsonb_build_object(COALESCE(dpt.id::text, 'default'), jsonb_build_object('total', 6, 'locked', 4))
-FROM default_plot_type dpt
-WHERE NOT EXISTS (SELECT 1 FROM farm.plot_policies WHERE policy_name = 'default-policy-v1' AND is_deleted = false);
-
--- 8) 用户地块分配策略 (整合增强补丁)
-WITH cfg (username, total_count, unlocked_count) AS (
-    VALUES
-        ('liubei',  10::smallint, 4::smallint),
-        ('caocao',   8::smallint, 3::smallint),
-        ('sunquan',  7::smallint, 2::smallint),
-        ('zhaoyun',  6::smallint, 2::smallint),
-        ('huatuo',   5::smallint, 1::smallint)
-),
-     default_plot_type AS (SELECT id FROM farm.plot_types WHERE name = '普通耕地' AND is_deleted = false LIMIT 1)
-INSERT INTO farm.user_plot_allocations (user_id, active, total_plot_count, unlocked_plot_count, locked_plot_count, default_plot_type_id, lock_rule_code, lock_reason, allocation_rule_json, applied_at)
-SELECT u.id, true, cfg.total_count, cfg.unlocked_count, cfg.total_count - cfg.unlocked_count, dpt.id, 'EXP_REQUIRED', '经验不足，待解锁', jsonb_build_object('default', jsonb_build_object('total', cfg.total_count, 'locked', cfg.total_count - cfg.unlocked_count)), NOW()
-FROM cfg
-         JOIN farm.users u ON u.username = cfg.username AND u.is_deleted = false
-         CROSS JOIN default_plot_type dpt
-ON CONFLICT (user_id) WHERE is_deleted = false DO UPDATE SET
-    total_plot_count = EXCLUDED.total_plot_count, unlocked_plot_count = EXCLUDED.unlocked_plot_count,
-    locked_plot_count = EXCLUDED.locked_plot_count, allocation_rule_json = EXCLUDED.allocation_rule_json, applied_at = NOW(), updated_at = NOW();
-
--- 9) 用户地块实例网格化 (按补丁版分配同步)
+-- 8) 用户地块实例网格化
 WITH alloc AS (
-    SELECT user_id, total_plot_count::int, unlocked_plot_count::int
-    FROM farm.user_plot_allocations WHERE active = true AND is_deleted = false
+    SELECT
+        u.id AS user_id,
+        COALESCE(pp.default_total_plot_count, 6)::int AS total_plot_count,
+        COALESCE(pp.default_unlocked_plot_count, 2)::int AS unlocked_plot_count
+    FROM farm.users u
+             LEFT JOIN farm.plot_policies pp ON pp.active = true AND pp.is_deleted = false
+    WHERE u.is_deleted = false
 ),
      soil_map AS (
          SELECT
@@ -722,18 +724,25 @@ SELECT
     CASE WHEN g.is_locked THEN NULL ELSE NOW() END, CASE WHEN g.is_locked THEN '经验不足，待解锁' ELSE NULL END
 FROM grid g
 ON CONFLICT (user_id, plot_index) WHERE is_deleted = false DO UPDATE SET
-    soil_type_id = EXCLUDED.soil_type_id, unlock_experience_required = EXCLUDED.unlock_experience_required,
-    is_locked = EXCLUDED.is_locked, unlocked_at = CASE WHEN EXCLUDED.is_locked THEN NULL ELSE COALESCE(farm.user_plots.unlocked_at, NOW()) END,
-    lock_reason = EXCLUDED.lock_reason, updated_at = NOW();
+                                                                         soil_type_id = EXCLUDED.soil_type_id, unlock_experience_required = EXCLUDED.unlock_experience_required,
+                                                                         is_locked = EXCLUDED.is_locked, unlocked_at = CASE WHEN EXCLUDED.is_locked THEN NULL ELSE COALESCE(farm.user_plots.unlocked_at, NOW()) END,
+                                                                         lock_reason = EXCLUDED.lock_reason, updated_at = NOW();
 
 -- 超额地块安全软删除
-WITH alloc AS (SELECT user_id, total_plot_count FROM farm.user_plot_allocations WHERE active = true AND is_deleted = false)
+WITH alloc AS (
+    SELECT
+        u.id AS user_id,
+        COALESCE(pp.default_total_plot_count, 6)::int AS total_plot_count
+    FROM farm.users u
+             LEFT JOIN farm.plot_policies pp ON pp.active = true AND pp.is_deleted = false
+    WHERE u.is_deleted = false
+)
 UPDATE farm.user_plots up
 SET is_deleted = true, updated_at = NOW(), remark = 'auto-retired by allocation sync'
 FROM alloc a
 WHERE up.user_id = a.user_id AND up.plot_index > a.total_plot_count AND up.is_deleted = false;
 
--- 10) 用户种子背包初始化
+-- 9) 用户种子背包初始化
 WITH cfg (username, seed_name, quantity) AS (
     VALUES
         ('liubei',  '草莓', 28::bigint), ('liubei',  '蓝莓', 12::bigint), ('liubei',  '玉米', 20::bigint), ('liubei',  '南瓜', 14::bigint), ('liubei',  '辣椒', 16::bigint), ('liubei',  '水稻', 24::bigint),
@@ -748,6 +757,6 @@ FROM cfg
          JOIN farm.users u ON u.username = cfg.username AND u.is_deleted = false
          JOIN farm.seed_types st ON st.name = cfg.seed_name AND st.is_deleted = false
 ON CONFLICT (user_id, seed_type_id) WHERE is_deleted = false DO UPDATE SET
-    quantity = EXCLUDED.quantity, updated_at = NOW();
+                                                                           quantity = EXCLUDED.quantity, updated_at = NOW();
 
 COMMIT;
