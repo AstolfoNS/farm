@@ -6,6 +6,7 @@
         editIndex: -1,
         uploadRowIndex: -1
     };
+    var bound = false;
 
     function motion() {
         if (window.FarmUi && $.isFunction(window.FarmUi.motion)) {
@@ -75,18 +76,21 @@
     }
 
     function buildUserSaveFailMessage(res, row) {
-        var reason = trimText(res && res.msg) || "\u540e\u7aef\u672a\u8fd4\u56de\u660e\u786e\u9519\u8bef";
-        return "\u7528\u6237\u8d44\u6599\u672a\u4fdd\u5b58\uff1a" + displayUserName(row) + "\u3002\n\u5931\u8d25\u539f\u56e0\uff1a" + reason + "\u3002";
+        var reason = trimText(res && res.msg) || "后端未返回明确错误";
+        return "用户资料未保存：" + displayUserName(row) +
+            "。\n失败原因：" + reason + "。";
     }
 
     function buildUserDeleteFailMessage(res, row) {
-        var reason = trimText(res && res.msg) || "\u540e\u7aef\u672a\u8fd4\u56de\u660e\u786e\u9519\u8bef";
-        return "\u7528\u6237\u5220\u9664\u672a\u5b8c\u6210\uff1a" + displayUserName(row) + "\u3002\n\u5931\u8d25\u539f\u56e0\uff1a" + reason + "\u3002";
+        var reason = trimText(res && res.msg) || "后端未返回明确错误";
+        return "用户删除未完成：" + displayUserName(row) +
+            "。\n失败原因：" + reason + "。";
     }
 
     function buildAvatarUploadFailMessage(res, row) {
-        var reason = trimText(res && res.msg) || "\u6587\u4ef6\u4e0a\u4f20\u6216 URL \u56de\u586b\u672a\u901a\u8fc7\u6821\u9a8c";
-        return "\u5934\u50cf\u4e0a\u4f20\u672a\u5b8c\u6210\uff1a" + displayUserName(row) + "\u3002\n\u5931\u8d25\u539f\u56e0\uff1a" + reason + "\u3002";
+        var reason = trimText(res && res.msg) || "文件上传或 URL 回填未通过校验";
+        return "头像上传未完成：" + displayUserName(row) +
+            "。\n失败原因：" + reason + "。";
     }
 
     function statCell(icon, value) {
@@ -101,8 +105,8 @@
     }
 
     function renderOps(index) {
-        return "<a href='javascript:void(0)' class='user-admin-op upload' data-action='upload' data-index='" + index + "'>涓婁紶澶村儚</a>" +
-            "<a href='javascript:void(0)' class='user-admin-op save' data-action='save' data-index='" + index + "'>淇濆瓨鏁版嵁</a>";
+        return "<a href='javascript:void(0)' class='user-admin-op upload' data-action='upload' data-index='" + index + "'>上传头像</a>" +
+            "<a href='javascript:void(0)' class='user-admin-op save' data-action='save' data-index='" + index + "'>保存数据</a>";
     }
 
     function pagePayload(param) {
@@ -222,7 +226,7 @@
             }
             return;
         }
-        $.messager.confirm("纭", "纭鍒犻櫎褰撳墠鐢ㄦ埛鍚楋紵", function (ok) {
+        $.messager.confirm("确认", "确认删除当前用户吗？", function (ok) {
             if (!ok) {
                 return;
             }
@@ -238,7 +242,7 @@
                 if (FarmApi.isOk(res)) {
                     reload();
                 }
-                    }, function () {
+            }, function () {
                 $.messager.alert("提示", buildUserDeleteFailMessage(null, row));
             });
         });
@@ -285,7 +289,7 @@
             if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.reloadUserOptions)) {
                 window.FarmHomeBridge.reloadUserOptions();
             }
-                }, function () {
+        }, function () {
             $.messager.alert("提示", buildUserSaveFailMessage(null, row));
         });
     }
@@ -318,11 +322,21 @@
 
     function uploadAvatar() {
         if (state.uploadRowIndex < 0) {
-            $.messager.show({title: "鎻愮ず", msg: "璇峰厛閫夋嫨瑕佷笂浼犲ご鍍忕殑鐢ㄦ埛", timeout: motion().actionFeedbackMs, showType: "slide"});
+            $.messager.show({
+                title: "提示",
+                msg: "请先选择要上传头像的用户",
+                timeout: motion().actionFeedbackMs,
+                showType: "slide"
+            });
             return;
         }
         if (!$("#userAvatarFile").val()) {
-            $.messager.show({title: "鎻愮ず", msg: "璇烽€夋嫨闇€瑕佷笂浼犵殑澶村儚鏂囦欢", timeout: motion().actionFeedbackMs, showType: "slide"});
+            $.messager.show({
+                title: "提示",
+                msg: "请选择需要上传的头像文件",
+                timeout: motion().actionFeedbackMs,
+                showType: "slide"
+            });
             return;
         }
         var formData = new FormData($("#userAvatarUploadForm")[0]);
@@ -355,7 +369,12 @@
             error: function () {
                 var rows = $("#userAdminGrid").datagrid("getRows");
                 var currentRow = rows[state.uploadRowIndex] || null;
-                $.messager.show({title: "提示", msg: buildAvatarUploadFailMessage(null, currentRow), timeout: motion().actionFeedbackMs, showType: "slide"});
+                $.messager.show({
+                    title: "提示",
+                    msg: buildAvatarUploadFailMessage(null, currentRow),
+                    timeout: motion().actionFeedbackMs,
+                    showType: "slide"
+                });
             },
             complete: function () {
                 $("#userAvatarFile").val("");
@@ -368,41 +387,55 @@
             cls: "farm-upload-window"
         });
 
-        $("#userAdminSearchBtn").on("click", function () {
-            endCurrentEdit();
-            $("#userAdminGrid").datagrid("load", {page: 1});
-        });
-        $("#userAdminName").textbox("textbox").on("keydown", function (event) {
-            if (event.keyCode === 13) {
-                $("#userAdminSearchBtn").trigger("click");
-            }
-        });
-        $("#userAdminAddBtn").on("click", addUserRow);
-        $("#userAdminCancelBtn").on("click", cancelEdit);
-        $("#userAdminDeleteBtn").on("click", deleteSelectedUser);
-        $("#userAdminCloseBtn").on("click", function () {
-            if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.switchModule)) {
-                window.FarmHomeBridge.switchModule("home");
-            }
-        });
-        $("#userManagePanel").on("click", ".user-admin-op", function () {
-            var action = String($(this).data("action") || "");
-            var index = asNumber($(this).data("index"), -1);
-            if (index < 0) {
-                return;
-            }
-            if (action === "upload") {
-                openUploadDialog(index);
-                return;
-            }
-            if (action === "save") {
-                saveRow(index);
-            }
-        });
-        $("#userAvatarUploadBtn").on("click", uploadAvatar);
-        $("#userAvatarCloseBtn").on("click", function () {
-            $("#userAvatarUploadDialog").dialog("close");
-        });
+        $("#userAdminSearchBtn")
+            .off("click.userAdmin")
+            .on("click.userAdmin", function () {
+                endCurrentEdit();
+                $("#userAdminGrid").datagrid("load", {page: 1});
+            });
+
+        $("#userAdminName").textbox("textbox")
+            .off("keydown.userAdmin")
+            .on("keydown.userAdmin", function (event) {
+                if (event.keyCode === 13) {
+                    $("#userAdminSearchBtn").trigger("click");
+                }
+            });
+
+        $("#userAdminAddBtn").off("click.userAdmin").on("click.userAdmin", addUserRow);
+        $("#userAdminCancelBtn").off("click.userAdmin").on("click.userAdmin", cancelEdit);
+        $("#userAdminDeleteBtn").off("click.userAdmin").on("click.userAdmin", deleteSelectedUser);
+        $("#userAdminCloseBtn")
+            .off("click.userAdmin")
+            .on("click.userAdmin", function () {
+                if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.switchModule)) {
+                    window.FarmHomeBridge.switchModule("home");
+                }
+            });
+
+        $("#userManagePanel")
+            .off("click.userAdmin", ".user-admin-op")
+            .on("click.userAdmin", ".user-admin-op", function () {
+                var action = String($(this).data("action") || "");
+                var index = asNumber($(this).data("index"), -1);
+                if (index < 0) {
+                    return;
+                }
+                if (action === "upload") {
+                    openUploadDialog(index);
+                    return;
+                }
+                if (action === "save") {
+                    saveRow(index);
+                }
+            });
+
+        $("#userAvatarUploadBtn").off("click.userAdmin").on("click.userAdmin", uploadAvatar);
+        $("#userAvatarCloseBtn")
+            .off("click.userAdmin")
+            .on("click.userAdmin", function () {
+                $("#userAvatarUploadDialog").dialog("close");
+            });
     }
 
     function initGrid() {
@@ -554,6 +587,14 @@
         state.initialized = true;
     }
 
+    function bindEventsOnce() {
+        if (bound) {
+            return;
+        }
+        bindEvents();
+        bound = true;
+    }
+
     function setActive(flag) {
         state.active = !!flag;
         if (state.active) {
@@ -581,15 +622,6 @@
         $("#userAvatarUploadDialog").dialog("close");
     }
 
-    var bound = false;
-    function bindEventsOnce() {
-        if (bound) {
-            return;
-        }
-        bindEvents();
-        bound = true;
-    }
-
     FarmUserAdminModule.setActive = setActive;
     FarmUserAdminModule.reload = reload;
     window.FarmUserAdminModule = FarmUserAdminModule;
@@ -597,4 +629,3 @@
         window.FarmCore.registerSetActiveModule("user-manage", FarmUserAdminModule, {refreshMethod: "reload"});
     }
 })(window, window.jQuery);
-
