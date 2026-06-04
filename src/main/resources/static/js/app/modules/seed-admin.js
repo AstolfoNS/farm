@@ -592,8 +592,8 @@
         return {
             width: getStageNumberValue("width", 100),
             height: getStageNumberValue("height", 120),
-            left: getStageNumberValue("offsetX", 50),
-            top: getStageNumberValue("offsetY", 40)
+            left: getStageNumberValue("offsetX", 110),
+            top: getStageNumberValue("offsetY", 280)
         };
     }
 
@@ -990,8 +990,8 @@
         $("#seedStageEditorForm input[name='seedTypeId']").val(state.currentSeedId);
         setStageNumberValue("width", 100);
         setStageNumberValue("height", 120);
-        setStageNumberValue("offsetX", 50);
-        setStageNumberValue("offsetY", 40);
+        setStageNumberValue("offsetX", 110);
+        setStageNumberValue("offsetY", 280);
         setStageNumberValue("durationSeconds", 30);
         setStageNumberValue("bugProbability", 0);
         setStageNumberValue("stageIndex", asNumber(state.stageRows.length, 0) + 1);
@@ -1007,8 +1007,8 @@
             bugProbability: row.bugProbability == null ? 0 : row.bugProbability,
             width: asNumber(row.width, 100),
             height: asNumber(row.height, 120),
-            offsetX: asNumber(row.offsetX, 50),
-            offsetY: asNumber(row.offsetY, 40),
+            offsetX: asNumber(row.offsetX, 110),
+            offsetY: asNumber(row.offsetY, 280),
             assetUrl: row.assetUrl || ""
         });
         $("#seedStageEditorForm input[name='id']").val(asNumber(row.id, 0));
@@ -1060,8 +1060,8 @@
             bugProbability: Number(getStageNumberValue("bugProbability", 0)),
             width: getStageNumberValue("width", 100),
             height: getStageNumberValue("height", 120),
-            offsetX: getStageNumberValue("offsetX", 50),
-            offsetY: getStageNumberValue("offsetY", 40),
+            offsetX: getStageNumberValue("offsetX", 110),
+            offsetY: getStageNumberValue("offsetY", 280),
             assetUrl: normalizedAssetUrl
         };
         FarmApi.seedStageSave(payload, function (res) {

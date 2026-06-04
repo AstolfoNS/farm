@@ -451,8 +451,8 @@
         $('#stageFormEditor').find("input[name='pestProbability']").numberbox('setValue', 0);
         $('#stageFormEditor').find("input[name='width']").numberbox('setValue', 100);
         $('#stageFormEditor').find("input[name='height']").numberbox('setValue', 100);
-        $('#stageFormEditor').find("input[name='offsetX']").numberbox('setValue', 50);
-        $('#stageFormEditor').find("input[name='offsetY']").numberbox('setValue', 80);
+        $('#stageFormEditor').find("input[name='offsetX']").numberbox('setValue', 110);
+        $('#stageFormEditor').find("input[name='offsetY']").numberbox('setValue', 280);
     }
 
     function editStageRecord() {
@@ -550,8 +550,8 @@
         $('#positionImage').attr('src', imageUrl);
         $('#positionDialog').dialog('open').dialog('center');
         $('#positionImage').css({
-            left: Number($('#stageFormEditor').find("input[name='offsetX']").numberbox('getValue') || 50) + 'px',
-            top: Number($('#stageFormEditor').find("input[name='offsetY']").numberbox('getValue') || 80) + 'px',
+            left: Number($('#stageFormEditor').find("input[name='offsetX']").numberbox('getValue') || 110) + 'px',
+            top: Number($('#stageFormEditor').find("input[name='offsetY']").numberbox('getValue') || 280) + 'px',
             width: Number($('#stageFormEditor').find("input[name='width']").numberbox('getValue') || 100) + 'px',
             height: Number($('#stageFormEditor').find("input[name='height']").numberbox('getValue') || 140) + 'px'
         });
