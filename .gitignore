@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Runtime uploads & logs ###
+logs/
+
+# 用户上传的运行时文件，只保留 defaults 默认资源
+static/oss/avatar/
+static/oss/seed-cover/
+static/oss/seed-stage/
+static/oss/soil-cover/
