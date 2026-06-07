@@ -1,0 +1,36 @@
+# growth_stages - 生长阶段字典
+
+**Schema**: `farm` | **引擎**: PostgreSQL
+
+## 字段定义
+
+| 字段名 | 类型 | 非空 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| `id` | `BIGINT` | Y | `GENERATED ALWAYS AS IDENTITY` | 主键 |
+| `name` | `VARCHAR(500)` | Y | — | 阶段名称（唯一） |
+| `description` | `TEXT` | N | — | 阶段描述 |
+| *(BaseEntity 字段)* | | | | |
+
+## 唯一约束
+
+| 索引名 | 字段 | 条件 |
+|--------|------|------|
+| `uk_growth_stages_name_active` | `name` | `WHERE is_deleted = false` |
+
+## 种子数据
+
+| name | description |
+|------|-------------|
+| 种子 | 播种后的初始阶段 |
+| 发芽 | 发芽阶段 |
+| 幼苗 | 发芽后的幼苗期 |
+| 生长期 | 快速生长阶段 |
+| 开花 | 开花授粉阶段 |
+| 结果 | 开花后结果阶段 |
+| 成熟 | 可收获阶段 |
+| 枯萎 | 作物虫害超限或错过收获窗口后的最终阶段 |
+
+## 关联
+
+- 被 `seed_growth_stages.growth_stage_id` 引用
+- 每类种子的具体阶段配置在 `seed_growth_stages` 中定义
