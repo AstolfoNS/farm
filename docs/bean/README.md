@@ -28,10 +28,10 @@ bean/
 
 ## 通用类
 
-| 类 | 位置 | 说明 |
-|----|------|------|
-| `R<T>` | `common/apis/R.java` | 统一响应 `{code, msg, data}` |
+| 类              | 位置                           | 说明                                      |
+| --------------- | ------------------------------ | ----------------------------------------- |
+| `R<T>`          | `common/apis/R.java`           | 统一响应 `{code, msg, data}`              |
 | `PageResult<T>` | `common/pages/PageResult.java` | 分页 `{pageNo, pageSize, total, records}` |
-| `PageQueryDTO` | `dto/PageQueryDTO.java` | `page, rows, sort, order` |
-| `IdDTO` | `dto/IdDTO.java` | `id` (Long) |
-| `OptionVO` | `vo/OptionVO.java` | `{id, text}` 下拉选项 |
+| `PageQueryDTO`  | `dto/PageQueryDTO.java`        | `page, rows, sort, order`                 |
+| `IdDTO`         | `dto/IdDTO.java`               | `id` (Long)                               |
+| `OptionVO`      | `vo/OptionVO.java`             | `{id, text}` 下拉选项                     |

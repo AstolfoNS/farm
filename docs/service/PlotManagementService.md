@@ -5,6 +5,7 @@
 ## 方法
 
 ### `PlotUnlockResultVO unlockPlot(PlotUnlockDTO params)`
+
 - **事务**: Y
 - **流程**:
   1. 校验用户、地块存在且已锁定
@@ -15,6 +16,7 @@
   6. 记录 UNLOCK_PLOT 资产流水
 
 ### `PlotExpandResultVO expandPlot(PlotExpandDTO params)`
+
 - **事务**: Y
 - **流程**:
   1. 选择土壤类型（不传则取最低级土壤）
@@ -24,15 +26,19 @@
   5. 记录 EXPAND_PLOT 资产流水
 
 ### `PlotExpandOptionsVO listPlotExpandOptions(PlotExpandOptionsQueryDTO params)`
+
 - 返回所有可用土壤的扩地选项，每个含成本和可行性校验
 
 ### `PlotStatusVO plotStatus(PlotStatusQueryDTO params)`
+
 - 委托 `CropLifecycleService.myFarmOverview()` 获取状态
 
 ### `PageResult<PlotTradeRecordVO> pagePlotTrades(PlotTradeQueryDTO params)`
+
 - 地块经营流水分页（UNLOCK_PLOT / EXPAND_PLOT）
 
 ### `List<PlotTradeBizTypeOptionVO> listPlotTradeBizTypeOptions()`
+
 - 经营业务类型字典
 
 ## 关键变更（v2.0）

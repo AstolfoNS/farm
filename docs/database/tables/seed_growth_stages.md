@@ -4,25 +4,25 @@
 
 ## 字段定义
 
-| 字段名 | 类型 | 非空 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| `id` | `BIGINT` | Y | `GENERATED ALWAYS AS IDENTITY` | 主键 |
-| `seed_type_id` | `BIGINT` | Y | — | 关联种子类型 ID |
-| `growth_stage_id` | `BIGINT` | Y | — | 关联生长阶段字典 ID |
-| `stage_index` | `SMALLINT` | Y | — | 阶段序号（1-based，同种子内唯一） |
-| `duration_seconds` | `INT` | Y | — | 该阶段持续时长（秒） |
-| `asset_url` | `VARCHAR(1024)` | N | — | 阶段展示图 URL |
-| `bug_probability` | `NUMERIC(5,4)` | Y | `0.0000` | 该阶段发生虫害的概率（0~1） |
-| `width` | `INT` | Y | `0` | 展示图宽度（px） |
-| `height` | `INT` | Y | `0` | 展示图高度（px） |
-| `offset_x` | `INT` | Y | `0` | 展示图水平偏移（px），默认 110 |
-| `offset_y` | `INT` | Y | `0` | 展示图垂直偏移（px），默认 280 |
-| *(BaseEntity 字段)* | | | | |
+| 字段名              | 类型            | 非空 | 默认值                         | 说明                              |
+| ------------------- | --------------- | ---- | ------------------------------ | --------------------------------- |
+| `id`                | `BIGINT`        | Y    | `GENERATED ALWAYS AS IDENTITY` | 主键                              |
+| `seed_type_id`      | `BIGINT`        | Y    | —                              | 关联种子类型 ID                   |
+| `growth_stage_id`   | `BIGINT`        | Y    | —                              | 关联生长阶段字典 ID               |
+| `stage_index`       | `SMALLINT`      | Y    | —                              | 阶段序号（1-based，同种子内唯一） |
+| `duration_seconds`  | `INT`           | Y    | —                              | 该阶段持续时长（秒）              |
+| `asset_url`         | `VARCHAR(1024)` | N    | —                              | 阶段展示图 URL                    |
+| `bug_probability`   | `NUMERIC(5,4)`  | Y    | `0.0000`                       | 该阶段发生虫害的概率（0~1）       |
+| `width`             | `INT`           | Y    | `0`                            | 展示图宽度（px）                  |
+| `height`            | `INT`           | Y    | `0`                            | 展示图高度（px）                  |
+| `offset_x`          | `INT`           | Y    | `0`                            | 展示图水平偏移（px），默认 110    |
+| `offset_y`          | `INT`           | Y    | `0`                            | 展示图垂直偏移（px），默认 280    |
+| _(BaseEntity 字段)_ |                 |      |                                |                                   |
 
 ## 唯一约束
 
-| 索引名 | 字段 | 条件 |
-|--------|------|------|
+| 索引名                       | 字段                          | 条件                       |
+| ---------------------------- | ----------------------------- | -------------------------- |
 | `uk_seed_growth_stage_index` | `(seed_type_id, stage_index)` | `WHERE is_deleted = false` |
 
 ## 业务说明

@@ -4,11 +4,11 @@
 
 ## 方法
 
-| 方法 | 说明 |
-|------|------|
-| `registerSession(Long userId, WebSocketSession)` | WebSocket 连接建立时注册会话 |
-| `unregisterSession(Long userId, String sessionId)` | 连接关闭/出错时注销会话 |
-| `pushOverviewToUsers(Set<Long> changedUserIds)` | 向指定用户推送农场概览更新（`FARM_OVERVIEW` 事件） |
+| 方法                                               | 说明                                               |
+| -------------------------------------------------- | -------------------------------------------------- |
+| `registerSession(Long userId, WebSocketSession)`   | WebSocket 连接建立时注册会话                       |
+| `unregisterSession(Long userId, String sessionId)` | 连接关闭/出错时注销会话                            |
+| `pushOverviewToUsers(Set<Long> changedUserIds)`    | 向指定用户推送农场概览更新（`FARM_OVERVIEW` 事件） |
 
 ## 架构
 

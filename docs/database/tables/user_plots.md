@@ -4,22 +4,22 @@
 
 ## 字段定义
 
-| 字段名 | 类型 | 非空 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| `id` | `BIGINT` | Y | `GENERATED ALWAYS AS IDENTITY` | 主键 |
-| `user_id` | `BIGINT` | Y | — | 用户 ID |
-| `soil_type_id` | `BIGINT` | Y | — | 土壤类型 ID |
-| `plot_index` | `SMALLINT` | Y | — | 地块序号（1-based，用户内唯一） |
-| `unlock_experience_required` | `BIGINT` | Y | `0` | 解锁该地块所需经验值 |
-| `is_locked` | `BOOLEAN` | Y | `false` | 是否锁定 |
-| `unlocked_at` | `TIMESTAMPTZ` | N | — | 解锁时间 |
-| `lock_reason` | `VARCHAR(255)` | N | — | 锁定原因说明 |
-| *(BaseEntity 字段)* | | | | |
+| 字段名                       | 类型           | 非空 | 默认值                         | 说明                            |
+| ---------------------------- | -------------- | ---- | ------------------------------ | ------------------------------- |
+| `id`                         | `BIGINT`       | Y    | `GENERATED ALWAYS AS IDENTITY` | 主键                            |
+| `user_id`                    | `BIGINT`       | Y    | —                              | 用户 ID                         |
+| `soil_type_id`               | `BIGINT`       | Y    | —                              | 土壤类型 ID                     |
+| `plot_index`                 | `SMALLINT`     | Y    | —                              | 地块序号（1-based，用户内唯一） |
+| `unlock_experience_required` | `BIGINT`       | Y    | `0`                            | 解锁该地块所需经验值            |
+| `is_locked`                  | `BOOLEAN`      | Y    | `false`                        | 是否锁定                        |
+| `unlocked_at`                | `TIMESTAMPTZ`  | N    | —                              | 解锁时间                        |
+| `lock_reason`                | `VARCHAR(255)` | N    | —                              | 锁定原因说明                    |
+| _(BaseEntity 字段)_          |                |      |                                |                                 |
 
 ## 唯一约束
 
-| 索引名 | 字段 | 条件 |
-|--------|------|------|
+| 索引名               | 字段                    | 条件                       |
+| -------------------- | ----------------------- | -------------------------- |
 | `uk_user_plot_index` | `(user_id, plot_index)` | `WHERE is_deleted = false` |
 
 ## 业务说明

@@ -4,31 +4,31 @@
 
 ## 字段定义
 
-| 字段名 | 类型 | 非空 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| `id` | `BIGINT` | Y | `GENERATED ALWAYS AS IDENTITY` | 主键 |
-| `user_id` | `BIGINT` | Y | — | 用户 ID |
-| `plot_id` | `BIGINT` | Y | — | 地块 ID（唯一） |
-| `seed_type_id` | `BIGINT` | Y | — | 种子类型 ID |
-| `planted_at` | `TIMESTAMPTZ` | Y | `CURRENT_TIMESTAMP` | 种植时间 |
-| `stage_started_at` | `TIMESTAMPTZ` | Y | `CURRENT_TIMESTAMP` | 当前阶段开始时间 |
-| `last_harvest_at` | `TIMESTAMPTZ` | N | — | 上次收获时间 |
-| `matured_at` | `TIMESTAMPTZ` | N | — | 成熟时间 |
-| `withered_at` | `TIMESTAMPTZ` | N | — | 枯萎时间 |
-| `expected_ripe_at` | `TIMESTAMPTZ` | N | — | 预计成熟时间（用于倒计时） |
-| `expected_withered_at` | `TIMESTAMPTZ` | N | — | 预计枯萎时间（用于倒计时） |
-| `harvest_count` | `SMALLINT` | Y | `0` | 已收获次数 |
-| `current_stage_index` | `SMALLINT` | Y | `1` | 当前阶段序号 |
-| `grow_status` | `SMALLINT` | Y | `1` | 生长状态：1=生长中, 2=成熟待收, 3=已枯萎 |
-| `bug_count` | `SMALLINT` | Y | `0` | 当前虫害数量 |
-| `last_bug_at` | `TIMESTAMPTZ` | N | — | 上次虫害发生时间 |
-| `last_care_at` | `TIMESTAMPTZ` | N | — | 上次养护时间 |
-| *(BaseEntity 字段)* | | | | |
+| 字段名                 | 类型          | 非空 | 默认值                         | 说明                                     |
+| ---------------------- | ------------- | ---- | ------------------------------ | ---------------------------------------- |
+| `id`                   | `BIGINT`      | Y    | `GENERATED ALWAYS AS IDENTITY` | 主键                                     |
+| `user_id`              | `BIGINT`      | Y    | —                              | 用户 ID                                  |
+| `plot_id`              | `BIGINT`      | Y    | —                              | 地块 ID（唯一）                          |
+| `seed_type_id`         | `BIGINT`      | Y    | —                              | 种子类型 ID                              |
+| `planted_at`           | `TIMESTAMPTZ` | Y    | `CURRENT_TIMESTAMP`            | 种植时间                                 |
+| `stage_started_at`     | `TIMESTAMPTZ` | Y    | `CURRENT_TIMESTAMP`            | 当前阶段开始时间                         |
+| `last_harvest_at`      | `TIMESTAMPTZ` | N    | —                              | 上次收获时间                             |
+| `matured_at`           | `TIMESTAMPTZ` | N    | —                              | 成熟时间                                 |
+| `withered_at`          | `TIMESTAMPTZ` | N    | —                              | 枯萎时间                                 |
+| `expected_ripe_at`     | `TIMESTAMPTZ` | N    | —                              | 预计成熟时间（用于倒计时）               |
+| `expected_withered_at` | `TIMESTAMPTZ` | N    | —                              | 预计枯萎时间（用于倒计时）               |
+| `harvest_count`        | `SMALLINT`    | Y    | `0`                            | 已收获次数                               |
+| `current_stage_index`  | `SMALLINT`    | Y    | `1`                            | 当前阶段序号                             |
+| `grow_status`          | `SMALLINT`    | Y    | `1`                            | 生长状态：1=生长中, 2=成熟待收, 3=已枯萎 |
+| `bug_count`            | `SMALLINT`    | Y    | `0`                            | 当前虫害数量                             |
+| `last_bug_at`          | `TIMESTAMPTZ` | N    | —                              | 上次虫害发生时间                         |
+| `last_care_at`         | `TIMESTAMPTZ` | N    | —                              | 上次养护时间                             |
+| _(BaseEntity 字段)_    |               |      |                                |                                          |
 
 ## 唯一约束
 
-| 索引名 | 字段 | 条件 |
-|--------|------|------|
+| 索引名                | 字段      | 条件                       |
+| --------------------- | --------- | -------------------------- |
 | `uk_plot_active_crop` | `plot_id` | `WHERE is_deleted = false` |
 
 ## 状态机
