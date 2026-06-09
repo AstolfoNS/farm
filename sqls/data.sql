@@ -5,14 +5,14 @@ BEGIN;
 
 -- 0) 默认资源路径 (合并基础与最终版)
 INSERT INTO farm.asset_defaults (asset_key, asset_url, description) VALUES
-                                                                        ('avatar', '/oss/defaults/avatar/default-avatar.png', '用户头像默认图'),
-                                                                        ('seedCover', '/oss/defaults/seed/seed-cover-default.png', '种子封面默认图'),
-                                                                        ('seedStage', '/oss/defaults/seed/seed-stage-default.png', '种子阶段默认图'),
-                                                                        ('soilCover', '/oss/defaults/soil/soil-default.png', '土壤默认图'),
-                                                                        ('plotCover', '/oss/defaults/plot/plot-cover-default.png', '地块封面默认图'),
-                                                                        ('plotIcon', '/oss/defaults/plot/plot-icon-default.png', '地块图标默认图'),
+                                                                        ('avatar', '/oss/.defaults/avatar/default-avatar.png', '用户头像默认图'),
+                                                                        ('seedCover', '/oss/.defaults/seed/seed-cover-default.png', '种子封面默认图'),
+                                                                        ('seedStage', '/oss/.defaults/seed/seed-stage-default.png', '种子阶段默认图'),
+                                                                        ('soilCover', '/oss/.defaults/soil/soil-default.png', '土壤默认图'),
+                                                                        ('plotCover', '/oss/.defaults/plot/plot-cover-default.png', '地块封面默认图'),
+                                                                        ('plotIcon', '/oss/.defaults/plot/plot-icon-default.png', '地块图标默认图'),
                                                                         ('bgm', '/resources/sounds/bgm/Must%20Work%20to%20Eat.wav', '默认背景音乐'),
-                                                                        ('seedStageWithered', '/oss/defaults/seed/seed-stage-withered-default.png', '种子枯萎阶段默认图')
+                                                                        ('seedStageWithered', '/oss/.defaults/seed/seed-stage-withered-default.png', '种子枯萎阶段默认图')
 ON CONFLICT (asset_key) WHERE is_deleted = false DO UPDATE SET
                                                                asset_url = EXCLUDED.asset_url, description = EXCLUDED.description;
 
@@ -25,9 +25,9 @@ ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
 
 -- 2) 土地类型字典 (集成最终版数据)
 INSERT INTO farm.soil_types (name, bit_code, cover_image_url, level, unlock_experience_required, grow_speed_multiplier, expand_cost_coin, description) VALUES
-                                                                                                                                         ('黄土地', 1, '/oss/defaults/soil/soil-default.png', 1, 0, 1.00, 0, '基础土地，适配多数作物'),
-                                                                                                                                         ('黑土地', 2, '/oss/defaults/soil/soil-default.png', 2, 500, 0.90, 1500, '生长速度更快的改良土地'),
-                                                                                                                                         ('金土地', 4, '/oss/defaults/soil/soil-default.png', 3, 2000, 0.80, 5000, '高级土地，适配高等级作物')
+                                                                                                                                         ('黄土地', 1, '/oss/.defaults/soil/soil-default.png', 1, 0, 1.00, 0, '基础土地，适配多数作物'),
+                                                                                                                                         ('黑土地', 2, '/oss/.defaults/soil/soil-default.png', 2, 500, 0.90, 1500, '生长速度更快的改良土地'),
+                                                                                                                                         ('金土地', 4, '/oss/.defaults/soil/soil-default.png', 3, 2000, 0.80, 5000, '高级土地，适配高等级作物')
 ON CONFLICT (bit_code) WHERE is_deleted = false DO UPDATE SET
                                                               cover_image_url = EXCLUDED.cover_image_url, updated_at = NOW();
 
@@ -62,7 +62,7 @@ INSERT INTO farm.seed_types (
     unlock_experience_required
 )
 SELECT
-    d.name, '/oss/defaults/seed/seed-cover-default.png', q.id, d.soil_bits, d.level, d.descr,
+    d.name, '/oss/.defaults/seed/seed-cover-default.png', q.id, d.soil_bits, d.level, d.descr,
     d.max_bug, d.max_harvest, d.regrow_idx, d.harvest_idx,
     d.price, d.harv_exp, d.harv_fruit, d.fruit_loss,
     d.bug_coin, d.bug_exp, d.bug_score, d.fruit_price, d.harv_score,
@@ -88,47 +88,47 @@ ON CONFLICT (name) WHERE is_deleted = false DO UPDATE SET
 -- 5) 种子生长阶段配置 (直接应用最终带枯萎的补丁阶段)
 WITH stage_data (seed_name, stage_name, stage_idx, dur_sec, bug_prob, w, h, ox, oy, asset) AS (
     VALUES
-        ('草莓','种子',1::smallint,25::int,0.0080::numeric,92,120,58,162,'/oss/defaults/seed/seed-stage-default.png'),
-        ('草莓','发芽',2,30,0.0140,95,126,56,156,'/oss/defaults/seed/seed-stage-default.png'),
-        ('草莓','开花',3,35,0.0200,102,132,52,150,'/oss/defaults/seed/seed-stage-default.png'),
-        ('草莓','结果',4,40,0.0260,108,138,48,145,'/oss/defaults/seed/seed-stage-default.png'),
-        ('草莓','成熟',5,35,0.0180,112,142,46,140,'/oss/defaults/seed/seed-stage-default.png'),
-        ('草莓','枯萎',6,0,0.0000,112,142,46,140,'/oss/defaults/seed/seed-stage-withered-default.png'),
-        ('茄子','种子',1,30,0.0100,94,122,57,160,'/oss/defaults/seed/seed-stage-default.png'),
-        ('茄子','发芽',2,35,0.0160,98,128,54,154,'/oss/defaults/seed/seed-stage-default.png'),
-        ('茄子','生长期',3,45,0.0240,104,136,50,148,'/oss/defaults/seed/seed-stage-default.png'),
-        ('茄子','结果',4,50,0.0300,110,142,46,142,'/oss/defaults/seed/seed-stage-default.png'),
-        ('茄子','成熟',5,42,0.0220,114,146,44,138,'/oss/defaults/seed/seed-stage-default.png'),
-        ('茄子','枯萎',6,0,0.0000,114,146,44,138,'/oss/defaults/seed/seed-stage-withered-default.png'),
-        ('玉米','种子',1,40,0.0100,94,124,56,160,'/oss/defaults/seed/seed-stage-default.png'),
-        ('玉米','幼苗',2,55,0.0180,102,136,51,150,'/oss/defaults/seed/seed-stage-default.png'),
-        ('玉米','生长期',3,70,0.0280,110,148,46,140,'/oss/defaults/seed/seed-stage-default.png'),
-        ('玉米','成熟',4,60,0.0220,118,156,40,130,'/oss/defaults/seed/seed-stage-default.png'),
-        ('玉米','枯萎',5,0,0.0000,118,156,40,130,'/oss/defaults/seed/seed-stage-withered-default.png'),
-        ('蓝莓','种子',1,35,0.0100,86,116,62,166,'/oss/defaults/seed/seed-stage-default.png'),
-        ('蓝莓','发芽',2,40,0.0160,90,122,60,160,'/oss/defaults/seed/seed-stage-default.png'),
-        ('蓝莓','幼苗',3,50,0.0240,96,128,56,154,'/oss/defaults/seed/seed-stage-default.png'),
-        ('蓝莓','生长期',4,55,0.0300,104,136,52,148,'/oss/defaults/seed/seed-stage-default.png'),
-        ('蓝莓','开花',5,60,0.0340,110,142,49,142,'/oss/defaults/seed/seed-stage-default.png'),
-        ('蓝莓','成熟',6,50,0.0220,114,146,46,138,'/oss/defaults/seed/seed-stage-default.png'),
-        ('蓝莓','枯萎',7,0,0.0000,114,146,46,138,'/oss/defaults/seed/seed-stage-withered-default.png'),
-        ('南瓜','种子',1,30,0.0090,98,122,54,158,'/oss/defaults/seed/seed-stage-default.png'),
-        ('南瓜','发芽',2,35,0.0140,102,126,52,154,'/oss/defaults/seed/seed-stage-default.png'),
-        ('南瓜','幼苗',3,45,0.0200,110,136,48,148,'/oss/defaults/seed/seed-stage-default.png'),
-        ('南瓜','生长期',4,65,0.0300,120,150,42,136,'/oss/defaults/seed/seed-stage-default.png'),
-        ('南瓜','成熟',5,55,0.0240,126,156,38,132,'/oss/defaults/seed/seed-stage-default.png'),
-        ('南瓜','枯萎',6,0,0.0000,126,156,38,132,'/oss/defaults/seed/seed-stage-withered-default.png'),
-        ('辣椒','种子',1,28,0.0100,90,118,60,164,'/oss/defaults/seed/seed-stage-default.png'),
-        ('辣椒','发芽',2,32,0.0180,94,124,57,158,'/oss/defaults/seed/seed-stage-default.png'),
-        ('辣椒','生长期',3,42,0.0260,100,132,54,152,'/oss/defaults/seed/seed-stage-default.png'),
-        ('辣椒','开花',4,50,0.0320,106,138,50,146,'/oss/defaults/seed/seed-stage-default.png'),
-        ('辣椒','成熟',5,45,0.0240,110,144,48,142,'/oss/defaults/seed/seed-stage-default.png'),
-        ('辣椒','枯萎',6,0,0.0000,110,144,48,142,'/oss/defaults/seed/seed-stage-withered-default.png'),
-        ('水稻','种子',1,22,0.0060,88,114,61,167,'/oss/defaults/seed/seed-stage-default.png'),
-        ('水稻','幼苗',2,30,0.0120,94,122,58,160,'/oss/defaults/seed/seed-stage-default.png'),
-        ('水稻','生长期',3,45,0.0180,98,130,55,154,'/oss/defaults/seed/seed-stage-default.png'),
-        ('水稻','成熟',4,38,0.0150,102,136,52,148,'/oss/defaults/seed/seed-stage-default.png'),
-        ('水稻','枯萎',5,0,0.0000,102,136,52,148,'/oss/defaults/seed/seed-stage-withered-default.png')
+        ('草莓','种子',1::smallint,25::int,0.0080::numeric,92,120,58,162,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('草莓','发芽',2,30,0.0140,95,126,56,156,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('草莓','开花',3,35,0.0200,102,132,52,150,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('草莓','结果',4,40,0.0260,108,138,48,145,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('草莓','成熟',5,35,0.0180,112,142,46,140,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('草莓','枯萎',6,0,0.0000,112,142,46,140,'/oss/.defaults/seed/seed-stage-withered-default.png'),
+        ('茄子','种子',1,30,0.0100,94,122,57,160,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('茄子','发芽',2,35,0.0160,98,128,54,154,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('茄子','生长期',3,45,0.0240,104,136,50,148,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('茄子','结果',4,50,0.0300,110,142,46,142,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('茄子','成熟',5,42,0.0220,114,146,44,138,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('茄子','枯萎',6,0,0.0000,114,146,44,138,'/oss/.defaults/seed/seed-stage-withered-default.png'),
+        ('玉米','种子',1,40,0.0100,94,124,56,160,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('玉米','幼苗',2,55,0.0180,102,136,51,150,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('玉米','生长期',3,70,0.0280,110,148,46,140,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('玉米','成熟',4,60,0.0220,118,156,40,130,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('玉米','枯萎',5,0,0.0000,118,156,40,130,'/oss/.defaults/seed/seed-stage-withered-default.png'),
+        ('蓝莓','种子',1,35,0.0100,86,116,62,166,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('蓝莓','发芽',2,40,0.0160,90,122,60,160,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('蓝莓','幼苗',3,50,0.0240,96,128,56,154,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('蓝莓','生长期',4,55,0.0300,104,136,52,148,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('蓝莓','开花',5,60,0.0340,110,142,49,142,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('蓝莓','成熟',6,50,0.0220,114,146,46,138,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('蓝莓','枯萎',7,0,0.0000,114,146,46,138,'/oss/.defaults/seed/seed-stage-withered-default.png'),
+        ('南瓜','种子',1,30,0.0090,98,122,54,158,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('南瓜','发芽',2,35,0.0140,102,126,52,154,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('南瓜','幼苗',3,45,0.0200,110,136,48,148,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('南瓜','生长期',4,65,0.0300,120,150,42,136,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('南瓜','成熟',5,55,0.0240,126,156,38,132,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('南瓜','枯萎',6,0,0.0000,126,156,38,132,'/oss/.defaults/seed/seed-stage-withered-default.png'),
+        ('辣椒','种子',1,28,0.0100,90,118,60,164,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('辣椒','发芽',2,32,0.0180,94,124,57,158,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('辣椒','生长期',3,42,0.0260,100,132,54,152,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('辣椒','开花',4,50,0.0320,106,138,50,146,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('辣椒','成熟',5,45,0.0240,110,144,48,142,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('辣椒','枯萎',6,0,0.0000,110,144,48,142,'/oss/.defaults/seed/seed-stage-withered-default.png'),
+        ('水稻','种子',1,22,0.0060,88,114,61,167,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('水稻','幼苗',2,30,0.0120,94,122,58,160,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('水稻','生长期',3,45,0.0180,98,130,55,154,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('水稻','成熟',4,38,0.0150,102,136,52,148,'/oss/.defaults/seed/seed-stage-default.png'),
+        ('水稻','枯萎',5,0,0.0000,102,136,52,148,'/oss/.defaults/seed/seed-stage-withered-default.png')
 )
 INSERT INTO farm.seed_growth_stages (
     seed_type_id, growth_stage_id, stage_index, duration_seconds, asset_url, bug_probability, width, height, offset_x, offset_y
@@ -167,11 +167,11 @@ WHERE sgs.seed_type_id = ms.seed_type_id
 
 -- 6) 用户初始化数据 (整合包含增强补丁的全量用户信息)
 INSERT INTO farm.users (username, nickname, password_hash, email, avatar_url, experience, score, coin, preferences_json) VALUES
-                                                                                                                             ('liubei',  '刘备', '123456', 'liubei@farm.local', '/oss/defaults/avatar/default-avatar.png', 2400, 820, 5600, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
-                                                                                                                             ('caocao',  '曹操', '123456', 'caocao@farm.local', '/oss/defaults/avatar/default-avatar.png', 2100, 700, 4900, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
-                                                                                                                             ('sunquan', '孙权', '123456', 'sunquan@farm.local', '/oss/defaults/avatar/default-avatar.png', 1750, 540, 3600, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
-                                                                                                                             ('zhaoyun', '赵云', '123456', 'zhaoyun@farm.local', '/oss/defaults/avatar/default-avatar.png', 1450, 430, 2800, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
-                                                                                                                             ('huatuo',  '华佗', '123456', 'huatuo@farm.local', '/oss/defaults/avatar/default-avatar.png', 900,  260, 1800, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}')
+                                                                                                                             ('liubei',  '刘备', '123456', 'liubei@farm.local', '/oss/.defaults/avatar/default-avatar.png', 2400, 820, 5600, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
+                                                                                                                             ('caocao',  '曹操', '123456', 'caocao@farm.local', '/oss/.defaults/avatar/default-avatar.png', 2100, 700, 4900, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
+                                                                                                                             ('sunquan', '孙权', '123456', 'sunquan@farm.local', '/oss/.defaults/avatar/default-avatar.png', 1750, 540, 3600, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
+                                                                                                                             ('zhaoyun', '赵云', '123456', 'zhaoyun@farm.local', '/oss/.defaults/avatar/default-avatar.png', 1450, 430, 2800, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}'),
+                                                                                                                             ('huatuo',  '华佗', '123456', 'huatuo@farm.local', '/oss/.defaults/avatar/default-avatar.png', 900,  260, 1800, '{"audio":{"effectEnabled":true,"effectVolume":0.8,"bgmEnabled":true,"bgmVolume":0.6}}')
 ON CONFLICT (username) WHERE is_deleted = false DO UPDATE SET
                                                               nickname = EXCLUDED.nickname, email = EXCLUDED.email, experience = EXCLUDED.experience,
                                                               score = EXCLUDED.score, coin = EXCLUDED.coin, updated_at = NOW();

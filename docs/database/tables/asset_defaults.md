@@ -26,14 +26,14 @@
 
 | asset_key           | asset_url                                            | description        |
 | ------------------- | ---------------------------------------------------- | ------------------ |
-| `avatar`            | `/oss/defaults/avatar/default-avatar.png`            | 用户头像默认图     |
-| `seedCover`         | `/oss/defaults/seed/seed-cover-default.png`          | 种子封面默认图     |
-| `seedStage`         | `/oss/defaults/seed/seed-stage-default.png`          | 种子阶段默认图     |
-| `soilCover`         | `/oss/defaults/soil/soil-default.png`                | 土壤默认图         |
-| `plotCover`         | `/oss/defaults/plot/plot-cover-default.png`          | 地块封面默认图     |
-| `plotIcon`          | `/oss/defaults/plot/plot-icon-default.png`           | 地块图标默认图     |
+| `avatar`            | `/oss/.defaults/avatar/default-avatar.png`            | 用户头像默认图     |
+| `seedCover`         | `/oss/.defaults/seed/seed-cover-default.png`          | 种子封面默认图     |
+| `seedStage`         | `/oss/.defaults/seed/seed-stage-default.png`          | 种子阶段默认图     |
+| `soilCover`         | `/oss/.defaults/soil/soil-default.png`                | 土壤默认图         |
+| `plotCover`         | `/oss/.defaults/plot/plot-cover-default.png`          | 地块封面默认图     |
+| `plotIcon`          | `/oss/.defaults/plot/plot-icon-default.png`           | 地块图标默认图     |
 | `bgm`               | `/resources/sounds/bgm/Must Work to Eat.wav`         | 默认背景音乐       |
-| `seedStageWithered` | `/oss/defaults/seed/seed-stage-withered-default.png` | 种子枯萎阶段默认图 |
+| `seedStageWithered` | `/oss/.defaults/seed/seed-stage-withered-default.png` | 种子枯萎阶段默认图 |
 
 ## 业务说明
 
