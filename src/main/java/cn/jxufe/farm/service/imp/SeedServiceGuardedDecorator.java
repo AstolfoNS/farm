@@ -280,7 +280,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     validateStageAssetUrl(params == null ? null : params.getAssetUrl());
     validateStageLayout(params);
     delegate.saveSeedStage(params);
-    Long seedTypeId = params == null ? null : params.getSeedTypeId();
+    Long seedTypeId = params.getSeedTypeId();
     validateStageRules(seedTypeId, false);
   }
 
@@ -545,7 +545,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
       return unlockExperienceRequired;
     }
     int lv = level == null ? 1 : Math.max(level, (short) 1);
-    if (lv <= 1) {
+    if (lv == 1) {
       return 0L;
     }
     if (lv == 2) {
