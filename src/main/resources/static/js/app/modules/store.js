@@ -21,11 +21,17 @@
     }
 
     function asNumber(value, def) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.asNumber)) {
+            return window.FarmUi.asNumber(value, def);
+        }
         var n = Number(value);
         return isNaN(n) ? (def || 0) : n;
     }
 
     function trimText(value) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.trimText)) {
+            return window.FarmUi.trimText(value);
+        }
         return $.trim(value == null ? "" : String(value));
     }
 
@@ -58,10 +64,16 @@
     }
 
     function escapeHtml(text) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.escapeHtml)) {
+            return window.FarmUi.escapeHtml(text);
+        }
         return $("<div/>").text(text == null ? "" : String(text)).html();
     }
 
     function escapeAttr(text) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.escapeAttr)) {
+            return window.FarmUi.escapeAttr(text);
+        }
         var value = text == null ? "" : String(text);
         return value
             .replace(/&/g, "&amp;")
@@ -72,6 +84,9 @@
     }
 
     function toArray(list) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.toArray)) {
+            return window.FarmUi.toArray(list);
+        }
         return $.isArray(list) ? list : [];
     }
 
@@ -83,6 +98,9 @@
     }
 
     function totalPages(pageResult) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.totalPages)) {
+            return window.FarmUi.totalPages(pageResult, 10);
+        }
         var total = asNumber(pageResult && pageResult.total, 0);
         var pageSize = asNumber(pageResult && pageResult.pageSize, 10);
         if (pageSize <= 0) {
@@ -176,53 +194,73 @@
     }
 
     function renderSeedPager(pageData) {
-        var pageNo = asNumber(pageData && pageData.pageNo, 1);
-        var pages = totalPages(pageData || {});
-        var prevDisabled = pageNo <= 1 ? "disabled" : "";
-        var nextDisabled = pageNo >= pages ? "disabled" : "";
-        var html = "" +
-            "<button type='button' class='store-page-btn prev store-seed-page-prev' " + prevDisabled + "></button>" +
-            "<span class='store-page-label'>第 " + pageNo + " / " + pages + " 页</span>" +
-            "<button type='button' class='store-page-btn next store-seed-page-next' " + nextDisabled + "></button>";
-        $("#storeSeedPager").html(html);
-        $("#storeSeedPager .store-seed-page-prev").off("click.storeSeedPager").on("click.storeSeedPager", function () {
-            if (state.seedQuery.page <= 1) {
-                return;
-            }
-            state.seedQuery.page = state.seedQuery.page - 1;
-            reload();
-        });
-        $("#storeSeedPager .store-seed-page-next").off("click.storeSeedPager").on("click.storeSeedPager", function () {
-            if (state.seedQuery.page >= pages) {
-                return;
-            }
-            state.seedQuery.page = state.seedQuery.page + 1;
-            reload();
-        });
+        if (window.FarmUi && $.isFunction(window.FarmUi.renderButtonPager)) {
+            window.FarmUi.renderButtonPager({
+                container: "#storeSeedPager",
+                pageData: pageData,
+                buttonClass: "store-page-btn",
+                prevClass: "store-seed-page-prev",
+                nextClass: "store-seed-page-next",
+                labelClass: "store-page-label",
+                onPrev: function () {
+                    state.seedQuery.page = state.seedQuery.page - 1;
+                    reload();
+                },
+                onNext: function () {
+                    state.seedQuery.page = state.seedQuery.page + 1;
+                    reload();
+                }
+            });
+            return;
+        }
+        renderFallbackPager("#storeSeedPager", "store-seed-page", pageData, state.seedQuery);
     }
 
     function renderFruitPager(pageData) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.renderButtonPager)) {
+            window.FarmUi.renderButtonPager({
+                container: "#storeFruitPager",
+                pageData: pageData,
+                buttonClass: "store-page-btn",
+                prevClass: "store-fruit-page-prev",
+                nextClass: "store-fruit-page-next",
+                labelClass: "store-page-label",
+                onPrev: function () {
+                    state.fruitQuery.page = state.fruitQuery.page - 1;
+                    reload();
+                },
+                onNext: function () {
+                    state.fruitQuery.page = state.fruitQuery.page + 1;
+                    reload();
+                }
+            });
+            return;
+        }
+        renderFallbackPager("#storeFruitPager", "store-fruit-page", pageData, state.fruitQuery);
+    }
+
+    function renderFallbackPager(container, prefix, pageData, query) {
         var pageNo = asNumber(pageData && pageData.pageNo, 1);
         var pages = totalPages(pageData || {});
         var prevDisabled = pageNo <= 1 ? "disabled" : "";
         var nextDisabled = pageNo >= pages ? "disabled" : "";
         var html = "" +
-            "<button type='button' class='store-page-btn prev store-fruit-page-prev' " + prevDisabled + "></button>" +
+            "<button type='button' class='store-page-btn prev " + prefix + "-prev' " + prevDisabled + "></button>" +
             "<span class='store-page-label'>第 " + pageNo + " / " + pages + " 页</span>" +
-            "<button type='button' class='store-page-btn next store-fruit-page-next' " + nextDisabled + "></button>";
-        $("#storeFruitPager").html(html);
-        $("#storeFruitPager .store-fruit-page-prev").off("click.storeFruitPager").on("click.storeFruitPager", function () {
-            if (state.fruitQuery.page <= 1) {
+            "<button type='button' class='store-page-btn next " + prefix + "-next' " + nextDisabled + "></button>";
+        $(container).html(html);
+        $(container + " ." + prefix + "-prev").off("click.storePager").on("click.storePager", function () {
+            if (query.page <= 1) {
                 return;
             }
-            state.fruitQuery.page = state.fruitQuery.page - 1;
+            query.page = query.page - 1;
             reload();
         });
-        $("#storeFruitPager .store-fruit-page-next").off("click.storeFruitPager").on("click.storeFruitPager", function () {
-            if (state.fruitQuery.page >= pages) {
+        $(container + " ." + prefix + "-next").off("click.storePager").on("click.storePager", function () {
+            if (query.page >= pages) {
                 return;
             }
-            state.fruitQuery.page = state.fruitQuery.page + 1;
+            query.page = query.page + 1;
             reload();
         });
     }

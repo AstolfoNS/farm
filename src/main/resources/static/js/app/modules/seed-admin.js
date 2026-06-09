@@ -42,6 +42,9 @@
     }
 
     function escapeHtml(text) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.escapeHtml)) {
+            return window.FarmUi.escapeHtml(text);
+        }
         return $("<div/>").text(text == null ? "" : String(text)).html();
     }
 
@@ -67,6 +70,9 @@
     }
 
     function boolOk(res) {
+        if ($.isFunction(Admin.boolOk)) {
+            return Admin.boolOk(res);
+        }
         return window.FarmApi && $.isFunction(FarmApi.isOk) ? FarmApi.isOk(res) : false;
     }
 
@@ -85,6 +91,9 @@
         }
         if ($.isArray(data.rows)) {
             return data.rows;
+        }
+        if ($.isArray(data.list)) {
+            return data.list;
         }
         return [];
     }

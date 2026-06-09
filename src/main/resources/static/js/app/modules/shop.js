@@ -5,6 +5,8 @@
         inited: false,
         userId: 0,
         loading: false,
+        fruitLoaded: false,
+        tradeLoaded: false,
         seedCardRows: [],
         currentTab: "seed",
         seedQuery: {
@@ -35,11 +37,17 @@
     }
 
     function asNumber(value, def) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.asNumber)) {
+            return window.FarmUi.asNumber(value, def);
+        }
         var n = Number(value);
         return isNaN(n) ? (def || 0) : n;
     }
 
     function trimText(value) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.trimText)) {
+            return window.FarmUi.trimText(value);
+        }
         return $.trim(value == null ? "" : String(value));
     }
 
@@ -93,10 +101,16 @@
     }
 
     function escapeHtml(text) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.escapeHtml)) {
+            return window.FarmUi.escapeHtml(text);
+        }
         return $("<div/>").text(text == null ? "" : String(text)).html();
     }
 
     function escapeAttr(text) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.escapeAttr)) {
+            return window.FarmUi.escapeAttr(text);
+        }
         var value = text == null ? "" : String(text);
         return value
             .replace(/&/g, "&amp;")
@@ -107,6 +121,9 @@
     }
 
     function toArray(list) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.toArray)) {
+            return window.FarmUi.toArray(list);
+        }
         return $.isArray(list) ? list : [];
     }
 
@@ -125,10 +142,12 @@
         $(".shop-pane").removeClass("is-active");
         if (tabName === "fruit") {
             $("#shopFruitPane").addClass("is-active");
+            loadFruitPage();
             return;
         }
         if (tabName === "trade") {
             $("#shopTradePane").addClass("is-active");
+            loadTradePage();
             return;
         }
         $("#shopSeedPane").addClass("is-active");
@@ -237,6 +256,9 @@
     }
 
     function totalPages(pageResult) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.totalPages)) {
+            return window.FarmUi.totalPages(pageResult, 10);
+        }
         var total = asNumber(pageResult && pageResult.total, 0);
         var pageSize = asNumber(pageResult && pageResult.pageSize, 10);
         if (pageSize <= 0) {
@@ -395,6 +417,31 @@
     }
 
     function renderSeedPager(pageData) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.renderButtonPager)) {
+            window.FarmUi.renderButtonPager({
+                container: "#shopSeedPager",
+                pageData: pageData,
+                buttonClass: "shop-page-btn",
+                prevClass: "shop-page-prev",
+                nextClass: "shop-page-next",
+                labelClass: "shop-page-label",
+                onPrev: function () {
+                    state.seedQuery.page = state.seedQuery.page - 1;
+                    beginPageTransition();
+                    reload();
+                },
+                onNext: function () {
+                    state.seedQuery.page = state.seedQuery.page + 1;
+                    beginPageTransition();
+                    reload();
+                }
+            });
+            return;
+        }
+        renderFallbackSeedPager(pageData);
+    }
+
+    function renderFallbackSeedPager(pageData) {
         var pageNo = asNumber(pageData && pageData.pageNo, 1);
         var pages = totalPages(pageData || {});
         var prevDisabled = pageNo <= 1 ? "disabled" : "";
@@ -404,7 +451,7 @@
             "<span class='shop-page-label'>第 " + pageNo + " / " + pages + " 页</span>" +
             "<button type='button' class='shop-page-btn next shop-page-next' " + nextDisabled + "></button>";
         $("#shopSeedPager").html(html);
-        $("#shopSeedPager .shop-page-prev").off("click").on("click", function () {
+        $("#shopSeedPager .shop-page-prev").off("click.shopPager").on("click.shopPager", function () {
             if (state.seedQuery.page <= 1) {
                 return;
             }
@@ -412,7 +459,7 @@
             beginPageTransition();
             reload();
         });
-        $("#shopSeedPager .shop-page-next").off("click").on("click", function () {
+        $("#shopSeedPager .shop-page-next").off("click.shopPager").on("click.shopPager", function () {
             if (state.seedQuery.page >= pages) {
                 return;
             }
@@ -699,10 +746,8 @@
         });
     }
 
-    function bindFruitActions() {}
-
     function loadFruitPage() {
-        if (!state.active || state.userId <= 0) {
+        if (!state.active || state.userId <= 0 || state.fruitLoaded) {
             return;
         }
         FarmApi.seedInventoryPage({
@@ -713,12 +758,13 @@
             if (!FarmApi.isOk(res)) {
                 return;
             }
+            state.fruitLoaded = true;
             renderFruitList(res.data);
         });
     }
 
     function loadTradePage() {
-        if (!state.active || state.userId <= 0) {
+        if (!state.active || state.userId <= 0 || state.tradeLoaded) {
             return;
         }
         FarmApi.shopTradePage({
@@ -729,6 +775,7 @@
             if (!FarmApi.isOk(res)) {
                 return;
             }
+            state.tradeLoaded = true;
             renderTradeList(res.data);
         });
     }
@@ -747,6 +794,8 @@
         }
         beginPageTransition();
         state.userId = currentUserId();
+        state.fruitLoaded = false;
+        state.tradeLoaded = false;
         if (state.userId <= 0) {
             renderNoUser();
             endPageTransition();
@@ -772,8 +821,12 @@
             }
             renderOverview(res.data.overview);
             renderSeedList(res.data.shopPage);
-            loadFruitPage();
-            loadTradePage();
+            if (state.currentTab === "fruit") {
+                loadFruitPage();
+            }
+            if (state.currentTab === "trade") {
+                loadTradePage();
+            }
             endPageTransition();
         }, function () {
             state.loading = false;

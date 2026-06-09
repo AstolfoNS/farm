@@ -1,816 +1,219 @@
 (function (window, $) {
     var FarmApi = {};
+
+    function callIfFunction(callback) {
+        if ($.isFunction(callback)) {
+            callback.apply(null, Array.prototype.slice.call(arguments, 1));
+        }
+    }
+
+    function request(options, onSuccess, onError) {
+        var opts = $.extend({
+            url: "",
+            type: "get",
+            dataType: "json"
+        }, options || {});
+
+        $.ajax($.extend({}, opts, {
+            success: function (res) {
+                callIfFunction(onSuccess, res);
+            },
+            error: function (xhr, status) {
+                callIfFunction(onError, xhr, status);
+            }
+        }));
+    }
+
+    function get(url, onSuccess, onError) {
+        request({
+            url: url,
+            type: "get"
+        }, onSuccess, onError);
+    }
+
+    function post(url, params, onSuccess, onError) {
+        request({
+            url: url,
+            type: "post",
+            contentType: "application/json",
+            data: JSON.stringify(params || {})
+        }, onSuccess, onError);
+    }
+
     FarmApi.isOk = function (res) {
         var code = Number(res && res.code);
         return code === 0 || code === 200;
     };
 
+    FarmApi.request = request;
+    FarmApi.get = get;
+    FarmApi.post = post;
+
     FarmApi.getCurUser = function (onSuccess, onError) {
-        $.ajax({
-            url: "/user/getCurUser",
-            type: "get",
-            dataType: "json",
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        get("/user/getCurUser", onSuccess, onError);
     };
 
     FarmApi.getCurUserSettings = function (onSuccess, onError) {
-        $.ajax({
-            url: "/user/settings/get",
-            type: "get",
-            dataType: "json",
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        get("/user/settings/get", onSuccess, onError);
     };
 
     FarmApi.saveCurUserSettings = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/user/settings/save",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/user/settings/save", params, onSuccess, onError);
     };
 
     FarmApi.loginOptions = function (onSuccess, onError) {
-        $.ajax({
-            url: "/user/loginOptions",
-            type: "get",
-            dataType: "json",
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        get("/user/loginOptions", onSuccess, onError);
     };
 
     FarmApi.setCurUser = function (userId, onSuccess, onError) {
-        $.ajax({
-            url: "/user/setCurUser",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify({id: Number(userId || 0)}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/user/setCurUser", {id: Number(userId || 0)}, onSuccess, onError);
     };
 
     FarmApi.userAdminPage = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/user/gridDataFilterSortPage",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/user/gridDataFilterSortPage", params, onSuccess, onError);
     };
 
     FarmApi.userAdminSave = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/user/addOrUpdate",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/user/addOrUpdate", params, onSuccess, onError);
     };
 
     FarmApi.userAdminDelete = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/user/delete",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/user/delete", params, onSuccess, onError);
     };
 
     FarmApi.myFarmOverview = function (userId, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/myFarmOverview",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify({userId: Number(userId || 0)}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/myFarmOverview", {userId: Number(userId || 0)}, onSuccess, onError);
     };
 
     FarmApi.myPlantingPanel = function (userId, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/myPlantingPanel",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify({userId: Number(userId || 0)}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/myPlantingPanel", {userId: Number(userId || 0)}, onSuccess, onError);
     };
 
     FarmApi.seedPlantablePlots = function (userId, seedTypeId, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/seedPlantablePlots",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify({userId: Number(userId || 0), seedTypeId: Number(seedTypeId || 0)}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/seedPlantablePlots", {
+            userId: Number(userId || 0),
+            seedTypeId: Number(seedTypeId || 0)
+        }, onSuccess, onError);
     };
 
     FarmApi.plant = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/plant",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/plant", params, onSuccess, onError);
     };
 
     FarmApi.harvest = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/harvest",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/harvest", params, onSuccess, onError);
     };
 
     FarmApi.clear = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/clear",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/clear", params, onSuccess, onError);
     };
 
     FarmApi.care = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/care",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/care", params, onSuccess, onError);
     };
 
     FarmApi.plotUnlock = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/plot/unlock",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/plot/unlock", params, onSuccess, onError);
     };
 
     FarmApi.plotExpand = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/plot/expand",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/plot/expand", params, onSuccess, onError);
     };
 
     FarmApi.plotExpandOptions = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/gameplay/plot/expand/options",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/gameplay/plot/expand/options", params, onSuccess, onError);
     };
 
     FarmApi.listSoilOptions = function (onSuccess, onError) {
-        $.ajax({
-            url: "/seed/soil/options",
-            type: "get",
-            dataType: "json",
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        get("/seed/soil/options", onSuccess, onError);
     };
 
     FarmApi.plotSoilPage = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/plot/soil/page",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/plot/soil/page", params, onSuccess, onError);
     };
 
     FarmApi.plotSoilSave = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/plot/soil/save",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/plot/soil/save", params, onSuccess, onError);
     };
 
     FarmApi.plotSoilGet = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/plot/soil/get",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/plot/soil/get", params, onSuccess, onError);
     };
 
     FarmApi.plotSoilDelete = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/plot/soil/delete",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/plot/soil/delete", params, onSuccess, onError);
     };
 
     FarmApi.plotPolicyCurrent = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/plot/policy/current",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/plot/policy/current", params, onSuccess, onError);
     };
 
     FarmApi.plotPolicySave = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/plot/policy/save",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/plot/policy/save", params, onSuccess, onError);
     };
 
     FarmApi.plotPolicyActivate = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/plot/policy/activate",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/plot/policy/activate", params, onSuccess, onError);
     };
 
     FarmApi.listSeedQualityOptions = function (onSuccess, onError) {
-        $.ajax({
-            url: "/seed/quality/options",
-            type: "get",
-            dataType: "json",
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        get("/seed/quality/options", onSuccess, onError);
     };
 
     FarmApi.shopHome = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/shop/home",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/shop/home", params, onSuccess, onError);
     };
 
     FarmApi.shopPage = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/shop/page",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/shop/page", params, onSuccess, onError);
     };
 
     FarmApi.shopBuy = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/shop/buy",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/shop/buy", params, onSuccess, onError);
     };
 
     FarmApi.fruitPage = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/shop/fruit/page",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/shop/fruit/page", params, onSuccess, onError);
     };
 
     FarmApi.seedInventoryPage = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/shop/seed/page",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/shop/seed/page", params, onSuccess, onError);
     };
 
     FarmApi.sellFruit = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/shop/sell-fruit",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/shop/sell-fruit", params, onSuccess, onError);
     };
 
     FarmApi.shopTradePage = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/shop/trade/page",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/shop/trade/page", params, onSuccess, onError);
     };
 
     FarmApi.listGrowthStageOptions = function (onSuccess, onError) {
-        $.ajax({
-            url: "/seed/growth-stage/options",
-            type: "get",
-            dataType: "json",
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        get("/seed/growth-stage/options", onSuccess, onError);
     };
 
     FarmApi.seedTypePage = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/type/page",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/type/page", params, onSuccess, onError);
     };
 
     FarmApi.seedTypeSave = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/type/save",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/type/save", params, onSuccess, onError);
     };
 
     FarmApi.seedTypeDelete = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/type/delete",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/type/delete", params, onSuccess, onError);
     };
 
     FarmApi.seedStagePage = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/stage/page",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/stage/page", params, onSuccess, onError);
     };
 
     FarmApi.seedStageSave = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/stage/save",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/stage/save", params, onSuccess, onError);
     };
 
     FarmApi.seedStageDelete = function (params, onSuccess, onError) {
-        $.ajax({
-            url: "/seed/stage/delete",
-            type: "post",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(params || {}),
-            success: function (res) {
-                if ($.isFunction(onSuccess)) {
-                    onSuccess(res);
-                }
-            },
-            error: function (xhr, status) {
-                if ($.isFunction(onError)) {
-                    onError(xhr, status);
-                }
-            }
-        });
+        post("/seed/stage/delete", params, onSuccess, onError);
     };
 
     window.FarmApi = FarmApi;

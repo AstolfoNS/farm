@@ -27,6 +27,9 @@
     }
 
     function escapeHtml(value) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.escapeHtml)) {
+            return window.FarmUi.escapeHtml(value);
+        }
         return $("<div/>").text(value == null ? "" : String(value)).html();
     }
 
@@ -39,6 +42,9 @@
     }
 
     function trimText(value) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.trimText)) {
+            return window.FarmUi.trimText(value);
+        }
         return $.trim(value == null ? "" : String(value));
     }
 
@@ -446,21 +452,6 @@
             ? window.FarmGrid.buildRemoteLoader({
                 request: function (param, onSuccess, onError) {
                     FarmApi.userAdminPage(pagePayload(param), onSuccess, onError);
-                },
-                resolve: function (res) {
-                    if (!FarmApi.isOk(res) || !res.data) {
-                        return {total: 0, rows: []};
-                    }
-                    var pageRows = [];
-                    if ($.isArray(res.data.records)) {
-                        pageRows = res.data.records;
-                    } else if ($.isArray(res.data.rows)) {
-                        pageRows = res.data.rows;
-                    }
-                    return {
-                        total: asNumber(res.data.total, 0),
-                        rows: pageRows
-                    };
                 }
             })
             : null;
@@ -480,17 +471,19 @@
                         return;
                     }
                     var pageRows = [];
-                    if ($.isArray(res.data.records)) {
+                    if (window.FarmGrid && $.isFunction(window.FarmGrid.listFromPageData)) {
+                        pageRows = window.FarmGrid.listFromPageData(res.data);
+                    } else if ($.isArray(res.data.records)) {
                         pageRows = res.data.records;
-                    } else if ($.isArray(res.data.rows)) {
-                        pageRows = res.data.rows;
                     }
                     success({
-                        total: asNumber(res.data.total, 0),
+                        total: asNumber(res.data.total, pageRows.length),
                         rows: pageRows
                     });
                 }, function () {
-                    error.apply(this, arguments);
+                    if ($.isFunction(error)) {
+                        error.apply(this, arguments);
+                    }
                 });
             },
             columns: [[

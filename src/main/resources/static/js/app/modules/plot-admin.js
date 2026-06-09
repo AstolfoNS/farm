@@ -60,6 +60,9 @@
     }
 
     function escapeHtml(text) {
+        if (window.FarmUi && $.isFunction(window.FarmUi.escapeHtml)) {
+            return window.FarmUi.escapeHtml(text);
+        }
         return $("<div/>").text(text == null ? "" : String(text)).html();
     }
 
