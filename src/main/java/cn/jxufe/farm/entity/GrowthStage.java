@@ -13,9 +13,9 @@ import lombok.Setter;
 @Table(name = "growth_stages", schema = "farm")
 public class GrowthStage extends BaseEntity {
 
-    @Column(name = "name", nullable = false, length = 500)
-    private String name;
+  @Column(name = "name", nullable = false, length = 500)
+  private String name;
 
-    @Column(name = "description")
-    private String description;
+  @Column(name = "description")
+  private String description;
 }

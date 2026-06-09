@@ -1,21 +1,20 @@
 package cn.jxufe.farm.bean.vo;
 
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 @Data
 public class PlotUnlockResultVO implements Serializable {
 
-    private Long userId;
-    private Long plotId;
-    private Short plotIndex;
-    private Long unlockRequiredExperience;
-    private Long currentExperience;
-    private Long unlockCostCoin;
-    private Long beforeCoin;
-    private Long afterCoin;
-    private Integer totalPlots;
-    private Integer unlockedPlots;
-    private Integer lockedPlots;
+  private Long userId;
+  private Long plotId;
+  private Short plotIndex;
+  private Long unlockRequiredExperience;
+  private Long currentExperience;
+  private Long unlockCostCoin;
+  private Long beforeCoin;
+  private Long afterCoin;
+  private Integer totalPlots;
+  private Integer unlockedPlots;
+  private Integer lockedPlots;
 }

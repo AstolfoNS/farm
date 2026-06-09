@@ -12,21 +12,19 @@ import cn.jxufe.farm.bean.vo.PlotTradeBizTypeOptionVO;
 import cn.jxufe.farm.bean.vo.PlotTradeRecordVO;
 import cn.jxufe.farm.bean.vo.PlotUnlockResultVO;
 import cn.jxufe.farm.common.pages.PageResult;
-
 import java.util.List;
 
 public interface PlotGameplayService {
 
-    PlotUnlockResultVO unlockPlot(PlotUnlockDTO params);
+  PlotUnlockResultVO unlockPlot(PlotUnlockDTO params);
 
-    PlotExpandResultVO expandPlot(PlotExpandDTO params);
+  PlotExpandResultVO expandPlot(PlotExpandDTO params);
 
-    PlotExpandOptionsVO listPlotExpandOptions(PlotExpandOptionsQueryDTO params);
+  PlotExpandOptionsVO listPlotExpandOptions(PlotExpandOptionsQueryDTO params);
 
-    PlotStatusVO plotStatus(PlotStatusQueryDTO params);
+  PlotStatusVO plotStatus(PlotStatusQueryDTO params);
 
-    PageResult<PlotTradeRecordVO> pagePlotTrades(PlotTradeQueryDTO params);
+  PageResult<PlotTradeRecordVO> pagePlotTrades(PlotTradeQueryDTO params);
 
-    List<PlotTradeBizTypeOptionVO> listPlotTradeBizTypeOptions();
-
+  List<PlotTradeBizTypeOptionVO> listPlotTradeBizTypeOptions();
 }

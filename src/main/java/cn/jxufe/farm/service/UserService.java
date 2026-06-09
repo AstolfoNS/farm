@@ -1,9 +1,9 @@
 package cn.jxufe.farm.service;
 
-import cn.jxufe.farm.bean.dto.PageQueryDTO;
-import cn.jxufe.farm.bean.dto.UserAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.IdDTO;
+import cn.jxufe.farm.bean.dto.PageQueryDTO;
 import cn.jxufe.farm.bean.dto.SetCurUserDTO;
+import cn.jxufe.farm.bean.dto.UserAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.UserAvatarUpdateDTO;
 import cn.jxufe.farm.bean.dto.UserSettingsUpdateDTO;
 import cn.jxufe.farm.bean.vo.CurUserVO;
@@ -12,28 +12,27 @@ import cn.jxufe.farm.bean.vo.UserInfoVO;
 import cn.jxufe.farm.bean.vo.UserSettingsVO;
 import cn.jxufe.farm.common.pages.PageResult;
 import jakarta.servlet.http.HttpSession;
-
 import java.util.List;
 
 public interface UserService {
 
-    PageResult<UserInfoVO> list();
+  PageResult<UserInfoVO> list();
 
-    PageResult<UserInfoVO> gridDataFilterSortPage(String name, PageQueryDTO pageRequest);
+  PageResult<UserInfoVO> gridDataFilterSortPage(String name, PageQueryDTO pageRequest);
 
-    UserInfoVO addOrUpdate(UserAddOrUpdateDTO params);
+  UserInfoVO addOrUpdate(UserAddOrUpdateDTO params);
 
-    void delete(IdDTO params);
+  void delete(IdDTO params);
 
-    UserAvatarVO updateAvatar(UserAvatarUpdateDTO params);
+  UserAvatarVO updateAvatar(UserAvatarUpdateDTO params);
 
-    List<UserInfoVO> loginUserOptions();
+  List<UserInfoVO> loginUserOptions();
 
-    CurUserVO setCurUser(HttpSession session, SetCurUserDTO user);
+  CurUserVO setCurUser(HttpSession session, SetCurUserDTO user);
 
-    CurUserVO getCurUser(HttpSession session);
+  CurUserVO getCurUser(HttpSession session);
 
-    UserSettingsVO getCurUserSettings(HttpSession session);
+  UserSettingsVO getCurUserSettings(HttpSession session);
 
-    UserSettingsVO saveCurUserSettings(HttpSession session, UserSettingsUpdateDTO params);
+  UserSettingsVO saveCurUserSettings(HttpSession session, UserSettingsUpdateDTO params);
 }

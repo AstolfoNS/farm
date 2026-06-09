@@ -13,12 +13,12 @@ import lombok.Setter;
 @Table(name = "asset_defaults", schema = "farm")
 public class AssetDefault extends BaseEntity {
 
-    @Column(name = "asset_key", nullable = false, length = 128)
-    private String assetKey;
+  @Column(name = "asset_key", nullable = false, length = 128)
+  private String assetKey;
 
-    @Column(name = "asset_url", nullable = false, length = 1024)
-    private String assetUrl;
+  @Column(name = "asset_url", nullable = false, length = 1024)
+  private String assetUrl;
 
-    @Column(name = "description")
-    private String description;
+  @Column(name = "description")
+  private String description;
 }

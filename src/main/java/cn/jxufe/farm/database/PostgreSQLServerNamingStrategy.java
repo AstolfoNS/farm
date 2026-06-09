@@ -7,16 +7,15 @@ import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 
 public class PostgreSQLServerNamingStrategy extends PhysicalNamingStrategyStandardImpl {
 
-    public static final PhysicalNamingStrategy INSTANCE = new PostgreSQLServerNamingStrategy();
+  public static final PhysicalNamingStrategy INSTANCE = new PostgreSQLServerNamingStrategy();
 
+  @Override
+  public Identifier toPhysicalTableName(Identifier name, JdbcEnvironment context) {
+    return new Identifier(name.getText(), true);
+  }
 
-    @Override
-    public Identifier toPhysicalTableName(Identifier name, JdbcEnvironment context) {
-        return new Identifier(name.getText(), true);
-    }
-
-    @Override
-    public Identifier toPhysicalColumnName(Identifier name, JdbcEnvironment context) {
-        return new Identifier(name.getText(), true);
-    }
+  @Override
+  public Identifier toPhysicalColumnName(Identifier name, JdbcEnvironment context) {
+    return new Identifier(name.getText(), true);
+  }
 }

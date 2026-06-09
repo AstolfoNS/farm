@@ -9,9 +9,9 @@ import cn.jxufe.farm.bean.vo.SeedPlantablePlotsVO;
 
 public interface FarmGameplayQueryService {
 
-    MyFarmOverviewVO myFarmOverview(MyFarmOverviewDTO params);
+  MyFarmOverviewVO myFarmOverview(MyFarmOverviewDTO params);
 
-    MyPlantingPanelVO myPlantingPanel(MyPlantingPanelDTO params);
+  MyPlantingPanelVO myPlantingPanel(MyPlantingPanelDTO params);
 
-    SeedPlantablePlotsVO seedPlantablePlots(SeedPlantablePlotsDTO params);
+  SeedPlantablePlotsVO seedPlantablePlots(SeedPlantablePlotsDTO params);
 }

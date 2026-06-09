@@ -11,17 +11,17 @@ import cn.jxufe.farm.common.pages.PageResult;
 
 public interface PlotPhase1Service {
 
-    PageResult<SoilTypeGridVO> pageSoilTypes(SoilTypeQueryDTO query);
+  PageResult<SoilTypeGridVO> pageSoilTypes(SoilTypeQueryDTO query);
 
-    SoilTypeGridVO getSoilType(IdDTO params);
+  SoilTypeGridVO getSoilType(IdDTO params);
 
-    Long saveSoilType(SoilTypeSaveDTO params);
+  Long saveSoilType(SoilTypeSaveDTO params);
 
-    void removeSoilType(IdDTO params);
+  void removeSoilType(IdDTO params);
 
-    PlotPolicyVO currentPolicy();
+  PlotPolicyVO currentPolicy();
 
-    Long savePolicy(PlotPolicySaveDTO params);
+  Long savePolicy(PlotPolicySaveDTO params);
 
-    Long activatePolicy(PlotPolicyActivateDTO params);
+  Long activatePolicy(PlotPolicyActivateDTO params);
 }

@@ -13,26 +13,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class FarmGameplayQueryServiceImp implements FarmGameplayQueryService {
 
-    private final GameplayService gameplayService;
+  private final GameplayService gameplayService;
 
-    public FarmGameplayQueryServiceImp(
-            GameplayService gameplayService
-    ) {
-        this.gameplayService = gameplayService;
-    }
+  public FarmGameplayQueryServiceImp(GameplayService gameplayService) {
+    this.gameplayService = gameplayService;
+  }
 
-    @Override
-    public MyFarmOverviewVO myFarmOverview(MyFarmOverviewDTO params) {
-        return gameplayService.myFarmOverview(params);
-    }
+  @Override
+  public MyFarmOverviewVO myFarmOverview(MyFarmOverviewDTO params) {
+    return gameplayService.myFarmOverview(params);
+  }
 
-    @Override
-    public MyPlantingPanelVO myPlantingPanel(MyPlantingPanelDTO params) {
-        return gameplayService.myPlantingPanel(params);
-    }
+  @Override
+  public MyPlantingPanelVO myPlantingPanel(MyPlantingPanelDTO params) {
+    return gameplayService.myPlantingPanel(params);
+  }
 
-    @Override
-    public SeedPlantablePlotsVO seedPlantablePlots(SeedPlantablePlotsDTO params) {
-        return gameplayService.seedPlantablePlots(params);
-    }
+  @Override
+  public SeedPlantablePlotsVO seedPlantablePlots(SeedPlantablePlotsDTO params) {
+    return gameplayService.seedPlantablePlots(params);
+  }
 }

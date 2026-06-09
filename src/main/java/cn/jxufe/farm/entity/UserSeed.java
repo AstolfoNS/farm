@@ -13,15 +13,15 @@ import lombok.Setter;
 @Table(name = "user_seeds", schema = "farm")
 public class UserSeed extends BaseEntity {
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+  @Column(name = "user_id", nullable = false)
+  private Long userId;
 
-    @Column(name = "seed_type_id", nullable = false)
-    private Long seedTypeId;
+  @Column(name = "seed_type_id", nullable = false)
+  private Long seedTypeId;
 
-    @Column(name = "quantity", nullable = false)
-    private Long quantity;
+  @Column(name = "quantity", nullable = false)
+  private Long quantity;
 
-    @Column(name = "frozen_quantity", nullable = false)
-    private Long frozenQuantity;
+  @Column(name = "frozen_quantity", nullable = false)
+  private Long frozenQuantity;
 }

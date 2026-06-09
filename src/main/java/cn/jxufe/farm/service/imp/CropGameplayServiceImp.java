@@ -18,34 +18,34 @@ import org.springframework.stereotype.Service;
 @Service
 public class CropGameplayServiceImp implements CropGameplayService {
 
-    private final GameplayService gameplayService;
+  private final GameplayService gameplayService;
 
-    public CropGameplayServiceImp(GameplayService gameplayService) {
-        this.gameplayService = gameplayService;
-    }
+  public CropGameplayServiceImp(GameplayService gameplayService) {
+    this.gameplayService = gameplayService;
+  }
 
-    @Override
-    public PlantResultVO plant(PlantCropDTO params) {
-        return gameplayService.plant(params);
-    }
+  @Override
+  public PlantResultVO plant(PlantCropDTO params) {
+    return gameplayService.plant(params);
+  }
 
-    @Override
-    public HarvestResultVO harvest(HarvestCropDTO params) {
-        return gameplayService.harvest(params);
-    }
+  @Override
+  public HarvestResultVO harvest(HarvestCropDTO params) {
+    return gameplayService.harvest(params);
+  }
 
-    @Override
-    public ClearResultVO clear(ClearCropDTO params) {
-        return gameplayService.clear(params);
-    }
+  @Override
+  public ClearResultVO clear(ClearCropDTO params) {
+    return gameplayService.clear(params);
+  }
 
-    @Override
-    public CareResultVO care(CareCropDTO params) {
-        return gameplayService.care(params);
-    }
+  @Override
+  public CareResultVO care(CareCropDTO params) {
+    return gameplayService.care(params);
+  }
 
-    @Override
-    public PageResult<CropActionLogRecordVO> pageCropActionLogs(CropActionLogQueryDTO params) {
-        return gameplayService.pageCropActionLogs(params);
-    }
+  @Override
+  public PageResult<CropActionLogRecordVO> pageCropActionLogs(CropActionLogQueryDTO params) {
+    return gameplayService.pageCropActionLogs(params);
+  }
 }

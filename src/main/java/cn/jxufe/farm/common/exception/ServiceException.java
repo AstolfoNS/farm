@@ -6,19 +6,18 @@ import lombok.Getter;
 @Getter
 public class ServiceException extends RuntimeException {
 
-    private final BizErrorCode bizCode;
+  private final BizErrorCode bizCode;
 
-    public ServiceException(String message) {
-        this(BizErrorCode.SERVICE_ERROR, message);
-    }
+  public ServiceException(String message) {
+    this(BizErrorCode.SERVICE_ERROR, message);
+  }
 
-    public ServiceException(BizErrorCode bizCode) {
-        this(bizCode, bizCode == null ? null : bizCode.getDefaultMessage());
-    }
+  public ServiceException(BizErrorCode bizCode) {
+    this(bizCode, bizCode == null ? null : bizCode.getDefaultMessage());
+  }
 
-    public ServiceException(BizErrorCode bizCode, String message) {
-        super(message);
-        this.bizCode = bizCode == null ? BizErrorCode.SERVICE_ERROR : bizCode;
-    }
-
+  public ServiceException(BizErrorCode bizCode, String message) {
+    super(message);
+    this.bizCode = bizCode == null ? BizErrorCode.SERVICE_ERROR : bizCode;
+  }
 }

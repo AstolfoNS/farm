@@ -9,24 +9,21 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @Configuration
 public class WebsocketConfigurer implements WebSocketConfigurer {
 
-    private final WebsocketHandler websocketHandler;
+  private final WebsocketHandler websocketHandler;
 
-    private final WebsocketInterceptor websocketInterceptor;
+  private final WebsocketInterceptor websocketInterceptor;
 
-    public  WebsocketConfigurer(
-            WebsocketHandler websocketHandler,
-            WebsocketInterceptor websocketInterceptor
-    ) {
-        this.websocketHandler = websocketHandler;
-        this.websocketInterceptor = websocketInterceptor;
-    }
+  public WebsocketConfigurer(
+      WebsocketHandler websocketHandler, WebsocketInterceptor websocketInterceptor) {
+    this.websocketHandler = websocketHandler;
+    this.websocketInterceptor = websocketInterceptor;
+  }
 
-    @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(websocketHandler, "/ws/server")
-                .setAllowedOrigins("*")
-                .addInterceptors(websocketInterceptor);
-    }
-
-
+  @Override
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    registry
+        .addHandler(websocketHandler, "/ws/server")
+        .setAllowedOrigins("*")
+        .addInterceptors(websocketInterceptor);
+  }
 }

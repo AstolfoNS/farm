@@ -6,5 +6,5 @@ import cn.jxufe.farm.common.pages.PageResult;
 
 public interface GameplayLogQueryService {
 
-    PageResult<CropActionLogRecordVO> pageCropActionLogs(CropActionLogQueryDTO params);
+  PageResult<CropActionLogRecordVO> pageCropActionLogs(CropActionLogQueryDTO params);
 }

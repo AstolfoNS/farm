@@ -14,13 +14,13 @@ import cn.jxufe.farm.common.pages.PageResult;
 
 public interface CropGameplayService {
 
-    PlantResultVO plant(PlantCropDTO params);
+  PlantResultVO plant(PlantCropDTO params);
 
-    HarvestResultVO harvest(HarvestCropDTO params);
+  HarvestResultVO harvest(HarvestCropDTO params);
 
-    ClearResultVO clear(ClearCropDTO params);
+  ClearResultVO clear(ClearCropDTO params);
 
-    CareResultVO care(CareCropDTO params);
+  CareResultVO care(CareCropDTO params);
 
-    PageResult<CropActionLogRecordVO> pageCropActionLogs(CropActionLogQueryDTO params);
+  PageResult<CropActionLogRecordVO> pageCropActionLogs(CropActionLogQueryDTO params);
 }

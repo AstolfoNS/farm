@@ -17,17 +17,17 @@ import cn.jxufe.farm.bean.vo.SeedPlantablePlotsVO;
 
 public interface CropLifecycleService {
 
-    PlantResultVO plant(PlantCropDTO params);
+  PlantResultVO plant(PlantCropDTO params);
 
-    HarvestResultVO harvest(HarvestCropDTO params);
+  HarvestResultVO harvest(HarvestCropDTO params);
 
-    ClearResultVO clear(ClearCropDTO params);
+  ClearResultVO clear(ClearCropDTO params);
 
-    CareResultVO care(CareCropDTO params);
+  CareResultVO care(CareCropDTO params);
 
-    MyFarmOverviewVO myFarmOverview(MyFarmOverviewDTO params);
+  MyFarmOverviewVO myFarmOverview(MyFarmOverviewDTO params);
 
-    MyPlantingPanelVO myPlantingPanel(MyPlantingPanelDTO params);
+  MyPlantingPanelVO myPlantingPanel(MyPlantingPanelDTO params);
 
-    SeedPlantablePlotsVO seedPlantablePlots(SeedPlantablePlotsDTO params);
+  SeedPlantablePlotsVO seedPlantablePlots(SeedPlantablePlotsDTO params);
 }

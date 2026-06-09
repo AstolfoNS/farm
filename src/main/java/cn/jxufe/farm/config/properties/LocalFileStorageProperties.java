@@ -9,8 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "farm.file")
 public class LocalFileStorageProperties {
 
-    private String storageRoot = "./static/oss";
+  private String storageRoot = "./static/oss";
 
-    private String publicPrefix = "/oss";
-
+  private String publicPrefix = "/oss";
 }

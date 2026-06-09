@@ -13,9 +13,9 @@ import lombok.Setter;
 @Table(name = "seed_qualities", schema = "farm")
 public class SeedQuality extends BaseEntity {
 
-    @Column(name = "name", nullable = false, length = 500)
-    private String name;
+  @Column(name = "name", nullable = false, length = 500)
+  private String name;
 
-    @Column(name = "description")
-    private String description;
+  @Column(name = "description")
+  private String description;
 }
