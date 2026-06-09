@@ -35,6 +35,18 @@
         return $.trim(value == null ? "" : String(value));
     }
 
+    function buildFileAccessUrl(relativePath) {
+        if ($.isFunction(Admin.buildFileAccessUrl)) {
+            return Admin.buildFileAccessUrl(relativePath);
+        }
+        var rel = trimText(relativePath).replace(/^\/+/, "");
+        var prefix = trimText(window.FARM_FILE_PUBLIC_PREFIX || "/oss");
+        if (prefix.charAt(0) !== "/") {
+            prefix = "/" + prefix;
+        }
+        return rel ? ((prefix.replace(/\/+$/, "") || "/oss") + "/" + rel) : "";
+    }
+
     function defaultText(value, fallback) {
         var safe = trimText(value);
         return safe.length > 0 ? safe : (fallback || "");
@@ -395,7 +407,7 @@
                 if (!url) {
                     var rel = trimText(res.data.relativePath || "");
                     if (rel) {
-                        url = "/oss/" + rel.replace(/^\/+/, "");
+                        url = buildFileAccessUrl(rel);
                     }
                 }
                 if (!url) {

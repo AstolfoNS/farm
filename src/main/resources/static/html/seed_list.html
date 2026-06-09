@@ -329,6 +329,31 @@
         return urlParams;
     }
 
+    function filePublicPrefix() {
+        var prefix = $.trim(window.FARM_FILE_PUBLIC_PREFIX || '/oss');
+        if (!prefix) {
+            return '/oss';
+        }
+        if (prefix.charAt(0) !== '/') {
+            prefix = '/' + prefix;
+        }
+        return prefix.replace(/\/+$/, '') || '/oss';
+    }
+
+    function buildFileAccessUrl(relativePath) {
+        var rel = $.trim(relativePath || '').replace(/^\/+/, '');
+        if (!rel) {
+            return '';
+        }
+        var prefix = filePublicPrefix();
+        if (rel.indexOf(prefix.replace(/^\/+/, '') + '/') === 0) {
+            rel = rel.substring(prefix.length);
+        } else if (rel.indexOf('oss/') === 0) {
+            rel = rel.substring(4);
+        }
+        return prefix + '/' + rel.replace(/^\/+/, '');
+    }
+
     function newRecord() {
         $('#formContainer').dialog('open').dialog('center').dialog('setTitle', '编辑数据');
         $('#formEditor').form('clear');
@@ -517,7 +542,7 @@
                     var accessUrl = res.data.accessUrl || '';
                     var relativePath = res.data.relativePath || '';
                     var path = res.data.path || '';
-                    var finalUrl = accessUrl || path || (relativePath ? ('/oss/' + relativePath) : '');
+                    var finalUrl = accessUrl || path || (relativePath ? buildFileAccessUrl(relativePath) : '');
                     $('#stageFormEditor').find("input[name='assetUrl']").textbox('setValue', finalUrl);
                     $('#stageFormEditor').find("input[name='assetUrl']").val(finalUrl);
                     $.messager.show({title: '消息', msg: '阶段图片上传成功'});

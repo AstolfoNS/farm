@@ -68,6 +68,31 @@
         });
     }
 
+    function filePublicPrefix() {
+        var prefix = trimText(window.FARM_FILE_PUBLIC_PREFIX || "/oss");
+        if (!prefix) {
+            return "/oss";
+        }
+        if (prefix.charAt(0) !== "/") {
+            prefix = "/" + prefix;
+        }
+        return prefix.replace(/\/+$/, "") || "/oss";
+    }
+
+    function buildFileAccessUrl(relativePath) {
+        var rel = trimText(relativePath).replace(/^\/+/, "");
+        if (!rel) {
+            return "";
+        }
+        var prefix = filePublicPrefix();
+        if (rel.indexOf(prefix.replace(/^\/+/, "") + "/") === 0) {
+            rel = rel.substring(prefix.length);
+        } else if (rel.indexOf("oss/") === 0) {
+            rel = rel.substring(4);
+        }
+        return prefix + "/" + rel.replace(/^\/+/, "");
+    }
+
     function setTextboxValue($el, value) {
         var safe = value == null ? "" : value;
         try {
@@ -108,7 +133,7 @@
         if (!url) {
             var rel = trimText(payload.relativePath || "");
             if (rel) {
-                url = "/oss/" + rel.replace(/^\/+/, "");
+                url = buildFileAccessUrl(rel);
             }
         }
         return url;
@@ -240,9 +265,10 @@
         getTextboxValue: getTextboxValue,
         setNumberboxValue: setNumberboxValue,
         getNumberboxValue: getNumberboxValue,
+        filePublicPrefix: filePublicPrefix,
+        buildFileAccessUrl: buildFileAccessUrl,
         resolveUploadedUrl: resolveUploadedUrl,
         uploadFile: uploadFile,
         bindUploadPicker: bindUploadPicker
     };
 })(window, window.jQuery);
-

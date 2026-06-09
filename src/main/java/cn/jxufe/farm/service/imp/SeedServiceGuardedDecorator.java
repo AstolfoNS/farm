@@ -29,6 +29,8 @@ import cn.jxufe.farm.common.constants.AssetDefaultKeys;
 import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.exception.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
+import cn.jxufe.farm.common.utils.FileAccessPathUtils;
+import cn.jxufe.farm.config.properties.LocalFileStorageProperties;
 import cn.jxufe.farm.dao.GrowthStageDao;
 import cn.jxufe.farm.dao.SeedGrowthStageDao;
 import cn.jxufe.farm.dao.SeedTypeDao;
@@ -76,6 +78,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
     private final UserCropDao userCropDao;
     private final UserInventoryFlowDao userInventoryFlowDao;
     private final AssetDefaultProvider assetDefaultProvider;
+    private final LocalFileStorageProperties fileStorageProperties;
 
     public SeedServiceGuardedDecorator(
             @Qualifier("seedServiceImp") SeedService delegate,
@@ -87,7 +90,8 @@ public class SeedServiceGuardedDecorator implements SeedService {
             UserFruitDao userFruitDao,
             UserCropDao userCropDao,
             UserInventoryFlowDao userInventoryFlowDao,
-            AssetDefaultProvider assetDefaultProvider
+            AssetDefaultProvider assetDefaultProvider,
+            LocalFileStorageProperties fileStorageProperties
     ) {
         this.delegate = delegate;
         this.seedTypeDao = seedTypeDao;
@@ -99,6 +103,7 @@ public class SeedServiceGuardedDecorator implements SeedService {
         this.userCropDao = userCropDao;
         this.userInventoryFlowDao = userInventoryFlowDao;
         this.assetDefaultProvider = assetDefaultProvider;
+        this.fileStorageProperties = fileStorageProperties;
     }
 
     @Override
@@ -424,31 +429,43 @@ public class SeedServiceGuardedDecorator implements SeedService {
     }
 
     private String normalizeSeedCoverUrl(String rawUrl) {
-        String value = rawUrl == null ? "" : rawUrl.trim();
-        if (value.isEmpty()) {
-            return defaultSeedCoverUrl();
-        }
-        if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/")) {
-            return value;
-        }
-        if (value.startsWith("resources/") || value.startsWith("oss/")) {
-            return "/" + value;
-        }
-        return "/oss/" + value.replaceFirst("^/+", "");
+        return normalizeManagedAssetUrl(rawUrl, defaultSeedCoverUrl());
     }
 
     private String normalizeStageAssetUrl(String rawUrl) {
+        return normalizeManagedAssetUrl(rawUrl, defaultSeedStageUrl());
+    }
+
+    private String normalizeManagedAssetUrl(String rawUrl, String defaultUrl) {
         String value = rawUrl == null ? "" : rawUrl.trim();
         if (value.isEmpty()) {
-            return defaultSeedStageUrl();
+            return defaultUrl;
         }
-        if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/")) {
+        if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/resources/")) {
             return value;
         }
-        if (value.startsWith("resources/") || value.startsWith("oss/")) {
+        if (value.startsWith("resources/")) {
             return "/" + value;
         }
-        return "/oss/" + value.replaceFirst("^/+", "");
+        String publicPrefix = filePublicPrefix();
+        if (value.startsWith(publicPrefix + "/")) {
+            return value;
+        }
+        if (value.startsWith("/")) {
+            if (value.startsWith("/oss/")) {
+                return publicPrefix + value.substring("/oss".length());
+            }
+            return value;
+        }
+        String relative = FileAccessPathUtils.normalizeIncomingRelativePath(value, publicPrefix);
+        if (relative.startsWith("oss/")) {
+            relative = relative.substring("oss/".length());
+        }
+        return publicPrefix + "/" + relative;
+    }
+
+    private String filePublicPrefix() {
+        return FileAccessPathUtils.normalizePublicPrefix(fileStorageProperties.getPublicPrefix());
     }
 
     private Map<Long, SeedType> buildSeedTypeMap(Set<Long> ids) {
@@ -553,10 +570,14 @@ public class SeedServiceGuardedDecorator implements SeedService {
         if (value.isEmpty()) {
             return;
         }
-        if (value.startsWith("/resources/") || value.startsWith("/oss/")) {
+        String publicPrefix = filePublicPrefix();
+        if (value.startsWith("/resources/") || value.startsWith(publicPrefix + "/") || value.startsWith("/oss/")) {
             return;
         }
-        throw new ServiceException(BizErrorCode.SEED_ASSET_URL_INVALID, "资源路径必须位于 /resources 或 /oss 下");
+        throw new ServiceException(
+                BizErrorCode.SEED_ASSET_URL_INVALID,
+                "资源路径必须位于 /resources 或 " + publicPrefix + " 下"
+        );
     }
 
     private void validateStageLayout(SeedStageAddOrUpdateDTO params) {

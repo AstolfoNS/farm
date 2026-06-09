@@ -48,6 +48,18 @@
         return $("<div/>").text(text == null ? "" : String(text)).html();
     }
 
+    function buildFileAccessUrl(relativePath) {
+        if ($.isFunction(Admin.buildFileAccessUrl)) {
+            return Admin.buildFileAccessUrl(relativePath);
+        }
+        var rel = $.trim(relativePath || "").replace(/^\/+/, "");
+        var prefix = $.trim(window.FARM_FILE_PUBLIC_PREFIX || "/oss");
+        if (prefix.charAt(0) !== "/") {
+            prefix = "/" + prefix;
+        }
+        return rel ? ((prefix.replace(/\/+$/, "") || "/oss") + "/" + rel) : "";
+    }
+
     function showMessage(msg) {
         if ($.isFunction(Admin.toast)) {
             Admin.toast(msg || "操作成功", "消息");
@@ -491,7 +503,7 @@
         if (raw.indexOf("resources/") === 0 || raw.indexOf("oss/") === 0) {
             return "/" + raw;
         }
-        return "/oss/" + raw.replace(/^\/+/, "");
+        return buildFileAccessUrl(raw);
     }
 
     function setStageNumberValue(fieldName, value) {
@@ -1163,7 +1175,7 @@
                 if (!url) {
                     var rel = $.trim(res.data.relativePath || "");
                     if (rel) {
-                        url = "/oss/" + rel.replace(/^\/+/, "");
+                        url = buildFileAccessUrl(rel);
                     }
                 }
                 url = normalizeAssetUrl(url);

@@ -25,9 +25,9 @@ ON CONFLICT (name) WHERE is_deleted = false DO NOTHING;
 
 -- 2) 土地类型字典 (集成最终版数据)
 INSERT INTO farm.soil_types (name, bit_code, cover_image_url, level, unlock_experience_required, grow_speed_multiplier, expand_cost_coin, description) VALUES
-                                                                                                                                         ('黄土地', 1, '/oss/defaults/soil/soil-land-default.png', 1, 0, 1.00, 0, '基础土地，适配多数作物'),
-                                                                                                                                         ('黑土地', 2, '/oss/defaults/soil/soil-land-black-default.png', 2, 500, 0.90, 1500, '生长速度更快的改良土地'),
-                                                                                                                                         ('金土地', 4, '/oss/defaults/soil/soil-land-gold-default.png', 3, 2000, 0.80, 5000, '高级土地，适配高等级作物')
+                                                                                                                                         ('黄土地', 1, '/oss/defaults/soil/soil-default.png', 1, 0, 1.00, 0, '基础土地，适配多数作物'),
+                                                                                                                                         ('黑土地', 2, '/oss/defaults/soil/soil-default.png', 2, 500, 0.90, 1500, '生长速度更快的改良土地'),
+                                                                                                                                         ('金土地', 4, '/oss/defaults/soil/soil-default.png', 3, 2000, 0.80, 5000, '高级土地，适配高等级作物')
 ON CONFLICT (bit_code) WHERE is_deleted = false DO UPDATE SET
                                                               cover_image_url = EXCLUDED.cover_image_url, updated_at = NOW();
 
