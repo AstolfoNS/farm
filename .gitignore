@@ -34,6 +34,7 @@ build/
 
 ### Runtime uploads & logs ###
 logs/
+*:Zone.Identifier
 
 # 用户上传的运行时文件，只保留 defaults 默认资源
 static/oss/avatar/
