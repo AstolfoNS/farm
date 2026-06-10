@@ -32,7 +32,7 @@ public class FileController {
     this.fileService = fileService;
   }
 
-  @Operation(summary = "上传文件", description = "上传任意文件到本地存储。category 自定义分类目录，默认为 other。返回相对路径和访问 URL")
+  @Operation(summary = "上传文件", description = "按分类白名单上传文件到本地存储。category 默认为 other。返回相对路径和访问 URL")
   @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public R<FileUploadResultDTO> upload(
       @Parameter(description = "文件") @RequestParam("file") MultipartFile file,

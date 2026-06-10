@@ -5,6 +5,7 @@ import cn.jxufe.farm.common.utils.FileAccessPathUtils;
 import cn.jxufe.farm.common.utils.FilePathUtils;
 import cn.jxufe.farm.config.properties.LocalFileStorageProperties;
 import cn.jxufe.farm.service.FileService;
+import cn.jxufe.farm.service.support.FileUploadPolicy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +30,7 @@ public class FileServiceImp implements FileService {
     }
     String normalizedCategory = FilePathUtils.normalizeCategory(category);
     String extension = FilePathUtils.extractExtension(file.getOriginalFilename());
+    FileUploadPolicy.validate(normalizedCategory, extension, file.getContentType());
     String datePath = FilePathUtils.buildDatePath();
     String storedName = FilePathUtils.buildStoredFileName(extension);
     String relativePath = normalizedCategory + "/" + datePath + "/" + storedName;
