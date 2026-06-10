@@ -216,5 +216,9 @@
         post("/seed/stage/delete", params, onSuccess, onError);
     };
 
+    FarmApi.seedStageValidate = function (params, onSuccess, onError) {
+        post("/seed/stage/validate", params, onSuccess, onError);
+    };
+
     window.FarmApi = FarmApi;
 })(window, window.jQuery);

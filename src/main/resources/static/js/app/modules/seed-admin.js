@@ -60,13 +60,13 @@
         return rel ? ((prefix.replace(/\/+$/, "") || "/oss") + "/" + rel) : "";
     }
 
-    function showMessage(msg) {
+    function showMessage(msg, title) {
         if ($.isFunction(Admin.toast)) {
-            Admin.toast(msg || "操作成功", "消息");
+            Admin.toast(msg || "操作成功", title || "消息");
             return;
         }
         $.messager.show({
-            title: "消息",
+            title: title || "消息",
             msg: msg || "操作成功",
             timeout: motion().actionFeedbackMs,
             showType: "slide"
@@ -188,6 +188,7 @@
         setLinkButtonEnabled("#seedAdminStageAddBtn", hasSeed);
         setLinkButtonEnabled("#seedAdminStageEditBtn", hasStage);
         setLinkButtonEnabled("#seedAdminStageDeleteBtn", hasStage);
+        setLinkButtonEnabled("#seedAdminStageSaveListBtn", hasSeed);
     }
 
     function previewSeedTypeCover(url) {
@@ -306,6 +307,7 @@
                         return;
                     }
                     selectSeedType(row);
+                    focusStagePanel();
                 };
 
                 if (window.FarmGrid && $.isFunction(window.FarmGrid.bindAction)) {
@@ -457,6 +459,14 @@
         $("#seedAdminStageHint").text("当前种子: " + state.currentSeedName + " (ID: " + state.currentSeedId + ")");
         syncActionButtons();
         refreshStageGrid();
+    }
+
+    function focusStagePanel() {
+        var $panel = $("#seedAdminStageToolbar").closest(".seed-admin-grid-panel");
+        if ($panel.length > 0) {
+            $panel.attr("tabindex", "-1").focus();
+        }
+        showMessage("已切换到“" + (state.currentSeedName || "当前种子") + "”的成长阶段清单");
     }
 
     function soilIdsByBits(bits) {
@@ -1134,6 +1144,42 @@
         }
     }
 
+    function saveSeedStageList() {
+        if (state.currentSeedId <= 0) {
+            alertMessage("请先选择种子类型");
+            return;
+        }
+        FarmApi.seedStageValidate({id: state.currentSeedId}, function (res) {
+            if (!boolOk(res)) {
+                showMessage((res && res.msg) || "阶段清单校验失败", "校验失败");
+                return;
+            }
+            showMessage((res && res.msg) || "阶段清单保存成功");
+            refreshStageGrid();
+            refreshTypeGrid(false);
+        }, function (xhr) {
+            showMessage(resolveAjaxErrorMessage(xhr, "阶段清单校验失败"), "校验失败");
+        });
+    }
+
+    function resolveAjaxErrorMessage(xhr, fallback) {
+        var response = xhr && xhr.responseJSON;
+        if (response && response.msg) {
+            return response.msg;
+        }
+        var raw = xhr && xhr.responseText ? $.trim(xhr.responseText) : "";
+        if (!raw) {
+            return fallback || "操作失败";
+        }
+        try {
+            response = JSON.parse(raw);
+            if (response && response.msg) {
+                return response.msg;
+            }
+        } catch (ignoreParseError) {}
+        return fallback || raw;
+    }
+
     function uploadFile($fileInput, category, onSuccess) {
         if ($.isFunction(Admin.uploadFile)) {
             Admin.uploadFile({
@@ -1280,6 +1326,7 @@
             openSeedStageEditor("edit");
         });
         $("#seedAdminStageDeleteBtn").off("click.seedAdmin").on("click.seedAdmin", deleteSeedStage);
+        $("#seedAdminStageSaveListBtn").off("click.seedAdmin").on("click.seedAdmin", saveSeedStageList);
 
         $("#seedTypeSaveBtn").off("click.seedAdmin").on("click.seedAdmin", saveSeedType);
         $("#seedTypeCancelBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
