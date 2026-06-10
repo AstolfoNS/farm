@@ -65,4 +65,6 @@ public interface SeedService {
   void saveSeedStage(SeedStageAddOrUpdateDTO params);
 
   void removeSeedStage(IdDTO params);
+
+  void validateSeedStages(IdDTO params);
 }

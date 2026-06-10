@@ -786,8 +786,20 @@ public class SeedServiceImp implements SeedService {
     seedGrowthStageDao.save(entity);
   }
 
-  /* =========================================================      *  Private Helper Methods      * ========================================================= */ private
-  OptionVO buildOption(Long id, String text) {
+  @Override
+  public void validateSeedStages(IdDTO params) {
+    Long seedTypeId =
+        ServiceGuardUtils.requirePositive(
+            params == null ? null : params.getId(), BizErrorCode.PARAM_INVALID, "种子类型ID无效");
+    validateSeedType(seedTypeId);
+  }
+
+  /*
+   * =========================================================
+   *  Private Helper Methods
+   * =========================================================
+   */
+  private OptionVO buildOption(Long id, String text) {
     OptionVO vo = new OptionVO();
     vo.setId(id);
     vo.setText(gameplayCoreService.safeString(text));
@@ -815,6 +827,12 @@ public class SeedServiceImp implements SeedService {
     vo.setHarvestExperience(gameplayCoreService.defaultLong(seedType.getHarvestExperience(), 0L));
     vo.setHarvestFruitNumber(
         seedType.getHarvestFruitNumber() == null ? 0 : seedType.getHarvestFruitNumber());
+    vo.setFruitLossPerBug(
+        seedType.getFruitLossPerBug() == null ? 0 : seedType.getFruitLossPerBug());
+    vo.setBugKillCoinReward(gameplayCoreService.defaultLong(seedType.getBugKillCoinReward(), 0L));
+    vo.setBugKillExperienceReward(
+        gameplayCoreService.defaultLong(seedType.getBugKillExperienceReward(), 0L));
+    vo.setBugKillScoreReward(gameplayCoreService.defaultLong(seedType.getBugKillScoreReward(), 0L));
     vo.setFruitPrice(gameplayCoreService.defaultLong(seedType.getFruitPrice(), 0L));
     vo.setHarvestScore(gameplayCoreService.defaultLong(seedType.getHarvestScore(), 0L));
     vo.setTotalGrowSeconds(getTotalGrowSeconds(seedType.getId()));
@@ -838,6 +856,12 @@ public class SeedServiceImp implements SeedService {
     vo.setPrice(gameplayCoreService.defaultLong(seedType.getPrice(), 0L));
     vo.setHarvestFruitNumber(
         seedType.getHarvestFruitNumber() == null ? 0 : seedType.getHarvestFruitNumber());
+    vo.setFruitLossPerBug(
+        seedType.getFruitLossPerBug() == null ? 0 : seedType.getFruitLossPerBug());
+    vo.setBugKillCoinReward(gameplayCoreService.defaultLong(seedType.getBugKillCoinReward(), 0L));
+    vo.setBugKillExperienceReward(
+        gameplayCoreService.defaultLong(seedType.getBugKillExperienceReward(), 0L));
+    vo.setBugKillScoreReward(gameplayCoreService.defaultLong(seedType.getBugKillScoreReward(), 0L));
     vo.setFruitPrice(gameplayCoreService.defaultLong(seedType.getFruitPrice(), 0L));
     vo.setHarvestExperience(gameplayCoreService.defaultLong(seedType.getHarvestExperience(), 0L));
     vo.setHarvestScore(gameplayCoreService.defaultLong(seedType.getHarvestScore(), 0L));

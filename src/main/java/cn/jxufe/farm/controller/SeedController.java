@@ -117,6 +117,13 @@ public class SeedController {
     return R.ok();
   }
 
+  @Operation(summary = "校验种子阶段清单", description = "保存阶段清单后触发完整阶段规则校验，检查必要阶段、阶段序号、收获/再生阶段等配置")
+  @PostMapping(value = "/stage/validate", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public R<Void> validateSeedStages(@Valid @RequestBody IdDTO params) {
+    seedService.validateSeedStages(params);
+    return R.ok();
+  }
+
   // ======================== 商店 ========================
 
   @Operation(summary = "商店分页", description = "查询可购买的种子列表。可按名称、品质、等级筛选，返回种子详情及用户是否满足购买条件")

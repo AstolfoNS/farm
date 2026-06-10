@@ -234,7 +234,6 @@ public class SeedServiceGuardedDecorator implements SeedService {
       seedType.setRegrowStageIndex(normalizeRegrowPointer(params));
       seedTypeDao.save(seedType);
     }
-    validateStageRules(seedTypeId, true);
     return seedTypeId;
   }
 
@@ -280,8 +279,6 @@ public class SeedServiceGuardedDecorator implements SeedService {
     validateStageAssetUrl(params == null ? null : params.getAssetUrl());
     validateStageLayout(params);
     delegate.saveSeedStage(params);
-    Long seedTypeId = params.getSeedTypeId();
-    validateStageRules(seedTypeId, false);
   }
 
   @Override
@@ -291,26 +288,14 @@ public class SeedServiceGuardedDecorator implements SeedService {
     if (stageId == null || stageId <= 0) {
       throw new ServiceException(BizErrorCode.PARAM_INVALID, "阶段ID无效");
     }
-    SeedGrowthStage target =
-        seedGrowthStageDao
-            .findByIdAndIsDeletedFalse(stageId)
-            .orElseThrow(
-                () -> new ServiceException(BizErrorCode.SEED_STAGE_NOT_FOUND, "种子阶段配置不存在"));
-    List<SeedGrowthStage> stages =
-        seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(
-            target.getSeedTypeId());
-    short maxStageIndex =
-        stages.stream()
-            .map(SeedGrowthStage::getStageIndex)
-            .filter(idx -> idx != null && idx > 0)
-            .max(Short::compareTo)
-            .orElse((short) 0);
-    if (!target.getStageIndex().equals(maxStageIndex)) {
-      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "只能删除最后一个阶段，避免阶段序号断档");
-    }
-
     delegate.removeSeedStage(params);
-    validateStageRules(target.getSeedTypeId(), false);
+  }
+
+  @Override
+  public void validateSeedStages(IdDTO params) {
+    Long seedTypeId = params == null ? null : params.getId();
+    delegate.validateSeedStages(params);
+    validateStageRules(seedTypeId, true);
   }
 
   private void ensureSeedTypeNotReferenced(Long seedTypeId) {
@@ -330,6 +315,9 @@ public class SeedServiceGuardedDecorator implements SeedService {
     List<SeedGrowthStage> stages =
         seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(seedTypeId);
     if (stages.isEmpty()) {
+      if (requireCompleteConfig) {
+        throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "请至少配置一个成长阶段");
+      }
       return;
     }
     short expect = 1;
