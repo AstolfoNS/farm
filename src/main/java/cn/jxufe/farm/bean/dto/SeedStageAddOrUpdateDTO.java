@@ -1,5 +1,7 @@
 package cn.jxufe.farm.bean.dto;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -10,6 +12,7 @@ import lombok.Data;
 @Data
 public class SeedStageAddOrUpdateDTO implements Serializable {
 
+  @Positive(message = "阶段ID必须大于0")
   private Long id;
 
   @NotNull(message = "seedTypeId不能为空")
@@ -29,7 +32,12 @@ public class SeedStageAddOrUpdateDTO implements Serializable {
   @Min(value = 0, message = "durationSeconds不能小于0")
   private Integer durationSeconds;
 
+  @DecimalMin(value = "0.0", message = "bugProbability不能小于0")
+  @DecimalMax(value = "1.0", message = "bugProbability不能大于1")
   private BigDecimal bugProbability;
+
+  @DecimalMin(value = "0.0", message = "pestProbability不能小于0")
+  @DecimalMax(value = "1.0", message = "pestProbability不能大于1")
   private BigDecimal pestProbability;
 
   @Min(value = 0, message = "width不能小于0")
