@@ -72,6 +72,7 @@ public class FileServiceImp implements FileService {
     if (normalized.isBlank()) {
       throw new IllegalArgumentException("文件路径不能为空");
     }
+    resolveSafePath(getStorageRootPath(), normalized);
     return FileAccessPathUtils.normalizePublicPrefix(fileStorageProperties.getPublicPrefix())
         + "/"
         + normalized;
