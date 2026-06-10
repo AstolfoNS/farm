@@ -154,6 +154,7 @@ public class SeedServiceImp implements SeedService {
                     request.getSeedQualityId() == null
                         || request.getSeedQualityId().equals(s.getSeedQualityId()))
             .filter(s -> request.getLevel() == null || request.getLevel().equals(s.getLevel()))
+            .filter(this::isSeedTypeReadyForShop)
             .map(s -> buildSeedShopItemVO(s, qualityMap, soilNameByBitCode))
             .sorted(resolveShopComparator(request.getSort(), request.getOrder()))
             .collect(Collectors.toList());
@@ -184,6 +185,7 @@ public class SeedServiceImp implements SeedService {
     try {
       validateUser(userId);
       SeedType seedType = validateSeedType(seedTypeId);
+      requireSeedTypeReadyForShop(seedType);
       long unitPrice = gameplayCoreService.defaultLong(seedType.getPrice(), 0L);
       long totalCost = gameplayCoreService.safeMultiply(unitPrice, buyQuantity);
       if (totalCost == Long.MAX_VALUE)
@@ -605,6 +607,7 @@ public class SeedServiceImp implements SeedService {
     entity.setSeedQualityId(seedQualityId);
     entity.setEnableSoilTypeBits(enableSoilTypeBits);
     entity.setLevel(resolveSeedLevel(params));
+    entity.setUnlockExperienceRequired(resolveUnlockExperienceRequired(params, entity.getLevel()));
     entity.setDescription(
         params.getDescription() != null
             ? params.getDescription()
@@ -1020,6 +1023,128 @@ public class SeedServiceImp implements SeedService {
       }
     }
     return 1;
+  }
+
+  private Long resolveUnlockExperienceRequired(SeedAddOrUpdateDTO params, Short level) {
+    if (params.getUnlockExperienceRequired() != null && params.getUnlockExperienceRequired() >= 0) {
+      return params.getUnlockExperienceRequired();
+    }
+    int safeLevel = level == null ? 1 : Math.max(level, (short) 1);
+    if (safeLevel <= 1) {
+      return 0L;
+    }
+    if (safeLevel == 2) {
+      return 300L;
+    }
+    return 300L + (long) (safeLevel - 2) * 500L;
+  }
+
+  private boolean isSeedTypeReadyForShop(SeedType seedType) {
+    try {
+      requireSeedTypeReadyForShop(seedType);
+      return true;
+    } catch (ServiceException ex) {
+      return false;
+    }
+  }
+
+  private void requireSeedTypeReadyForShop(SeedType seedType) {
+    if (seedType == null || seedType.getId() == null || seedType.getId() <= 0) {
+      throw new ServiceException(BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在");
+    }
+    if (gameplayCoreService.safeString(seedType.getName()).trim().isEmpty()) {
+      throw new ServiceException(BizErrorCode.SEED_NAME_REQUIRED, "种子名称不能为空");
+    }
+    if (seedType.getSeedQualityId() == null || seedType.getSeedQualityId() <= 0) {
+      throw new ServiceException(BizErrorCode.SEED_QUALITY_NOT_FOUND, "种子品质不存在");
+    }
+    if (gameplayCoreService.defaultLong(seedType.getEnableSoilTypeBits(), 0L) <= 0) {
+      throw new ServiceException(BizErrorCode.SOIL_TYPE_REQUIRED, "至少需要选择一种土壤类型");
+    }
+    if (seedType.getLevel() == null || seedType.getLevel() <= 0) {
+      throw new ServiceException(BizErrorCode.PARAM_INVALID, "种子等级必须大于0");
+    }
+    if (seedType.getMaxHarvestCount() == null || seedType.getMaxHarvestCount() <= 0) {
+      throw new ServiceException(BizErrorCode.PARAM_INVALID, "最大收获次数必须大于0");
+    }
+    requireNonNegative(seedType.getUnlockExperienceRequired(), "解锁经验不能小于0");
+    requireNonNegative(seedType.getPrice(), "种子价格不能小于0");
+    requireNonNegative(seedType.getFruitPrice(), "果实单价不能小于0");
+    requireNonNegative(seedType.getHarvestExperience(), "收获经验不能小于0");
+    requireNonNegative(seedType.getHarvestScore(), "收获积分不能小于0");
+    requireNonNegative(seedType.getHarvestFruitNumber(), "果实数量不能小于0");
+    requireNonNegative(seedType.getFruitLossPerBug(), "虫害损失不能小于0");
+    requireNonNegative(seedType.getMaxBugLimit(), "虫子上限不能小于0");
+    requireNonNegative(seedType.getBugKillExperienceReward(), "杀虫经验不能小于0");
+    requireNonNegative(seedType.getBugKillScoreReward(), "杀虫积分不能小于0");
+    requireNonNegative(seedType.getBugKillCoinReward(), "杀虫金币不能小于0");
+    validateCompleteSeedStages(seedType);
+  }
+
+  private void validateCompleteSeedStages(SeedType seedType) {
+    List<SeedGrowthStage> stages =
+        seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(seedType.getId());
+    if (stages.isEmpty()) {
+      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "请至少配置一个成长阶段");
+    }
+    Map<Long, String> growthStageNameMap =
+        growthStageDao.findByIsDeletedFalseOrderByIdAsc().stream()
+            .collect(Collectors.toMap(GrowthStage::getId, GrowthStage::getName));
+    short expected = 1;
+    short lastStageIndex = 0;
+    short witherStageCount = 0;
+    Short witherStageIndex = null;
+    for (SeedGrowthStage stage : stages) {
+      short actual = stage.getStageIndex() == null ? 0 : stage.getStageIndex();
+      if (actual != expected) {
+        throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "阶段序号必须连续为 1..N");
+      }
+      lastStageIndex = actual;
+      String growthStageName =
+          gameplayCoreService.safeString(growthStageNameMap.get(stage.getGrowthStageId())).trim();
+      if ("枯萎".equals(growthStageName)) {
+        witherStageCount++;
+        witherStageIndex = actual;
+      }
+      expected++;
+    }
+    if (witherStageCount > 1) {
+      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "同一种子只能配置一个枯萎阶段");
+    }
+    if (witherStageIndex == null) {
+      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "请为该种子补充最后一个“枯萎”阶段");
+    }
+    if (witherStageIndex != lastStageIndex) {
+      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "枯萎阶段必须位于最后一阶段");
+    }
+    Short harvest = normalizeStagePointer(seedType.getHarvestStageIndex());
+    Short regrow = normalizeStagePointer(seedType.getRegrowStageIndex());
+    if (harvest == null || harvest < 1 || harvest > lastStageIndex) {
+      throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须存在于该种子的阶段集合中");
+    }
+    if (harvest >= witherStageIndex) {
+      throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须早于最后的枯萎阶段");
+    }
+    if (seedType.getMaxHarvestCount() != null && seedType.getMaxHarvestCount() > 1) {
+      if (regrow == null || regrow < 1 || regrow > lastStageIndex) {
+        throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "多次收获作物必须配置存在的再生阶段");
+      }
+      if (regrow >= harvest) {
+        throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "收获阶段序号必须大于再生阶段序号");
+      }
+    } else if (regrow != null && regrow >= harvest) {
+      throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段序号必须小于收获阶段序号");
+    }
+  }
+
+  private Short normalizeStagePointer(Short value) {
+    return value == null || value <= 0 ? null : value;
+  }
+
+  private void requireNonNegative(Number value, String message) {
+    if (value == null || value.longValue() < 0) {
+      throw new ServiceException(BizErrorCode.PARAM_INVALID, message);
+    }
   }
 
   /* =========================================================      *  Common Entity / Base Helpers      * ========================================================= */ private
