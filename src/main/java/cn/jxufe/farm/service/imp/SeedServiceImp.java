@@ -51,6 +51,7 @@ import cn.jxufe.farm.entity.UserSeed;
 import cn.jxufe.farm.service.GameplayCoreService;
 import cn.jxufe.farm.service.RequestIdempotencyService;
 import cn.jxufe.farm.service.SeedService;
+import cn.jxufe.farm.service.support.SeedStageConfigValidator;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -140,7 +141,7 @@ public class SeedServiceImp implements SeedService {
     Map<Long, SeedQuality> qualityMap = buildSeedQualityMap();
     Map<Integer, String> soilNameByBitCode = buildSoilNameByBitCode();
     String nameKeyword = gameplayCoreService.safeString(request.getName()).trim().toLowerCase();
-    List<SeedShopItemVO> allItems =
+    List<SeedType> matchedSeedTypes =
         seedTypeDao.findByIsDeletedFalseOrderByIdAsc().stream()
             .filter(
                 s ->
@@ -154,7 +155,9 @@ public class SeedServiceImp implements SeedService {
                     request.getSeedQualityId() == null
                         || request.getSeedQualityId().equals(s.getSeedQualityId()))
             .filter(s -> request.getLevel() == null || request.getLevel().equals(s.getLevel()))
-            .filter(this::isSeedTypeReadyForShop)
+            .collect(Collectors.toList());
+    List<SeedShopItemVO> allItems =
+        filterShopReadySeedTypes(matchedSeedTypes).stream()
             .map(s -> buildSeedShopItemVO(s, qualityMap, soilNameByBitCode))
             .sorted(resolveShopComparator(request.getSort(), request.getOrder()))
             .collect(Collectors.toList());
@@ -1039,9 +1042,38 @@ public class SeedServiceImp implements SeedService {
     return 300L + (long) (safeLevel - 2) * 500L;
   }
 
-  private boolean isSeedTypeReadyForShop(SeedType seedType) {
+  private List<SeedType> filterShopReadySeedTypes(List<SeedType> seedTypes) {
+    if (seedTypes.isEmpty()) {
+      return seedTypes;
+    }
+    List<Long> seedTypeIds =
+        seedTypes.stream()
+            .map(SeedType::getId)
+            .filter(id -> id != null)
+            .collect(Collectors.toList());
+    if (seedTypeIds.isEmpty()) {
+      return List.of();
+    }
+    Map<Long, List<SeedGrowthStage>> stagesBySeedTypeId =
+        seedGrowthStageDao
+            .findBySeedTypeIdInAndIsDeletedFalseOrderBySeedTypeIdAscStageIndexAsc(seedTypeIds)
+            .stream()
+            .collect(Collectors.groupingBy(SeedGrowthStage::getSeedTypeId));
+    Map<Long, String> growthStageNameMap = buildGrowthStageNameMap();
+    return seedTypes.stream()
+        .filter(
+            seedType ->
+                isSeedTypeReadyForShop(
+                    seedType,
+                    stagesBySeedTypeId.getOrDefault(seedType.getId(), List.of()),
+                    growthStageNameMap))
+        .collect(Collectors.toList());
+  }
+
+  private boolean isSeedTypeReadyForShop(
+      SeedType seedType, List<SeedGrowthStage> stages, Map<Long, String> growthStageNameMap) {
     try {
-      requireSeedTypeReadyForShop(seedType);
+      requireSeedTypeReadyForShop(seedType, stages, growthStageNameMap);
       return true;
     } catch (ServiceException ex) {
       return false;
@@ -1049,6 +1081,16 @@ public class SeedServiceImp implements SeedService {
   }
 
   private void requireSeedTypeReadyForShop(SeedType seedType) {
+    List<SeedGrowthStage> stages =
+        seedType == null || seedType.getId() == null
+            ? List.of()
+            : seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(
+                seedType.getId());
+    requireSeedTypeReadyForShop(seedType, stages, buildGrowthStageNameMap());
+  }
+
+  private void requireSeedTypeReadyForShop(
+      SeedType seedType, List<SeedGrowthStage> stages, Map<Long, String> growthStageNameMap) {
     if (seedType == null || seedType.getId() == null || seedType.getId() <= 0) {
       throw new ServiceException(BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在");
     }
@@ -1078,67 +1120,7 @@ public class SeedServiceImp implements SeedService {
     requireNonNegative(seedType.getBugKillExperienceReward(), "杀虫经验不能小于0");
     requireNonNegative(seedType.getBugKillScoreReward(), "杀虫积分不能小于0");
     requireNonNegative(seedType.getBugKillCoinReward(), "杀虫金币不能小于0");
-    validateCompleteSeedStages(seedType);
-  }
-
-  private void validateCompleteSeedStages(SeedType seedType) {
-    List<SeedGrowthStage> stages =
-        seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(seedType.getId());
-    if (stages.isEmpty()) {
-      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "请至少配置一个成长阶段");
-    }
-    Map<Long, String> growthStageNameMap =
-        growthStageDao.findByIsDeletedFalseOrderByIdAsc().stream()
-            .collect(Collectors.toMap(GrowthStage::getId, GrowthStage::getName));
-    short expected = 1;
-    short lastStageIndex = 0;
-    short witherStageCount = 0;
-    Short witherStageIndex = null;
-    for (SeedGrowthStage stage : stages) {
-      short actual = stage.getStageIndex() == null ? 0 : stage.getStageIndex();
-      if (actual != expected) {
-        throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "阶段序号必须连续为 1..N");
-      }
-      lastStageIndex = actual;
-      String growthStageName =
-          gameplayCoreService.safeString(growthStageNameMap.get(stage.getGrowthStageId())).trim();
-      if ("枯萎".equals(growthStageName)) {
-        witherStageCount++;
-        witherStageIndex = actual;
-      }
-      expected++;
-    }
-    if (witherStageCount > 1) {
-      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "同一种子只能配置一个枯萎阶段");
-    }
-    if (witherStageIndex == null) {
-      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "请为该种子补充最后一个“枯萎”阶段");
-    }
-    if (witherStageIndex != lastStageIndex) {
-      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "枯萎阶段必须位于最后一阶段");
-    }
-    Short harvest = normalizeStagePointer(seedType.getHarvestStageIndex());
-    Short regrow = normalizeStagePointer(seedType.getRegrowStageIndex());
-    if (harvest == null || harvest < 1 || harvest > lastStageIndex) {
-      throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须存在于该种子的阶段集合中");
-    }
-    if (harvest >= witherStageIndex) {
-      throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须早于最后的枯萎阶段");
-    }
-    if (seedType.getMaxHarvestCount() != null && seedType.getMaxHarvestCount() > 1) {
-      if (regrow == null || regrow < 1 || regrow > lastStageIndex) {
-        throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "多次收获作物必须配置存在的再生阶段");
-      }
-      if (regrow >= harvest) {
-        throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "收获阶段序号必须大于再生阶段序号");
-      }
-    } else if (regrow != null && regrow >= harvest) {
-      throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段序号必须小于收获阶段序号");
-    }
-  }
-
-  private Short normalizeStagePointer(Short value) {
-    return value == null || value <= 0 ? null : value;
+    SeedStageConfigValidator.validateComplete(seedType, stages, growthStageNameMap);
   }
 
   private void requireNonNegative(Number value, String message) {
@@ -1147,8 +1129,12 @@ public class SeedServiceImp implements SeedService {
     }
   }
 
-  /* =========================================================      *  Common Entity / Base Helpers      * ========================================================= */ private
-  User validateUser(Long userId) {
+  /*
+   * =========================================================
+   * Common Entity / Base Helpers
+   * =========================================================
+   */
+  private User validateUser(Long userId) {
     return ServiceGuardUtils.requirePresent(
         userDao.findByIdAndIsDeletedFalse(userId), BizErrorCode.USER_NOT_FOUND, "用户不存在");
   }

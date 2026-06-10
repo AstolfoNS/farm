@@ -45,9 +45,9 @@ import cn.jxufe.farm.entity.SeedType;
 import cn.jxufe.farm.entity.User;
 import cn.jxufe.farm.service.SeedService;
 import cn.jxufe.farm.service.support.AssetDefaultProvider;
+import cn.jxufe.farm.service.support.SeedStageConfigValidator;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -314,68 +314,15 @@ public class SeedServiceGuardedDecorator implements SeedService {
     }
     List<SeedGrowthStage> stages =
         seedGrowthStageDao.findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(seedTypeId);
-    if (stages.isEmpty()) {
-      if (requireCompleteConfig) {
-        throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "请至少配置一个成长阶段");
-      }
-      return;
-    }
-    short expect = 1;
-    Set<Short> stageIndexSet = new HashSet<>();
-    Map<Long, String> growthStageNameMap = buildGrowthStageNameMap();
-    short lastStageIndex = 0;
-    short witherStageCount = 0;
-    Short witherStageIndex = null;
-    for (SeedGrowthStage stage : stages) {
-      short actual = stage.getStageIndex() == null ? 0 : stage.getStageIndex();
-      if (actual != expect) {
-        throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "阶段序号必须连续为 1..N");
-      }
-      stageIndexSet.add(actual);
-      lastStageIndex = actual;
-      String growthStageName = safeString(growthStageNameMap.get(stage.getGrowthStageId())).trim();
-      if ("枯萎".equals(growthStageName)) {
-        witherStageCount++;
-        witherStageIndex = actual;
-      }
-      expect++;
-    }
-    if (witherStageCount > 1) {
-      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "同一种子只能配置一个枯萎阶段");
-    }
-    if (witherStageIndex != null && witherStageIndex != lastStageIndex) {
-      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "枯萎阶段必须位于最后一阶段");
-    }
     SeedType seedType =
         seedTypeDao
             .findByIdAndIsDeletedFalse(seedTypeId)
             .orElseThrow(() -> new ServiceException(BizErrorCode.SEED_TYPE_NOT_FOUND, "种子类型不存在"));
-    Short harvest = normalizeStagePointer(seedType.getHarvestStageIndex());
-    Short regrow = normalizeStagePointer(seedType.getRegrowStageIndex());
-    if (!requireCompleteConfig) {
-      validateOptionalStagePointers(
-          stageIndexSet, lastStageIndex, witherStageIndex, harvest, regrow);
-      return;
-    }
-    if (witherStageIndex == null) {
-      throw new ServiceException(BizErrorCode.SEED_STAGE_SEQUENCE_INVALID, "请为该种子补充最后一个“枯萎”阶段");
-    }
-    if (harvest == null || !stageIndexSet.contains(harvest)) {
-      throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须存在于该种子的阶段集合中");
-    }
-    if (harvest >= witherStageIndex) {
-      throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须早于最后的枯萎阶段");
-    }
-    short maxHarvestCount = normalizeMaxHarvestCount(seedType.getMaxHarvestCount());
-    if (maxHarvestCount > 1) {
-      if (regrow == null || !stageIndexSet.contains(regrow)) {
-        throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "多次收获作物必须配置存在的再生阶段");
-      }
-      if (regrow >= harvest) {
-        throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "收获阶段序号必须大于再生阶段序号");
-      }
-    } else if (regrow != null && stageIndexSet.contains(regrow) && regrow >= harvest) {
-      throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段序号必须小于收获阶段序号");
+    Map<Long, String> growthStageNameMap = buildGrowthStageNameMap();
+    if (requireCompleteConfig) {
+      SeedStageConfigValidator.validateComplete(seedType, stages, growthStageNameMap);
+    } else {
+      SeedStageConfigValidator.validateDraft(seedType, stages, growthStageNameMap);
     }
   }
 
@@ -634,31 +581,8 @@ public class SeedServiceGuardedDecorator implements SeedService {
         .collect(Collectors.toMap(GrowthStage::getId, item -> safeString(item.getName())));
   }
 
-  private void validateOptionalStagePointers(
-      Set<Short> stageIndexSet,
-      short lastStageIndex,
-      Short witherStageIndex,
-      Short harvest,
-      Short regrow) {
-    if (harvest != null && stageIndexSet.contains(harvest)) {
-      if (witherStageIndex != null && harvest >= witherStageIndex) {
-        throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段必须早于枯萎阶段");
-      }
-      if (harvest >= lastStageIndex) {
-        throw new ServiceException(BizErrorCode.SEED_HARVEST_STAGE_INVALID, "收获阶段不能落在最后一阶段");
-      }
-    }
-    if (regrow != null
-        && harvest != null
-        && stageIndexSet.contains(regrow)
-        && stageIndexSet.contains(harvest)
-        && regrow >= harvest) {
-      throw new ServiceException(BizErrorCode.SEED_REGROW_STAGE_INVALID, "再生阶段序号必须小于收获阶段序号");
-    }
-  }
-
   private Short normalizeStagePointer(Short value) {
-    return value == null || value <= 0 ? null : value;
+    return SeedStageConfigValidator.normalizeStagePointer(value);
   }
 
   private Short normalizeRegrowPointer(SeedAddOrUpdateDTO params) {
@@ -673,6 +597,6 @@ public class SeedServiceGuardedDecorator implements SeedService {
   }
 
   private short normalizeMaxHarvestCount(Short value) {
-    return value == null || value <= 0 ? (short) 1 : value;
+    return SeedStageConfigValidator.normalizeMaxHarvestCount(value);
   }
 }
