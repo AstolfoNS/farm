@@ -52,6 +52,7 @@ import cn.jxufe.farm.service.GameplayCoreService;
 import cn.jxufe.farm.service.RequestIdempotencyService;
 import cn.jxufe.farm.service.SeedService;
 import cn.jxufe.farm.service.support.SeedStageConfigValidator;
+import cn.jxufe.farm.service.support.SeedViewAssembler;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -83,6 +84,7 @@ public class SeedServiceImp implements SeedService {
   private final UserInventoryFlowDao userInventoryFlowDao;
   private final RequestIdempotencyService requestIdempotencyService;
   private final GameplayCoreService gameplayCoreService;
+  private final SeedViewAssembler seedViewAssembler;
 
   public SeedServiceImp(
       SeedTypeDao seedTypeDao,
@@ -96,7 +98,8 @@ public class SeedServiceImp implements SeedService {
       UserAssetFlowDao userAssetFlowDao,
       UserInventoryFlowDao userInventoryFlowDao,
       RequestIdempotencyService requestIdempotencyService,
-      GameplayCoreService gameplayCoreService) {
+      GameplayCoreService gameplayCoreService,
+      SeedViewAssembler seedViewAssembler) {
     this.seedTypeDao = seedTypeDao;
     this.seedQualityDao = seedQualityDao;
     this.soilTypeDao = soilTypeDao;
@@ -109,6 +112,7 @@ public class SeedServiceImp implements SeedService {
     this.userInventoryFlowDao = userInventoryFlowDao;
     this.requestIdempotencyService = requestIdempotencyService;
     this.gameplayCoreService = gameplayCoreService;
+    this.seedViewAssembler = seedViewAssembler;
   }
 
   @Override
@@ -126,9 +130,13 @@ public class SeedServiceImp implements SeedService {
             gameplayCoreService.safeString(request.getName()).trim(), pageable);
     Map<Long, SeedQuality> qualityMap = buildSeedQualityMap();
     Map<Integer, String> soilNameByBitCode = buildSoilNameByBitCode();
+    Map<Long, Integer> totalGrowSecondsMap = buildTotalGrowSecondsMap(seedPage.getContent());
     List<SeedGridVO> records =
         seedPage.getContent().stream()
-            .map(seedType -> buildSeedGridVO(seedType, qualityMap, soilNameByBitCode))
+            .map(
+                seedType ->
+                    seedViewAssembler.seedGrid(
+                        seedType, qualityMap, soilNameByBitCode, totalGrowSecondsMap))
             .collect(Collectors.toList());
     return new PageResult<>(pageNo, pageSize, seedPage.getTotalElements(), records);
   }
@@ -157,8 +165,9 @@ public class SeedServiceImp implements SeedService {
             .filter(s -> request.getLevel() == null || request.getLevel().equals(s.getLevel()))
             .collect(Collectors.toList());
     List<SeedShopItemVO> allItems =
-        filterShopReadySeedTypes(matchedSeedTypes).stream()
-            .map(s -> buildSeedShopItemVO(s, qualityMap, soilNameByBitCode))
+        buildReadySeedShopItems(
+                filterShopReadySeedTypes(matchedSeedTypes), qualityMap, soilNameByBitCode)
+            .stream()
             .sorted(resolveShopComparator(request.getSort(), request.getOrder()))
             .collect(Collectors.toList());
     return PageResult.of(allItems, pageNo, pageSize);
@@ -662,28 +671,21 @@ public class SeedServiceImp implements SeedService {
   @Override
   public List<OptionVO> listSeedQualityOptions() {
     return seedQualityDao.findByIsDeletedFalseOrderByIdAsc().stream()
-        .map(item -> buildOption(item.getId(), item.getName()))
+        .map(item -> seedViewAssembler.option(item.getId(), item.getName()))
         .collect(Collectors.toList());
   }
 
   @Override
   public List<SoilOptionVO> listSoilOptions() {
     return soilTypeDao.findByIsDeletedFalseOrderByIdAsc().stream()
-        .map(
-            item -> {
-              SoilOptionVO vo = new SoilOptionVO();
-              vo.setId(item.getId());
-              vo.setText(gameplayCoreService.safeString(item.getName()));
-              vo.setBitCode(item.getBitCode());
-              return vo;
-            })
+        .map(item -> seedViewAssembler.soilOption(item.getId(), item.getName(), item.getBitCode()))
         .collect(Collectors.toList());
   }
 
   @Override
   public List<OptionVO> listGrowthStageOptions() {
     return growthStageDao.findByIsDeletedFalseOrderByIdAsc().stream()
-        .map(item -> buildOption(item.getId(), item.getName()))
+        .map(item -> seedViewAssembler.option(item.getId(), item.getName()))
         .collect(Collectors.toList());
   }
 
@@ -805,83 +807,36 @@ public class SeedServiceImp implements SeedService {
    *  Private Helper Methods
    * =========================================================
    */
-  private OptionVO buildOption(Long id, String text) {
-    OptionVO vo = new OptionVO();
-    vo.setId(id);
-    vo.setText(gameplayCoreService.safeString(text));
-    return vo;
-  }
-
-  private SeedGridVO buildSeedGridVO(
-      SeedType seedType,
+  private List<SeedShopItemVO> buildReadySeedShopItems(
+      List<SeedType> seedTypes,
       Map<Long, SeedQuality> qualityMap,
       Map<Integer, String> soilNameByBitCode) {
-    SeedGridVO vo = new SeedGridVO();
-    vo.setId(seedType.getId());
-    vo.setName(gameplayCoreService.safeString(seedType.getName()));
-    vo.setCoverImageUrl(gameplayCoreService.safeString(seedType.getCoverImageUrl()));
-    vo.setSeedQualityId(seedType.getSeedQualityId());
-    vo.setSeedQualityName(resolveSeedQualityName(qualityMap, seedType.getSeedQualityId()));
-    vo.setEnableSoilTypeBits(gameplayCoreService.defaultLong(seedType.getEnableSoilTypeBits(), 0L));
-    vo.setEnableSoilTypeNames(resolveSoilName(seedType.getEnableSoilTypeBits(), soilNameByBitCode));
-    vo.setLevel(seedType.getLevel());
-    vo.setDescription(gameplayCoreService.safeString(seedType.getDescription()));
-    vo.setMaxBugLimit(seedType.getMaxBugLimit());
-    vo.setMaxHarvestCount(seedType.getMaxHarvestCount());
-    vo.setRegrowStageIndex(seedType.getRegrowStageIndex());
-    vo.setPrice(gameplayCoreService.defaultLong(seedType.getPrice(), 0L));
-    vo.setHarvestExperience(gameplayCoreService.defaultLong(seedType.getHarvestExperience(), 0L));
-    vo.setHarvestFruitNumber(
-        seedType.getHarvestFruitNumber() == null ? 0 : seedType.getHarvestFruitNumber());
-    vo.setFruitLossPerBug(
-        seedType.getFruitLossPerBug() == null ? 0 : seedType.getFruitLossPerBug());
-    vo.setBugKillCoinReward(gameplayCoreService.defaultLong(seedType.getBugKillCoinReward(), 0L));
-    vo.setBugKillExperienceReward(
-        gameplayCoreService.defaultLong(seedType.getBugKillExperienceReward(), 0L));
-    vo.setBugKillScoreReward(gameplayCoreService.defaultLong(seedType.getBugKillScoreReward(), 0L));
-    vo.setFruitPrice(gameplayCoreService.defaultLong(seedType.getFruitPrice(), 0L));
-    vo.setHarvestScore(gameplayCoreService.defaultLong(seedType.getHarvestScore(), 0L));
-    vo.setTotalGrowSeconds(getTotalGrowSeconds(seedType.getId()));
-    return vo;
+    Map<Long, Integer> totalGrowSecondsMap = buildTotalGrowSecondsMap(seedTypes);
+    return seedTypes.stream()
+        .map(
+            seed ->
+                seedViewAssembler.seedShopItem(
+                    seed, qualityMap, soilNameByBitCode, totalGrowSecondsMap))
+        .collect(Collectors.toList());
   }
 
-  private SeedShopItemVO buildSeedShopItemVO(
-      SeedType seedType,
-      Map<Long, SeedQuality> qualityMap,
-      Map<Integer, String> soilNameByBitCode) {
-    SeedShopItemVO vo = new SeedShopItemVO();
-    vo.setId(seedType.getId());
-    vo.setName(gameplayCoreService.safeString(seedType.getName()));
-    vo.setCoverImageUrl(gameplayCoreService.safeString(seedType.getCoverImageUrl()));
-    vo.setSeedQualityId(seedType.getSeedQualityId());
-    vo.setSeedQualityName(resolveSeedQualityName(qualityMap, seedType.getSeedQualityId()));
-    vo.setLevel(seedType.getLevel());
-    vo.setEnableSoilTypeBits(gameplayCoreService.defaultLong(seedType.getEnableSoilTypeBits(), 0L));
-    vo.setEnableSoilTypeNames(resolveSoilName(seedType.getEnableSoilTypeBits(), soilNameByBitCode));
-    vo.setDescription(gameplayCoreService.safeString(seedType.getDescription()));
-    vo.setPrice(gameplayCoreService.defaultLong(seedType.getPrice(), 0L));
-    vo.setHarvestFruitNumber(
-        seedType.getHarvestFruitNumber() == null ? 0 : seedType.getHarvestFruitNumber());
-    vo.setFruitLossPerBug(
-        seedType.getFruitLossPerBug() == null ? 0 : seedType.getFruitLossPerBug());
-    vo.setBugKillCoinReward(gameplayCoreService.defaultLong(seedType.getBugKillCoinReward(), 0L));
-    vo.setBugKillExperienceReward(
-        gameplayCoreService.defaultLong(seedType.getBugKillExperienceReward(), 0L));
-    vo.setBugKillScoreReward(gameplayCoreService.defaultLong(seedType.getBugKillScoreReward(), 0L));
-    vo.setFruitPrice(gameplayCoreService.defaultLong(seedType.getFruitPrice(), 0L));
-    vo.setHarvestExperience(gameplayCoreService.defaultLong(seedType.getHarvestExperience(), 0L));
-    vo.setHarvestScore(gameplayCoreService.defaultLong(seedType.getHarvestScore(), 0L));
-    vo.setMaxHarvestCount(
-        seedType.getMaxHarvestCount() == null ? 1 : seedType.getMaxHarvestCount());
-    vo.setTotalGrowSeconds(getTotalGrowSeconds(seedType.getId()));
-    long singleHarvestFruitValue =
-        gameplayCoreService.safeMultiply(vo.getHarvestFruitNumber(), vo.getFruitPrice());
-    long totalHarvestFruitValue =
-        gameplayCoreService.safeMultiply(singleHarvestFruitValue, vo.getMaxHarvestCount());
-    vo.setSingleHarvestFruitValue(singleHarvestFruitValue);
-    vo.setTotalHarvestFruitValue(totalHarvestFruitValue);
-    vo.setEstimatedNetValue(totalHarvestFruitValue - vo.getPrice());
-    return vo;
+  private Map<Long, Integer> buildTotalGrowSecondsMap(List<SeedType> seedTypes) {
+    List<Long> seedTypeIds =
+        seedTypes.stream()
+            .map(SeedType::getId)
+            .filter(id -> id != null)
+            .collect(Collectors.toList());
+    if (seedTypeIds.isEmpty()) {
+      return Map.of();
+    }
+    return seedGrowthStageDao
+        .findBySeedTypeIdInAndIsDeletedFalseOrderBySeedTypeIdAscStageIndexAsc(seedTypeIds)
+        .stream()
+        .collect(
+            Collectors.groupingBy(
+                SeedGrowthStage::getSeedTypeId,
+                Collectors.summingInt(
+                    stage -> stage.getDurationSeconds() == null ? 0 : stage.getDurationSeconds())));
   }
 
   private Map<Long, SeedQuality> buildSeedQualityMap() {
@@ -908,34 +863,6 @@ public class SeedServiceImp implements SeedService {
     return growthStageDao.findByIsDeletedFalseOrderByIdAsc().stream()
         .collect(
             Collectors.toMap(GrowthStage::getId, s -> gameplayCoreService.safeString(s.getName())));
-  }
-
-  private String resolveSeedQualityName(Map<Long, SeedQuality> qualityMap, Long seedQualityId) {
-    return qualityMap.containsKey(seedQualityId)
-        ? gameplayCoreService.safeString(qualityMap.get(seedQualityId).getName())
-        : "";
-  }
-
-  private String resolveSoilName(Long soilBits, Map<Integer, String> soilNameByBitCode) {
-    long bits = gameplayCoreService.defaultLong(soilBits, 0L);
-    if (bits <= 0) {
-      return "";
-    }
-    return soilNameByBitCode.entrySet().stream()
-        .filter(e -> e.getKey() != null && e.getKey() > 0 && (bits & e.getKey()) == e.getKey())
-        .map(Map.Entry::getValue)
-        .collect(Collectors.joining("/"));
-  }
-
-  private int getTotalGrowSeconds(Long seedTypeId) {
-    if (seedTypeId == null || seedTypeId <= 0) {
-      return 0;
-    }
-    return seedGrowthStageDao
-        .findBySeedTypeIdAndIsDeletedFalseOrderByStageIndexAsc(seedTypeId)
-        .stream()
-        .mapToInt(stage -> stage.getDurationSeconds() == null ? 0 : stage.getDurationSeconds())
-        .sum();
   }
 
   private Comparator<SeedShopItemVO> resolveShopComparator(String sort, String order) {
