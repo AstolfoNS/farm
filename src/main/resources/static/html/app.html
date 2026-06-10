@@ -39,7 +39,7 @@
     <script src="/js/app/modules/store.js"></script>
     <script src="/js/app/modules/plot-admin.js?v=20260601-8"></script>
     <script src="/js/app/modules/user-admin.js"></script>
-    <script src="/js/app/modules/seed-admin.js?v=20260610-1"></script>
+    <script src="/js/app/modules/seed-admin.js?v=20260610-2"></script>
     <script src="/js/app/modules/home.js"></script>
 </head>
 <body class="farm-body">
@@ -450,11 +450,11 @@
                         <td>种子名称</td>
                         <td><input name="name" class="easyui-textbox" style="width:220px" required="true"></td>
                         <td>种子品质</td>
-                        <td><input id="seedTypeQualityId" name="seedQualityId" class="easyui-combobox" style="width:220px"></td>
+                        <td><input id="seedTypeQualityId" name="seedQualityId" class="easyui-combobox" style="width:220px" required="true"></td>
                     </tr>
                     <tr>
                         <td>可种土壤</td>
-                        <td colspan="3" class="seed-admin-full-field farm-admin-form-full-field"><input id="seedTypeSoilIds" name="soilTypeIds" class="easyui-combobox seed-admin-full-input"></td>
+                        <td colspan="3" class="seed-admin-full-field farm-admin-form-full-field"><input id="seedTypeSoilIds" name="soilTypeIds" class="easyui-combobox seed-admin-full-input" required="true"></td>
                     </tr>
                     <tr>
                         <td>等级</td>
@@ -533,6 +533,7 @@
                 <input id="seedTypeCoverFile" type="file" accept="image/*" style="display:none">
             </form>
             <div class="seed-admin-dialog-actions farm-dialog-actions">
+                <a id="seedTypeStagesBtn" href="javascript:void(0)" class="easyui-linkbutton c1" data-options="iconCls:'icon-edit'">打开成长阶段</a>
                 <a id="seedTypeSaveBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">保存</a>
                 <a id="seedTypeCancelBtn" href="javascript:void(0)" class="easyui-linkbutton c5" data-options="iconCls:'icon-cancel'">取消</a>
             </div>

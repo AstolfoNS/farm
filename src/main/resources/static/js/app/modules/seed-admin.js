@@ -469,6 +469,24 @@
         showMessage("已切换到“" + (state.currentSeedName || "当前种子") + "”的成长阶段清单");
     }
 
+    function openCurrentSeedStages() {
+        var id = asNumber($("#seedTypeEditorForm input[name='id']").val(), 0);
+        if (id <= 0) {
+            alertMessage("请先保存种子类型，再编辑成长阶段");
+            return;
+        }
+        var row = getSeedTypeById(id);
+        if (!row) {
+            row = {
+                id: id,
+                name: getTextboxValue($("#seedTypeEditorForm input[name='name']").first(), "")
+            };
+        }
+        $("#seedTypeEditorDialog").dialog("close");
+        selectSeedType(row);
+        focusStagePanel();
+    }
+
     function soilIdsByBits(bits) {
         var valueBits = asNumber(bits, 0);
         var ids = [];
@@ -747,39 +765,6 @@
     }
 
     function bindUploadPickerEvents() {
-        if ($.isFunction(Admin.bindUploadPicker)) {
-            Admin.bindUploadPicker({
-                namespace: ".seedAdminUploadTypeCover",
-                buttonSelector: "#seedTypeUploadCoverBtn",
-                fileSelector: "#seedTypeCoverFile",
-                category: "seed-cover",
-                onSuccess: function (url, payload, raw) {
-                    setTextboxValue($("#seedTypeCoverImageUrl"), url);
-                    previewSeedTypeCover(url);
-                    showMessage((raw && raw.msg) || "上传成功");
-                },
-                onError: function (msg) {
-                    alertMessage(msg || "上传失败，请稍后重试");
-                }
-            });
-            Admin.bindUploadPicker({
-                namespace: ".seedAdminUploadStage",
-                buttonSelector: "#seedStageUploadImageBtn",
-                fileSelector: "#seedStageImageFile",
-                category: "seed-stage",
-                onSuccess: function (url, payload, raw) {
-                    var normalized = normalizeAssetUrl(url);
-                    setTextboxValue($("#seedStageAssetUrl"), normalized);
-                    previewImageFromUrl(normalized);
-                    showMessage((raw && raw.msg) || "上传成功");
-                },
-                onError: function (msg) {
-                    alertMessage(msg || "上传失败，请稍后重试");
-                }
-            });
-            return;
-        }
-
         $(document)
             .off("click.seedAdminUpload", "#seedTypeUploadCoverBtn")
             .on("click.seedAdminUpload", "#seedTypeUploadCoverBtn", function () {
@@ -920,11 +905,13 @@
             }
             fillSeedTypeForm(row);
             $("#seedTypeEditorDialog").dialog("setTitle", "编辑种子类型").dialog("open");
+            setLinkButtonEnabled("#seedTypeStagesBtn", true);
             refreshSeedTypeEditorLayout();
             return;
         }
         fillSeedTypeForm(null);
         $("#seedTypeEditorDialog").dialog("setTitle", "新增种子类型").dialog("open");
+        setLinkButtonEnabled("#seedTypeStagesBtn", false);
         refreshSeedTypeEditorLayout();
     }
 
@@ -943,6 +930,14 @@
         try {
             seedQualityId = asNumber($("#seedTypeQualityId").combobox("getValue"), 0);
         } catch (ignoreQualityGetError) {}
+        if (seedQualityId <= 0) {
+            alertMessage("请选择种子品质");
+            return;
+        }
+        if (!soilIds || soilIds.length <= 0) {
+            alertMessage("请至少选择一种可种土壤");
+            return;
+        }
         var payload = {
             id: id > 0 ? id : null,
             name: getTextboxValue($form.find("input[name='name']").first(), ""),
@@ -1332,6 +1327,7 @@
         $("#seedTypeCancelBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedTypeEditorDialog").dialog("close");
         });
+        $("#seedTypeStagesBtn").off("click.seedAdmin").on("click.seedAdmin", openCurrentSeedStages);
         $("#seedStageSaveBtn").off("click.seedAdmin").on("click.seedAdmin", saveSeedStage);
         $("#seedStageCancelBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedStageEditorDialog").dialog("close");
@@ -1358,7 +1354,8 @@
             valueField: "id",
             textField: "text",
             editable: false,
-            panelHeight: "auto"
+            panelHeight: "auto",
+            required: true
         });
         $("#seedTypeSoilIds").combobox({
             valueField: "id",
@@ -1367,7 +1364,8 @@
             panelHeight: 260,
             multiple: true,
             multivalue: true,
-            separator: ","
+            separator: ",",
+            required: true
         });
         $("#seedStageGrowthStageId").combobox({
             valueField: "id",
