@@ -15,7 +15,7 @@
     <link rel="stylesheet" type="text/css" href="/css/modules/admin-grid.css">
     <link rel="stylesheet" type="text/css" href="/css/modules/admin-shared.css?v=20260601-1">
     <link rel="stylesheet" type="text/css" href="/css/modules/farm-stage.css">
-    <link rel="stylesheet" type="text/css" href="/css/modules/shop-panel.css?v=20260531-9">
+    <link rel="stylesheet" type="text/css" href="/css/modules/shop-panel.css?v=20260610-1">
     <link rel="stylesheet" type="text/css" href="/css/modules/store-panel.css?v=20260531-2">
     <link rel="stylesheet" type="text/css" href="/css/modules/plot-admin.css?v=20260601-5">
     <link rel="stylesheet" type="text/css" href="/css/modules/user-admin.css">
@@ -35,11 +35,11 @@
     <script src="/js/app/core/audio.js"></script>
     <script src="/js/app/core/farm-action-kit.js?v=20260601-1"></script>
     <script src="/js/app/modules/farm.js"></script>
-    <script src="/js/app/modules/shop.js"></script>
+    <script src="/js/app/modules/shop.js?v=20260610-1"></script>
     <script src="/js/app/modules/store.js"></script>
     <script src="/js/app/modules/plot-admin.js?v=20260601-8"></script>
     <script src="/js/app/modules/user-admin.js"></script>
-    <script src="/js/app/modules/seed-admin.js?v=20260610-2"></script>
+    <script src="/js/app/modules/seed-admin.js?v=20260610-3"></script>
     <script src="/js/app/modules/home.js"></script>
 </head>
 <body class="farm-body">
@@ -448,7 +448,7 @@
                 <table class="seed-admin-form-table farm-dialog-form seed-type-editor-table">
                     <tr>
                         <td>种子名称</td>
-                        <td><input name="name" class="easyui-textbox" style="width:220px" required="true"></td>
+                        <td><input name="name" class="easyui-textbox" style="width:220px" required="true" data-options="missingMessage:'请输入种子名称'"></td>
                         <td>种子品质</td>
                         <td><input id="seedTypeQualityId" name="seedQualityId" class="easyui-combobox" style="width:220px" required="true"></td>
                     </tr>
@@ -458,55 +458,55 @@
                     </tr>
                     <tr>
                         <td>等级</td>
-                        <td><input name="level" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                        <td><input name="level" class="easyui-numberbox" data-options="min:1,precision:0,value:1,missingMessage:'请输入等级'" style="width:220px" required="true"></td>
                         <td>收获阶段</td>
                         <td><input name="harvestStageIndex" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
                     </tr>
                     <tr>
                         <td>最大收获次数</td>
-                        <td><input name="maxHarvestCount" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
+                        <td><input name="maxHarvestCount" class="easyui-numberbox" data-options="min:1,precision:0,value:1,missingMessage:'请输入最大收获次数'" style="width:220px" required="true"></td>
                         <td>再生阶段</td>
                         <td><input name="regrowStageIndex" class="easyui-numberbox" data-options="min:1,precision:0" style="width:220px"></td>
                     </tr>
                     <tr>
                         <td>解锁经验</td>
-                        <td><input name="unlockExperienceRequired" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">exp</span></td>
+                        <td><input name="unlockExperienceRequired" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入解锁经验'" style="width:220px" required="true"><span class="farm-dialog-unit">exp</span></td>
                         <td>阶段约束</td>
                         <td class="seed-admin-cell-tip">最终阶段必须配置为“枯萎”，并且收获阶段序号必须大于再生阶段。</td>
                     </tr>
                     <tr>
                         <td>种子价格</td>
-                        <td><input name="price" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">金币</span></td>
+                        <td><input name="price" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入种子价格'" style="width:220px" required="true"><span class="farm-dialog-unit">金币</span></td>
                         <td>果实单价</td>
-                        <td><input name="fruitPrice" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">金币</span></td>
+                        <td><input name="fruitPrice" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入果实单价'" style="width:220px" required="true"><span class="farm-dialog-unit">金币</span></td>
                     </tr>
                     <tr>
                         <td>收获经验</td>
-                        <td><input name="harvestExperience" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td><input name="harvestExperience" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入收获经验'" style="width:220px" required="true"></td>
                         <td>收获积分</td>
-                        <td><input name="harvestScore" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">分</span></td>
+                        <td><input name="harvestScore" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入收获积分'" style="width:220px" required="true"><span class="farm-dialog-unit">分</span></td>
                     </tr>
                     <tr>
                         <td>果实数量</td>
-                        <td><input name="harvestFruitNumber" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">个/次</span></td>
+                        <td><input name="harvestFruitNumber" class="easyui-numberbox" data-options="min:0,precision:0,value:1,missingMessage:'请输入果实数量'" style="width:220px" required="true"><span class="farm-dialog-unit">个/次</span></td>
                         <td>虫害损失</td>
-                        <td><input name="fruitLossPerBug" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td><input name="fruitLossPerBug" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入虫害损失'" style="width:220px" required="true"></td>
                     </tr>
                     <tr>
                         <td>虫子上限</td>
-                        <td><input name="maxBugLimit" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"></td>
+                        <td><input name="maxBugLimit" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入虫子上限'" style="width:220px" required="true"></td>
                         <td>说明</td>
                         <td class="seed-admin-cell-tip">虫子数达到上限后，作物会直接跳转到最后的枯萎阶段。</td>
                     </tr>
                     <tr>
                         <td>杀虫经验</td>
-                        <td><input name="bugKillExperienceReward" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">exp</span></td>
+                        <td><input name="bugKillExperienceReward" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入杀虫经验'" style="width:220px" required="true"><span class="farm-dialog-unit">exp</span></td>
                         <td>杀虫积分</td>
-                        <td><input name="bugKillScoreReward" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">分</span></td>
+                        <td><input name="bugKillScoreReward" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入杀虫积分'" style="width:220px" required="true"><span class="farm-dialog-unit">分</span></td>
                     </tr>
                     <tr>
                         <td>杀虫金币</td>
-                        <td><input name="bugKillCoinReward" class="easyui-numberbox" data-options="min:0,precision:0" style="width:220px"><span class="farm-dialog-unit">金币</span></td>
+                        <td><input name="bugKillCoinReward" class="easyui-numberbox" data-options="min:0,precision:0,value:0,missingMessage:'请输入杀虫金币'" style="width:220px" required="true"><span class="farm-dialog-unit">金币</span></td>
                         <td>说明</td>
                         <td class="seed-admin-cell-tip">杀虫奖励将在农场提示框中展示。</td>
                     </tr>

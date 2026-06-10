@@ -285,40 +285,59 @@
         }
         var html = [];
         $.each(records, function (_, row) {
-            var seedTypeId = asNumber(row.id, 0);
-            var price = asNumber(row.price, 0);
-            var unlockRequired = asNumber(row.unlockExperienceRequired, 0);
-            var currentExp = asNumber(row.currentUserExperience, 0);
-            var unlockedByExperience = row.unlockedByExperience !== false && currentExp >= unlockRequired;
-            var unlockProgress = asNumber(row.unlockProgressPercent, unlockRequired <= 0 ? 100 : Math.floor((currentExp * 100) / unlockRequired));
-            if (unlockProgress < 0) {
-                unlockProgress = 0;
-            } else if (unlockProgress > 100) {
-                unlockProgress = 100;
-            }
-            var lockText = unlockedByExperience
-                ? "已解锁"
-                : ("需经验 " + unlockRequired + "（当前 " + currentExp + "，进度 " + unlockProgress + "%）");
-            html.push(
-                "<div class='shop-seed-card' data-seed-index='" + _ + "'>" +
-                "<div class='shop-seed-name'>" + escapeHtml(row.name || ("种子#" + seedTypeId)) + "</div>" +
-                "<div class='shop-seed-meta'>品质: " + escapeHtml(row.seedQualityName || "-") + " | 等级: " + asNumber(row.level, 0) + "</div>" +
-                "<div class='shop-seed-meta'>土地需求: " + escapeHtml(row.enableSoilTypeNames || "-") + "</div>" +
-                "<div class='shop-seed-lock " + (unlockedByExperience ? "is-unlocked" : "is-locked") + "'>" + escapeHtml(lockText) + "</div>" +
-                "<div class='shop-seed-desc'>" + escapeHtml(row.description || "暂无描述") + "</div>" +
-                "<img class='shop-seed-cover' src='" + escapeAttr(resolveCover(row.coverImageUrl)) + "' alt=''>" +
-                "<div class='shop-seed-price'>采购价: " + price + " 金币 | 预估净值: " + asNumber(row.estimatedNetValue, 0) + "</div>" +
-                "<div class='shop-seed-actions'>" +
-                "<a href='javascript:void(0)' class='easyui-linkbutton " + (unlockedByExperience ? "c1" : "c5") + " shop-buy-btn' data-seed-type-id='" + seedTypeId + "' data-price='" + price + "' data-seed-name='" + escapeAttr(row.name || "") + "' data-exp-locked='" + (unlockedByExperience ? "0" : "1") + "' " + (unlockedByExperience ? "" : "disabled='disabled'") + ">" + (unlockedByExperience ? "我要购买" : "经验未解锁") + "</a>" +
-                "</div>" +
-                "</div>"
-            );
+            html.push(buildSeedCardHtml(row, _));
         });
         $("#shopSeedList").html(html.join(""));
         $("#shopSeedList .easyui-linkbutton").linkbutton();
         bindSeedActions();
         bindSeedHoverInfo();
         renderSeedPager(pageData);
+    }
+
+    function buildSeedCardHtml(row, index) {
+        var seedTypeId = asNumber(row.id, 0);
+        var price = asNumber(row.price, 0);
+        var lockState = resolveSeedUnlockState(row);
+        return "" +
+            "<div class='shop-seed-card' data-seed-index='" + index + "'>" +
+            "<div class='shop-seed-frame'>" +
+            "<div class='shop-seed-head'>" +
+            "<div class='shop-seed-name'>" + escapeHtml(row.name || ("种子#" + seedTypeId)) + "</div>" +
+            "<div class='shop-seed-meta-row'>" +
+            "<span>" + escapeHtml(row.seedQualityName || "-") + "</span>" +
+            "<span>Lv." + asNumber(row.level, 0) + "</span>" +
+            "</div>" +
+            "</div>" +
+            "<div class='shop-seed-cover-wrap'>" +
+            "<img class='shop-seed-cover' src='" + escapeAttr(resolveCover(row.coverImageUrl)) + "' alt=''>" +
+            "</div>" +
+            "<div class='shop-seed-desc'>" + escapeHtml(row.description || "暂无描述") + "</div>" +
+            "<div class='shop-seed-buy-info'>" +
+            "<div class='shop-seed-price'>" +
+            "<span>采购价</span><strong>" + price + "</strong><em>金币</em>" +
+            "</div>" +
+            "<div class='shop-seed-meta'>土地需求: " + escapeHtml(row.enableSoilTypeNames || "-") + "</div>" +
+            "<div class='shop-seed-lock " + (lockState.unlocked ? "is-unlocked" : "is-locked") + "'>" + escapeHtml(lockState.text) + "</div>" +
+            "</div>" +
+            "</div>" +
+            "<div class='shop-seed-actions'>" +
+            "<a href='javascript:void(0)' class='easyui-linkbutton " + (lockState.unlocked ? "c1" : "c5") + " shop-buy-btn' data-seed-type-id='" + seedTypeId + "' data-price='" + price + "' data-seed-name='" + escapeAttr(row.name || "") + "' data-exp-locked='" + (lockState.unlocked ? "0" : "1") + "' " + (lockState.unlocked ? "" : "disabled='disabled'") + ">" + (lockState.unlocked ? "我要购买" : "经验未解锁") + "</a>" +
+            "</div>" +
+            "</div>";
+    }
+
+    function resolveSeedUnlockState(row) {
+        var unlockRequired = asNumber(row && row.unlockExperienceRequired, 0);
+        var currentExp = asNumber(row && row.currentUserExperience, 0);
+        var unlocked = row && row.unlockedByExperience !== false && currentExp >= unlockRequired;
+        var fallbackProgress = unlockRequired <= 0 ? 100 : Math.floor((currentExp * 100) / unlockRequired);
+        var unlockProgress = Math.max(0, Math.min(100, asNumber(row && row.unlockProgressPercent, fallbackProgress)));
+        return {
+            unlocked: unlocked,
+            text: unlocked
+                ? "已解锁"
+                : ("需经验 " + unlockRequired + "（当前 " + currentExp + "，进度 " + unlockProgress + "%）")
+        };
     }
 
     function ensureSeedInfoTooltip() {
@@ -343,18 +362,37 @@
         var harvestTimes = asNumber(data.maxHarvestCount, 1);
         var bugLimit = asNumber(data.maxBugLimit, 0);
         var netValue = asNumber(data.estimatedNetValue, 0);
+        var soilNames = data.enableSoilTypeNames || "-";
+        var fruitLoss = asNumber(data.fruitLossPerBug, 0);
+        var bugExp = asNumber(data.bugKillExperienceReward, 0);
+        var bugScore = asNumber(data.bugKillScoreReward, 0);
+        var bugCoin = asNumber(data.bugKillCoinReward, 0);
         var desc = data.description || "暂无描述";
         return "" +
             "<div class='shop-seed-info-title'>" + escapeHtml(data.name || "种子详情") + "</div>" +
-            "<div class='shop-seed-info-line'>品质: " + escapeHtml(quality) + " | 等级: " + level + "</div>" +
-            "<div class='shop-seed-info-line'>采购价: " + asNumber(data.price, 0) + " 金币</div>" +
-            "<div class='shop-seed-info-line'>解锁经验: " + lockReq + "</div>" +
-            "<div class='shop-seed-info-line'>总成长: " + growSeconds + " 秒</div>" +
-            "<div class='shop-seed-info-line'>单次果实: " + harvestFruit + " | 果实单价: " + fruitPrice + "</div>" +
-            "<div class='shop-seed-info-line'>收获次数: " + harvestTimes + " | 虫害上限: " + bugLimit + "</div>" +
-            "<div class='shop-seed-info-line'>收获经验: " + harvestExp + " | 收获积分: " + harvestScore + "</div>" +
-            "<div class='shop-seed-info-line'>预估净值: " + netValue + "</div>" +
+            "<div class='shop-seed-info-subtitle'>" + escapeHtml(quality) + " | Lv." + level + "</div>" +
+            "<div class='shop-seed-info-grid'>" + buildInfoGridRows([
+                ["采购价", asNumber(data.price, 0) + " 金币"],
+                ["解锁经验", lockReq],
+                ["预估净值", netValue],
+                ["总成长", growSeconds + " 秒"],
+                ["单次果实", harvestFruit + " 个"],
+                ["果实单价", fruitPrice + " 金币"],
+                ["收获次数", harvestTimes + " 次"],
+                ["虫害上限", bugLimit],
+                ["收获经验", harvestExp],
+                ["收获积分", harvestScore],
+                ["虫害损失", fruitLoss],
+                ["杀虫奖励", bugExp + " exp / " + bugScore + " 分 / " + bugCoin + " 金币"]
+            ]) + "</div>" +
+            "<div class='shop-seed-info-section'><span>土地需求</span><p>" + escapeHtml(soilNames) + "</p></div>" +
             "<div class='shop-seed-info-desc'>" + escapeHtml(desc) + "</div>";
+    }
+
+    function buildInfoGridRows(rows) {
+        return $.map(rows || [], function (row) {
+            return "<span>" + escapeHtml(row[0]) + "</span><b>" + escapeHtml(row[1]) + "</b>";
+        }).join("");
     }
 
     function showSeedInfoTooltip($card, row) {
@@ -524,15 +562,22 @@
         $("body").append(
             "<div id='shopBuyDialog' class='shop-action-dialog' style='display:none;'>" +
             "<div class='farm-dialog-shell shop-action-dialog-shell'>" +
-            "<div class='farm-action-row' id='shopBuySeedLabel'>种子</div>" +
-            "<div class='farm-action-row'>数量: <input id='shopBuyQty' style='width:180px;'></div>" +
-            "<div class='farm-action-row' id='shopBuyCostTip'>预计花费: 0 金币</div>" +
+            "<div class='shop-buy-summary'>" +
+            "<div class='shop-buy-seed' id='shopBuySeedLabel'>种子</div>" +
+            "<div class='shop-buy-cost' id='shopBuyCostTip'>0</div>" +
+            "<div class='shop-buy-cost-label'>预计花费 金币</div>" +
+            "</div>" +
+            "<div class='shop-buy-fields'>" +
+            "<div class='shop-buy-field'><span>购买数量</span><input id='shopBuyQty' style='width:150px;'></div>" +
+            "<div class='shop-buy-field'><span>单价</span><b id='shopBuyUnitPrice'>0 金币</b></div>" +
+            "<div class='shop-buy-field'><span>当前金币</span><b id='shopBuyCurrentCoin'>0</b></div>" +
+            "</div>" +
             "</div>" +
             "</div>"
         );
         $("#shopBuyDialog").dialog({
-            width: 380,
-            height: 230,
+            width: 420,
+            height: 286,
             modal: true,
             closed: true,
             cls: "farm-dialog-window shop-dialog-window",
@@ -611,16 +656,18 @@
         ensureBuyDialog();
         $("#shopBuyDialog").data("seedTypeId", seedTypeId);
         $("#shopBuyDialog").data("unitPrice", price);
-        $("#shopBuySeedLabel").text("种子: " + (seedName || ("种子#" + seedTypeId)));
+        $("#shopBuySeedLabel").text(seedName || ("种子#" + seedTypeId));
+        $("#shopBuyUnitPrice").text(asNumber(price, 0) + " 金币");
+        $("#shopBuyCurrentCoin").text($("#shopCurrentCoin").text() || "0");
         $("#shopBuyQty").numberbox("setValue", 1);
-        $("#shopBuyCostTip").text("预计花费: " + asNumber(price, 0) + " 金币");
+        $("#shopBuyCostTip").text(asNumber(price, 0));
         $("#shopBuyQty").numberbox({
             onChange: function (newVal) {
                 var qty = asNumber(newVal, 1);
                 if (qty <= 0) {
                     qty = 1;
                 }
-                $("#shopBuyCostTip").text("预计花费: " + (qty * asNumber(price, 0)) + " 金币");
+                $("#shopBuyCostTip").text(qty * asNumber(price, 0));
             }
         });
         $("#shopBuyDialog").dialog("setTitle", "购买种子").dialog("open");

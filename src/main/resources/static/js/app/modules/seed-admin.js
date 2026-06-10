@@ -450,6 +450,7 @@
         state.currentSeedId = asNumber(row && row.id, 0);
         state.currentSeedName = row && row.name ? row.name : "";
         state.currentStageId = 0;
+        state.stageRows = [];
         if (state.currentSeedId <= 0) {
             $("#seedAdminStageHint").text("请先在上方选择一个种子，再进行阶段管理。");
             syncActionButtons();
@@ -472,7 +473,7 @@
     function openCurrentSeedStages() {
         var id = asNumber($("#seedTypeEditorForm input[name='id']").val(), 0);
         if (id <= 0) {
-            alertMessage("请先保存种子类型，再编辑成长阶段");
+            saveSeedType({openStages: true});
             return;
         }
         var row = getSeedTypeById(id);
@@ -816,8 +817,12 @@
         $("#seedTypeSoilIds").combobox("clear");
         previewSeedTypeCover("");
         if (!row) {
+            applySeedTypeDefaults();
             if (state.seedQualityOptions.length > 0) {
                 $("#seedTypeQualityId").combobox("setValue", state.seedQualityOptions[0].id);
+            }
+            if (state.soilOptions.length > 0) {
+                $("#seedTypeSoilIds").combobox("setValues", [String(state.soilOptions[0].id)]);
             }
             return;
         }
@@ -846,6 +851,31 @@
         $("#seedTypeQualityId").combobox("setValue", asNumber(row.seedQualityId, 0));
         $("#seedTypeSoilIds").combobox("setValues", soilIdsByBits(row.enableSoilTypeBits));
         previewSeedTypeCover(row.coverImageUrl || "");
+    }
+
+    function setSeedTypeNumberValue(fieldName, value) {
+        var $field = $("#seedTypeEditorForm input[name='" + fieldName + "']").first();
+        try {
+            $field.numberbox("setValue", value);
+        } catch (ignoreNumberboxSetError) {
+            $field.val(value);
+        }
+    }
+
+    function applySeedTypeDefaults() {
+        setSeedTypeNumberValue("level", 1);
+        setSeedTypeNumberValue("maxHarvestCount", 1);
+        setSeedTypeNumberValue("unlockExperienceRequired", 0);
+        setSeedTypeNumberValue("price", 0);
+        setSeedTypeNumberValue("fruitPrice", 0);
+        setSeedTypeNumberValue("harvestExperience", 0);
+        setSeedTypeNumberValue("harvestScore", 0);
+        setSeedTypeNumberValue("harvestFruitNumber", 1);
+        setSeedTypeNumberValue("fruitLossPerBug", 0);
+        setSeedTypeNumberValue("maxBugLimit", 0);
+        setSeedTypeNumberValue("bugKillExperienceReward", 0);
+        setSeedTypeNumberValue("bugKillScoreReward", 0);
+        setSeedTypeNumberValue("bugKillCoinReward", 0);
     }
 
     function refreshSeedTypeEditorLayout() {
@@ -911,14 +941,14 @@
         }
         fillSeedTypeForm(null);
         $("#seedTypeEditorDialog").dialog("setTitle", "新增种子类型").dialog("open");
-        setLinkButtonEnabled("#seedTypeStagesBtn", false);
+        setLinkButtonEnabled("#seedTypeStagesBtn", true);
         refreshSeedTypeEditorLayout();
     }
 
-    function saveSeedType() {
+    function buildSeedTypePayload() {
         if (!$("#seedTypeEditorForm").form("validate")) {
             alertMessage("请先完善种子必填信息");
-            return;
+            return null;
         }
         var $form = $("#seedTypeEditorForm");
         var id = asNumber($form.find("input[name='id']").val(), 0);
@@ -932,13 +962,13 @@
         } catch (ignoreQualityGetError) {}
         if (seedQualityId <= 0) {
             alertMessage("请选择种子品质");
-            return;
+            return null;
         }
         if (!soilIds || soilIds.length <= 0) {
             alertMessage("请至少选择一种可种土壤");
-            return;
+            return null;
         }
-        var payload = {
+        return {
             id: id > 0 ? id : null,
             name: getTextboxValue($form.find("input[name='name']").first(), ""),
             seedQualityId: seedQualityId,
@@ -961,6 +991,15 @@
             coverImageUrl: getTextboxValue($("#seedTypeCoverImageUrl"), ""),
             description: getTextboxValue($form.find("input[name='description']").first(), "")
         };
+    }
+
+    function saveSeedType(options) {
+        var settings = $.extend({openStages: false}, options || {});
+        var payload = buildSeedTypePayload();
+        if (!payload) {
+            return;
+        }
+        var isNew = !(payload.id > 0);
         FarmApi.seedTypeSave(payload, function (res) {
             if (!boolOk(res)) {
                 alertMessage((res && res.msg) || "保存失败");
@@ -968,10 +1007,34 @@
             }
             showMessage((res && res.msg) || "保存成功");
             $("#seedTypeEditorDialog").dialog("close");
-            refreshTypeGrid(id <= 0);
+            refreshTypeGrid(isNew);
+            if (settings.openStages) {
+                openSeedStagesAfterSave(res, payload);
+            }
         }, function () {
             alertMessage("保存失败，请稍后重试");
         });
+    }
+
+    function openSeedStagesAfterSave(res, payload) {
+        var seedTypeId = asNumber(res && res.data, 0);
+        if (seedTypeId <= 0) {
+            seedTypeId = asNumber(payload && payload.id, 0);
+        }
+        if (seedTypeId <= 0) {
+            alertMessage("种子类型已保存，但未返回种子ID，请刷新列表后再编辑成长阶段");
+            return;
+        }
+        var row = getSeedTypeById(seedTypeId) || {
+            id: seedTypeId,
+            name: payload.name || ""
+        };
+        window.setTimeout(function () {
+            state.stageRows = [];
+            selectSeedType(row);
+            focusStagePanel();
+            openSeedStageEditor("add");
+        }, 150);
     }
 
     function deleteSeedType() {
@@ -1323,7 +1386,9 @@
         $("#seedAdminStageDeleteBtn").off("click.seedAdmin").on("click.seedAdmin", deleteSeedStage);
         $("#seedAdminStageSaveListBtn").off("click.seedAdmin").on("click.seedAdmin", saveSeedStageList);
 
-        $("#seedTypeSaveBtn").off("click.seedAdmin").on("click.seedAdmin", saveSeedType);
+        $("#seedTypeSaveBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
+            saveSeedType();
+        });
         $("#seedTypeCancelBtn").off("click.seedAdmin").on("click.seedAdmin", function () {
             $("#seedTypeEditorDialog").dialog("close");
         });
