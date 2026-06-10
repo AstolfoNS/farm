@@ -1,5 +1,6 @@
 (function (window, $) {
     var FarmStoreModule = {};
+    var Ui = window.FarmUi || {};
     var state = {
         active: false,
         inited: false,
@@ -14,23 +15,23 @@
     };
 
     function motion() {
-        if ($.isFunction(window.farmMotion)) {
-            return window.farmMotion();
+        if ($.isFunction(Ui.motion)) {
+            return Ui.motion();
         }
         return {actionFeedbackMs: 1200};
     }
 
     function asNumber(value, def) {
-        if (window.FarmUi && $.isFunction(window.FarmUi.asNumber)) {
-            return window.FarmUi.asNumber(value, def);
+        if ($.isFunction(Ui.asNumber)) {
+            return Ui.asNumber(value, def);
         }
         var n = Number(value);
         return isNaN(n) ? (def || 0) : n;
     }
 
     function trimText(value) {
-        if (window.FarmUi && $.isFunction(window.FarmUi.trimText)) {
-            return window.FarmUi.trimText(value);
+        if ($.isFunction(Ui.trimText)) {
+            return Ui.trimText(value);
         }
         return $.trim(value == null ? "" : String(value));
     }
@@ -64,15 +65,15 @@
     }
 
     function escapeHtml(text) {
-        if (window.FarmUi && $.isFunction(window.FarmUi.escapeHtml)) {
-            return window.FarmUi.escapeHtml(text);
+        if ($.isFunction(Ui.escapeHtml)) {
+            return Ui.escapeHtml(text);
         }
         return $("<div/>").text(text == null ? "" : String(text)).html();
     }
 
     function escapeAttr(text) {
-        if (window.FarmUi && $.isFunction(window.FarmUi.escapeAttr)) {
-            return window.FarmUi.escapeAttr(text);
+        if ($.isFunction(Ui.escapeAttr)) {
+            return Ui.escapeAttr(text);
         }
         var value = text == null ? "" : String(text);
         return value
@@ -84,8 +85,8 @@
     }
 
     function toArray(list) {
-        if (window.FarmUi && $.isFunction(window.FarmUi.toArray)) {
-            return window.FarmUi.toArray(list);
+        if ($.isFunction(Ui.toArray)) {
+            return Ui.toArray(list);
         }
         return $.isArray(list) ? list : [];
     }
@@ -98,8 +99,8 @@
     }
 
     function totalPages(pageResult) {
-        if (window.FarmUi && $.isFunction(window.FarmUi.totalPages)) {
-            return window.FarmUi.totalPages(pageResult, 10);
+        if ($.isFunction(Ui.totalPages)) {
+            return Ui.totalPages(pageResult, 10);
         }
         var total = asNumber(pageResult && pageResult.total, 0);
         var pageSize = asNumber(pageResult && pageResult.pageSize, 10);
@@ -194,8 +195,8 @@
     }
 
     function renderSeedPager(pageData) {
-        if (window.FarmUi && $.isFunction(window.FarmUi.renderButtonPager)) {
-            window.FarmUi.renderButtonPager({
+        if ($.isFunction(Ui.renderButtonPager)) {
+            Ui.renderButtonPager({
                 container: "#storeSeedPager",
                 pageData: pageData,
                 buttonClass: "store-page-btn",
@@ -217,8 +218,8 @@
     }
 
     function renderFruitPager(pageData) {
-        if (window.FarmUi && $.isFunction(window.FarmUi.renderButtonPager)) {
-            window.FarmUi.renderButtonPager({
+        if ($.isFunction(Ui.renderButtonPager)) {
+            Ui.renderButtonPager({
                 container: "#storeFruitPager",
                 pageData: pageData,
                 buttonClass: "store-page-btn",
