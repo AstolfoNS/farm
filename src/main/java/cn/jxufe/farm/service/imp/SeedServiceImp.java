@@ -3,6 +3,7 @@ package cn.jxufe.farm.service.imp;
 import cn.jxufe.farm.bean.dto.IdDTO;
 import cn.jxufe.farm.bean.dto.SeedAddOrUpdateDTO;
 import cn.jxufe.farm.bean.dto.SeedFruitInventoryQueryDTO;
+import cn.jxufe.farm.bean.dto.SeedInventoryQueryDTO;
 import cn.jxufe.farm.bean.dto.SeedShopBuyDTO;
 import cn.jxufe.farm.bean.dto.SeedShopHomeQueryDTO;
 import cn.jxufe.farm.bean.dto.SeedShopOverviewDTO;
@@ -15,6 +16,7 @@ import cn.jxufe.farm.bean.dto.SeedTypeQueryDTO;
 import cn.jxufe.farm.bean.vo.OptionVO;
 import cn.jxufe.farm.bean.vo.SeedFruitInventoryItemVO;
 import cn.jxufe.farm.bean.vo.SeedGridVO;
+import cn.jxufe.farm.bean.vo.SeedInventoryItemVO;
 import cn.jxufe.farm.bean.vo.SeedShopBuyResultVO;
 import cn.jxufe.farm.bean.vo.SeedShopHomeVO;
 import cn.jxufe.farm.bean.vo.SeedShopItemVO;
@@ -507,6 +509,52 @@ public class SeedServiceImp implements SeedService {
                   item.setUnitFruitPrice(
                       gameplayCoreService.defaultLong(seedType.getFruitPrice(), 0L));
                   item.setEstimatedIncomeCoin(estimatedIncome);
+                  return item;
+                })
+            .collect(Collectors.toList());
+    return PageResult.of(items, pageNo, pageSize);
+  }
+
+  @Override
+  public PageResult<SeedInventoryItemVO> pageSeedInventory(SeedInventoryQueryDTO query) {
+    SeedInventoryQueryDTO request = query == null ? new SeedInventoryQueryDTO() : query;
+    Long userId =
+        ServiceGuardUtils.requirePositive(
+            request.getUserId(), BizErrorCode.PARAM_INVALID, "用户ID无效");
+    validateUser(userId);
+    int pageNo = gameplayCoreService.normalizePageNo(request.getPage());
+    int pageSize = gameplayCoreService.normalizePageSize(request.getRows());
+    String nameKeyword = gameplayCoreService.safeString(request.getName()).trim().toLowerCase();
+    Map<Long, SeedType> seedTypeMap = buildSeedTypeMap();
+
+    List<SeedInventoryItemVO> items =
+        userSeedDao.findByUserIdAndIsDeletedFalseOrderByIdAsc(userId).stream()
+            .filter(seed -> seedTypeMap.containsKey(seed.getSeedTypeId()))
+            .filter(
+                seed ->
+                    nameKeyword.isEmpty()
+                        || gameplayCoreService
+                            .safeString(seedTypeMap.get(seed.getSeedTypeId()).getName())
+                            .toLowerCase()
+                            .contains(nameKeyword))
+            .map(
+                seed -> {
+                  SeedType seedType = seedTypeMap.get(seed.getSeedTypeId());
+                  long quantity = gameplayCoreService.defaultLong(seed.getQuantity(), 0L);
+                  long frozenQuantity =
+                      gameplayCoreService.defaultLong(seed.getFrozenQuantity(), 0L);
+                  SeedInventoryItemVO item = new SeedInventoryItemVO();
+                  item.setSeedTypeId(seedType.getId());
+                  item.setSeedName(gameplayCoreService.safeString(seedType.getName()));
+                  item.setCoverImageUrl(
+                      gameplayCoreService.safeString(seedType.getCoverImageUrl()));
+                  item.setQuantity(quantity);
+                  item.setFrozenQuantity(frozenQuantity);
+                  item.setAvailableQuantity(Math.max(quantity - frozenQuantity, 0L));
+                  item.setUnitBuyPrice(gameplayCoreService.defaultLong(seedType.getPrice(), 0L));
+                  item.setUnlockExperienceRequired(
+                      gameplayCoreService.defaultLong(
+                          seedType.getUnlockExperienceRequired(), 0L));
                   return item;
                 })
             .collect(Collectors.toList());

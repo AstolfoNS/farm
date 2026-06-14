@@ -26,7 +26,6 @@ import cn.jxufe.farm.bean.vo.SeedShopTradeRecordVO;
 import cn.jxufe.farm.bean.vo.SeedStageGridVO;
 import cn.jxufe.farm.bean.vo.SoilOptionVO;
 import cn.jxufe.farm.common.pages.PageResult;
-import java.util.Collections;
 import java.util.List;
 
 public interface SeedService {
@@ -42,9 +41,7 @@ public interface SeedService {
 
   PageResult<SeedFruitInventoryItemVO> pageFruitInventory(SeedFruitInventoryQueryDTO query);
 
-  default PageResult<SeedInventoryItemVO> pageSeedInventory(SeedInventoryQueryDTO query) {
-    return PageResult.of(Collections.emptyList(), 1L, 10L);
-  }
+  PageResult<SeedInventoryItemVO> pageSeedInventory(SeedInventoryQueryDTO query);
 
   SeedShopOverviewVO shopOverview(SeedShopOverviewDTO query);
 
