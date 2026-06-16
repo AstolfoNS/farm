@@ -3,7 +3,7 @@ package cn.jxufe.farm.service.support;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import org.junit.jupiter.api.Test;
 
 class FileUploadPolicyTest {

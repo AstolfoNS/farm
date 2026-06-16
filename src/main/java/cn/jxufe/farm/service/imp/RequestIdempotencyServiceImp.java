@@ -1,7 +1,7 @@
 package cn.jxufe.farm.service.imp;
 
 import cn.jxufe.farm.common.enums.BizErrorCode;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import cn.jxufe.farm.dao.RequestIdempotencyDao;
 import cn.jxufe.farm.entity.RequestIdempotency;
 import cn.jxufe.farm.service.RequestIdempotencyService;

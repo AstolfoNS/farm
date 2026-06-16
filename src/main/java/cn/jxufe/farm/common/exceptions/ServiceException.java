@@ -1,4 +1,4 @@
-package cn.jxufe.farm.common.exception;
+package cn.jxufe.farm.common.exceptions;
 
 import cn.jxufe.farm.common.enums.BizErrorCode;
 import lombok.Getter;

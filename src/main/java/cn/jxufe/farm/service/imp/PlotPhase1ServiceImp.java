@@ -9,7 +9,7 @@ import cn.jxufe.farm.bean.vo.PlotPolicyVO;
 import cn.jxufe.farm.bean.vo.SoilTypeGridVO;
 import cn.jxufe.farm.common.constants.AssetDefaultKeys;
 import cn.jxufe.farm.common.enums.BizErrorCode;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
 import cn.jxufe.farm.dao.PlotPolicyDao;
 import cn.jxufe.farm.dao.SoilTypeDao;

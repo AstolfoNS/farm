@@ -1,7 +1,7 @@
 package cn.jxufe.farm.service.support;
 
 import cn.jxufe.farm.common.enums.BizErrorCode;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;

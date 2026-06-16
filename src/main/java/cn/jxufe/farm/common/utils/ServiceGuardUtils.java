@@ -1,7 +1,7 @@
 package cn.jxufe.farm.common.utils;
 
 import cn.jxufe.farm.common.enums.BizErrorCode;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import java.util.Optional;
 
 public final class ServiceGuardUtils {

@@ -13,7 +13,7 @@ import cn.jxufe.farm.bean.vo.UserSettingsVO;
 import cn.jxufe.farm.common.constants.AssetDefaultKeys;
 import cn.jxufe.farm.common.constants.SessionKeys;
 import cn.jxufe.farm.common.enums.BizErrorCode;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
 import cn.jxufe.farm.common.utils.FileAccessPathUtils;
 import cn.jxufe.farm.common.utils.ServiceGuardUtils;

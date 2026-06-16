@@ -15,7 +15,7 @@ import cn.jxufe.farm.bean.vo.PlotTradeBizTypeOptionVO;
 import cn.jxufe.farm.bean.vo.PlotTradeRecordVO;
 import cn.jxufe.farm.bean.vo.PlotUnlockResultVO;
 import cn.jxufe.farm.common.enums.BizErrorCode;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
 import cn.jxufe.farm.common.utils.ServiceGuardUtils;
 import cn.jxufe.farm.config.properties.GameplayPolicyProperties;

@@ -26,7 +26,7 @@ import cn.jxufe.farm.bean.vo.SeedShopTradeRecordVO;
 import cn.jxufe.farm.bean.vo.SeedStageGridVO;
 import cn.jxufe.farm.bean.vo.SoilOptionVO;
 import cn.jxufe.farm.common.enums.BizErrorCode;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
 import cn.jxufe.farm.common.utils.ServiceGuardUtils;
 import cn.jxufe.farm.dao.GrowthStageDao;

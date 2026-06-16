@@ -3,7 +3,7 @@ package cn.jxufe.farm.service.imp;
 import cn.jxufe.farm.bean.dto.CropActionLogQueryDTO;
 import cn.jxufe.farm.bean.vo.CropActionLogRecordVO;
 import cn.jxufe.farm.common.enums.BizErrorCode;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import cn.jxufe.farm.common.pages.PageResult;
 import cn.jxufe.farm.dao.SeedTypeDao;
 import cn.jxufe.farm.dao.UserCropActionLogDao;

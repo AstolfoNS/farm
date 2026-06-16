@@ -1,7 +1,8 @@
-package cn.jxufe.farm.common.exception;
+package cn.jxufe.farm.handler;
 
 import cn.jxufe.farm.common.apis.R;
 import cn.jxufe.farm.common.enums.BizErrorCode;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;

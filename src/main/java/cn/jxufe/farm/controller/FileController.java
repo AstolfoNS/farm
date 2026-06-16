@@ -5,7 +5,7 @@ import cn.jxufe.farm.bean.dto.FileUploadResultDTO;
 import cn.jxufe.farm.bean.vo.AvatarUploadVO;
 import cn.jxufe.farm.bean.vo.FileUrlVO;
 import cn.jxufe.farm.common.apis.R;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import cn.jxufe.farm.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

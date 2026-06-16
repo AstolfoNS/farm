@@ -21,7 +21,7 @@ import cn.jxufe.farm.bean.vo.SeedPlantablePlotsVO;
 import cn.jxufe.farm.common.constants.PlotRuleConstants;
 import cn.jxufe.farm.common.enums.BizErrorCode;
 import cn.jxufe.farm.common.enums.CropStatus;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import cn.jxufe.farm.common.utils.ServiceGuardUtils;
 import cn.jxufe.farm.config.properties.GameplayPolicyProperties;
 import cn.jxufe.farm.dao.PlotPolicyDao;

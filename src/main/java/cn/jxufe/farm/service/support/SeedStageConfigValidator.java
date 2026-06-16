@@ -1,7 +1,7 @@
 package cn.jxufe.farm.service.support;
 
 import cn.jxufe.farm.common.enums.BizErrorCode;
-import cn.jxufe.farm.common.exception.ServiceException;
+import cn.jxufe.farm.common.exceptions.ServiceException;
 import cn.jxufe.farm.entity.SeedGrowthStage;
 import cn.jxufe.farm.entity.SeedType;
 import java.util.HashSet;
