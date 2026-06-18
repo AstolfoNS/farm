@@ -188,6 +188,11 @@
     position: relative;
     min-width: 1180px;
     min-height: 740px;
+    transform-origin: 0 0;
+}
+
+.farm-iso-viewport {
+    position: relative;
 }
 
 .farm-plot {

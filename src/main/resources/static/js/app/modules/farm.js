@@ -1,4 +1,4 @@
-﻿(function (window, $) {   var FarmModule = {};   var layout = {     cols: 5,     tileX: 118,     tileY: 54,     baseX: 460,     baseY: 36,   };   var cropAnchor = {     left: -8,     top: -170,   };   var STAGE_OFFSET_SCALE_X = 220 / 320;   var STAGE_OFFSET_SCALE_Y = 282 / 410;   var ActionKit = window.FarmActionKit || null;   var state = {     active: false,     userId: 0,     overview: null,     plotSignatures: {},     wsStatus: "idle",     pollTimer: null,     growthTimer: null,     transitionRefreshTimer: null,     lastTransitionRefreshAt: 0,     soilOptions: null,     seedCoverById: {},     seedVisualLoaded: false,     selectedTool: "inspect",   };   var toolTitleMap = {
+﻿(function (window, $) {   var FarmModule = {};   var layout = {     cols: 5,     tileX: 118,     tileY: 54,     baseX: 460,     baseY: 36,   };   var cropAnchor = {     left: -8,     top: -170,   };   var STAGE_OFFSET_SCALE_X = 220 / 320;   var STAGE_OFFSET_SCALE_Y = 282 / 410;   var FARM_ZOOM_MIN = 0.55;   var FARM_ZOOM_MAX = 1.75;   var FARM_ZOOM_STEP = 0.12;   var ActionKit = window.FarmActionKit || null;   var state = {     active: false,     userId: 0,     overview: null,     plotSignatures: {},     wsStatus: "idle",     pollTimer: null,     growthTimer: null,     transitionRefreshTimer: null,     lastTransitionRefreshAt: 0,     zoom: 1,     soilOptions: null,     seedCoverById: {},     seedVisualLoaded: false,     selectedTool: "inspect",   };   var toolTitleMap = {
     inspect: "查看",
     plant: "播种",
     harvest: "收获",
@@ -247,7 +247,66 @@ function escapeHtml(text) {     return $("<div/>")       .text(text == null ? ""
     );
   }
 
-function resolveCropImage(crop) {     if (       crop &&       crop.stageAssetUrl &&       String(crop.stageAssetUrl).trim().length > 0     ) {       var raw = String(crop.stageAssetUrl).trim();       if (         raw.indexOf("http://") === 0 ||         raw.indexOf("https://") === 0 ||         raw.indexOf("/") === 0       ) {         return raw;       }       return "/" + raw;     }     var sid = asNumber(crop && crop.seedTypeId, 0);     var cover = sid > 0 ? state.seedCoverById[String(sid)] : "";     if (cover && String(cover).trim().length > 0) {       return cover;     }     return farmResolveImg("domain/farm/actions/action-plant.png");   }    function resolveCropStyle(crop) {     var box = resolveCropBox(crop);     return (       "left:" +       box.left +       "px;top:" +       box.top +       "px;width:" +       box.width +       "px;height:" +       box.height +       "px;"     );   }    function resolveCropBox(crop) {     var width = asNumber(crop && crop.stageWidth, 132);     var height = asNumber(crop && crop.stageHeight, 132);     var offsetX = asNumber(crop && crop.stageOffsetX, 0);     var offsetY = asNumber(crop && crop.stageOffsetY, 0);     if (width <= 0) {       width = 132;     }     if (height <= 0) {       height = 132;     }     var renderWidth = Math.max(1, Math.round(width * STAGE_OFFSET_SCALE_X));     var renderHeight = Math.max(1, Math.round(height * STAGE_OFFSET_SCALE_Y));     var left = cropAnchor.left + Math.round(offsetX * STAGE_OFFSET_SCALE_X);     var top = cropAnchor.top + Math.round(offsetY * STAGE_OFFSET_SCALE_Y);     return {       left: left,       top: top,       width: renderWidth,       height: renderHeight,     };   }    function seededUnit(seed) {     var x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;     return x - Math.floor(x);   }    function buildBugOverlay(plot, crop) {     var count = asNumber(crop && crop.bugCount, 0);     if (count <= 0) {       return "";     }     var box = resolveCropBox(crop);     var maxDots = Math.min(4, Math.max(1, count));     var bugSrc = escapeAttr(farmResolveImg("domain/farm/components/bug.png"));     var html = ["<div class='farm-bug-layer'>"];     for (var i = 0; i < maxDots; i++) {       var seed =         asNumber(plot && plot.plotId, 0) * 17 +         asNumber(crop && crop.cropId, 0) * 13 +         i * 7;       var rx = seededUnit(seed);       var ry = seededUnit(seed + 3.33);       var bx = box.left + Math.round(box.width * (0.18 + rx * 0.64));       var by = box.top + Math.round(box.height * (0.1 + ry * 0.62));       html.push(         "<span class='farm-bug-dot' style='left:" +           bx +           "px;top:" +           by +           "px;'><img src='" +           bugSrc +           "' alt='bug'></span>",       );     }     html.push("<span class='farm-bug-count'>x" + count + "</span>");     html.push("</div>");     return html.join("");   }    function ensureSeedVisuals() {     if (state.seedVisualLoaded) {       return;     }     state.seedVisualLoaded = true;     FarmApi.shopPage(       { page: 1, rows: 100, sort: "id", order: "asc" },       function (res) {         if (!(FarmApi.isOk(res) && res.data && $.isArray(res.data.records))) {           return;         }         $.each(res.data.records, function (_, item) {           var sid = asNumber(item.id, 0);           var cover =             item && item.coverImageUrl ? String(item.coverImageUrl) : "";           if (sid > 0 && cover) {             state.seedCoverById[String(sid)] = cover;           }         });         if (state.active && state.overview) {           updateOverview(state.overview, true);         }       },     );   }    function renderMeta(overview) {     var data = overview || {};     $("#farmMetaBar [data-key='unlocked']").text(       asNumber(data.unlockedPlots, 0),     );     $("#farmMetaBar [data-key='total']").text(asNumber(data.totalPlots, 0));     $("#farmMetaBar [data-key='occupied']").text(       asNumber(data.occupiedPlots, 0),     );     $("#farmMetaBar [data-key='harvestable']").text(       asNumber(data.harvestableCount, 0),     );   }    function renderAll(overview) {
+function resolveCropImage(crop) {     if (       crop &&       crop.stageAssetUrl &&       String(crop.stageAssetUrl).trim().length > 0     ) {       var raw = String(crop.stageAssetUrl).trim();       if (         raw.indexOf("http://") === 0 ||         raw.indexOf("https://") === 0 ||         raw.indexOf("/") === 0       ) {         return raw;       }       return "/" + raw;     }     var sid = asNumber(crop && crop.seedTypeId, 0);     var cover = sid > 0 ? state.seedCoverById[String(sid)] : "";     if (cover && String(cover).trim().length > 0) {       return cover;     }     return farmResolveImg("domain/farm/actions/action-plant.png");   }    function resolveCropStyle(crop) {     var box = resolveCropBox(crop);     return (       "left:" +       box.left +       "px;top:" +       box.top +       "px;width:" +       box.width +       "px;height:" +       box.height +       "px;"     );   }    function resolveCropBox(crop) {     var width = asNumber(crop && crop.stageWidth, 132);     var height = asNumber(crop && crop.stageHeight, 132);     var offsetX = asNumber(crop && crop.stageOffsetX, 0);     var offsetY = asNumber(crop && crop.stageOffsetY, 0);     if (width <= 0) {       width = 132;     }     if (height <= 0) {       height = 132;     }     var renderWidth = Math.max(1, Math.round(width * STAGE_OFFSET_SCALE_X));     var renderHeight = Math.max(1, Math.round(height * STAGE_OFFSET_SCALE_Y));     var left = cropAnchor.left + Math.round(offsetX * STAGE_OFFSET_SCALE_X);     var top = cropAnchor.top + Math.round(offsetY * STAGE_OFFSET_SCALE_Y);     return {       left: left,       top: top,       width: renderWidth,       height: renderHeight,     };   }    function seededUnit(seed) {     var x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;     return x - Math.floor(x);   }    function buildBugOverlay(plot, crop) {     var count = asNumber(crop && crop.bugCount, 0);     if (count <= 0) {       return "";     }     var box = resolveCropBox(crop);     var maxDots = Math.min(4, Math.max(1, count));     var bugSrc = escapeAttr(farmResolveImg("domain/farm/components/bug.png"));     var html = ["<div class='farm-bug-layer'>"];     for (var i = 0; i < maxDots; i++) {       var seed =         asNumber(plot && plot.plotId, 0) * 17 +         asNumber(crop && crop.cropId, 0) * 13 +         i * 7;       var rx = seededUnit(seed);       var ry = seededUnit(seed + 3.33);       var bx = box.left + Math.round(box.width * (0.18 + rx * 0.64));       var by = box.top + Math.round(box.height * (0.1 + ry * 0.62));       html.push(         "<span class='farm-bug-dot' style='left:" +           bx +           "px;top:" +           by +           "px;'><img src='" +           bugSrc +           "' alt='bug'></span>",       );     }     html.push("<span class='farm-bug-count'>x" + count + "</span>");     html.push("</div>");     return html.join("");   }    function ensureSeedVisuals() {     if (state.seedVisualLoaded) {       return;     }     state.seedVisualLoaded = true;     FarmApi.shopPage(       { page: 1, rows: 100, sort: "id", order: "asc" },       function (res) {         if (!(FarmApi.isOk(res) && res.data && $.isArray(res.data.records))) {           return;         }         $.each(res.data.records, function (_, item) {           var sid = asNumber(item.id, 0);           var cover =             item && item.coverImageUrl ? String(item.coverImageUrl) : "";           if (sid > 0 && cover) {             state.seedCoverById[String(sid)] = cover;           }         });         if (state.active && state.overview) {           updateOverview(state.overview, true);         }       },     );   }    function renderMeta(overview) {     var data = overview || {};     $("#farmMetaBar [data-key='unlocked']").text(       asNumber(data.unlockedPlots, 0),     );     $("#farmMetaBar [data-key='total']").text(asNumber(data.totalPlots, 0));     $("#farmMetaBar [data-key='occupied']").text(       asNumber(data.occupiedPlots, 0),     );     $("#farmMetaBar [data-key='harvestable']").text(       asNumber(data.harvestableCount, 0),     );   }
+  function clampZoom(value) {
+    var next = asNumber(value, 1);
+    return Math.min(FARM_ZOOM_MAX, Math.max(FARM_ZOOM_MIN, next));
+  }
+
+  function getFarmGridSize() {
+    var $grid = $("#farmIsoContainer .farm-iso-grid");
+    return {
+      width: Math.max(1, $grid.outerWidth() || 1180),
+      height: Math.max(1, $grid.outerHeight() || 740)
+    };
+  }
+
+  function applyFarmZoom() {
+    var zoom = clampZoom(state.zoom);
+    state.zoom = zoom;
+    var size = getFarmGridSize();
+    var $viewport = $("#farmIsoContainer .farm-iso-viewport");
+    var $grid = $viewport.find(".farm-iso-grid");
+    $viewport.css({
+      width: Math.ceil(size.width * zoom) + "px",
+      height: Math.ceil(size.height * zoom) + "px"
+    });
+    $grid.css("transform", "scale(" + zoom + ")");
+  }
+
+  function zoomFarmAt(event) {
+    if (!(event && event.ctrlKey)) {
+      return;
+    }
+    var $container = $("#farmIsoContainer");
+    var $grid = $container.find(".farm-iso-grid");
+    if ($container.length <= 0 || $grid.length <= 0) {
+      return;
+    }
+    event.preventDefault();
+    var original = event.originalEvent || event;
+    var oldZoom = clampZoom(state.zoom);
+    var direction = original.deltaY > 0 ? -1 : 1;
+    var nextZoom = clampZoom(oldZoom + direction * FARM_ZOOM_STEP);
+    if (nextZoom === oldZoom) {
+      return;
+    }
+
+    var offset = $container.offset();
+    var paddingLeft = parsePixel($container.css("padding-left"), 0);
+    var paddingTop = parsePixel($container.css("padding-top"), 0);
+    var pointerX = original.pageX - offset.left;
+    var pointerY = original.pageY - offset.top;
+    var contentX = ($container.scrollLeft() + pointerX - paddingLeft) / oldZoom;
+    var contentY = ($container.scrollTop() + pointerY - paddingTop) / oldZoom;
+
+    state.zoom = nextZoom;
+    applyFarmZoom();
+    $container.scrollLeft(contentX * nextZoom - pointerX + paddingLeft);
+    $container.scrollTop(contentY * nextZoom - pointerY + paddingTop);
+  }
+
+function renderAll(overview) {
     var plots = asArray(overview && overview.plots);
     state.plotSignatures = {};
     if (plots.length === 0) {
@@ -257,14 +316,15 @@ function resolveCropImage(crop) {     if (       crop &&       crop.stageAssetUr
       return;
     }
 
-    var html = ["<div class='farm-iso-grid'>"];
+    var html = ["<div class='farm-iso-viewport'><div class='farm-iso-grid'>"];
     $.each(plots, function (_, plot) {
       var safeId = plot.plotId || "idx_" + asNumber(plot.plotIndex, 0);
       state.plotSignatures[String(safeId)] = buildPlotSignature(plot);
       html.push(buildPlotHtml(plot));
     });
-    html.push("</div>");
+    html.push("</div></div>");
     $("#farmIsoContainer").html(html.join(""));
+    applyFarmZoom();
   }
 
   function patchChangedPlots(overview) {
@@ -1516,7 +1576,9 @@ function applyToolOnPlot(plotId) {
       .on("click.farm", ".farm-plot", function () {
         var plotId = $(this).attr("data-plot-id");
         applyToolOnPlot(plotId);
-      });
+      })
+      .off("wheel.farmZoom")
+      .on("wheel.farmZoom", zoomFarmAt);
   }
 
 FarmModule.setActive = setActive;   FarmModule.loadOverviewByUser = loadOverviewByUser;   FarmModule.updateOverview = updateOverview;    window.FarmModule = FarmModule;   if (     window.FarmCore &&     $.isFunction(window.FarmCore.registerSetActiveModule)   ) {     window.FarmCore.registerSetActiveModule("farm", FarmModule, {       refresh: function () {         loadOverviewByUser(currentUserId(), false);       },     });   }    $(function () {     bindRealtime();     bindEvents();     renderAll({ plots: [] });     onRealtimeStatus("idle");   }); })(window, window.jQuery); 
