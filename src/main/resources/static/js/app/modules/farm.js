@@ -1,4 +1,4 @@
-﻿(function (window, $) {   var FarmModule = {};   var layout = {     cols: 5,     tileX: 118,     tileY: 54,     baseX: 460,     baseY: 36,   };   var cropAnchor = {     left: -8,     top: -170,   };   var STAGE_OFFSET_SCALE_X = 220 / 320;   var STAGE_OFFSET_SCALE_Y = 282 / 410;   var ActionKit = window.FarmActionKit || null;   var state = {     active: false,     userId: 0,     overview: null,     plotSignatures: {},     wsStatus: "idle",     pollTimer: null,     soilOptions: null,     seedCoverById: {},     seedVisualLoaded: false,     selectedTool: "inspect",   };   var toolTitleMap = {
+﻿(function (window, $) {   var FarmModule = {};   var layout = {     cols: 5,     tileX: 118,     tileY: 54,     baseX: 460,     baseY: 36,   };   var cropAnchor = {     left: -8,     top: -170,   };   var STAGE_OFFSET_SCALE_X = 220 / 320;   var STAGE_OFFSET_SCALE_Y = 282 / 410;   var ActionKit = window.FarmActionKit || null;   var state = {     active: false,     userId: 0,     overview: null,     plotSignatures: {},     wsStatus: "idle",     pollTimer: null,     growthTimer: null,     transitionRefreshTimer: null,     lastTransitionRefreshAt: 0,     soilOptions: null,     seedCoverById: {},     seedVisualLoaded: false,     selectedTool: "inspect",   };   var toolTitleMap = {
     inspect: "查看",
     plant: "播种",
     harvest: "收获",
@@ -33,18 +33,50 @@ function defaultSoilCover() {     return (window.farmDefaultAsset && window.farm
     $("#farmToolHint").text("当前工具：" + toolLabel(next) + "（点击地块直接执行）");
   }
 
-function fallbackEnabled() {     var checked = $("#farmFallbackSwitch").prop("checked") === true;     window.FarmAppState.realtime.enableFallbackPolling = checked;     return checked;   }    function pollIntervalMs() {     return asNumber(window.FarmAppState.realtime.fallbackIntervalMs, 5000);   }    function cropStatusText(crop) {
+function fallbackEnabled() {     var checked = $("#farmFallbackSwitch").prop("checked") === true;     window.FarmAppState.realtime.enableFallbackPolling = checked;     return checked;   }
+
+  function pollIntervalMs() {
+    return asNumber(window.FarmAppState.realtime.fallbackIntervalMs, 5000);
+  }
+
+  function growthTickIntervalMs() {
+    var realtime = window.FarmAppState.realtime || {};
+    return asNumber(realtime.growthTickIntervalMs, 1000);
+  }
+
+  function transitionRefreshDelayMs() {
+    var realtime = window.FarmAppState.realtime || {};
+    return asNumber(realtime.transitionRefreshDelayMs, 250);
+  }
+
+  function elapsedSnapshotSeconds(crop) {
+    var snapshotAt = asNumber(crop && crop._farmSnapshotAt, 0);
+    if (snapshotAt <= 0) {
+      return 0;
+    }
+    return Math.max(0, Math.floor((new Date().getTime() - snapshotAt) / 1000));
+  }
+
+  function localRemainSeconds(crop, fieldName) {
+    var base = asNumber(crop && crop[fieldName], 0);
+    if (base <= 0) {
+      return 0;
+    }
+    return Math.max(0, base - elapsedSnapshotSeconds(crop));
+  }
+
+  function cropStatusText(crop) {
     if (!crop) {
       return "空闲";
     }
     if (crop.harvestable) {
       return "可收获";
     }
-    if (asNumber(crop.remainMatureSeconds, 0) > 0) {
-      return "成熟倒计时 " + asNumber(crop.remainMatureSeconds, 0) + "s";
+    if (localRemainSeconds(crop, "remainMatureSeconds") > 0) {
+      return "成熟倒计时 " + localRemainSeconds(crop, "remainMatureSeconds") + "s";
     }
-    if (asNumber(crop.remainWitherSeconds, 0) > 0) {
-      return "枯萎倒计时 " + asNumber(crop.remainWitherSeconds, 0) + "s";
+    if (localRemainSeconds(crop, "remainWitherSeconds") > 0) {
+      return "枯萎倒计时 " + localRemainSeconds(crop, "remainWitherSeconds") + "s";
     }
     return "生长中";
   }
@@ -138,7 +170,193 @@ function resolveCropImage(crop) {     if (       crop &&       crop.stageAssetUr
     $("#farmIsoContainer").html(html.join(""));
   }
 
-function patchChangedPlots(overview) {     var plots = asArray(overview && overview.plots);     var $grid = $("#farmIsoContainer .farm-iso-grid");     if ($grid.length === 0 || plots.length === 0) {       renderAll(overview);       return;     }      var nextSignatures = {};     $.each(plots, function (_, plot) {       var safeId = plot.plotId || "idx_" + asNumber(plot.plotIndex, 0);       var idKey = String(safeId);       var signature = buildPlotSignature(plot);       var lastSignature = state.plotSignatures[idKey] || "";       nextSignatures[idKey] = signature;       if (signature === lastSignature) {         return true;       }       var html = buildPlotHtml(plot);       var $old = $("#farmPlot_" + safeId);       if ($old.length > 0) {         $old.replaceWith(html);       } else {         $grid.append(html);       }       return true;     });      if (       Object.keys(state.plotSignatures).length !==       Object.keys(nextSignatures).length     ) {       renderAll(overview);       return;     }     state.plotSignatures = nextSignatures;   }    function updateOverview(overview, forceFullRender) {     if (!overview) {       return;     }     state.overview = overview;     state.userId = asNumber(overview.userId, 0);     renderMeta(overview);     if (forceFullRender) {       renderAll(overview);       return;     }     patchChangedPlots(overview);   }    function loadOverviewByUser(userId, forceFullRender) {     var uid = asNumber(userId, 0);     if (uid <= 0) {       renderMeta({});       renderAll({ plots: [] });       return;     }     FarmApi.myFarmOverview(uid, function (res) {       if (!(FarmApi.isOk(res) && res.data)) {         return;       }       updateOverview(res.data, forceFullRender === true);     });   }    function stopPolling() {     if (state.pollTimer) {       window.clearInterval(state.pollTimer);       state.pollTimer = null;     }   }    function startPolling() {     stopPolling();     if (!state.active || !fallbackEnabled()) {       return;     }     var uid = currentUserId();     if (uid <= 0) {       return;     }     state.pollTimer = window.setInterval(function () {       loadOverviewByUser(uid, false);     }, pollIntervalMs());   }    function setWsStatusUI(statusText, cssName) {     var $el = $("#farmWsStatus");     $el       .removeClass("is-connected is-connecting is-disconnected is-idle")       .addClass(cssName);     $el.text(statusText);   }    function onRealtimeStatus(status) {
+  function patchChangedPlots(overview) {
+    var plots = asArray(overview && overview.plots);
+    var $grid = $("#farmIsoContainer .farm-iso-grid");
+    if ($grid.length === 0 || plots.length === 0) {
+      renderAll(overview);
+      return;
+    }
+
+    var nextSignatures = {};
+    $.each(plots, function (_, plot) {
+      var safeId = plot.plotId || "idx_" + asNumber(plot.plotIndex, 0);
+      var idKey = String(safeId);
+      var signature = buildPlotSignature(plot);
+      var lastSignature = state.plotSignatures[idKey] || "";
+      nextSignatures[idKey] = signature;
+      if (signature === lastSignature) {
+        return true;
+      }
+      var html = buildPlotHtml(plot);
+      var $old = $("#farmPlot_" + safeId);
+      if ($old.length > 0) {
+        $old.replaceWith(html);
+      } else {
+        $grid.append(html);
+      }
+      return true;
+    });
+
+    if (
+      Object.keys(state.plotSignatures).length !==
+      Object.keys(nextSignatures).length
+    ) {
+      renderAll(overview);
+      return;
+    }
+    state.plotSignatures = nextSignatures;
+  }
+
+  function stampRuntimeSnapshot(overview) {
+    var snapshotAt = new Date().getTime();
+    $.each(asArray(overview && overview.plots), function (_, plot) {
+      if (!(plot && plot.crop)) {
+        return true;
+      }
+      plot.crop._farmSnapshotAt = snapshotAt;
+      plot.crop._farmTransitionRefreshRequested = false;
+      return true;
+    });
+  }
+
+  function updateOverview(overview, forceFullRender) {
+    if (!overview) {
+      return;
+    }
+    stampRuntimeSnapshot(overview);
+    state.overview = overview;
+    state.userId = asNumber(overview.userId, 0);
+    renderMeta(overview);
+    if (forceFullRender) {
+      renderAll(overview);
+    } else {
+      patchChangedPlots(overview);
+    }
+    startGrowthTicker();
+  }
+
+  function loadOverviewByUser(userId, forceFullRender) {
+    var uid = asNumber(userId, 0);
+    if (uid <= 0) {
+      renderMeta({});
+      renderAll({ plots: [] });
+      return;
+    }
+    FarmApi.myFarmOverview(uid, function (res) {
+      if (!(FarmApi.isOk(res) && res.data)) {
+        return;
+      }
+      updateOverview(res.data, forceFullRender === true);
+    });
+  }
+
+  function stopPolling() {
+    if (state.pollTimer) {
+      window.clearInterval(state.pollTimer);
+      state.pollTimer = null;
+    }
+  }
+
+  function startPolling() {
+    stopPolling();
+    if (!state.active || !fallbackEnabled()) {
+      return;
+    }
+    var uid = currentUserId();
+    if (uid <= 0) {
+      return;
+    }
+    state.pollTimer = window.setInterval(function () {
+      loadOverviewByUser(uid, false);
+    }, pollIntervalMs());
+  }
+
+  function stopGrowthTicker() {
+    if (state.growthTimer) {
+      window.clearInterval(state.growthTimer);
+      state.growthTimer = null;
+    }
+    if (state.transitionRefreshTimer) {
+      window.clearTimeout(state.transitionRefreshTimer);
+      state.transitionRefreshTimer = null;
+    }
+  }
+
+  function scheduleTransitionRefresh() {
+    if (state.transitionRefreshTimer || !state.active) {
+      return;
+    }
+    var now = new Date().getTime();
+    if (now - state.lastTransitionRefreshAt < growthTickIntervalMs()) {
+      return;
+    }
+    state.lastTransitionRefreshAt = now;
+    state.transitionRefreshTimer = window.setTimeout(function () {
+      state.transitionRefreshTimer = null;
+      loadOverviewByUser(state.userId || currentUserId(), false);
+    }, transitionRefreshDelayMs());
+  }
+
+  function refreshVisibleCropCountdowns() {
+    var shouldRefresh = false;
+    $.each(asArray(state.overview && state.overview.plots), function (_, plot) {
+      if (!(plot && plot.crop)) {
+        return true;
+      }
+      var crop = plot.crop;
+      var safeId = plot.plotId || "idx_" + asNumber(plot.plotIndex, 0);
+      $("#farmPlot_" + safeId + " .farm-plot-sub").text(cropStatusText(crop));
+
+      var matureBase = asNumber(crop.remainMatureSeconds, 0);
+      var witherBase = asNumber(crop.remainWitherSeconds, 0);
+      var matureReached =
+        matureBase > 0 && localRemainSeconds(crop, "remainMatureSeconds") <= 0;
+      var witherReached =
+        witherBase > 0 && localRemainSeconds(crop, "remainWitherSeconds") <= 0;
+
+      if (
+        (matureReached || witherReached) &&
+        crop._farmTransitionRefreshRequested !== true
+      ) {
+        crop._farmTransitionRefreshRequested = true;
+        shouldRefresh = true;
+      }
+      return true;
+    });
+
+    if (shouldRefresh) {
+      scheduleTransitionRefresh();
+    }
+  }
+
+  function startGrowthTicker() {
+    if (!state.active || !(state.overview && asArray(state.overview.plots).length > 0)) {
+      stopGrowthTicker();
+      return;
+    }
+    refreshVisibleCropCountdowns();
+    if (state.growthTimer) {
+      return;
+    }
+    state.growthTimer = window.setInterval(function () {
+      if (!state.active) {
+        stopGrowthTicker();
+        return;
+      }
+      refreshVisibleCropCountdowns();
+    }, growthTickIntervalMs());
+  }
+
+  function setWsStatusUI(statusText, cssName) {
+    var $el = $("#farmWsStatus");
+    $el
+      .removeClass("is-connected is-connecting is-disconnected is-idle")
+      .addClass(cssName);
+    $el.text(statusText);
+  }
+
+  function onRealtimeStatus(status) {
     state.wsStatus = status || "idle";
     if (state.wsStatus === "connected") {
       setWsStatusUI("农场状态：实时更新中", "is-connected");
@@ -1105,7 +1323,64 @@ function applyToolOnPlot(plotId) {
     openPlotActionDialog(plotId);
   }
 
-function setActive(flag) {     state.active = !!flag;     if (state.active) {       var uid = currentUserId();       if (uid <= 0) {         if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.switchModule)) {           window.FarmHomeBridge.switchModule("user-select");         }         $.messager.show({           title: "提示",           msg: "请先选择用户，再进入农场。",           timeout: motion().actionFeedbackMs,           showType: "slide"         });         return;       }       $("#farmPanel").addClass("is-active is-module-enter");       window.setTimeout(function () {         $("#farmPanel").removeClass("is-module-enter");       }, motion().moduleEnterMs);       ensureSeedVisuals();       switchTool(state.selectedTool || "inspect");       loadOverviewByUser(uid, false);       if (window.FarmWsBridge && window.FarmWsBridge.isConnected()) {         onRealtimeStatus("connected");       } else {         onRealtimeStatus(state.wsStatus || "idle");       }       return;     }     $("#farmPanel").removeClass("is-active");     stopPolling();   }    function bindRealtime() {     $(document)       .off("farm:realtime:overview.farm")       .on("farm:realtime:overview.farm", function (_, payload) {         if (!(payload && payload.overview)) {           return;         }         var loginUid = currentUserId();         var pushUid = asNumber(payload.userId, 0);         if (loginUid <= 0 || (pushUid > 0 && pushUid !== loginUid)) {           return;         }         updateOverview(payload.overview, false);       });      $(document)       .off("farm:realtime:status.farm")       .on("farm:realtime:status.farm", function (_, text) {         onRealtimeStatus(text);       });   }    function bindEvents() {
+  function setActive(flag) {
+    state.active = !!flag;
+    if (state.active) {
+      var uid = currentUserId();
+      if (uid <= 0) {
+        if (window.FarmHomeBridge && $.isFunction(window.FarmHomeBridge.switchModule)) {
+          window.FarmHomeBridge.switchModule("user-select");
+        }
+        $.messager.show({
+          title: "提示",
+          msg: "请先选择用户，再进入农场。",
+          timeout: motion().actionFeedbackMs,
+          showType: "slide"
+        });
+        return;
+      }
+      $("#farmPanel").addClass("is-active is-module-enter");
+      window.setTimeout(function () {
+        $("#farmPanel").removeClass("is-module-enter");
+      }, motion().moduleEnterMs);
+      ensureSeedVisuals();
+      switchTool(state.selectedTool || "inspect");
+      loadOverviewByUser(uid, false);
+      if (window.FarmWsBridge && window.FarmWsBridge.isConnected()) {
+        onRealtimeStatus("connected");
+      } else {
+        onRealtimeStatus(state.wsStatus || "idle");
+      }
+      return;
+    }
+    $("#farmPanel").removeClass("is-active");
+    stopPolling();
+    stopGrowthTicker();
+  }
+
+  function bindRealtime() {
+    $(document)
+      .off("farm:realtime:overview.farm")
+      .on("farm:realtime:overview.farm", function (_, payload) {
+        if (!(payload && payload.overview)) {
+          return;
+        }
+        var loginUid = currentUserId();
+        var pushUid = asNumber(payload.userId, 0);
+        if (loginUid <= 0 || (pushUid > 0 && pushUid !== loginUid)) {
+          return;
+        }
+        updateOverview(payload.overview, false);
+      });
+
+    $(document)
+      .off("farm:realtime:status.farm")
+      .on("farm:realtime:status.farm", function (_, text) {
+        onRealtimeStatus(text);
+      });
+  }
+
+  function bindEvents() {
     $("#farmFallbackSwitch")
       .off("change.farm")
       .on("change.farm", function () {
@@ -1140,10 +1415,6 @@ function setActive(flag) {     state.active = !!flag;     if (state.active) {   
   }
 
 FarmModule.setActive = setActive;   FarmModule.loadOverviewByUser = loadOverviewByUser;   FarmModule.updateOverview = updateOverview;    window.FarmModule = FarmModule;   if (     window.FarmCore &&     $.isFunction(window.FarmCore.registerSetActiveModule)   ) {     window.FarmCore.registerSetActiveModule("farm", FarmModule, {       refresh: function () {         loadOverviewByUser(currentUserId(), false);       },     });   }    $(function () {     bindRealtime();     bindEvents();     renderAll({ plots: [] });     onRealtimeStatus("idle");   }); })(window, window.jQuery); 
-
-
-
-
 
 
 

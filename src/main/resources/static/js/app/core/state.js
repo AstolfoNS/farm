@@ -22,7 +22,9 @@
         },
         realtime: {
             enableFallbackPolling: true,
-            fallbackIntervalMs: 5000
+            fallbackIntervalMs: 5000,
+            growthTickIntervalMs: 1000,
+            transitionRefreshDelayMs: 250
         }
     };
 
