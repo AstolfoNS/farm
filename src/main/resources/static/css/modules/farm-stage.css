@@ -203,7 +203,7 @@
 
 .farm-plot:hover {
     transform: translateY(-3px);
-    z-index: 7;
+    z-index: 18;
 }
 
 .farm-plot.is-soil-base {
@@ -393,6 +393,90 @@
 
 .farm-plot-badge.lock {
     background: rgba(90, 90, 90, 0.9);
+}
+
+.farm-crop-hover-card {
+    position: absolute;
+    left: 50%;
+    bottom: 94px;
+    width: 176px;
+    padding: 8px 9px;
+    border: 1px solid rgba(203, 255, 173, 0.92);
+    border-radius: 5px;
+    color: #f5ffe7;
+    background:
+        linear-gradient(180deg, rgba(18, 102, 28, 0.96), rgba(9, 62, 18, 0.97)),
+        radial-gradient(circle at 18% 8%, rgba(184, 255, 116, 0.22), transparent 58%);
+    box-shadow: 0 7px 16px rgba(0, 0, 0, 0.48), 0 0 0 1px rgba(0, 62, 0, 0.72) inset;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 4px);
+    transition: opacity var(--farm-motion-page-ms, 220ms) ease, transform var(--farm-motion-page-ms, 220ms) ease;
+    z-index: 20;
+}
+
+.farm-plot:hover .farm-crop-hover-card {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.farm-crop-hover-card::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -7px;
+    width: 12px;
+    height: 12px;
+    border-right: 1px solid rgba(203, 255, 173, 0.92);
+    border-bottom: 1px solid rgba(203, 255, 173, 0.92);
+    background: rgba(9, 62, 18, 0.97);
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.farm-crop-hover-title {
+    margin-bottom: 3px;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #fff7c7;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.farm-crop-hover-status {
+    margin-bottom: 5px;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+    line-height: 15px;
+    color: #cffff1;
+    background: rgba(0, 35, 8, 0.38);
+}
+
+.farm-crop-hover-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 18px;
+    font-size: 11px;
+    line-height: 18px;
+}
+
+.farm-crop-hover-row span {
+    flex: 0 0 auto;
+    color: #c8efc1;
+}
+
+.farm-crop-hover-row strong {
+    min-width: 0;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: right;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .farm-empty-tip {

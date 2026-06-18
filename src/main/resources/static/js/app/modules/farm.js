@@ -69,6 +69,9 @@ function fallbackEnabled() {     var checked = $("#farmFallbackSwitch").prop("ch
     if (!crop) {
       return "空闲";
     }
+    if (asNumber(crop.growStatus, 1) === 3) {
+      return "已枯萎";
+    }
     if (crop.harvestable) {
       return "可收获";
     }
@@ -79,6 +82,97 @@ function fallbackEnabled() {     var checked = $("#farmFallbackSwitch").prop("ch
       return "枯萎倒计时 " + localRemainSeconds(crop, "remainWitherSeconds") + "s";
     }
     return "生长中";
+  }
+
+  function cropGrowStatusLabel(crop) {
+    var status = asNumber(crop && crop.growStatus, 1);
+    if (status === 2) {
+      return "成熟";
+    }
+    if (status === 3) {
+      return "枯萎";
+    }
+    return "生长中";
+  }
+
+  function secondsText(seconds) {
+    var total = Math.max(0, asNumber(seconds, 0));
+    var hours = Math.floor(total / 3600);
+    var minutes = Math.floor((total % 3600) / 60);
+    var secs = total % 60;
+    if (hours > 0) {
+      return hours + "小时" + minutes + "分" + secs + "秒";
+    }
+    if (minutes > 0) {
+      return minutes + "分" + secs + "秒";
+    }
+    return secs + "秒";
+  }
+
+  function buildCropHoverRows(plot, crop) {
+    if (!plot || plot.locked || !crop) {
+      return "";
+    }
+    var bugCount = asNumber(crop.bugCount, 0);
+    var maxBugLimit = asNumber(crop.maxBugLimit, 0);
+    var bugText = maxBugLimit > 0 ? bugCount + "/" + maxBugLimit : String(bugCount);
+    var rows = [
+      {label: "地块", value: "第 " + fmtNum(plot.plotIndex) + " 块"},
+      {label: "土壤", value: plot.soilName || "-"},
+      {label: "阶段", value: "第 " + fmtNum(crop.currentStageIndex) + " 阶段"},
+      {label: "状态", value: cropGrowStatusLabel(crop)},
+      {label: "虫害", value: bugText},
+      {label: "收获次数", value: fmtNum(crop.harvestCount)}
+    ];
+
+    if (crop.harvestable) {
+      rows.push({label: "操作", value: "可以收获"});
+    } else if (bugCount > 0 && crop.canCare) {
+      rows.push({label: "操作", value: "建议杀虫"});
+    } else if (localRemainSeconds(crop, "remainMatureSeconds") > 0) {
+      rows.push({
+        label: "成熟剩余",
+        value: secondsText(localRemainSeconds(crop, "remainMatureSeconds")),
+        dynamic: "mature"
+      });
+    } else if (localRemainSeconds(crop, "remainWitherSeconds") > 0) {
+      rows.push({
+        label: "枯萎剩余",
+        value: secondsText(localRemainSeconds(crop, "remainWitherSeconds")),
+        dynamic: "wither"
+      });
+    }
+
+    return rows.map(function (row) {
+      var dynamicAttr = row.dynamic ? " data-dynamic='" + escapeAttr(row.dynamic) + "'" : "";
+      return (
+        "<div class='farm-crop-hover-row'" +
+        dynamicAttr +
+        "><span>" +
+        escapeHtml(row.label) +
+        "</span><strong>" +
+        escapeHtml(row.value) +
+        "</strong></div>"
+      );
+    }).join("");
+  }
+
+  function buildCropHoverInfo(plot, crop) {
+    var rows = buildCropHoverRows(plot, crop);
+    if (!rows) {
+      return "";
+    }
+    return (
+      "<div class='farm-crop-hover-card'>" +
+      "<div class='farm-crop-hover-title'>" +
+      escapeHtml(crop.seedTypeName || "当前作物") +
+      "</div>" +
+      "<div class='farm-crop-hover-status' data-dynamic='status'>" +
+      escapeHtml(cropStatusText(crop)) +
+      "</div>" +
+      rows +
+      "</div>"
+    );
   }
 
 function escapeHtml(text) {     return $("<div/>")       .text(text == null ? "" : String(text))       .html();   }    function escapeAttr(text) {     var value = text == null ? "" : String(text);     return value       .replace(/&/g, "&amp;")       .replace(/"/g, "&quot;")       .replace(/'/g, "&#39;")       .replace(/</g, "&lt;")       .replace(/>/g, "&gt;");   }    function buildPlotSignature(plot) {     var crop = plot && plot.crop ? plot.crop : {};     return [       plot.plotId,       plot.locked ? 1 : 0,       plot.hasCrop ? 1 : 0,       crop.cropId || 0,       crop.currentStageIndex || 0,       crop.growStatus || 0,       crop.bugCount || 0,       crop.harvestable ? 1 : 0,       crop.remainMatureSeconds || 0,       crop.remainWitherSeconds || 0,       crop.stageWidth || 0,       crop.stageHeight || 0,       crop.stageOffsetX || 0,       crop.stageOffsetY || 0,       crop.stageAssetUrl || "",       plot.soilCoverImageUrl || "",     ].join("|");   }    function calcIso(plotIndex) {     var safeIndex = asNumber(plotIndex, 1);     if (safeIndex <= 0) {       safeIndex = 1;     }     var seq = safeIndex - 1;     var col = seq % layout.cols;     var row = Math.floor(seq / layout.cols);     var x = layout.baseX + (col - row) * layout.tileX;     var y = layout.baseY + (col + row) * layout.tileY;     return { x: x, y: y };   }    function buildPlotClasses(plot) {     var classes = ["farm-plot"];     if (plot && plot.locked) {       classes.push("is-locked");     }     if (plot && plot.hasCrop) {       classes.push("is-has-crop");     }     if (plot && plot.crop && plot.crop.harvestable) {       classes.push("is-harvestable");     }     classes.push("is-soil-base");     return classes.join(" ");   }    function resolveSoilCoverImage(plot) {     var raw = $.trim(       plot && plot.soilCoverImageUrl ? String(plot.soilCoverImageUrl) : "",     );     if (!raw) {       return defaultSoilCover();     }     if (       raw.indexOf("http://") === 0 ||       raw.indexOf("https://") === 0 ||       raw.indexOf("/") === 0     ) {       return raw;     }     return "/" + raw;   }    function buildPlotHtml(plot) {
@@ -95,6 +189,7 @@ function escapeHtml(text) {     return $("<div/>")       .text(text == null ? ""
       : cropStatusText(crop);
     var badges = [];
     var cropLayer = "";
+    var cropHoverInfo = "";
     var bugOverlay = "";
     if (plot.locked) {
       badges.push("<span class='farm-plot-badge lock'>锁定</span>");
@@ -106,6 +201,7 @@ function escapeHtml(text) {     return $("<div/>")       .text(text == null ? ""
       badges.push("<span class='farm-plot-badge harvest'>熟</span>");
     }
     if (!plot.locked && plot.hasCrop && crop) {
+      cropHoverInfo = buildCropHoverInfo(plot, crop);
       cropLayer =
         "<img class='farm-crop-sprite' style='" +
         escapeAttr(resolveCropStyle(crop)) +
@@ -146,6 +242,7 @@ function escapeHtml(text) {     return $("<div/>")       .text(text == null ? ""
       "<div class='farm-plot-badges'>" +
       badges.join("") +
       "</div>" +
+      cropHoverInfo +
       "</div>"
     );
   }
@@ -306,7 +403,15 @@ function resolveCropImage(crop) {     if (       crop &&       crop.stageAssetUr
       }
       var crop = plot.crop;
       var safeId = plot.plotId || "idx_" + asNumber(plot.plotIndex, 0);
-      $("#farmPlot_" + safeId + " .farm-plot-sub").text(cropStatusText(crop));
+      var $plot = $("#farmPlot_" + safeId);
+      $plot.find(".farm-plot-sub").text(cropStatusText(crop));
+      $plot.find(".farm-crop-hover-status[data-dynamic='status']").text(cropStatusText(crop));
+      $plot
+        .find(".farm-crop-hover-row[data-dynamic='mature'] strong")
+        .text(secondsText(localRemainSeconds(crop, "remainMatureSeconds")));
+      $plot
+        .find(".farm-crop-hover-row[data-dynamic='wither'] strong")
+        .text(secondsText(localRemainSeconds(crop, "remainWitherSeconds")));
 
       var matureBase = asNumber(crop.remainMatureSeconds, 0);
       var witherBase = asNumber(crop.remainWitherSeconds, 0);
@@ -1415,7 +1520,3 @@ function applyToolOnPlot(plotId) {
   }
 
 FarmModule.setActive = setActive;   FarmModule.loadOverviewByUser = loadOverviewByUser;   FarmModule.updateOverview = updateOverview;    window.FarmModule = FarmModule;   if (     window.FarmCore &&     $.isFunction(window.FarmCore.registerSetActiveModule)   ) {     window.FarmCore.registerSetActiveModule("farm", FarmModule, {       refresh: function () {         loadOverviewByUser(currentUserId(), false);       },     });   }    $(function () {     bindRealtime();     bindEvents();     renderAll({ plots: [] });     onRealtimeStatus("idle");   }); })(window, window.jQuery); 
-
-
-
-
