@@ -675,6 +675,7 @@
             left: geometry.left + "px",
             top: geometry.top + "px"
         });
+        syncResizeHandleFromPositionImage();
     }
 
     function syncPreviewGeometryFromForm() {
@@ -693,6 +694,67 @@
         setStageNumberValue("offsetX", parseInt($image.css("left"), 10) || 0);
         setStageNumberValue("offsetY", parseInt($image.css("top"), 10) || 0);
         state.stageGeometrySyncing = false;
+    }
+
+    function clampPositionImageToCanvas() {
+        var $image = $("#seedStagePositionImage");
+        var geometry = normalizePositionGeometry({
+            width: $image.outerWidth() || 1,
+            height: $image.outerHeight() || 1,
+            left: parseInt($image.css("left"), 10) || 0,
+            top: parseInt($image.css("top"), 10) || 0
+        });
+        applyGeometryToPositionImage(geometry);
+    }
+
+    function normalizePositionGeometry(geometry) {
+        var $canvas = $("#seedStagePositionCanvas");
+        var canvasWidth = $canvas.innerWidth() || POSITION_CANVAS_DEFAULT_WIDTH;
+        var canvasHeight = $canvas.innerHeight() || POSITION_CANVAS_DEFAULT_HEIGHT;
+        var imageWidth = Math.max(1, asNumber(geometry && geometry.width, 1));
+        var imageHeight = Math.max(1, asNumber(geometry && geometry.height, 1));
+        var left = asNumber(geometry && geometry.left, 0);
+        var top = asNumber(geometry && geometry.top, 0);
+        imageWidth = Math.min(imageWidth, canvasWidth);
+        imageHeight = Math.min(imageHeight, canvasHeight);
+        left = Math.min(Math.max(0, left), Math.max(0, canvasWidth - imageWidth));
+        top = Math.min(Math.max(0, top), Math.max(0, canvasHeight - imageHeight));
+        return {
+            width: Math.round(imageWidth),
+            height: Math.round(imageHeight),
+            left: Math.round(left),
+            top: Math.round(top)
+        };
+    }
+
+    function applyResizableEventGeometry(event) {
+        var data = event && event.data ? event.data : {};
+        var geometry = normalizePositionGeometry({
+            width: data.width,
+            height: data.height,
+            left: data.left,
+            top: data.top
+        });
+        applyGeometryToPositionImage(geometry);
+        syncFormFromPositionImage();
+        syncPreviewGeometryFromForm();
+        syncResizeHandleFromPositionImage();
+    }
+
+    function syncResizeHandleFromPositionImage() {
+        var $image = $("#seedStagePositionImage");
+        var $handle = $("#seedStageResizeHandle");
+        if ($handle.length <= 0 || $image.length <= 0) {
+            return;
+        }
+        var imageWidth = $image.outerWidth() || 0;
+        var imageHeight = $image.outerHeight() || 0;
+        var left = (parseInt($image.css("left"), 10) || 0) + imageWidth;
+        var top = (parseInt($image.css("top"), 10) || 0) + imageHeight;
+        $handle.css({
+            left: left + "px",
+            top: top + "px"
+        });
     }
 
     function syncFormOffsetFromPositionImage() {
@@ -724,6 +786,7 @@
                     syncPreviewGeometryFromForm();
                     if ($("#seedStagePositionDialog").dialog("options").closed === false) {
                         syncPositionImageFromForm();
+                        syncResizeHandleFromPositionImage();
                     }
                 });
             } catch (ignoreBindError) {}
@@ -1318,11 +1381,63 @@
         } catch (ignoreResizeDestroy) {}
         $image.draggable({
             containment: "#seedStagePositionCanvas",
+            edge: 12,
             onDrag: function () {
+                syncResizeHandleFromPositionImage();
                 syncFormOffsetFromPositionImage();
                 syncPreviewGeometryFromForm();
+            },
+            onStopDrag: function () {
+                clampPositionImageToCanvas();
+                syncFormOffsetFromPositionImage();
+                syncPreviewGeometryFromForm();
+                syncResizeHandleFromPositionImage();
             }
         });
+        $image.resizable({
+            handles: "n,e,s,w,ne,se,sw,nw",
+            minWidth: 20,
+            minHeight: 20,
+            maxWidth: POSITION_CANVAS_DEFAULT_WIDTH,
+            maxHeight: POSITION_CANVAS_DEFAULT_HEIGHT,
+            edge: 12,
+            onResize: function (event) {
+                applyResizableEventGeometry(event);
+                return false;
+            },
+            onStopResize: function (event) {
+                applyResizableEventGeometry(event);
+            }
+        });
+        $("#seedStageResizeHandle")
+            .off(".seedAdmin")
+            .on("mousedown.seedAdmin", function (event) {
+                var width = Math.max(1, $image.outerWidth() || 1);
+                var height = Math.max(1, $image.outerHeight() || 1);
+                var left = parseInt($image.css("left"), 10) || 0;
+                var top = parseInt($image.css("top"), 10) || 0;
+                $(document)
+                    .off(".seedStageManualResize")
+                    .on("mousemove.seedStageManualResize", function (moveEvent) {
+                        var nextWidth = Math.max(20, width + moveEvent.pageX - event.pageX);
+                        var nextHeight = Math.max(20, height + moveEvent.pageY - event.pageY);
+                        nextWidth = Math.min(nextWidth, POSITION_CANVAS_DEFAULT_WIDTH - left);
+                        nextHeight = Math.min(nextHeight, POSITION_CANVAS_DEFAULT_HEIGHT - top);
+                        $image.css({
+                            width: Math.round(nextWidth) + "px",
+                            height: Math.round(nextHeight) + "px"
+                        });
+                        syncFormFromPositionImage();
+                        syncPreviewGeometryFromForm();
+                        syncResizeHandleFromPositionImage();
+                    })
+                    .on("mouseup.seedStageManualResize", function () {
+                        $(document).off(".seedStageManualResize");
+                    });
+                event.preventDefault();
+                event.stopPropagation();
+            });
+        syncResizeHandleFromPositionImage();
         $("#seedStagePositionDialog").dialog("open");
     }
 

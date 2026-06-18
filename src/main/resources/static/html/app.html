@@ -605,8 +605,10 @@
 
         <div id="seedStagePositionDialog" class="easyui-dialog seed-admin-dialog farm-dialog-shell" title="定位编辑器"
              style="width:360px;height:520px;padding:8px" closed="true" modal="true" resizable="false">
+            <div class="seed-stage-position-tip">拖动作物可调整位置，拖动红框边缘或右下角手柄可调整大小。</div>
             <div id="seedStagePositionCanvas" class="seed-stage-position-canvas">
                 <img id="seedStagePositionImage" src="" alt="">
+                <span id="seedStageResizeHandle" class="seed-stage-resize-handle" aria-hidden="true"></span>
             </div>
             <div class="seed-admin-dialog-actions farm-dialog-actions">
                 <a id="seedStagePositionApplyBtn" href="javascript:void(0)" class="easyui-linkbutton c2" data-options="iconCls:'icon-ok'">应用坐标</a>

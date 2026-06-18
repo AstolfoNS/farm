@@ -326,6 +326,14 @@
     overflow: hidden;
 }
 
+.seed-stage-position-tip {
+    margin: 0 0 6px;
+    color: #e8ffd8;
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: center;
+}
+
 .seed-stage-reference-land {
     position: absolute;
     left: 50%;
@@ -388,4 +396,40 @@
     border: 2px solid #ff2f2f;
     cursor: move;
     z-index: 2;
+}
+
+#seedStagePositionImage:hover {
+    box-shadow: 0 0 0 1px rgba(255, 242, 128, 0.95), 0 0 12px rgba(255, 240, 120, 0.62);
+}
+
+.seed-stage-resize-handle {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    margin-top: -7px;
+    border: 1px solid rgba(255, 255, 210, 0.95);
+    background: linear-gradient(135deg, #fffbd0 0%, #ffcd45 100%);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+    cursor: se-resize;
+    z-index: 3;
+}
+
+.seed-stage-resize-handle::before,
+.seed-stage-resize-handle::after {
+    content: "";
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 7px;
+    height: 1px;
+    background: rgba(72, 55, 0, 0.75);
+    transform: rotate(-45deg);
+    transform-origin: right center;
+}
+
+.seed-stage-resize-handle::after {
+    right: 5px;
+    bottom: 5px;
+    width: 5px;
 }
